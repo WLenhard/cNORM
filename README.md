@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 # cNORM
 
 The package provides methods for generating non-parametric regression based continuous norms, as f. e. for psychometric test development, biological and physiological growth curves, and
-screenings in the medical domain.
+screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016).
 
 ## Approach
 
@@ -73,3 +73,6 @@ Until then, you can access the github development version via
 install.packages("devtools")
 devtools::install_github("WLenhard/cNORM")
 ```
+
+## References
+Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437 
