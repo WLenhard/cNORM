@@ -74,7 +74,7 @@ prepareData <- function() {
 #' @param data data.frame with norm sample data
 #' @param group the grouping variable, e. g. grade
 #' @param method Ranking method in case of bindings, either 'blom', 'tukey', 'rankit' (default),
-#' 'vanderwarden',
+#' and 'vanderwarden'
 #' @param scale type of norm scale, either T (default), IQ or z
 #' @return the dataset with the percentiles and norm scales per group
 #'

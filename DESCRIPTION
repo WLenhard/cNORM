@@ -7,12 +7,13 @@ Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-07-24
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de"), person("Alexandra", "Lenhard", role=c("aut")))
 Description: Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
-    (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. The package
-    generates continuous test norms on the basis of the raw data from norming samples, without requiring
-    assumptions about the distribution of the raw data: Norm values are established from raw data by
-    modeling the latter ones as a function of both percentile scores and an explanatory variable
-    (e.g., age). The method minimizes bias arising from sampling and measurement error, while handling
-    marked deviations from normality.
+    (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. Non-parametric
+    Continuous Norming generates continuous test norms on the basis of the raw data from norming samples, 
+    without requiring assumptions about the distribution of the raw data: Norm values are directly established
+    from raw data by modeling the latter ones as a function of both percentile scores and an explanatory
+    variable (e.g., age). The method minimizes bias arising from sampling and measurement error, while 
+    handling marked deviations from normality, addressing bottom or ceiling effects and capturing almost
+    all of the variance in the original norm data sample.
 License: BSD 3-clause License + file LICENSE
 Depends:
     R (>= 3.1.0)
