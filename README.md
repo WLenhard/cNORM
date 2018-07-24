@@ -57,7 +57,13 @@ vignette(cNORM-Demo)
 ```
 
 ## Installation
-cNORM can be installed via
+Once it is on CRAN, cNORM can be installed via
 ```{r example}
 install.packages("cNORM", dependencies = TRUE)
+```
+
+Until then, you can access the github development version via
+```{r example}
+install.packages("devtools")
+devtools::install_github("WLenhard/cNORM")
 ```
