@@ -55,6 +55,11 @@ normTable(3, model)
 # start vignette for a complete walk through
 vignette(cNORM-Demo)
 ```
+cNORM offers functions to choose the optimal model, both from a visual inspection of the 
+percentiles, as well as by information criteria and model tests:
+![](vignettes/plotSubset.png)
+
+![](vignettes/plotPercentiles.png)
 
 ## Installation
 Once it is on CRAN, cNORM can be installed via
