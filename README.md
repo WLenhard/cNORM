@@ -58,9 +58,14 @@ vignette(cNORM-Demo)
 cNORM offers functions to choose the optimal model, both from a visual inspection of the 
 percentiles, as well as by information criteria and model tests:
 
-![In the plot, Mallow's $C_p$ is used ($BIC$ is available through the option `bic = TRUE`). The predefined $R_{adjusted}^{2}$ value of .99 is already reached with the third model and afterwards we only get minor improvements in $R_{adjusted}^{2}$. On the other hand, $C_p$ rapidly declines afterwards, so model 3 seems to be a good candidate in terms of the relative information content per predictor and the captured information ($R_{adjusted}^{2}$). It is advisable to choose a model at the "elbow" in order to avoid over-fitting, but the solution should be tested for violations of model assumptions and the progression of the percentiles should be inspected visually, as well.](vignettes/plotSubset.png)
+![](vignettes/plotSubset.png)
 
-![The predicted progression over age as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data.](vignettes/plotPercentiles.png)
+In this example, a Taylor polynomial with power k = 4 was computed. In the plot, you can see the share of variance explained by the different models (with progressing number of predictors). Mallow's $C_p$ is used ($BIC$ is available through the option `bic = TRUE`). The predefined $R_{adjusted}^{2}$ value of .99 is already reached with the third model and afterwards we only get minor improvements in $R_{adjusted}^{2}$. On the other hand, $C_p$ rapidly declines afterwards, so model 3 seems to be a good candidate in terms of the relative information content per predictor and the captured information ($R_{adjusted}^{2}$). It is advisable to choose a model at the "elbow" in order to avoid over-fitting, but the solution should be tested for violations of model assumptions and the progression of the percentiles should be inspected visually, as well.
+
+
+![](vignettes/plotPercentiles.png)
+
+The predicted progression over age are displayed as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data with $R_{adjusted}^{2}$.
 
 ## Installation
 Once it is on CRAN, cNORM can be installed via
