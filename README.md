@@ -60,12 +60,12 @@ percentiles, as well as by information criteria and model tests:
 
 ![](vignettes/plotSubset.png)
 
-In this example, a Taylor polynomial with power k = 4 was computed. In the plot, you can see the share of variance explained by the different models (with progressing number of predictors). Mallow's $C_p$ is used ($BIC$ is available through the option `bic = TRUE`). The predefined $R_{adjusted}^{2}$ value of .99 is already reached with the third model and afterwards we only get minor improvements in $R_{adjusted}^{2}$. On the other hand, $C_p$ rapidly declines afterwards, so model 3 seems to be a good candidate in terms of the relative information content per predictor and the captured information ($R_{adjusted}^{2}$). It is advisable to choose a model at the "elbow" in order to avoid over-fitting, but the solution should be tested for violations of model assumptions and the progression of the percentiles should be inspected visually, as well.
+In this example, a Taylor polynomial with power k = 4 was computed in order to model a sample of the ELFE 1-6 reading comprehension test (sentence completion task; W. Lenhard & Schneider, 2006). In the plot, you can see the share of variance explained by the different models (with progressing number of predictors). Mallow's Cp (an AIC like measure) is used (BIC is available through the option `bic = TRUE`). The predefined adjusted R2 value of .99 is already reached with the third model and afterwards we only get minor improvements in adjusted R2. On the other hand, Cp rapidly declines afterwards, so model 3 seems to be a good candidate in terms of the relative information content per predictor and the captured information (adjusted R2). It is advisable to choose a model at the "elbow" in order to avoid over-fitting, but the solution should be tested for violations of model assumptions and the progression of the percentiles should be inspected visually, as well.
 
 
 ![](vignettes/plotPercentiles.png)
 
-The predicted progression over age are displayed as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data with $R_{adjusted}^{2}$.
+The predicted progression over age are displayed as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data with adjusted R2.
 
 ## Installation
 Once it is on CRAN, cNORM can be installed via
