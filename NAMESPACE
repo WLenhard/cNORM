@@ -1,0 +1,27 @@
+import(lattice)
+import(dplyr)
+importFrom(leaps, regsubsets)
+importFrom(stats, formula)
+importFrom(dplyr, arrange, group_by, mutate)
+importFrom("grDevices", "rainbow")
+importFrom("stats", "aggregate")
+importFrom(latticeExtra, panel.2dsmoother)
+export(
+	prepareData,
+	plotValues,
+	plotNormCurves,
+	plotPercentiles,
+	plotSubset,
+	getNormCurve,
+	predictRaw,
+	normTable,
+	predictNormValue,
+	rankByGroup,
+	computePowers,
+	bestModel,
+	regressionFunction,
+	derive,
+	checkConsistency,
+	derivationTable,
+	derivationPlot
+)

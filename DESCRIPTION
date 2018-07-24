@@ -1,0 +1,32 @@
+Package: cNORM
+Type: Package
+Title: 'Non-parametric Continuous Norming in R'
+Version: 0.7.2
+Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut]
+Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
+Date: 2018-07-24
+Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de"), person("Alexandra", "Lenhard", role=c("aut")))
+Description: Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
+    (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. The package
+    generates continuous test norms on the basis of the raw data from norming samples, without requiring
+    assumptions about the distribution of the raw data: Norm values are established from raw data by
+    modeling the latter ones as a function of both percentile scores and an explanatory variable
+    (e.g., age). The method minimizes bias arising from sampling and measurement error, while handling
+    marked deviations from normality.
+License: BSD 3-clause License + file LICENSE
+Depends:
+    R (>= 3.1.0)
+Imports:
+    dplyr (>= 0.7.6),
+    lattice (>= 0.20),
+    leaps (>= 3.0.0),
+    latticeExtra (>= 0.6),
+    RColorBrewer (>= 1.1),
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
+NeedsCompilation: no
+Repository: CRAN
+Encoding: UTF-8
+Packaged: 2018-07-30 07:44:57 UTC; wl
+LazyData: true
