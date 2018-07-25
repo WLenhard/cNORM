@@ -114,7 +114,7 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-    if(!group){
+    if(typeof(group)=="logical"&&!group){
       d <- data %>% dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
 
     }else{
