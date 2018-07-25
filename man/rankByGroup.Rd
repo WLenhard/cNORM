@@ -4,17 +4,19 @@
 \alias{rankByGroup}
 \title{Determine the norm values of the participants in each subsample}
 \usage{
-rankByGroup(data, group = "group", method = "rankit", scale = "T")
+rankByGroup(data, group = "group", method = 4, scale = "T")
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
 
 \item{group}{the grouping variable, e. g. grade}
 
-\item{method}{Ranking method in case of bindings, either blom, tukey, rankit (default)
-or vanderwarden}
+\item{method}{Ranking method in case of bindings, please provide an index, choosin from the following
+methods: 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+6 = Filliben (1975), 7 = Yu & Huang (2001)}
 
-\item{scale}{type of norm scale, either T (default), IQ or z}
+\item{scale}{type of norm scale, either T (default), IQ or z; you can provide a double vector with the mean and
+standard deviation as well, f. e. c(10, 3) for Wechsler scale index points}
 }
 \value{
 the dataset with the percentiles and norm scales per group
@@ -30,5 +32,11 @@ inverse cumulative normal distribution. In case of bindings, we use the medium r
 and there are different methods for estimating the percentiles (default RankIt).
 }
 \examples{
+#Transformation with default parameters: RandIt and converting to T values
 normData <- rankByGroup(elfe, group = "group")
+
+#Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
+normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+
+
 }

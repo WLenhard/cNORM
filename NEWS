@@ -1,6 +1,18 @@
+Version in 0.7.3
+================
+Date: 2018.07.25
+
+Changes:
+-------
+- Additional ranking algorithms: Filliben, Levenbach, Yu & Huang; API changed to index
+- scale can be specified as double vector with c(mean, sd)
+- vignette updated accordingly
+
+
+
 Version in 0.7.2
 ================
-Date: 2018.07.30
+Date: 2018.07.24
 
 Changes:
 -------

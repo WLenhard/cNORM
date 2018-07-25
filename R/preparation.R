@@ -73,42 +73,46 @@ prepareData <- function() {
 #'
 #' @param data data.frame with norm sample data
 #' @param group the grouping variable, e. g. grade
-#' @param method Ranking method in case of bindings, either 'blom', 'tukey', 'rankit' (default),
-#' and 'vanderwarden'
-#' @param scale type of norm scale, either T (default), IQ or z
+#' @param method Ranking method in case of bindings, please provide an index, choosin from the following
+#' methods: 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+#' 6 = Filliben (1975), 7 = Yu & Huang (2001)
+#' @param scale type of norm scale, either T (default), IQ or z; you can provide a double vector with the mean and
+#' standard deviation as well, f. e. c(10, 3) for Wechsler scale index points
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
+#' #Transformation with default parameters: RandIt and converting to T values
 #' normData <- rankByGroup(elfe, group = "group")
+#'
+#' #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
+#' normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+#'
+#'
 #' @export
 rankByGroup <-
   function(data,
            group = "group",
-           method = "rankit",
+           method = 4,
            scale = "T") {
-    d <- data
 
-    if (method == "blom") {
-      d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(raw) - 0.375) / (base::length(raw) + 0.25))
-    } else if (method == "tukey") {
-      d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(raw) - 0.3333333334) / (base::length(raw) +
-                                                                         0.3333333334))
-    } else if (method == "vanderwarden") {
-      d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(raw)) / (base::length(raw) +
-                                                          1))
-    } else {
-       d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(raw) - 0.5) / base::length(raw))
+    # define Q-Q-plot alorithm, use rankit as standard
+    # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
+    # 6 = Filliben (1975), 7 = Yu & Huang (2001)
+    numerator <- c(-3.75, -1/3, 0, -0.5, -1/3, -0.3175, -0.326)
+    denominator <- c(0.25, 1/3, 1, 0, 0.4, 0.365, 0.348)
+
+    if(method < 1 || method>length(numerator)){
+      message("Method parameter out of range, setting to RankIt")
     }
 
-    if (scale == "IQ") {
+     d <- data %>% dplyr::arrange(group, data$raw) %>%
+        dplyr::group_by(group) %>%
+        dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
+
+
+    if((typeof(scale)=="double"&&length(scale)==2)){
+      d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+    }else if (scale == "IQ") {
       d$normValue <- stats::qnorm(d$percentile, 100, 15)
     } else if (scale == "z") {
       d$normValue <- stats::qnorm(d$percentile, 0, 1)

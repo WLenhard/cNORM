@@ -56,12 +56,12 @@ As you can see, the data.frame initially consists of those three variables, name
 library(psych)
 describeBy(normData, group="group")
 ```
-The next step is, to retrieve the norm data per group via the `rankByGroup`-function. The function retrieves the percentiles and is doing a normal rank transformation to assign T values as well. Essentially, the analyses can as well be done with the percentiles as well and normal rank transformations are problematic, when the data deviates from a normal distribution considerably. Additionally, it is possible, to retrieve z or IQ values and the ranking procedure can be chosen as well (default: RankIt, Blom, van der Warden and Tukey). First, we want to stick with T values and RankIt, which are already the predefined values:
+The next step is, to retrieve the norm data per group via the `rankByGroup`-function. The function retrieves the percentiles and is doing a normal rank transformation to assign T values as well. Essentially, the analyses can as well be done with the percentiles as well and normal rank transformations are problematic, when the data deviates from a normal distribution considerably. Additionally, it is possible, to retrieve z or IQ values and the ranking procedure can be chosen as well (default: RankIt, Blom, van der Warden, Tukey, Levenbach, Filliben, Yu & Huang). First, we want to stick with T values and RankIt, which are already the predefined values:
 
 ```
 normData <- rankByGroup(elfe, group = "group")
 ```
-The data.frame now has two additional columns: percentile and normValue. The normValue specifies the location (`L`) within the norm sample and the variable group will be our explanatory variable (`A`) in the following analyses. We finally build the powers of `A` and `L` up to the factor `k` and their interactions, simply by building all linear combinations through multiplication. As a rule of thumb, `k = 4` is usually sufficient to model human performance data. Please use the following function for the computation: 
+To change the ranking method, please specify `method=x` (x = method index; consult function help for details). The parameter for the norm scale calculation can be either `T`, `IQ`, `z` or a double vector with mean and sd, as f. e. `scale = c(10, 3)` for Wechsler like tests. The data.frame now has two additional columns: percentile and normValue. The normValue specifies the location (`L`) within the norm sample and the variable group will be our explanatory variable (`A`) in the following analyses. We finally build the powers of `A` and `L` up to the factor `k` and their interactions, simply by building all linear combinations through multiplication. As a rule of thumb, `k = 4` is usually sufficient to model human performance data. Please use the following function for the computation: 
 
 ```
 normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable = "group")
