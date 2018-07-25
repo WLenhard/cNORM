@@ -78,6 +78,10 @@ prepareData <- function() {
 #' 6 = Filliben (1975), 7 = Yu & Huang (2001)
 #' @param scale type of norm scale, either T (default), IQ or z; you can provide a double vector with the mean and
 #' standard deviation as well, f. e. c(10, 3) for Wechsler scale index points
+#' @param descend ranking order (default descent = FALSE): inverses the ranking order with higher raw values
+#' getting lower norm values; relevant for example when norming error values, where lower values mean
+#' higher performance; ATTENTION: while modelling works, norm table generation, checks and plotting are currently
+#' incompatible with this option
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -93,7 +97,8 @@ rankByGroup <-
   function(data,
            group = "group",
            method = 4,
-           scale = "T") {
+           scale = "T",
+           descend = FALSE) {
 
     # define Q-Q-plot alorithm, use rankit as standard
     # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
@@ -105,10 +110,18 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
+    if(descend){
+      # rank in descending order
      d <- data %>% dplyr::arrange(group, data$raw) %>%
+        dplyr::group_by(group) %>%
+        dplyr::mutate(percentile = (base::rank(-raw) + numerator[method]) / (base::length(raw) + denominator[method]))
+    }else {
+      # rank in ascending order
+      d <- data %>% dplyr::arrange(group, data$raw) %>%
         dplyr::group_by(group) %>%
         dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
 
+    }
 
     if((typeof(scale)=="double"&&length(scale)==2)){
       d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
