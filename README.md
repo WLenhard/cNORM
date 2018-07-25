@@ -1,3 +1,5 @@
+<img src="vignettes/logo.png" align=right style="border:0;">
+
 # cNORM
 
 The package provides methods for generating non-parametric regression based continuous norms, as f. e. for psychometric test development, biological and physiological growth curves, and
