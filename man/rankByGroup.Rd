@@ -10,19 +10,23 @@ rankByGroup(data, group = "group", method = 4, scale = "T",
 \arguments{
 \item{data}{data.frame with norm sample data}
 
-\item{group}{the grouping variable, e. g. grade}
+\item{group}{the grouping variable, e. g. grade, setting group to FALSE
+cancels grouping (data is treated as one goup)}
 
-\item{method}{Ranking method in case of bindings, please provide an index, choosin from the following
-methods: 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+\item{method}{Ranking method in case of bindings, please provide an index,
+choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 6 = Filliben (1975), 7 = Yu & Huang (2001)}
 
-\item{scale}{type of norm scale, either T (default), IQ or z; you can provide a double vector with the mean and
-standard deviation as well, f. e. c(10, 3) for Wechsler scale index points}
+\item{scale}{type of norm scale, either T (default), IQ or z; you can
+provide a double vector with the mean and standard deviation as well,
+f. e. c(10, 3) for Wechsler scale index points}
 
-\item{descend}{ranking order (default descent = FALSE): inverses the ranking order with higher raw values
-getting lower norm values; relevant for example when norming error values, where lower values mean
-higher performance; ATTENTION: while modelling works, norm table generation, checks and plotting are currently
-incompatible with this option}
+\item{descend}{ranking order (default descent = FALSE): inverses the
+ranking order with higher raw values getting lower norm values; relevant
+for example when norming error values, where lower values mean higher
+performance; ATTENTION: while modelling works, norm table generation,
+checks and plotting are currently incompatible with this option}
 }
 \value{
 the dataset with the percentiles and norm scales per group
