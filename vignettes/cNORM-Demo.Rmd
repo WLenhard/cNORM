@@ -15,8 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
-cNORM is based on the non-parametric continuous norming approach described by Lenhard et al. (2016). It originates from the construction of psychometric tests, but can be used to model physiologic data and comparable scenarios as well. It models percentile curves in dependence of age or another explanatory variable and has the following advantages:
+<img src="logo.png" align=right style="border:0;">cNORM is based on the non-parametric continuous norming approach described by Lenhard et al. (2016). It originates from the construction of psychometric tests, but can be used to model physiologic data and comparable scenarios as well. It models percentile curves in dependence of age or another explanatory variable and has the following advantages:
 
 *   By drawing on the data of the complete sample, errors in representativeness or stratification of single norm samples are smoothed.
 *   Gaps between different norm samples are closed and gaps within norm tables as well do not occur anymore. For example, when constructing tests for grades, norm tables for any point in time in the school year can be retrieved with the desired precision.
@@ -44,7 +43,10 @@ data$group <- c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
 
 Of course, you can use a dataset that already has a variable on norm values per group. For demonstration purposes, cNORM already includes a clean example data set, drawn from a test norming project (ELFE 1-6 Sentence Completion task, Lenhard & Schneider, 2006), which we will use in the following. To load it into your global environment, please type: 
 ```
+# load package
 library(cNORM)
+
+# copy data frame to global environment
 normData <- elfe
 
 # Show the first rows of the data.frame
