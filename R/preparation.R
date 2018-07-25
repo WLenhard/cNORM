@@ -72,16 +72,20 @@ prepareData <- function() {
 #' and there are different methods for estimating the percentiles (default RankIt).
 #'
 #' @param data data.frame with norm sample data
-#' @param group the grouping variable, e. g. grade
-#' @param method Ranking method in case of bindings, please provide an index, choosin from the following
-#' methods: 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+#' @param group the grouping variable, e. g. grade, setting group to FALSE
+#' cancels grouping (data is treated as one goup)
+#' @param method Ranking method in case of bindings, please provide an index,
+#' choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 #' 6 = Filliben (1975), 7 = Yu & Huang (2001)
-#' @param scale type of norm scale, either T (default), IQ or z; you can provide a double vector with the mean and
-#' standard deviation as well, f. e. c(10, 3) for Wechsler scale index points
-#' @param descend ranking order (default descent = FALSE): inverses the ranking order with higher raw values
-#' getting lower norm values; relevant for example when norming error values, where lower values mean
-#' higher performance; ATTENTION: while modelling works, norm table generation, checks and plotting are currently
-#' incompatible with this option
+#' @param scale type of norm scale, either T (default), IQ or z; you can
+#' provide a double vector with the mean and standard deviation as well,
+#' f. e. c(10, 3) for Wechsler scale index points
+#' @param descend ranking order (default descent = FALSE): inverses the
+#' ranking order with higher raw values getting lower norm values; relevant
+#' for example when norming error values, where lower values mean higher
+#' performance; ATTENTION: while modelling works, norm table generation,
+#' checks and plotting are currently incompatible with this option
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -110,6 +114,10 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
+    if(!group){
+      d <- data %>% dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
+
+    }else{
     if(descend){
       # rank in descending order
      d <- data %>% dplyr::arrange(group, data$raw) %>%
@@ -122,6 +130,9 @@ rankByGroup <-
         dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
 
     }
+  }
+
+
 
     if((typeof(scale)=="double"&&length(scale)==2)){
       d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
