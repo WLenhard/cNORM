@@ -127,15 +127,20 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' be handled with caution.
 #' The original percentiles are displayed as distinct points in the according
 #' color, the model based projection of percentiles are drawn as lines.
+#' Please note, that the estimation of the percentiles of the raw data is done with
+#' the stats::quantile function with the default settings. Please consult help(quantile)
+#' and change the 'type' parameter accordingly.
 #' @param data The raw data including the percentiles and norm values
 #' @param model The model from the bestModel function
 #' @param minRaw Lower bound of the raw value scale (default = 0)
 #' @param maxRaw Upper bound of the raw value scale
 #' @param raw The name of the raw variable
-#' @param group The name of the grouping variable; the groups are automatically
+#' @param group The name of the grouping variable; the distinct groups are automatically
 #' determined
 #' @param percentiles Vector with percentile values, ranging from 0 to 1 (exclusive)
 #' @param scale The norm value scale, either 'T' (default), 'IQ' or 'z'
+#' @param type The type parameter of the quantile function to estimate the percentiles
+#' of the raw data (default 7)
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
@@ -149,7 +154,8 @@ plotPercentiles <- function(data,
                             raw = "raw",
                             group = "group",
                             percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95, 0.98),
-                            scale = "T") {
+                            scale = "T",
+                            type = 7) {
 
   # compute norm values from percentile vector
     if (scale == "IQ") {
@@ -165,16 +171,21 @@ plotPercentiles <- function(data,
     NAMESP <- base::paste("PredPR", percentiles * 100, sep = "")
 
     # build function for xyplot and aggregate actual percentiles per group
-    xyFunction <- base::paste(base::paste(NAMES, collapse = " + "),
+    if(typeof(group)=="logical"&&!group){
+      message("The plotPercentiles-function does not work without a grouping variable.")
+    }else{
+      xyFunction <- base::paste(base::paste(NAMES, collapse = " + "),
                               base::paste(NAMESP, collapse = " + "),
                         sep = " + ", collapse = " + ")
-      xyFunction <- base::paste(xyFunction, group, sep = " ~ ")
-      percentile.actual <- do.call(data.frame, stats::aggregate(data[, raw],
-                                                                list(data[, group]),
-                                                                FUN = function(x) stats::quantile(x,
-                                                                probs = percentiles)))
+    xyFunction <- base::paste(xyFunction, group, sep = " ~ ")
+    percentile.actual <- do.call(data.frame,
+                                 stats::aggregate(data[, raw],
+                                                  list(data[, group]),
+                                                  FUN = function(x) stats::quantile(x,
+                                                  probs = percentiles,
+                                                  type = type)))
 
-
+    }
     # compute percetile table
     colnames(percentile.actual) <- base::c(base::c("group"), NAMES)
 

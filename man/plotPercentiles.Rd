@@ -6,7 +6,7 @@
 \usage{
 plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
   group = "group", percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95,
-  0.98), scale = "T")
+  0.98), scale = "T", type = 7)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm values}
@@ -19,12 +19,15 @@ plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
 
 \item{raw}{The name of the raw variable}
 
-\item{group}{The name of the grouping variable; the groups are automatically
+\item{group}{The name of the grouping variable; the distinct groups are automatically
 determined}
 
 \item{percentiles}{Vector with percentile values, ranging from 0 to 1 (exclusive)}
 
 \item{scale}{The norm value scale, either 'T' (default), 'IQ' or 'z'}
+
+\item{type}{The type parameter of the quantile function to estimate the percentiles
+of the raw data (default 7)}
 }
 \description{
 The function plots the norm curves based on the regression model against
@@ -38,6 +41,9 @@ certain degree outside the original sample, but it should in general
 be handled with caution.
 The original percentiles are displayed as distinct points in the according
 color, the model based projection of percentiles are drawn as lines.
+Please note, that the estimation of the percentiles of the raw data is done with
+the stats::quantile function with the default settings. Please consult help(quantile)
+and change the 'type' parameter accordingly.
 }
 \examples{
 # Load example data set, compute model and plot results
