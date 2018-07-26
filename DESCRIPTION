@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: 'Non-parametric Continuous Norming in R'
-Version: 0.7.5
+Version: 0.7.6
 Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-07-26

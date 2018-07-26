@@ -4,7 +4,8 @@
 \alias{bestModel}
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
-bestModel(data, raw = "raw", R2 = 0.99, k = 4, terms = 0)
+bestModel(data, raw = "raw", R2 = 0.99, k = 4, predictors = NULL,
+  terms = 0)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
@@ -18,6 +19,13 @@ and an explanatory variably (usually age = A)}
 
 \item{k}{The power constant. Higher values result in more detailed approximations
 but have the danger of over-fit (default = 4, max = 6)}
+
+\item{predictors}{List of the names of predictor to use for the model selection.
+The parameter overrides the 'k' parameter and it can be used to preselect the
+variables entering the regression, or even to add variables like sex, that are
+not part of the original model building. Please not, that adding other variables
+than those based on L and A, plotting, prediction and normTable function will most
+likely not work, but at least the regression formula can be obtained that way.}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
@@ -49,4 +57,7 @@ normData <- prepareData()
 model <- bestModel(normData)
 plotSubset(model)
 plotPercentiles(normData, model)
+
+preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
+print(regressionFunction(preselectedModel))
 }

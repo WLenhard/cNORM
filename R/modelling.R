@@ -28,6 +28,12 @@
 #' (default R2 = 0.99)
 #' @param k The power constant. Higher values result in more detailed approximations
 #' but have the danger of over-fit (default = 4, max = 6)
+#' @param predictors List of the names of predictor to use for the model selection.
+#' The parameter overrides the 'k' parameter and it can be used to preselect the
+#' variables entering the regression, or even to add variables like sex, that are
+#' not part of the original model building. Please not, that adding other variables
+#' than those based on L and A, plotting, prediction and normTable function will most
+#' likely not work, but at least the regression formula can be obtained that way.
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
@@ -36,11 +42,16 @@
 #' model <- bestModel(normData)
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
+#'
+#' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
+#' print(regressionFunction(preselectedModel))
 #' @export
 bestModel <- function(data,
                       raw="raw",
                       R2 = 0.99,
-                      k = 4, terms=0) {
+                      k = 4,
+                      predictors = NULL,
+                      terms=0) {
   if(R2<=0 || R2>0.9999){
     base::message("R2 parameter out of bounds.")
     stop()
@@ -59,8 +70,9 @@ bestModel <- function(data,
   if(k>3){
     message("The computation might take some time ...")
   }
-
-  if (k == 1) {
+  if(!is.null(predictors)){
+    lmX <- stats::formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
+  }else if (k == 1) {
     lmX <- stats::formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
   } else if (k == 2) {
     lmX <-
