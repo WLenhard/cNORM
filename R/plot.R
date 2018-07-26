@@ -131,8 +131,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @param model The model from the bestModel function
 #' @param minRaw Lower bound of the raw value scale (default = 0)
 #' @param maxRaw Upper bound of the raw value scale
-#' @param rawVar The name of the raw variable
-#' @param groupVar The name of the grouping variable; the groups are automatically
+#' @param raw The name of the raw variable
+#' @param group The name of the grouping variable; the groups are automatically
 #' determined
 #' @param percentiles Vector with percentile values, ranging from 0 to 1 (exclusive)
 #' @param scale The norm value scale, either 'T' (default), 'IQ' or 'z'
@@ -140,14 +140,14 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotPercentiles(normData, m, rawVar="raw", groupVar="group")
+#' plotPercentiles(normData, m, raw="raw", group="group")
 #' @export
 plotPercentiles <- function(data,
                             model,
                             minRaw = 0,
                             maxRaw = 1000,
-                            rawVar = "raw",
-                            groupVar = "group",
+                            raw = "raw",
+                            group = "group",
                             percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95, 0.98),
                             scale = "T") {
 
@@ -164,17 +164,18 @@ plotPercentiles <- function(data,
     NAMES <- base::paste("PR", percentiles * 100, sep = "")
     NAMESP <- base::paste("PredPR", percentiles * 100, sep = "")
 
-    # build function for xyplot
+    # build function for xyplot and aggregate actual percentiles per group
     xyFunction <- base::paste(base::paste(NAMES, collapse = " + "),
                               base::paste(NAMESP, collapse = " + "),
                         sep = " + ", collapse = " + ")
-    xyFunction <- base::paste(xyFunction, " ~ group", sep = "")
+      xyFunction <- base::paste(xyFunction, group, sep = " ~ ")
+      percentile.actual <- do.call(data.frame, stats::aggregate(data[, raw],
+                                                                list(data[, group]),
+                                                                FUN = function(x) stats::quantile(x,
+                                                                probs = percentiles)))
+
 
     # compute percetile table
-    percentile.actual <- do.call(data.frame, stats::aggregate(data[, rawVar],
-                                                       by = data[, groupVar],
-                                                       FUN = function(x) stats::quantile(x,
-        probs = percentiles)))
     colnames(percentile.actual) <- base::c(base::c("group"), NAMES)
 
     # build finer grained grouping variable for prediction
@@ -331,9 +332,10 @@ plotSubset <- function(model, bic = FALSE) {
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' derivationPlot(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+#' plotDerivate(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
-derivationPlot <- function(model, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75, stepAge = 0.2, stepNorm = 1){
+plotDerivate <- function(model, minAge = 2, maxAge = 5, minNorm = 25,
+                         maxNorm = 75, stepAge = 0.2, stepNorm = 1){
   rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm-minNorm)/stepNorm))
   colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge-minAge)/stepAge))
   coeff <- cNORM::derive(model)

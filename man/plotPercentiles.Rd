@@ -4,8 +4,8 @@
 \alias{plotPercentiles}
 \title{Plot norm curves against actual percentiles}
 \usage{
-plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, rawVar = "raw",
-  groupVar = "group", percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95,
+plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
+  group = "group", percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95,
   0.98), scale = "T")
 }
 \arguments{
@@ -17,9 +17,9 @@ plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, rawVar = "raw",
 
 \item{maxRaw}{Upper bound of the raw value scale}
 
-\item{rawVar}{The name of the raw variable}
+\item{raw}{The name of the raw variable}
 
-\item{groupVar}{The name of the grouping variable; the groups are automatically
+\item{group}{The name of the grouping variable; the groups are automatically
 determined}
 
 \item{percentiles}{Vector with percentile values, ranging from 0 to 1 (exclusive)}
@@ -43,5 +43,5 @@ color, the model based projection of percentiles are drawn as lines.
 # Load example data set, compute model and plot results
 normData <- prepareData()
 m <- bestModel(data = normData)
-plotPercentiles(normData, m, rawVar="raw", groupVar="group")
+plotPercentiles(normData, m, raw="raw", group="group")
 }

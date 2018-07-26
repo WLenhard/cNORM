@@ -72,8 +72,9 @@ prepareData <- function() {
 #' and there are different methods for estimating the percentiles (default RankIt).
 #'
 #' @param data data.frame with norm sample data
-#' @param group the grouping variable, e. g. grade, setting group to FALSE
-#' cancels grouping (data is treated as one goup)
+#' @param group name of the grouping variable (default 'group'), e. g. grade, setting
+#' group to FALSE cancels grouping (data is treated as one goup)
+#' @param raw name of the raw value variable (default 'raw')
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -100,6 +101,7 @@ prepareData <- function() {
 rankByGroup <-
   function(data,
            group = "group",
+           raw = "raw",
            method = 4,
            scale = "T",
            descend = FALSE) {
@@ -114,21 +116,18 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
+    d <- data
     if(typeof(group)=="logical"&&!group){
-      d <- data %>% dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
-
+     if(descend){
+        d$percentile <- (rank(-1*(d[, raw])) + numerator[method])/(length(d[, raw])+denominator[method])
+      }else{
+        d$percentile <- (rank(d[, raw]) + numerator[method])/(length(d[, raw])+denominator[method])
+      }
     }else{
     if(descend){
-      # rank in descending order
-     d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(-raw) + numerator[method]) / (base::length(raw) + denominator[method]))
-    }else {
-      # rank in ascending order
-      d <- data %>% dplyr::arrange(group, data$raw) %>%
-        dplyr::group_by(group) %>%
-        dplyr::mutate(percentile = (base::rank(raw) + numerator[method]) / (base::length(raw) + denominator[method]))
-
+        d$percentile <- ave(d[, raw], d[, group], FUN=function(x) {(rank(-x) + numerator[method])/(length(x)+denominator[method])})
+     }else {
+       d$percentile <- ave(d[, raw], d[, group], FUN=function(x) {(rank(x) + numerator[method])/(length(x)+denominator[method])})
     }
   }
 

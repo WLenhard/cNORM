@@ -4,12 +4,14 @@
 \alias{bestModel}
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
-bestModel(data, R2 = 0.99, k = 4, terms = 0)
+bestModel(data, raw = "raw", R2 = 0.99, k = 4, terms = 0)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
 and the powers and interactions of the norm value (L = Location; usually T values)
 and an explanatory variably (usually age = A)}
+
+\item{raw}{the name of the raw value variable (default raw)}
 
 \item{R2}{Adjusted R square as a stopping criterion for the model building
 (default R2 = 0.99)}

@@ -1,8 +1,7 @@
 import(lattice)
-import(dplyr)
 importFrom(leaps, regsubsets)
 importFrom(stats, formula)
-importFrom(dplyr, arrange, group_by, mutate)
+importFrom("stats", "ave")
 importFrom("grDevices", "rainbow")
 importFrom("stats", "aggregate")
 importFrom(latticeExtra, panel.2dsmoother)
@@ -23,5 +22,5 @@ export(
 	derive,
 	checkConsistency,
 	derivationTable,
-	derivationPlot
+	plotDerivate
 )

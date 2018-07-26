@@ -4,14 +4,16 @@
 \alias{rankByGroup}
 \title{Determine the norm values of the participants in each subsample}
 \usage{
-rankByGroup(data, group = "group", method = 4, scale = "T",
+rankByGroup(data, group = "group", raw = "raw", method = 4, scale = "T",
   descend = FALSE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
 
-\item{group}{the grouping variable, e. g. grade, setting group to FALSE
-cancels grouping (data is treated as one goup)}
+\item{group}{name of the grouping variable (default 'group'), e. g. grade, setting
+group to FALSE cancels grouping (data is treated as one goup)}
+
+\item{raw}{name of the raw value variable (default 'raw')}
 
 \item{method}{Ranking method in case of bindings, please provide an index,
 choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),

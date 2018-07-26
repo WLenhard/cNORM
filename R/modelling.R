@@ -21,6 +21,7 @@
 #' @param data The preprocessed dataset, which should include the variables 'raw'
 #'  and the powers and interactions of the norm value (L = Location; usually T values)
 #'  and an explanatory variably (usually age = A)
+#' @param raw the name of the raw value variable (default raw)
 #' @param terms Selection criterion for model building. The best fitting model with
 #' this number of terms is used
 #' @param R2 Adjusted R square as a stopping criterion for the model building
@@ -37,6 +38,7 @@
 #' plotPercentiles(normData, model)
 #' @export
 bestModel <- function(data,
+                      raw="raw",
                       R2 = 0.99,
                       k = 4, terms=0) {
   if(R2<=0 || R2>0.9999){
@@ -59,24 +61,23 @@ bestModel <- function(data,
   }
 
   if (k == 1) {
-    lmX <- stats::formula("raw ~ L1 + A1 + L1A1")
+    lmX <- stats::formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
   } else if (k == 2) {
     lmX <-
-      stats::formula("raw ~ L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2")
+      stats::formula(paste(raw, "L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2", sep = " ~ "))
   } else if (k == 3) {
-    lmX <- stats::formula("
-      raw ~ L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3")
+    lmX <- stats::formula(paste(raw, "L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3", sep = " ~ "))
   } else if (k == 4) {
-    lmX <- stats::formula("raw ~ L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4")
+    lmX <- stats::formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
 
   } else if (k == 5) {
-    lmX <-stats::formula("raw ~ L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5")
+    lmX <-stats::formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5", sep = " ~ "))
   } else if (k == 6) {
     lmX <-
-      stats::formula("raw ~ L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6")
+      stats::formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6", sep = " ~ "))
   } else {
     message("Power parameter unknown, setting to k = 4")
-    lmX <- stats::formula("raw ~ L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4")
+    lmX <- stats::formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
   }
 
   subsets <- leaps::regsubsets(lmX, data=data, nbest=1, nvmax=2*k+k*k, force.in=NULL)
@@ -199,7 +200,7 @@ bestModel <- function(data,
 #' m <- bestModel(normData)
 #' modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
 #'                    minNorm=25, maxNorm=75, stepNorm=1)
-#' derivationPlot(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
+#' plotDerivate(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 #' @export
 checkConsistency <- function(model, minAge,
                              maxAge, minNorm, maxNorm,
@@ -271,6 +272,7 @@ checkConsistency <- function(model, minAge,
 #' including the beta weights.
 #' It can be used to predict the raw values based on age and location.
 #' @param model The regression model from the bestModel function
+#' @param raw The name of the raw value variable (default 'raw')
 #' @return The regression formula as a string
 #'
 #' @examples
@@ -278,8 +280,8 @@ checkConsistency <- function(model, minAge,
 #' model <- bestModel(normData)
 #' regressionFunction(model)
 #' @export
-regressionFunction <- function(model){
-  formulA <- base::paste0("raw ~ ", model$coefficients[[1]])
+regressionFunction <- function(model, raw="raw"){
+  formulA <- base::paste(raw, model$coefficients[[1]], sep = " ~ ")
   i <- 2
   while(i <= base::length(model$coefficients)){
     formulA <- base::paste0(formulA, " + (", model$coefficients[[i]], "*",
