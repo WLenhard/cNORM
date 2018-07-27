@@ -3,7 +3,20 @@ TODO
 - fix predictRaw and checkConsistency to accept descending order
 - add check in plotPercentiles for groupVar = FALSE to create age
   independent plot of percentiles
-- check parameter names for coherence (e. g. for the age / group / explanatory variable)
+- in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
+
+
+
+Version in 0.7.6
+================
+Date: 2018.07.27
+
+Changes:
+-------
+- parameter 'predictors' added to allow self defined regression functions,
+  e. g. for the inclusion of other ranking parameters like sex
+- 'type' parameter added to 'plotPercentile' to allow selection of quantile
+  algorithm. Please consult help(quantile) for further information on 'type'
 
 
 
