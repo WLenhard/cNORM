@@ -378,7 +378,7 @@ plotDerivate <- function(model, minAge = 2, maxAge = 5, minNorm = 25,
               col.regions=rainbow(n, end=.8),
             panel = latticeExtra::panel.2dsmoother,
             main = "Slope of the Regression Function\n(1st order derivation)",
-            ylab = "Norm Value",
+            ylab = "1st order derivate of norm value",
             xlab = "Age"
             )
   }else{
@@ -387,7 +387,7 @@ plotDerivate <- function(model, minAge = 2, maxAge = 5, minNorm = 25,
                     colorkey=list(at=seq(-.21,max,by=.001)),
                     col.regions=rainbow(n, end=.8),
                     main = "Slope of the Regression Function\n(1st order derivation)",
-                    ylab = "Norm Value",
+                    ylab = "1st order derivate of norm value",
                     xlab = "Age"
     )
   }
