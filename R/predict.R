@@ -42,7 +42,10 @@ getNormCurve <- function(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
 #' Predict single raw value
 #'
 #' Most elementary function to predict raw value based on Location (L, T value),
-#' Age (grouping variable) and the coefficients from a regression model
+#' Age (grouping variable) and the coefficients from a regression model.
+#' WARNING! This function, and all functions  depending on it, only works with regression
+#' functions including L, A and interactions. Manually adding predictors to bestModel via the
+#' predictors parameter is currently incompatible.
 #' @param normValue The norm value, e. g. T value
 #' @param age The age value
 #' @param coefficients The coefficients from the regression model
@@ -120,17 +123,25 @@ predictRaw <- function(normValue, age, coefficients, min = 0, max = 1000) {
 #' @param min The lower bound of the norm value range
 #' @param max The upper bound of the norm value range
 #' @param step Stepping parameter with lower values indicating higher precision
+#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @return data.frame with norm values and the predicted raw value
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
 #' norms <- normTable(3.5, m, step=0.5)
 #' @export
-normTable <- function(A, model, min = 25, max = 75, step = 0.1) {
+normTable <- function(A,
+                      model,
+                      min = 25,
+                      max = 75,
+                      step = 0.1,
+                      descend = FALSE) {
     norm <- base::vector("list", (max - min)/step)
     raw <- base::vector("list", (max - min)/step)
     i <- 1
-    while (min <= max) {
+    if(!descend){
+      while (min <= max) {
         i <- i + 1
         r <- cNORM::predictRaw(min, A, model$coefficients)
 
@@ -138,6 +149,17 @@ normTable <- function(A, model, min = 25, max = 75, step = 0.1) {
         raw[[i]] <- r
 
         min <- min + step
+      }
+    }else{
+      while (max >= min) {
+        i <- i + 1
+        r <- cNORM::predictRaw(max, A, model$coefficients)
+
+        norm[[i]] <- max
+        raw[[i]] <- r
+
+        max <- max - step
+      }
     }
     normTable <- do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
     return(normTable)

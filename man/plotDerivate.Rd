@@ -35,6 +35,8 @@ The regression models usually converge within the range of the original
 values. In case of vertical and horizontal extrapolation, with increasing
 distance to the original data, the risk of assumption violation increases
 as well.
+ATTENTION: plotDerivate is currently still incompatible with reversed raw
+value scales ('descent' option)
 }
 \examples{
 # Load example data set, compute model and plot results

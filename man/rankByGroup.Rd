@@ -27,8 +27,7 @@ f. e. c(10, 3) for Wechsler scale index points}
 \item{descend}{ranking order (default descent = FALSE): inverses the
 ranking order with higher raw values getting lower norm values; relevant
 for example when norming error values, where lower values mean higher
-performance; ATTENTION: while modelling works, norm table generation,
-checks and plotting are currently incompatible with this option}
+performance}
 }
 \value{
 the dataset with the percentiles and norm scales per group

@@ -1,9 +1,17 @@
 TODO
 ====
-- fix predictRaw and checkConsistency to accept descending order
-- add check in plotPercentiles for groupVar = FALSE to create age
-  independent plot of percentiles
+- fix plotDerivate to accept descending order
 - in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
+
+
+
+Version in 0.7.8
+================
+Date: 2018.07.27
+
+Changes:
+-------
+- 'descend' parameter added to consistencyCheck and normTable
 
 
 
@@ -15,8 +23,6 @@ Changes:
 -------
 - Small changes to error messages in bestModel
 - printing of min value in plotDerivate removed
-
-
 
 
 

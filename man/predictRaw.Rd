@@ -24,7 +24,10 @@ the predicted raw value
 }
 \description{
 Most elementary function to predict raw value based on Location (L, T value),
-Age (grouping variable) and the coefficients from a regression model
+Age (grouping variable) and the coefficients from a regression model.
+WARNING! This function, and all functions  depending on it, only works with regression
+functions including L, A and interactions. Manually adding predictors to bestModel via the
+predictors parameter is currently incompatible.
 }
 \examples{
 normData <- prepareData()

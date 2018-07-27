@@ -4,7 +4,7 @@
 \alias{normTable}
 \title{Create a norm table based on model for specific age}
 \usage{
-normTable(A, model, min = 25, max = 75, step = 0.1)
+normTable(A, model, min = 25, max = 75, step = 0.1, descend = FALSE)
 }
 \arguments{
 \item{A}{the age}
@@ -16,6 +16,9 @@ normTable(A, model, min = 25, max = 75, step = 0.1)
 \item{max}{The upper bound of the norm value range}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
+
+\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+indicate higher performance. Relevent f. e. in case of modelling errors}
 }
 \value{
 data.frame with norm values and the predicted raw value

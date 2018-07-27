@@ -204,6 +204,8 @@ bestModel <- function(data,
 #' @param stepNorm Stepping parameter for the norm table check within age with lower
 #' values indicating a higher precision. The choice depends of the norm scale
 #' used. With T values a stepping parameter of 1 is suitable
+#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
 #' @return List of warning messages
@@ -214,24 +216,30 @@ bestModel <- function(data,
 #'                    minNorm=25, maxNorm=75, stepNorm=1)
 #' plotDerivate(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 #' @export
-checkConsistency <- function(model, minAge,
-                             maxAge, minNorm, maxNorm,
-                             stepAge = 1, stepNorm=1, warn = FALSE){
+checkConsistency <- function(model,
+                             minAge,
+                             maxAge,
+                             minNorm,
+                             maxNorm,
+                             stepAge = 1,
+                             stepNorm=1,
+                             descend = FALSE,
+                             warn = FALSE){
   i <- minAge
   j <- minNorm
   minor <- 0
   major <- 0
   results <- c()
     while(i <= maxAge){
-    norm = cNORM::normTable(i, model, min = minNorm, max = maxNorm,
-                            step = stepNorm)
+    norm <- cNORM::normTable(i, model, min = minNorm, max = maxNorm,
+                            step = stepNorm, descend = descend)
       k <- 1
       maxRaw <- 0
       while(k < base::length(norm$raw)){
         if(norm$raw[[k]]>maxRaw)
           maxRaw <- norm$raw[[k]]
         diff <- maxRaw-norm$raw[[k+1]]
-        if(diff >= 1){
+        if((!descend&&diff >= 1)||(descend&&diff <= -1)){
           base::message(base::paste0("Considerable violation of consistency at age ",
                                      base::round(i, digits=1), ", raw value ",
                                      base::round(norm$raw[[k]],
@@ -244,7 +252,7 @@ checkConsistency <- function(model, minAge,
                                                                       digits=1)))
           major <- major + 1
           k <- base::length(norm$raw) + 1
-        }else if(warn&(diff > 0)){
+        }else if(warn&((!descend&&diff > 0)||(descend&&diff < 0))){
           base::message(paste0("Neglectible violation of consistency at age ",
                                base::round(i, digits=1),
                                ", raw value ",
