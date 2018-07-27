@@ -7,6 +7,19 @@ TODO
 
 
 
+Version in 0.7.7
+================
+Date: 2018.07.27
+
+Changes:
+-------
+- Small changes to error messages in bestModel
+- printing of min value in plotDerivate removed
+
+
+
+
+
 Version in 0.7.6
 ================
 Date: 2018.07.27

@@ -67,7 +67,7 @@ bestModel <- function(data,
     stop()
   }
 
-  if(k>3&is.null(predictors)){
+  if((k>4&is.null(predictors))||(!is.null(predictors)&&length(predictors)>25)){
     message("The computation might take some time ...")
   }
   if(!is.null(predictors)){
@@ -103,7 +103,7 @@ bestModel <- function(data,
     i <- terms
     finished = TRUE
     base::message(paste0(
-      "\n\nUser specified solution: ",
+      "\nUser specified solution: ",
       i,
       "\nR-Square Adj. amounts to ",
       results$adjr2[i]
@@ -115,13 +115,13 @@ bestModel <- function(data,
   }
     if(R2 < results$adjr2[i]){
       base::message(paste0(
-      "\n\nSpecified R2 falls below the value of the most primitive model. Falling back to model 1.\nR-Square Adj. amounts to ",
+      "\nSpecified R2 falls below the value of the most primitive model. Falling back to model 1.\nR-Square Adj. amounts to ",
       results$adjr2[i]
     ))
   }else if(results$adjr2[base::length(results$adjr2)]<R2){
     i <- base::length(results$adjr2)
     base::message(paste0(
-      "\n\nSpecified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i,".\nR-Square Adj. amounts to ",
+      "\nSpecified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i,".\nR-Square Adj. amounts to ",
       results$adjr2[i]
     ))
   }else{
@@ -130,7 +130,7 @@ bestModel <- function(data,
     rAdj <- results$adjr2[i]
   }
     base::message(paste0(
-    "\n\nFinal solution: ",
+    "\nFinal solution: ",
     i,
     "\nR-Square Adj. amounts to ",
     results$adjr2[i]

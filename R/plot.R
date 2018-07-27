@@ -371,7 +371,6 @@ plotDerivate <- function(model, minAge = 2, maxAge = 5, minNorm = 25,
   colnames(dev2) <- base::c("X", "Y", "Z")
   max <- base::max(dev2$Z) + 0.01
   n <- (max + 0.21)*1000
-  base::print(min(dev2$Z))
   if (requireNamespace("latticeExtra", quietly = TRUE)) {
   p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
               at=seq(-.21,max,by=0.001), region=T,
