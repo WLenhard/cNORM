@@ -52,7 +52,7 @@ bestModel <- function(data,
                       k = 4,
                       predictors = NULL,
                       terms=0) {
-  if(R2<=0 || R2>0.9999){
+  if(R2<=0 || R2>=1){
     base::message("R2 parameter out of bounds.")
     stop()
   }
@@ -62,12 +62,12 @@ bestModel <- function(data,
     stop()
   }
 
-  if(k<1 || k >6){
+  if((k<1 || k >6)&is.null(predictors)){
     base::message("k parameter out of bounds.")
     stop()
   }
 
-  if(k>3){
+  if(k>3&is.null(predictors)){
     message("The computation might take some time ...")
   }
   if(!is.null(predictors)){
