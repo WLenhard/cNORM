@@ -20,9 +20,9 @@ choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 6 = Filliben (1975), 7 = Yu & Huang (2001)}
 
-\item{scale}{type of norm scale, either T (default), IQ or z; you can
-provide a double vector with the mean and standard deviation as well,
-f. e. c(10, 3) for Wechsler scale index points}
+\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
+transformation); a double vector with the mean and standard deviation can as well,
+be provided f. e. c(10, 3) for Wechsler scale index points}
 
 \item{descend}{ranking order (default descent = FALSE): inverses the
 ranking order with higher raw values getting lower norm values; relevant

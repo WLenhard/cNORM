@@ -138,7 +138,9 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @param group The name of the grouping variable; the distinct groups are automatically
 #' determined
 #' @param percentiles Vector with percentile values, ranging from 0 to 1 (exclusive)
-#' @param scale The norm value scale, either 'T' (default), 'IQ', 'z' or 'percentile'
+#' @param scale The norm value scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+#' self defined with a double vector with the mean and standard deviation,
+#' f. e. c(10, 3) for Wechsler scale index points
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
 #' @examples
@@ -158,7 +160,9 @@ plotPercentiles <- function(data,
                             type = 7) {
 
   # compute norm values from percentile vector
-    if (scale == "IQ") {
+    if((typeof(scale)=="double"&&length(scale)==2)){
+        T <- stats::qnorm(percentiles, scale[1], scale[2])
+    }else if (scale == "IQ") {
         T <- stats::qnorm(percentiles, 100, 15)
     } else if (scale == "z") {
         T <- stats::qnorm(percentiles)

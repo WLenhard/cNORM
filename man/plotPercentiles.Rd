@@ -24,7 +24,9 @@ determined}
 
 \item{percentiles}{Vector with percentile values, ranging from 0 to 1 (exclusive)}
 
-\item{scale}{The norm value scale, either 'T' (default), 'IQ' or 'z'}
+\item{scale}{The norm value scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+self defined with a double vector with the mean and standard deviation,
+f. e. c(10, 3) for Wechsler scale index points}
 
 \item{type}{The type parameter of the quantile function to estimate the percentiles
 of the raw data (default 7)}

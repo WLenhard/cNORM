@@ -11,7 +11,7 @@ Date: 2018.07.28
 Changes:
 -------
 - Description for computePowers improved
-- option in plotPercentile to use percentile sclae
+- option in plotPercentile to use percentile scale or self defined c(mean, sd)
 
 
 
