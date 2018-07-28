@@ -1,7 +1,18 @@
 TODO
 ====
-- fix plotDerivate to accept descending order
 - in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
+
+
+
+Version in 0.7.9
+================
+Date: 2018.07.28
+
+Changes:
+-------
+- 'descend' parameter added to consistencyCheck and normTable
+- dependency rColorBrewer removed; plotPercentiles changed accordingly
+- latticeExtra moved to 'suggests'
 
 
 

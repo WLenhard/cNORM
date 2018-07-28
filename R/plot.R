@@ -153,7 +153,7 @@ plotPercentiles <- function(data,
                             maxRaw = 1000,
                             raw = "raw",
                             group = "group",
-                            percentiles = base::c(0.02, 0.05, 0.2, 0.5, 0.8, 0.95, 0.98),
+                            percentiles = base::c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = "T",
                             type = 7) {
 
@@ -219,22 +219,13 @@ plotPercentiles <- function(data,
     }
 
     # merge actual and predicted values und plot them show lines
-
     # for predicted values and dots for actual values
     percentile <- base::merge(percentile.actual, percentile.fitted,
                         by = "group", all.y = TRUE)
 
-    if (requireNamespace("RColorBrewer", quietly = TRUE)) {
-      COL1 <- RColorBrewer::brewer.pal(length(percentiles), "Spectral")
-      COL2 <-
-        c(RColorBrewer::brewer.pal(length(percentiles), "Spectral"),
-          RColorBrewer::brewer.pal(length(percentiles), "Spectral"))
-    } else {
-      COL1 <- base::seq(1, length(percentiles))
-      COL2 <-
-        base::c(base::seq(1, base::length(percentiles)),
-                base::seq(1, base::length(percentiles)))
-    }
+    END <- 5/6
+    COL1 <- grDevices::rainbow(base::length(percentiles), end=END);
+    COL2 <- base::c(grDevices::rainbow(base::length(percentiles), end=END), grDevices::rainbow(base::length(percentiles), end=END))
 
     panelfun <- function(..., type, group.number) {
         if (group.number > length(T)) {
@@ -341,6 +332,8 @@ plotSubset <- function(model, bic = FALSE) {
 #' @param minNorm Lower end of the norm value range, in case of T values, 25 might be good
 #' @param maxNorm Upper end of the norm value range, in case of T values, 25 might be good
 #' @param stepNorm Stepping parameter for norm values
+#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
@@ -353,7 +346,8 @@ plotDerivate <- function(model,
                          minNorm = 25,
                          maxNorm = 75,
                          stepAge = 0.2,
-                         stepNorm = 1){
+                         stepNorm = 1,
+                         descend = FALSE){
   rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm-minNorm)/stepNorm))
   colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge-minAge)/stepAge))
   coeff <- cNORM::derive(model)
@@ -367,7 +361,7 @@ plotDerivate <- function(model,
   while(i <= base::ncol(devFrame)){
     j <- 1
     while(j <= base::nrow(devFrame)){
-      devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff, min = -0.2, max = 100000)
+      devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff, descend)
       colList <- base::c(rowS[[j]], colS[[i]], devFrame[j, i])
       dev2 <- base::rbind(dev2, colList)
       j <- j + 1
@@ -376,23 +370,30 @@ plotDerivate <- function(model,
 
   }
   colnames(dev2) <- base::c("X", "Y", "Z")
-  max <- base::max(dev2$Z) + 0.01
-  n <- (max + 0.21)*1000
+
+  # define range and colors
+  min <- base::min(dev2$Z)-.1
+  max <- base::max(dev2$Z)+.1
+  step <- (max-min)/1000
+  regions <- grDevices::rainbow(1000, end=.8)
+  key <- base::list(at=seq(min,max,by=step))
+  sequence <- base::seq(min, max,by=step)
+
   if (requireNamespace("latticeExtra", quietly = TRUE)) {
-  p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
-              at=seq(-.21,max,by=0.001), region=T,
-              colorkey=list(at=seq(-.21,max,by=.001)),
-              col.regions=rainbow(n, end=.8),
-            panel = latticeExtra::panel.2dsmoother,
-            main = "Slope of the Regression Function\n(1st order derivation)",
-            ylab = "1st order derivate of norm value",
-            xlab = "Age"
+    p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
+              at=sequence, region=T,
+              colorkey=key,
+              col.regions=regions,
+              panel = latticeExtra::panel.2dsmoother,
+              main = "Slope of the Regression Function\n(1st order derivation)",
+              ylab = "1st order derivate of norm value",
+              xlab = "Age"
             )
   }else{
     p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
-                    at=seq(-.21,max,by=0.001), region=T,
-                    colorkey=list(at=seq(-.21,max,by=.001)),
-                    col.regions=rainbow(n, end=.8),
+                    at=sequence, region=T,
+                    colorkey=key,
+                    col.regions=regions,
                     main = "Slope of the Regression Function\n(1st order derivation)",
                     ylab = "1st order derivate of norm value",
                     xlab = "Age"

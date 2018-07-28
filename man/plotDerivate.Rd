@@ -5,7 +5,7 @@
 \title{Plot first order derivation of regression model}
 \usage{
 plotDerivate(model, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75,
-  stepAge = 0.2, stepNorm = 1)
+  stepAge = 0.2, stepNorm = 1, descend = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -22,6 +22,9 @@ plotDerivate(model, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75,
 values indicate higher precision / closer checks}
 
 \item{stepNorm}{Stepping parameter for norm values}
+
+\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+indicate higher performance. Relevent f. e. in case of modelling errors}
 }
 \description{
 Plots the values obtained via the first derivation of the regression model

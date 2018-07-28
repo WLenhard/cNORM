@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: 'Non-parametric Continuous Norming in R'
-Version: 0.7.8
+Version: 0.7.9
 Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-07-26
@@ -19,9 +19,7 @@ Depends:
     R (>= 3.1.0)
 Imports:
     lattice (>= 0.20),
-    leaps (>= 3.0.0),
-    latticeExtra (>= 0.6),
-    RColorBrewer (>= 1.1),
+    leaps (>= 3.0.0), latticeExtra (>= 0.6)
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
