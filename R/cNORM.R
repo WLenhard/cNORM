@@ -31,11 +31,11 @@
 #'   \item Data preparation: rankByGroup, computePowers
 #'   \item Regression models: bestModel, regressionFunction, derive
 #'   \item Model validation: checkConsistency, plotSubset, plotPercentiles,
-#'   plotNormCurves, plotValues, derivationTable, derivationPlot
-#'   \item Norm tables: predictNormValue, predictRaw, normTable, getNormCurve
+#'   plotValues, derivationTable, plotDerative
+#'   \item Norm tables: predictNormValue, predictRaw, normTable, getNormCurve, plotNormCurves
 #' }
 #' An example dataset is available for demonstration purposes ("elfe"; sample data
-#' from the references). Use \code{prepareData()} to load and prepare the results
+#' from the references). Use \code{data <- prepareData()} to load and prepare example data
 #' for the modeling. Use \code{vignette(cNORM-Demo)} for a comprehensive
 #' explanation for conducting  the modeling.
 #'

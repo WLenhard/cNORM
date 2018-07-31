@@ -47,15 +47,27 @@ NULL
 
 #' Set up example dataset and compute model
 #'
-#' This is a convenience method to load the inbuilt sample dataset, rank the
-#' data and compute norm values, compute powers and interactions and
-#' determine the best fitting model based on all default parameters.
-#'
+#' This is a convenience method to either load the inbuilt sample dataset, or
+#' to provide a data frame with the variables "raw" (for the raw values) and "group"
+#' The function ranks the data within groups, computes norm values, powers of the norm
+#' values and interactions. Afterwards the best fitting model is determined, based on
+#' all default parameters.
+#' @param data data.frame with a grouping variable named 'group' and a raw value variable
+#' named 'raw'. In case no object is provided, cNORM uses the inbuild sample data to demonstrate
+#' the procedure
+#' @return data frame including the norm values, powers and interactions of the norm value and
+#' grouping variable
 #' @examples
 #' normData <- prepareData()
 #' @export
-prepareData <- function() {
-  normData <- rankByGroup(cNORM::elfe, group = "group")
+prepareData <- function(data=NULL) {
+  if(is.null(data)){
+    normData <- cNORM::elfe
+  }else{
+    normData <- data
+  }
+
+  normData <- rankByGroup(normData, group = "group")
   normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable = "group")
   return(normData)
 }

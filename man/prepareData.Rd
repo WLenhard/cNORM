@@ -4,12 +4,23 @@
 \alias{prepareData}
 \title{Set up example dataset and compute model}
 \usage{
-prepareData()
+prepareData(data = NULL)
+}
+\arguments{
+\item{data}{data.frame with a grouping variable named 'group' and a raw value variable
+named 'raw'. In case no object is provided, cNORM uses the inbuild sample data to demonstrate
+the procedure}
+}
+\value{
+data frame including the norm values, powers and interactions of the norm value and
+grouping variable
 }
 \description{
-This is a convenience method to load the inbuilt sample dataset, rank the
-data and compute norm values, compute powers and interactions and
-determine the best fitting model based on all default parameters.
+This is a convenience method to either load the inbuilt sample dataset, or
+to provide a data frame with the variables "raw" (for the raw values) and "group"
+The function ranks the data within groups, computes norm values, powers of the norm
+values and interactions. Afterwards the best fitting model is determined, based on
+all default parameters.
 }
 \examples{
 normData <- prepareData()
