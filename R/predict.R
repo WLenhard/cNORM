@@ -113,11 +113,12 @@ predictRaw <- function(normValue, age, coefficients, min = 0, max = 1000) {
 #' Create a norm table based on model for specific age
 #'
 #' This function generates a norm table for a specific age based on the regression
-#' model. Please specify the range of norm values, you want to cover. A T value of
-#' 25 corresponds to a percentile of .6. As a consequence, specifying a rang of
-#' T = 25 to T = 75 would cover 98.4 % of the population. Please be careful when
-#' extrapolating horizontally. Extreme values with T < 20 or T > 80 might lead to
-#' inconsistent results.
+#' model by assigning raw values to norm values. Please specify the range of norm values,
+#' you want to cover. A T value of 25 corresponds to a percentile of .6. As a consequence,
+#' specifying a rang of T = 25 to T = 75 would cover 98.4 % of the population. Please be
+#' careful when extrapolating vertically (at the lower and upper end of the age specific
+#' distribution). Depending on the size of your norm sample, extreme values with
+#' T < 20 or T > 80 might lead to inconsistent results.
 #' @param A the age
 #' @param model The regression model
 #' @param min The lower bound of the norm value range
@@ -161,8 +162,70 @@ normTable <- function(A,
         max <- max - step
       }
     }
+
     normTable <- do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
     return(normTable)
+}
+
+#' Create a table with norms assigned to raw values for a specific age based on the regression model
+#'
+#' This function is comparable to 'normTable', despite it reverses the assignment:
+#' A table with raw values and the according norm values for a specific age based on the regression
+#' model is generated. This way, the inverse function of the regression model is solved numerically with
+#' brute force. Please specify the range of raw values, you want to cover. With higher precision
+#' and smaller stepping, this function becomes computational intensive.
+#' @param A the age
+#' @param model The regression model
+#' @param min The lower bound of the raw value range
+#' @param max The upper bound of the raw value range
+#' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
+#' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
+#' @param step Stepping parameter for the raw values (default 1)
+#' @param precision Precision for the norm value estimation. Lower values indicate
+#' higher precision (default .1)
+#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' @return data.frame with raw values and the predicted norm value
+#' @examples
+#' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
+#' normData <- prepareData()
+#' m <- bestModel(data=normData)
+#' table <- rawTable(3 + 7/12, m, 0, 28, precision=1)
+#' @export
+rawTable <- function(A,
+                      model,
+                      min,
+                      max,
+                      minNorm = 25,
+                      maxNorm = 75,
+                      step = 1,
+                      precision = .1,
+                      descend = FALSE) {
+  norm <- base::vector("list", (max - min)/step)
+  raw <- base::vector("list", (max - min)/step)
+  i <- 1
+  if(!descend){
+    while (min <= max) {
+      i <- i + 1
+      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      norm[[i]] <- n
+      raw[[i]] <- min
+
+      min <- min + step
+    }
+  }else{
+    while (max >= min) {
+      i <- i + 1
+      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      norm[[i]] <- n
+      raw[[i]] <- max
+
+      max <- max - step
+    }
+  }
+
+  table <- do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  return(table)
 }
 
 #' Create a table based on first derivation of the regression model for specific age

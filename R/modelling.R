@@ -38,11 +38,13 @@
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
 #' @examples
+#' # Standard example with sample data
 #' normData <- prepareData()
 #' model <- bestModel(normData)
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
 #'
+#' # It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
 #' @export

@@ -166,9 +166,19 @@ The norm value for an specific raw value and age is determined.
 
 *   **normTable**
 ```
-normTable(A, model, min = 25, max = 75, step = 0.1)
+normTable(A, model, min = 25, max = 75, step = 0.1, descend = FALSE)
 ```
 This function combines the functionality of the preceding smaller functions in order to generate a norm table for a specific age with the desired degree of granularity and a predefined range of norm values. As a test constructor, you would finally take this table and manually bring it to a form, that can be printed in the manual of a psychometric or medical test. If you are working on computer based testing, you can of course directly take the model to retrieve values on the fly or use this package in a server environment and have it do it for you.
+
+*   **rawTable**
+```
+rawTable(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1, precision = .1, descend = FALSE)
+```
+This function is comparable to 'normTable', despite it reverses the assignment:
+A table with raw values and the according norm values for a specific age based on the regression
+model is generated. This way, the inverse function of the regression model is solved numerically with
+brute force. Please specify the range of raw values, you want to cover. With higher precision
+and smaller stepping, this function becomes computational intensive.
 
 
 ## Final conclusion

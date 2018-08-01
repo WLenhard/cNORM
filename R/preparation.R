@@ -55,12 +55,13 @@ NULL
 #' @param data data.frame with a grouping variable named 'group' and a raw value variable
 #' named 'raw'. In case no object is provided, cNORM uses the inbuild sample data to demonstrate
 #' the procedure
+#' @param group manually specify the grouping variable in the data
 #' @return data frame including the norm values, powers and interactions of the norm value and
 #' grouping variable
 #' @examples
 #' normData <- prepareData()
 #' @export
-prepareData <- function(data=NULL) {
+prepareData <- function(data=NULL, group = "group") {
   if(is.null(data)){
     normData <- cNORM::elfe
   }else{

@@ -4,12 +4,14 @@
 \alias{prepareData}
 \title{Set up example dataset and compute model}
 \usage{
-prepareData(data = NULL)
+prepareData(data = NULL, group = "group")
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw value variable
 named 'raw'. In case no object is provided, cNORM uses the inbuild sample data to demonstrate
 the procedure}
+
+\item{group}{manually specify the grouping variable in the data}
 }
 \value{
 data frame including the norm values, powers and interactions of the norm value and

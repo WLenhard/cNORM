@@ -25,11 +25,12 @@ data.frame with norm values and the predicted raw value
 }
 \description{
 This function generates a norm table for a specific age based on the regression
-model. Please specify the range of norm values, you want to cover. A T value of
-25 corresponds to a percentile of .6. As a consequence, specifying a rang of
-T = 25 to T = 75 would cover 98.4 % of the population. Please be careful when
-extrapolating horizontally. Extreme values with T < 20 or T > 80 might lead to
-inconsistent results.
+model by assigning raw values to norm values. Please specify the range of norm values,
+you want to cover. A T value of 25 corresponds to a percentile of .6. As a consequence,
+specifying a rang of T = 25 to T = 75 would cover 98.4 % of the population. Please be
+careful when extrapolating vertically (at the lower and upper end of the age specific
+distribution). Depending on the size of your norm sample, extreme values with
+T < 20 or T > 80 might lead to inconsistent results.
 }
 \examples{
 normData <- prepareData()

@@ -4,6 +4,19 @@ TODO
 
 
 
+
+Version in 0.8.0
+================
+Date: 2018.08.01
+
+Changes:
+-------
+- new function: rawTable allows creating norm tables with assignment of raw -> norm values
+  solves inverse function of regression model with brute force
+
+
+
+
 Version in 0.7.11
 ================
 Date: 2018.07.31
