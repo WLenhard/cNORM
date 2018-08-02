@@ -207,7 +207,7 @@ rawTable <- function(A,
                       descend = FALSE,
                       quick = TRUE) {
   if(quick){
-    return(cNORM::rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
+    return(rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
     stop()
   }
   norm <- base::vector("list", (max - min)/step)
