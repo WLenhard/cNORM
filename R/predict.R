@@ -207,7 +207,7 @@ rawTable <- function(A,
                       descend = FALSE,
                       quick = TRUE) {
   if(quick){
-    return(rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
+    return(cNORM::rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
     stop()
   }
   norm <- base::vector("list", (max - min)/step)
@@ -216,7 +216,7 @@ rawTable <- function(A,
   if(!descend){
     while (min <= max) {
       i <- i + 1
-      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- min
 
@@ -225,7 +225,7 @@ rawTable <- function(A,
   }else{
     while (max >= min) {
       i <- i + 1
-      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- max
 
@@ -233,7 +233,7 @@ rawTable <- function(A,
     }
   }
 
-  table <- do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  table <- base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
   return(table)
 }
 
@@ -276,7 +276,7 @@ rawTableQuick <- function(A,
   if(!descend){
     #first path, low precision
     normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10)
-    rows <- nrow(normTab)
+    rows <- base::nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
 
@@ -291,7 +291,7 @@ rawTableQuick <- function(A,
         norm[[i]] <- highestNorm
       }else{
         # second path with high precision
-        index <- which.min(abs(normTab$raw - min))
+        index <- base::which.min(base::abs(normTab$raw - min))
         if(index <= 2){
           mi <- lowestNorm
           ma <- normTab$norm[[3]]
@@ -303,7 +303,7 @@ rawTableQuick <- function(A,
           ma <- index + 1
         }
 
-        n <- predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
+        n <- cNORM::predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
         norm[[i]] <- n
       }
 
@@ -313,7 +313,7 @@ rawTableQuick <- function(A,
   }else{
     while (max >= min) {
       i <- i + 1
-      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- max
 
@@ -322,7 +322,7 @@ rawTableQuick <- function(A,
 
     #first path, low precision
     normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10, descend = TRUE)
-    rows <- nrow(normTab)
+    rows <- base::nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
 
@@ -337,7 +337,7 @@ rawTableQuick <- function(A,
         norm[[i]] <- highestNorm
       }else{
         # second path with high precision
-        index <- which.min(abs(normTab$raw - min))
+        index <- base::which.min(base::abs(normTab$raw - min))
         if(index <= 2){
           mi <- rows - 2
           ma <- rows
@@ -349,7 +349,7 @@ rawTableQuick <- function(A,
           ma <- index + 1
         }
 
-        n <- predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
+        n <- cNORM::predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
         norm[[i]] <- n
       }
 
@@ -358,7 +358,7 @@ rawTableQuick <- function(A,
     }
   }
 
-  table <- do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  table <- base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
   return(table)
 }
 
@@ -393,7 +393,7 @@ derivationTable <- function(A, model, min = 25, max = 75, step = 0.1) {
 
     min <- min + step
   }
-  normTable <- do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
+  normTable <- base::do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
   return(normTable)
 }
 
@@ -418,6 +418,6 @@ derivationTable <- function(A, model, min = 25, max = 75, step = 0.1) {
 #' @export
 predictNormValue <- function(raw, A, model, min = 25, max = 75, precision = 0.1) {
     norms <- cNORM::normTable(A, model, min = min, max = max, step = precision)
-    index <- which.min(abs(norms$raw - raw))
+    index <- base::which.min(base::abs(norms$raw - raw))
     return(norms$norm[index])
 }

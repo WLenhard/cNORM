@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{rawTableQuick}
 \alias{rawTableQuick}
-\title{Internal method for shotgun search of raw -> norm value table}
+\title{Internal method for two step shotgun search of raw -> norm value table}
 \usage{
 rawTableQuick(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1,
   precision = 0.1, descend = FALSE)
