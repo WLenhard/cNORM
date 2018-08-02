@@ -173,7 +173,8 @@ normTable <- function(A,
 #' A table with raw values and the according norm values for a specific age based on the regression
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
-#' and smaller stepping, this function becomes computational intensive.
+#' and smaller stepping, this function becomes computational intensive, especially when quick is set
+#' to FALSE for a thorough search.
 #' @param A the age
 #' @param model The regression model
 #' @param min The lower bound of the raw value range
@@ -185,12 +186,15 @@ normTable <- function(A,
 #' higher precision (default .1)
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
 #' indicate higher performance. Relevent f. e. in case of modelling errors
+#' @param quick Forces the use of a shotgun method to quickly find the norm values
+#' with the desired precision. Reproduces the same results as the thorough search in
+#' case the model assumptions are met.
 #' @return data.frame with raw values and the predicted norm value
 #' @examples
 #' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
-#' table <- rawTable(3 + 7/12, m, 0, 28, precision=1)
+#' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1)
 #' @export
 rawTable <- function(A,
                       model,
@@ -200,7 +204,12 @@ rawTable <- function(A,
                       maxNorm = 75,
                       step = 1,
                       precision = .1,
-                      descend = FALSE) {
+                      descend = FALSE,
+                      quick = TRUE) {
+  if(quick){
+    return(rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
+    stop()
+  }
   norm <- base::vector("list", (max - min)/step)
   raw <- base::vector("list", (max - min)/step)
   i <- 1
@@ -220,6 +229,131 @@ rawTable <- function(A,
       norm[[i]] <- n
       raw[[i]] <- max
 
+      max <- max - step
+    }
+  }
+
+  table <- do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  return(table)
+}
+
+#' Internal method for two step shotgun search of raw -> norm value table
+#'
+#' This function is comparable to 'rawTable', but uses an optimization to reduce computational
+#' resources. It is the default method in the 'rawTable' function. TODO: It still has to be checked for
+#' descending values.
+#'
+#' @param A the age
+#' @param model The regression model
+#' @param min The lower bound of the raw value range
+#' @param max The upper bound of the raw value range
+#' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
+#' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
+#' @param step Stepping parameter for the raw values (default 1)
+#' @param precision Precision for the norm value estimation. Lower values indicate
+#' higher precision (default .1)
+#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' @return data.frame with raw values and the predicted norm value
+#' @examples
+#' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
+#' normData <- prepareData()
+#' m <- bestModel(data=normData)
+#' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1, quick = TRUE)
+rawTableQuick <- function(A,
+                     model,
+                     min,
+                     max,
+                     minNorm = 25,
+                     maxNorm = 75,
+                     step = 1,
+                     precision = .1,
+                     descend = FALSE) {
+
+  norm <- base::vector("list", (max - min)/step)
+  raw <- base::vector("list", (max - min)/step)
+  i <- 0
+  if(!descend){
+    #first path, low precision
+    normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10)
+    rows <- nrow(normTab)
+    lowestRaw <- normTab$raw[[1]]
+    highestRaw <- normTab$raw[[rows]]
+
+    lowestNorm <- normTab$norm[[1]]
+    highestNorm <- normTab$norm[[rows]]
+
+    while (min <= max) {
+      i <- i + 1
+      if(min<lowestRaw){
+        norm[[i]] <- lowestNorm
+      }else if(min>highestRaw){
+        norm[[i]] <- highestNorm
+      }else{
+        # second path with high precision
+        index <- which.min(abs(normTab$raw - min))
+        if(index <= 2){
+          mi <- lowestNorm
+          ma <- normTab$norm[[3]]
+        }else if(index >= rows - 2){
+          mi <- rows - 2
+          ma <- rows
+        }else{
+          mi <- index - 1
+          ma <- index + 1
+        }
+
+        n <- predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
+        norm[[i]] <- n
+      }
+
+      raw[[i]] <- min
+      min <- min + step
+    }
+  }else{
+    while (max >= min) {
+      i <- i + 1
+      n <- predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      norm[[i]] <- n
+      raw[[i]] <- max
+
+      max <- max - step
+    }
+
+    #first path, low precision
+    normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10, descend = TRUE)
+    rows <- nrow(normTab)
+    lowestRaw <- normTab$raw[[1]]
+    highestRaw <- normTab$raw[[rows]]
+
+    lowestNorm <- normTab$norm[[1]]
+    highestNorm <- normTab$norm[[rows]]
+
+    while (max >= min) {
+      i <- i + 1
+      if(max>lowestRaw){
+        norm[[i]] <- lowestNorm
+      }else if(max<highestRaw){
+        norm[[i]] <- highestNorm
+      }else{
+        # second path with high precision
+        index <- which.min(abs(normTab$raw - min))
+        if(index <= 2){
+          mi <- rows - 2
+          ma <- rows
+        }else if(index >= rows - 2){
+          mi <- lowestNorm
+          ma <- normTab$norm[[3]]
+        }else{
+          mi <- index - 1
+          ma <- index + 1
+        }
+
+        n <- predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
+        norm[[i]] <- n
+      }
+
+      raw[[i]] <- max
       max <- max - step
     }
   }

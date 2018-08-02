@@ -1,7 +1,19 @@
 TODO
 ====
 - in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
+- Check rawTableQuick for usage with descending values
 
+
+
+Version in 0.8.2
+================
+Date: 2018.08.02
+
+Changes:
+-------
+- new internal function: rawTableQuick for speeding up generating norm tables
+  Still has to be checked for working with descending values.
+  Works only, if model assumptions are valid
 
 
 
@@ -13,7 +25,6 @@ Changes:
 -------
 - new function: rawTable allows creating norm tables with assignment of raw -> norm values
   solves inverse function of regression model with brute force
-
 
 
 
