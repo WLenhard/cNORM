@@ -204,7 +204,7 @@ normTable <- function(A,
 #' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
 #' @param step Stepping parameter for the raw values (default 1)
 #' @param precision Precision for the norm value estimation. Lower values indicate
-#' higher precision (default .1)
+#' higher precision (default .01)
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
 #' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @param quick Forces the use of a shotgun method to quickly find the norm values
@@ -224,7 +224,7 @@ rawTable <- function(A,
                      minNorm = 25,
                      maxNorm = 75,
                      step = 1,
-                     precision = .1,
+                     precision = .01,
                      descend = FALSE,
                      quick = TRUE) {
   if (quick) {
