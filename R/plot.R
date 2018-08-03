@@ -14,18 +14,18 @@
 #' plotValues(normData, m, group="group")
 #' @export
 plotValues <- function(data, model, group = "group") {
-
   d <- data
-    d$fitted <- model$fitted.values
-    d$group <- data[[group]]
-    d$group <- base::as.factor(d$group)
-    lattice::xyplot(fitted ~ raw | group, d,
-           main = paste("Actual vs. predicted raw values by ", group),
-           ylab = "Predicted values",
-           xlab = "Actual values",
-           grid = TRUE,
-           auto.key = TRUE,
-           abline = c(0, 1), lwd = 1)
+  d$fitted <- model$fitted.values
+  d$group <- data[[group]]
+  d$group <- base::as.factor(d$group)
+  lattice::xyplot(fitted ~ raw | group, d,
+    main = paste("Actual vs. predicted raw values by ", group),
+    ylab = "Predicted values",
+    xlab = "Actual values",
+    grid = TRUE,
+    auto.key = TRUE,
+    abline = c(0, 1), lwd = 1
+  )
 }
 
 #' Plot norm curves
@@ -71,44 +71,45 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
                            step = 0.1,
                            minRaw = 0,
                            maxRaw = 1000) {
+  valueList <- list()
+  n <- length(normList)
+  i <- 1
 
-    valueList <- list()
-    n <- length(normList)
-    i <- 1
+  norm <- list()
+  raw <- list()
+  age <- list()
 
-    norm <- list()
-    raw <- list()
-    age <- list()
+  while (i <= n) {
+    normCurve <-
+      cNORM::getNormCurve(
+        normList[[i]],
+        model,
+        minAge = minAge,
+        maxAge = maxAge,
+        step = step,
+        minRaw = minRaw,
+        maxRaw = maxRaw
+      )
+    norm <- base::c(norm, normCurve$norm)
+    raw <- base::c(raw, normCurve$raw)
+    age <- base::c(age, normCurve$age)
 
-    while (i <= n) {
-      normCurve <-
-        cNORM::getNormCurve(
-          normList[[i]],
-          model,
-          minAge = minAge,
-          maxAge = maxAge,
-          step = step,
-          minRaw = minRaw,
-          maxRaw = maxRaw
-        )
-      norm <- base::c(norm, normCurve$norm)
-      raw <- base::c(raw, normCurve$raw)
-      age <- base::c(age, normCurve$age)
+    i <- i + 1
+  }
 
-      i <- i + 1
-    }
+  valueList$n <- norm
+  valueList$raw <- raw
+  valueList$age <- age
+  dataFrame <- base::as.data.frame(valueList,
+    row.names = NULL,
+    optional = FALSE,
+    cut.names = FALSE,
+    col.names = names(base::c("n", "raw", "age")),
+    fix.empty.names = TRUE, stringsAsFactors = default.stringsAsFactors()
+  )
 
-    valueList$n <- norm
-    valueList$raw <- raw
-    valueList$age <- age
-    dataFrame <- base::as.data.frame(valueList, row.names = NULL,
-                               optional = FALSE,
-                               cut.names = FALSE,
-                               col.names = names(base::c("n", "raw", "age")),
-        fix.empty.names = TRUE, stringsAsFactors = default.stringsAsFactors())
-
-    age <- norm
-    lattice::xyplot(raw ~ age, data = valueList, grid = TRUE)
+  age <- norm
+  lattice::xyplot(raw ~ age, data = valueList, grid = TRUE)
 }
 
 
@@ -160,96 +161,108 @@ plotPercentiles <- function(data,
                             type = 7) {
 
   # compute norm values from percentile vector
-    if((typeof(scale)=="double"&&length(scale)==2)){
-        T <- stats::qnorm(percentiles, scale[1], scale[2])
-    }else if (scale == "IQ") {
-        T <- stats::qnorm(percentiles, 100, 15)
-    } else if (scale == "z") {
-        T <- stats::qnorm(percentiles)
-    } else if (scale == "T") {
-        T <- stats::qnorm(percentiles, 50, 10)
-    }else{
-      # no transformation
-      T <- percentiles
-    }
+  if ((typeof(scale) == "double" && length(scale) == 2)) {
+    T <- stats::qnorm(percentiles, scale[1], scale[2])
+  } else if (scale == "IQ") {
+    T <- stats::qnorm(percentiles, 100, 15)
+  } else if (scale == "z") {
+    T <- stats::qnorm(percentiles)
+  } else if (scale == "T") {
+    T <- stats::qnorm(percentiles, 50, 10)
+  } else {
+    # no transformation
+    T <- percentiles
+  }
 
-    # generate variable names
-    NAMES <- base::paste("PR", percentiles * 100, sep = "")
-    NAMESP <- base::paste("PredPR", percentiles * 100, sep = "")
+  # generate variable names
+  NAMES <- base::paste("PR", percentiles * 100, sep = "")
+  NAMESP <- base::paste("PredPR", percentiles * 100, sep = "")
 
-    # build function for xyplot and aggregate actual percentiles per group
-    if(typeof(group)=="logical"&&!group){
-      message("The plotPercentiles-function does not work without a grouping variable.")
-    }else{
-      xyFunction <- base::paste(base::paste(NAMES, collapse = " + "),
-                              base::paste(NAMESP, collapse = " + "),
-                        sep = " + ", collapse = " + ")
+  # build function for xyplot and aggregate actual percentiles per group
+  if (typeof(group) == "logical" && !group) {
+    message("The plotPercentiles-function does not work without a grouping variable.")
+  } else {
+    xyFunction <- base::paste(base::paste(NAMES, collapse = " + "),
+      base::paste(NAMESP, collapse = " + "),
+      sep = " + ", collapse = " + "
+    )
     xyFunction <- base::paste(xyFunction, group, sep = " ~ ")
-    percentile.actual <- do.call(data.frame,
-                                 stats::aggregate(data[, raw],
-                                                  list(data[, group]),
-                                                  FUN = function(x) stats::quantile(x,
-                                                  probs = percentiles,
-                                                  type = type)))
+    percentile.actual <- do.call(
+      data.frame,
+      stats::aggregate(data[, raw],
+        list(data[, group]),
+        FUN = function(x) stats::quantile(x,
+            probs = percentiles,
+            type = type
+          )
+      )
+    )
+  }
+  # compute percetile table
+  colnames(percentile.actual) <- base::c(base::c("group"), NAMES)
 
+  # build finer grained grouping variable for prediction
+  gr <- percentile.actual$group
+  leng <- base::length(gr)
+  FIRST <- gr[[1]]
+  LAST <- gr[[leng]]
+  AGEP <- base::seq(FIRST, LAST, length.out = leng * 2 - 1)
+
+  # fitt predicted percentiles
+  percentile.fitted <- base::data.frame(base::matrix(NA,
+    nrow = base::length(AGEP),
+    ncol = base::length(T) + 1
+  ))
+  percentile.fitted[, 1] <- AGEP
+  colnames(percentile.fitted) <- base::c(base::c("group"), NAMESP)
+
+  i <- 1
+  while (i <= base::length(AGEP)) {
+    j <- 1
+
+    while (j <= base::length(T)) {
+      percentile.fitted[i, j + 1] <- cNORM::predictRaw(
+        T[[j]],
+        AGEP[[i]],
+        model$coefficients,
+        minRaw, maxRaw
+      )
+
+      j <- j + 1
     }
-    # compute percetile table
-    colnames(percentile.actual) <- base::c(base::c("group"), NAMES)
+    i <- i + 1
+  }
 
-    # build finer grained grouping variable for prediction
-    gr <- percentile.actual$group
-    leng <- base::length(gr)
-    FIRST <- gr[[1]]
-    LAST <- gr[[leng]]
-    AGEP <- base::seq(FIRST, LAST, length.out = leng * 2 - 1)
+  # merge actual and predicted values und plot them show lines
+  # for predicted values and dots for actual values
+  percentile <- base::merge(percentile.actual, percentile.fitted,
+    by = "group", all.y = TRUE
+  )
 
-    # fitt predicted percentiles
-    percentile.fitted <- base::data.frame(base::matrix(NA,
-                                           nrow = base::length(AGEP),
-                                           ncol = base::length(T) + 1))
-    percentile.fitted[, 1] <- AGEP
-    colnames(percentile.fitted) <- base::c(base::c("group"), NAMESP)
+  END <- 5 / 6
+  COL1 <- grDevices::rainbow(base::length(percentiles), end = END)
+  COL2 <- base::c(grDevices::rainbow(base::length(percentiles), end = END), grDevices::rainbow(base::length(percentiles), end = END))
 
-    i <- 1
-    while (i <= base::length(AGEP)) {
-        j <- 1
-
-        while (j <= base::length(T)) {
-            percentile.fitted[i, j + 1] <- cNORM::predictRaw(T[[j]],
-                                                      AGEP[[i]],
-                                                      model$coefficients,
-                                                      minRaw, maxRaw)
-
-            j <- j + 1
-        }
-        i <- i + 1
+  panelfun <- function(..., type, group.number) {
+    if (group.number > length(T)) {
+      lattice::panel.lines(...)
+    } else {
+      lattice::panel.points(..., type = "p")
     }
+  }
 
-    # merge actual and predicted values und plot them show lines
-    # for predicted values and dots for actual values
-    percentile <- base::merge(percentile.actual, percentile.fitted,
-                        by = "group", all.y = TRUE)
-
-    END <- 5/6
-    COL1 <- grDevices::rainbow(base::length(percentiles), end=END);
-    COL2 <- base::c(grDevices::rainbow(base::length(percentiles), end=END), grDevices::rainbow(base::length(percentiles), end=END))
-
-    panelfun <- function(..., type, group.number) {
-        if (group.number > length(T)) {
-          lattice::panel.lines(...)
-        } else {
-          lattice::panel.points(..., type = "p")
-        }
-    }
-
-    lattice::xyplot(stats::formula(xyFunction), percentile, panel = function(...)
+  lattice::xyplot(stats::formula(xyFunction), percentile,
+    panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
-      main = "Actual and predicted percentile curves",
-      ylab = "Raw value", xlab = "Explanatory Variable",
-      col = COL2, lwd = 2, grid = TRUE,
-      key = list(corner = c(0.99, 0.01),
-                 lines = list(col = COL1, lwd = 2),
-                 text = list(NAMES)))
+    main = "Actual and predicted percentile curves",
+    ylab = "Raw value", xlab = "Explanatory Variable",
+    col = COL2, lwd = 2, grid = TRUE,
+    key = list(
+      corner = c(0.99, 0.01),
+      lines = list(col = COL1, lwd = 2),
+      text = list(NAMES)
+    )
+  )
 }
 
 #' Evaluate information criteria for regression model
@@ -276,44 +289,67 @@ plotPercentiles <- function(data,
 #' @export
 plotSubset <- function(model, bic = FALSE) {
   base::message("Hint: Select the model with the highest BIC or Cp score while simultaneously optimizing R2.")
-  if(!bic){
+  if (!bic) {
     dataFrameTMP <- base::data.frame(model$subsets$adjr2, model$subsets$cp)
-    lattice::xyplot(log(model.subsets.cp) ~ model.subsets.adjr2, data = dataFrameTMP, type = "b",
-           col.line = "lightblue", lwd = 1,
-           grid = TRUE, scales = list(y = list(log = 10)),
-           main = "Information Function",
-           ylab = "log-transformed Mallows's Cp",
-           xlab = "Adjusted R2",
-           key = list(corner = c(0.1,
-            0.1), lines = list(col = c("lightblue", "#9933FF"),
-                               lty = c(1, 2), lwd = 2),
-            text = list(c("model in ascending order",
-            "cutoff value"))), panel = function(x, y, ...) {
-              lattice::panel.abline(v = model$cutoff,
-                         lwd = 2, lty = "longdash",
-                         col = "#9933FF", label = model$cutoff)
-              lattice:: panel.xyplot(x, y, ...)
-        })
-  }else{
+    lattice::xyplot(log(model.subsets.cp) ~ model.subsets.adjr2,
+      data = dataFrameTMP, type = "b",
+      col.line = "lightblue", lwd = 1,
+      grid = TRUE, scales = list(y = list(log = 10)),
+      main = "Information Function",
+      ylab = "log-transformed Mallows's Cp",
+      xlab = "Adjusted R2",
+      key = list(
+        corner = c(
+          0.1,
+          0.1
+        ), lines = list(
+          col = c("lightblue", "#9933FF"),
+          lty = c(1, 2), lwd = 2
+        ),
+        text = list(c(
+          "model in ascending order",
+          "cutoff value"
+        ))
+      ), panel = function(x, y, ...) {
+        lattice::panel.abline(
+          v = model$cutoff,
+          lwd = 2, lty = "longdash",
+          col = "#9933FF", label = model$cutoff
+        )
+        lattice::panel.xyplot(x, y, ...)
+      }
+    )
+  } else {
     dataFrameTMP <- base::data.frame(model$subsets$adjr2, model$subsets$bic)
-    lattice::xyplot(model.subsets.bic ~ model.subsets.adjr2, data = dataFrameTMP, type = "b",
-                    col.line = "lightblue", lwd = 1,
-                    grid = TRUE,
-                    main = "Information Function",
-                    ylab = "BIC",
-                    xlab = "Adjusted R2",
-                    key = list(corner = c(0.1,
-                                          0.1), lines = list(col = c("lightblue", "#9933FF"),
-                                                             lty = c(1, 2), lwd = 2),
-                               text = list(c("model in ascending order",
-                                             "cutoff value"))), panel = function(x, y, ...) {
-                                               lattice::panel.abline(v = model$cutoff,
-                                                                     lwd = 2, lty = "longdash",
-                                                                     col = "#9933FF", label = model$cutoff)
-                                               lattice:: panel.xyplot(x, y, ...)
-                                             })
+    lattice::xyplot(model.subsets.bic ~ model.subsets.adjr2,
+      data = dataFrameTMP, type = "b",
+      col.line = "lightblue", lwd = 1,
+      grid = TRUE,
+      main = "Information Function",
+      ylab = "BIC",
+      xlab = "Adjusted R2",
+      key = list(
+        corner = c(
+          0.1,
+          0.1
+        ), lines = list(
+          col = c("lightblue", "#9933FF"),
+          lty = c(1, 2), lwd = 2
+        ),
+        text = list(c(
+          "model in ascending order",
+          "cutoff value"
+        ))
+      ), panel = function(x, y, ...) {
+        lattice::panel.abline(
+          v = model$cutoff,
+          lwd = 2, lty = "longdash",
+          col = "#9933FF", label = model$cutoff
+        )
+        lattice::panel.xyplot(x, y, ...)
+      }
+    )
   }
-
 }
 
 #' Plot first order derivation of regression model
@@ -354,9 +390,9 @@ plotDerivate <- function(model,
                          maxNorm = 75,
                          stepAge = 0.2,
                          stepNorm = 1,
-                         descend = FALSE){
-  rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm-minNorm)/stepNorm))
-  colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge-minAge)/stepAge))
+                         descend = FALSE) {
+  rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
+  colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
   coeff <- cNORM::derive(model)
   devFrame <- base::data.frame(matrix(NA, nrow = length(rowS), ncol = length(colS)))
   dev2 <- base::data.frame()
@@ -365,50 +401,50 @@ plotDerivate <- function(model,
   rownames(devFrame) <- rowS
 
   i <- 1
-  while(i <= base::ncol(devFrame)){
+  while (i <= base::ncol(devFrame)) {
     j <- 1
-    while(j <= base::nrow(devFrame)){
+    while (j <= base::nrow(devFrame)) {
       devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff, descend)
       colList <- base::c(rowS[[j]], colS[[i]], devFrame[j, i])
       dev2 <- base::rbind(dev2, colList)
       j <- j + 1
     }
     i <- i + 1
-
   }
   colnames(dev2) <- base::c("X", "Y", "Z")
 
   # define range and colors
-  min <- base::min(dev2$Z)-.1
-  max <- base::max(dev2$Z)+.1
-  step <- (max-min)/1000
-  regions <- grDevices::rainbow(1000, end=.8)
-  key <- base::list(at=seq(min,max,by=step))
-  sequence <- base::seq(min, max,by=step)
+  min <- base::min(dev2$Z) - .1
+  max <- base::max(dev2$Z) + .1
+  step <- (max - min) / 1000
+  regions <- grDevices::rainbow(1000, end = .8)
+  key <- base::list(at = seq(min, max, by = step))
+  sequence <- base::seq(min, max, by = step)
 
   if (requireNamespace("latticeExtra", quietly = TRUE)) {
-    p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
-              at=sequence, region=T,
-              colorkey=key,
-              col.regions=regions,
-              panel = latticeExtra::panel.2dsmoother,
-              main = "Slope of the Regression Function\n(1st order derivation)",
-              ylab = "1st order derivate of norm value",
-              xlab = "Age"
-            )
-  }else{
-    p1 <- lattice::levelplot(Z ~ Y*X, data=dev2,
-                    at=sequence, region=T,
-                    colorkey=key,
-                    col.regions=regions,
-                    main = "Slope of the Regression Function\n(1st order derivation)",
-                    ylab = "1st order derivate of norm value",
-                    xlab = "Age"
+    p1 <- lattice::levelplot(Z ~ Y * X,
+      data = dev2,
+      at = sequence, region = T,
+      colorkey = key,
+      col.regions = regions,
+      panel = latticeExtra::panel.2dsmoother,
+      main = "Slope of the Regression Function\n(1st order derivation)",
+      ylab = "1st order derivate of norm value",
+      xlab = "Age"
+    )
+  } else {
+    p1 <- lattice::levelplot(Z ~ Y * X,
+      data = dev2,
+      at = sequence, region = T,
+      colorkey = key,
+      col.regions = regions,
+      main = "Slope of the Regression Function\n(1st order derivation)",
+      ylab = "1st order derivate of norm value",
+      xlab = "Age"
     )
   }
-  p2 <- lattice::contourplot(Z ~ Y*X, data=dev2)
+  p2 <- lattice::contourplot(Z ~ Y * X, data = dev2)
 
   p3 <- p1 + p2
   p3
 }
-

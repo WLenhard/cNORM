@@ -32,5 +32,7 @@ the closest fitting norm value for a raw value is returned.
 \examples{
 normData <- prepareData()
 m <- bestModel(data=normData)
-specificNormValue <- predictNormValue(21, 2.8, m)
+
+# return norm value for raw value 21 for grade 2, month 9
+specificNormValue <- predictNormValue(21, 2.75, m)
 }

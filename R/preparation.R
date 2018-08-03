@@ -34,8 +34,9 @@ NULL
       cNORM.desc = list()
     )
   toset <- !(names(op.cNORM) %in% names(op))
-  if (any(toset))
+  if (any(toset)) {
     options(op.cNORM[toset])
+  }
 
   invisible()
 }
@@ -61,10 +62,10 @@ NULL
 #' @examples
 #' normData <- prepareData()
 #' @export
-prepareData <- function(data=NULL, group = "group") {
-  if(is.null(data)){
+prepareData <- function(data = NULL, group = "group") {
+  if (is.null(data)) {
     normData <- cNORM::elfe
-  }else{
+  } else {
     normData <- data
   }
 
@@ -112,48 +113,52 @@ prepareData <- function(data=NULL, group = "group") {
 #' @export
 rankByGroup <-
   function(data,
-           group = "group",
-           raw = "raw",
-           method = 4,
-           scale = "T",
-           descend = FALSE) {
+             group = "group",
+             raw = "raw",
+             method = 4,
+             scale = "T",
+             descend = FALSE) {
 
     # define Q-Q-plot alorithm, use rankit as standard
     # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
     # 6 = Filliben (1975), 7 = Yu & Huang (2001)
-    numerator <- c(-3.75, -1/3, 0, -0.5, -1/3, -0.3175, -0.326)
-    denominator <- c(0.25, 1/3, 1, 0, 0.4, 0.365, 0.348)
+    numerator <- c(-3.75, -1 / 3, 0, -0.5, -1 / 3, -0.3175, -0.326)
+    denominator <- c(0.25, 1 / 3, 1, 0, 0.4, 0.365, 0.348)
 
-    if(method < 1 || method>length(numerator)){
+    if (method < 1 || method > length(numerator)) {
       message("Method parameter out of range, setting to RankIt")
     }
 
     d <- data
-    if(typeof(group)=="logical"&&!group){
-     if(descend){
-        d$percentile <- (rank(-1*(d[, raw])) + numerator[method])/(length(d[, raw])+denominator[method])
-      }else{
-        d$percentile <- (rank(d[, raw]) + numerator[method])/(length(d[, raw])+denominator[method])
+    if (typeof(group) == "logical" && !group) {
+      if (descend) {
+        d$percentile <- (rank(-1 * (d[, raw])) + numerator[method]) / (length(d[, raw]) + denominator[method])
+      } else {
+        d$percentile <- (rank(d[, raw]) + numerator[method]) / (length(d[, raw]) + denominator[method])
       }
-    }else{
-    if(descend){
-        d$percentile <- ave(d[, raw], d[, group], FUN=function(x) {(rank(-x) + numerator[method])/(length(x)+denominator[method])})
-     }else {
-       d$percentile <- ave(d[, raw], d[, group], FUN=function(x) {(rank(x) + numerator[method])/(length(x)+denominator[method])})
+    } else {
+      if (descend) {
+        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
+          (rank(-x) + numerator[method]) / (length(x) + denominator[method])
+        })
+      } else {
+        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
+          (rank(x) + numerator[method]) / (length(x) + denominator[method])
+        })
+      }
     }
-  }
 
 
 
-    if((typeof(scale)=="double"&&length(scale)==2)){
+    if ((typeof(scale) == "double" && length(scale) == 2)) {
       d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
-    }else if (scale == "IQ") {
+    } else if (scale == "IQ") {
       d$normValue <- stats::qnorm(d$percentile, 100, 15)
     } else if (scale == "z") {
       d$normValue <- stats::qnorm(d$percentile, 0, 1)
     } else if (scale == "T") {
       d$normValue <- stats::qnorm(d$percentile, 50, 10)
-    }else if(scale == "percentile"){
+    } else if (scale == "percentile") {
       d$normValue <- d$percentile
     }
 
@@ -189,9 +194,9 @@ rankByGroup <-
 #' @export
 computePowers <-
   function(data,
-           k = 4,
-           normVariable = "normValue",
-           explanatoryVariable = "group") {
+             k = 4,
+             normVariable = "normValue",
+             explanatoryVariable = "group") {
     if ((k < 1) | (k > 6)) {
       base::message("Parameter k out of range, setting to 4")
       k <- 6
@@ -201,7 +206,7 @@ computePowers <-
     d <- data
     L1 <- base::as.numeric(d[[normVariable]])
     A1 <- base::as.numeric(d[[explanatoryVariable]])
-    L1A1 <- L1*A1
+    L1A1 <- L1 * A1
 
     d$L1 <- L1
     d$A1 <- A1

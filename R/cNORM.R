@@ -39,7 +39,8 @@
 #' for the modeling. Use \code{vignette(cNORM-Demo)} for a comprehensive
 #' explanation for conducting  the modeling.
 #'
-#' @references Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
+#' @references Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution
+#' to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
 #' @author Wolfgang Lenhard & Alexandra Lenhard
 #' @docType package
 #' @name cNORM

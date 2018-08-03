@@ -18,26 +18,41 @@
 #' m <- bestModel(data = normData)
 #' getNormCurve(35, m)
 #' @export
-getNormCurve <- function(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
-                         minRaw = 0, maxRaw = 1000) {
-    raw <- base::vector("list", (maxAge - minAge)/step)
-    age <- base::vector("list", (maxAge - minAge)/step)
-    normList <- base::vector("list", (maxAge - minAge)/step)
+getNormCurve <-
+  function(normValue,
+             model,
+             minAge = 2,
+             maxAge = 5,
+             step = 0.1,
+             minRaw = 0,
+             maxRaw = 1000) {
+    raw <- base::vector("list", (maxAge - minAge) / step)
+    age <- base::vector("list", (maxAge - minAge) / step)
+    normList <- base::vector("list", (maxAge - minAge) / step)
 
     i <- 1
     while (minAge <= maxAge) {
-        r <- cNORM::predictRaw(normValue, minAge, model$coefficients, minRaw, maxRaw)
+      r <-
+        cNORM::predictRaw(normValue, minAge, model$coefficients, minRaw, maxRaw)
 
-        raw[[i]] <- r
-        age[[i]] <- minAge
-        normList[[i]] <- base::paste(normValue, "T")
-        minAge <- minAge + step
-        i <- i + 1
-
+      raw[[i]] <- r
+      age[[i]] <- minAge
+      normList[[i]] <- base::paste(normValue, "T")
+      minAge <- minAge + step
+      i <- i + 1
     }
-    curve <- do.call(base::rbind, base::Map(data.frame, norm = normList, age = age, raw = raw))
+    curve <-
+      do.call(
+        base::rbind,
+        base::Map(
+          data.frame,
+          norm = normList,
+          age = age,
+          raw = raw
+        )
+      )
     return(curve)
-}
+  }
 
 #' Predict single raw value
 #'
@@ -59,56 +74,61 @@ getNormCurve <- function(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
 #' m <- bestModel(data = normData)
 #' predictRaw(35, 3.5, m$coefficients)
 #' @export
-predictRaw <- function(normValue, age, coefficients, min = 0, max = 1000) {
+predictRaw <-
+  function(normValue,
+             age,
+             coefficients,
+             min = 0,
+             max = 1000) {
     # first intercept
     coef <- coefficients
     predict <- 0
 
     i <- 1
     while (i <= base::length(coef)) {
-        nam <- base::strsplit(names(coef[i]), "")
-        p <- coef[[i]][1]
+      nam <- base::strsplit(names(coef[i]), "")
+      p <- coef[[i]][1]
 
-        # first variable, either L or A
-        if(base::length(nam[[1]])<2|base::length(nam[[1]])>4){
-          # nothing to do
-        } else if (nam[[1]][1] == "L") {
-            j <- 1
-            while (j <= nam[[1]][2]) {
-                p <- p * normValue
-                j <- j + 1
-            }
-        } else if (nam[[1]][1] == "A") {
-            j <- 1
-            while (j <= nam[[1]][2]) {
-                p <- p * age
-                j <- j + 1
-            }
+      # first variable, either L or A
+      if (base::length(nam[[1]]) < 2 | base::length(nam[[1]]) > 4) {
+        # nothing to do
+      } else if (nam[[1]][1] == "L") {
+        j <- 1
+        while (j <= nam[[1]][2]) {
+          p <- p * normValue
+          j <- j + 1
         }
-
-        # in case, second factor is present
-        if (base::length(nam[[1]]) == 4) {
-            j <- 1
-            while (j <= nam[[1]][4]) {
-                p <- p * age
-                j <- j + 1
-            }
+      } else if (nam[[1]][1] == "A") {
+        j <- 1
+        while (j <= nam[[1]][2]) {
+          p <- p * age
+          j <- j + 1
         }
+      }
 
-        # add up
-        predict <- predict + p
-        i <- i + 1
+      # in case, second factor is present
+      if (base::length(nam[[1]]) == 4) {
+        j <- 1
+        while (j <= nam[[1]][4]) {
+          p <- p * age
+          j <- j + 1
+        }
+      }
+
+      # add up
+      predict <- predict + p
+      i <- i + 1
     }
 
     # check bounds
     if (predict < min) {
-        predict <- min
+      predict <- min
     } else if (predict > max) {
-        predict <- max
+      predict <- max
     }
 
     return(predict)
-}
+  }
 
 #' Create a norm table based on model for specific age
 #'
@@ -138,33 +158,34 @@ normTable <- function(A,
                       max = 75,
                       step = 0.1,
                       descend = FALSE) {
-    norm <- base::vector("list", (max - min)/step)
-    raw <- base::vector("list", (max - min)/step)
-    i <- 1
-    if(!descend){
-      while (min <= max) {
-        i <- i + 1
-        r <- cNORM::predictRaw(min, A, model$coefficients)
+  norm <- base::vector("list", (max - min) / step)
+  raw <- base::vector("list", (max - min) / step)
+  i <- 1
+  if (!descend) {
+    while (min <= max) {
+      i <- i + 1
+      r <- cNORM::predictRaw(min, A, model$coefficients)
 
-        norm[[i]] <- min
-        raw[[i]] <- r
+      norm[[i]] <- min
+      raw[[i]] <- r
 
-        min <- min + step
-      }
-    }else{
-      while (max >= min) {
-        i <- i + 1
-        r <- cNORM::predictRaw(max, A, model$coefficients)
-
-        norm[[i]] <- max
-        raw[[i]] <- r
-
-        max <- max - step
-      }
+      min <- min + step
     }
+  } else {
+    while (max >= min) {
+      i <- i + 1
+      r <- cNORM::predictRaw(max, A, model$coefficients)
 
-    normTable <- do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
-    return(normTable)
+      norm[[i]] <- max
+      raw[[i]] <- r
+
+      max <- max - step
+    }
+  }
+
+  normTable <-
+    do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
+  return(normTable)
 }
 
 #' Create a table with norms assigned to raw values for a specific age based on the regression model
@@ -197,35 +218,37 @@ normTable <- function(A,
 #' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1)
 #' @export
 rawTable <- function(A,
-                      model,
-                      min,
-                      max,
-                      minNorm = 25,
-                      maxNorm = 75,
-                      step = 1,
-                      precision = .1,
-                      descend = FALSE,
-                      quick = TRUE) {
-  if(quick){
-    return(rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend))
-    stop()
+                     model,
+                     min,
+                     max,
+                     minNorm = 25,
+                     maxNorm = 75,
+                     step = 1,
+                     precision = .1,
+                     descend = FALSE,
+                     quick = TRUE) {
+  if (quick) {
+    tab <- rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend)
+    return(tab)
   }
-  norm <- base::vector("list", (max - min)/step)
-  raw <- base::vector("list", (max - min)/step)
+  norm <- base::vector("list", (max - min) / step)
+  raw <- base::vector("list", (max - min) / step)
   i <- 1
-  if(!descend){
+  if (!descend) {
     while (min <= max) {
       i <- i + 1
-      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <-
+        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- min
 
       min <- min + step
     }
-  }else{
+  } else {
     while (max >= min) {
       i <- i + 1
-      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <-
+        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- max
 
@@ -233,7 +256,8 @@ rawTable <- function(A,
     }
   }
 
-  table <- base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  table <-
+    base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
   return(table)
 }
 
@@ -261,21 +285,21 @@ rawTable <- function(A,
 #' m <- bestModel(data=normData)
 #' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1, quick = TRUE)
 rawTableQuick <- function(A,
-                     model,
-                     min,
-                     max,
-                     minNorm = 25,
-                     maxNorm = 75,
-                     step = 1,
-                     precision = .1,
-                     descend = FALSE) {
-
-  norm <- base::vector("list", (max - min)/step)
-  raw <- base::vector("list", (max - min)/step)
+                          model,
+                          min,
+                          max,
+                          minNorm = 25,
+                          maxNorm = 75,
+                          step = 1,
+                          precision = .1,
+                          descend = FALSE) {
+  norm <- base::vector("list", (max - min) / step)
+  raw <- base::vector("list", (max - min) / step)
   i <- 0
-  if(!descend){
-    #first path, low precision
-    normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10)
+  if (!descend) {
+    # first path, low precision
+    normTab <-
+      cNORM::normTable(A, model, minNorm, maxNorm, precision * 10)
     rows <- base::nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
@@ -285,43 +309,46 @@ rawTableQuick <- function(A,
 
     while (min <= max) {
       i <- i + 1
-      if(min<lowestRaw){
+      if (min < lowestRaw) {
         norm[[i]] <- lowestNorm
-      }else if(min>highestRaw){
+      } else if (min > highestRaw) {
         norm[[i]] <- highestNorm
-      }else{
+      } else {
         # second path with high precision
         index <- base::which.min(base::abs(normTab$raw - min))
-        if(index <= 2){
+        if (index <= 2) {
           mi <- lowestNorm
           ma <- normTab$norm[[3]]
-        }else if(index >= rows - 2){
+        } else if (index >= rows - 2) {
           mi <- rows - 2
           ma <- rows
-        }else{
+        } else {
           mi <- index - 1
           ma <- index + 1
         }
 
-        n <- cNORM::predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
+        n <-
+          cNORM::predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
         norm[[i]] <- n
       }
 
       raw[[i]] <- min
       min <- min + step
     }
-  }else{
+  } else {
     while (max >= min) {
       i <- i + 1
-      n <- cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <-
+        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- max
 
       max <- max - step
     }
 
-    #first path, low precision
-    normTab <- cNORM::normTable(A, model, minNorm, maxNorm, precision*10, descend = TRUE)
+    # first step, low precision
+    normTab <-
+      cNORM::normTable(A, model, minNorm, maxNorm, precision * 10, descend = TRUE)
     rows <- base::nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
@@ -331,25 +358,26 @@ rawTableQuick <- function(A,
 
     while (max >= min) {
       i <- i + 1
-      if(max>lowestRaw){
+      if (max > lowestRaw) {
         norm[[i]] <- lowestNorm
-      }else if(max<highestRaw){
+      } else if (max < highestRaw) {
         norm[[i]] <- highestNorm
-      }else{
-        # second path with high precision
+      } else {
+        # second step with high precision
         index <- base::which.min(base::abs(normTab$raw - min))
-        if(index <= 2){
+        if (index <= 2) {
           mi <- rows - 2
           ma <- rows
-        }else if(index >= rows - 2){
+        } else if (index >= rows - 2) {
           mi <- lowestNorm
           ma <- normTab$norm[[3]]
-        }else{
+        } else {
           mi <- index - 1
           ma <- index + 1
         }
 
-        n <- cNORM::predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
+        n <-
+          cNORM::predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
         norm[[i]] <- n
       }
 
@@ -358,7 +386,8 @@ rawTableQuick <- function(A,
     }
   }
 
-  table <- base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  table <-
+    base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
   return(table)
 }
 
@@ -379,23 +408,29 @@ rawTableQuick <- function(A,
 #' m <- bestModel(data=normData)
 #' d <- derivationTable(6, m, step=0.5)
 #' @export
-derivationTable <- function(A, model, min = 25, max = 75, step = 0.1) {
-  norm <- base::vector("list", 1 + (max - min)/step)
-  raw <- base::vector("list", 1 + (max - min)/step)
-  i <- 1
-  coeff <- cNORM::derive(model)
-  while (min <= max) {
-    i <- i + 1
-    r <- cNORM::predictRaw(min, A, coeff, min = -1000, max = 1000)
+derivationTable <-
+  function(A,
+             model,
+             min = 25,
+             max = 75,
+             step = 0.1) {
+    norm <- base::vector("list", 1 + (max - min) / step)
+    raw <- base::vector("list", 1 + (max - min) / step)
+    i <- 1
+    coeff <- cNORM::derive(model)
+    while (min <= max) {
+      i <- i + 1
+      r <- cNORM::predictRaw(min, A, coeff, min = -1000, max = 1000)
 
-    norm[[i]] <- min
-    raw[[i]] <- r
+      norm[[i]] <- min
+      raw[[i]] <- r
 
-    min <- min + step
+      min <- min + step
+    }
+    normTable <-
+      base::do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
+    return(normTable)
   }
-  normTable <- base::do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
-  return(normTable)
-}
 
 #' Retrieve norm value for raw score at a specific age
 #'
@@ -414,10 +449,24 @@ derivationTable <- function(A, model, min = 25, max = 75, step = 0.1) {
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
-#' specificNormValue <- predictNormValue(21, 2.8, m)
+#'
+#' # return norm value for raw value 21 for grade 2, month 9
+#' specificNormValue <- predictNormValue(21, 2.75, m)
 #' @export
-predictNormValue <- function(raw, A, model, min = 25, max = 75, precision = 0.1) {
-    norms <- cNORM::normTable(A, model, min = min, max = max, step = precision)
+predictNormValue <-
+  function(raw,
+             A,
+             model,
+             min = 25,
+             max = 75,
+             precision = 0.1) {
+    norms <-
+      cNORM::normTable(A,
+        model,
+        min = min,
+        max = max,
+        step = precision
+      )
     index <- base::which.min(base::abs(norms$raw - raw))
     return(norms$norm[index])
-}
+  }
