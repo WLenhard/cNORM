@@ -365,7 +365,7 @@ plotSubset <- function(model, bic = FALSE) {
 #' values. In case of vertical and horizontal extrapolation, with increasing
 #' distance to the original data, the risk of assumption violation increases
 #' as well.
-#' ATTENTION: plotDerivate is currently still incompatible with reversed raw
+#' ATTENTION: plotDerivative is currently still incompatible with reversed raw
 #' value scales ('descent' option)
 #' @param model The model from the bestModel function
 #' @param minAge Age to start with checking
@@ -381,9 +381,9 @@ plotSubset <- function(model, bic = FALSE) {
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotDerivate(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+#' plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
-plotDerivate <- function(model,
+plotDerivative <- function(model,
                          minAge = 2,
                          maxAge = 5,
                          minNorm = 25,
@@ -391,6 +391,8 @@ plotDerivate <- function(model,
                          stepAge = 0.2,
                          stepNorm = 1,
                          descend = FALSE) {
+
+  printExtrapolationWarning(model, minAge, maxAge, minNorm, maxNorm)
   rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
   coeff <- cNORM::derive(model)

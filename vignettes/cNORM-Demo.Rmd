@@ -122,7 +122,7 @@ plotPercentiles(normData, model)
 As you can see from the plot, the predicted lines are smooth and capture the original data pretty well, while eliminating random variation from age group to age group. Importantly, the percentile lines do not intersect, which would be a violation of the model assumptions: Within each age group, the mapping of norm values and raw values has to be one to one, or to use a mathematical expression, the function has to be bijective. A violation  however usually only occurs when extrapolating horizontally (= stretching the norm tables to an age that is not included in the norm sample) or vertically (= using extreme norm values with $T < 20$ or $T > 80$). To check the range, where the model assumptions are valid, we can numerically cycle through the norm groups and look out for decreasing raw values with increasing norm value (function `checkConsistency`), or to determine the first order derivation of the regression function $\frac{\delta f(l, a)}{\delta(l)}$ and search for negative slopes. This can be done via 
 
 ```
-plotDerivate(model, minAge=1, maxAge=6, minNorm=20, maxNorm=80)
+plotDerivative(model, minAge=1, maxAge=6, minNorm=20, maxNorm=80)
 ```
 
 Here, both, a horizontal and vertical extrapolation was done in order to intentionally violate the model. The age (in this case, the grade) spans below grade 2 and above grade 5, that is outside the original norm study. While at the lower end of the age, the model assumptions hold true, especially above grade 5 and with T values above 70, the model does not work anymore:

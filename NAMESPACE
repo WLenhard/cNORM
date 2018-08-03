@@ -23,5 +23,5 @@ export(
 	derive,
 	checkConsistency,
 	derivationTable,
-	plotDerivate
+	plotDerivative
 )
