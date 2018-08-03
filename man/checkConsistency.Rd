@@ -59,5 +59,5 @@ normData <- prepareData()
 m <- bestModel(normData)
 modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
                    minNorm=25, maxNorm=75, stepNorm=1)
-plotDerivate(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
+plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 }

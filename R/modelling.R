@@ -221,7 +221,7 @@ bestModel <- function(data,
 #' m <- bestModel(normData)
 #' modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
 #'                    minNorm=25, maxNorm=75, stepNorm=1)
-#' plotDerivate(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
+#' plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 #' @export
 checkConsistency <- function(model,
                              minAge,
@@ -232,6 +232,10 @@ checkConsistency <- function(model,
                              stepNorm = 1,
                              descend = FALSE,
                              warn = FALSE) {
+  if(warn){
+    printExtrapolationWarning(model, minAge, maxAge, minNorm, maxNorm)
+  }
+
   i <- minAge
   j <- minNorm
   minor <- 0

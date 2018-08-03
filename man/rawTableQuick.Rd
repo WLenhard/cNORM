@@ -36,9 +36,3 @@ This function is comparable to 'rawTable', but uses an optimization to reduce co
 resources. It is the default method in the 'rawTable' function. TODO: It still has to be checked for
 descending values.
 }
-\examples{
-# generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
-normData <- prepareData()
-m <- bestModel(data=normData)
-table <- rawTable(3 + 7/12, m, 0, 28, precision=.1, quick = TRUE)
-}

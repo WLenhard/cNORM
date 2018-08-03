@@ -320,11 +320,6 @@ rawTable <- function(A,
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
 #' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @return data.frame with raw values and the predicted norm value
-#' @examples
-#' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
-#' normData <- prepareData()
-#' m <- bestModel(data=normData)
-#' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1, quick = TRUE)
 rawTableQuick <- function(A,
                           model,
                           min,
