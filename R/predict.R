@@ -228,8 +228,24 @@ rawTable <- function(A,
                      descend = FALSE,
                      quick = TRUE) {
   if (quick) {
-    tab <- rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend)
-    return(tab)
+    table <- rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend)
+    # consistency check
+    k <- 1
+    SUCCESS <- TRUE
+    while (k < nrow(table)) {
+      if (table$norm[k] > table$norm[k + 1]) {
+        # inconsistent results -> warning
+        SUCCESS <- FALSE
+      }
+
+      k <- k + 1
+    }
+
+    if (SUCCESS) {
+      return(table)
+    } else {
+      base::message("Inconsistent norms found in fast iteration, reruning analysis with quick set to FALSE ...")
+    }
   }
   norm <- base::vector("list", (max - min) / step)
   raw <- base::vector("list", (max - min) / step)
@@ -258,6 +274,31 @@ rawTable <- function(A,
 
   table <-
     base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+  # checking consistency
+  k <- 1
+  SUCCESS <- TRUE
+  while (k < nrow(table)) {
+    if (table$norm[k] > table$norm[k + 1]) {
+      # inconsistent results -> warning
+      SUCCESS <- FALSE
+      message(paste("Raw ", table$raw[k], " value with inconsistent norm value", sep = ""))
+    }
+
+    k <- k + 1
+  }
+
+  if (!SUCCESS) {
+    if (quick) {
+      base::message("... still getting inconsistent entries.")
+      base::message("Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
+    } else {
+      base::message("The raw table generation yielded inconsistent entries. Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
+    }
+    printExtrapolationWarning(model, A, A, minNorm, maxNorm)
+  } else if (quick) {
+    base::message("... done! Everything worked fine.")
+  }
+
   return(table)
 }
 

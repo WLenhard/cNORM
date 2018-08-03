@@ -165,6 +165,12 @@ bestModel <- function(data,
   bestformula$cutoff <- R2
   bestformula$subsets <- results
   base::print(bestformula$coefficients)
+  # add information for horizontal and vertical extrapolation
+  bestformula$minA1 <- base::min(data$A1)
+  bestformula$maxA1 <- base::max(data$A1)
+  bestformula$minL1 <- base::min(data$L1)
+  bestformula$maxL1 <- base::max(data$L1)
+
 
   base::message("\nRegression formula:")
   base::print(regressionFunction(bestformula))
@@ -381,4 +387,24 @@ derive <- function(model) {
   base::names(coeff) <- name
 
   return(coeff)
+}
+
+#' Internal function to check for horizontal and vertical extrapolation
+#'
+#' Regression model only work in a specific range and extrapolation horizontally (outside
+#' the original range) or vertically (extreme norm values) might lead to inconsistent
+#' results. The function prints messages, indicating extrapolation.
+#' @param model The regression model
+#' @param minA The lower age bound
+#' @param maxA The upper age bound
+#' @param minL The lower norm value bound
+#' @param maxL The upper norm value bound
+printExtrapolationWarning <- function(model, minA, maxA, minL, maxL){
+  if ((minA < model$minA1 || maxA > model$maxA1)&&(minL < model$minL1 || maxL > model$maxL1)) {
+    base::message("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm values outside the original sample.")
+  } else if (minA < model$minA1 || maxA > model$maxA1) {
+    base::message("Horizontal extrapolation detected. Be careful using age groups outside the original sample.")
+  } else if (minL < model$minL1 || maxL > model$maxL1) {
+    base::message("Vertical extrapolation detected. Be careful using extreme norm values exceeding the values of the original sample.")
+  }
 }

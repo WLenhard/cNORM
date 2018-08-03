@@ -5,7 +5,7 @@
 \title{Create a table with norms assigned to raw values for a specific age based on the regression model}
 \usage{
 rawTable(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1,
-  precision = 0.1, descend = FALSE, quick = TRUE)
+  precision = 0.01, descend = FALSE, quick = TRUE)
 }
 \arguments{
 \item{A}{the age}
@@ -23,7 +23,7 @@ rawTable(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1,
 \item{step}{Stepping parameter for the raw values (default 1)}
 
 \item{precision}{Precision for the norm value estimation. Lower values indicate
-higher precision (default .1)}
+higher precision (default .01)}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
 indicate higher performance. Relevent f. e. in case of modelling errors}
@@ -47,5 +47,5 @@ to FALSE for a thorough search.
 # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 normData <- prepareData()
 m <- bestModel(data=normData)
-table <- rawTable(3 + 7/12, m, 0, 28, precision=.1)
+table <- rawTable(3 + 7/12, m, 0, 28, precision=.01)
 }
