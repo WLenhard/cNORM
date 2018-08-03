@@ -27,3 +27,5 @@ NeedsCompilation: no
 Repository: CRAN
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/WLenhard/cNORM
+BugReports: https://github.com/WLenhard/cNORM/issues
