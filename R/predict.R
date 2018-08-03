@@ -215,7 +215,7 @@ normTable <- function(A,
 #' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
-#' table <- rawTable(3 + 7/12, m, 0, 28, precision=.1)
+#' table <- rawTable(3 + 7/12, m, 0, 28, precision=.01)
 #' @export
 rawTable <- function(A,
                      model,
