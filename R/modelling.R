@@ -215,7 +215,6 @@ bestModel <- function(data,
 #' indicate higher performance. Relevent f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
-#' @return List of warning messages
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(normData)
@@ -232,9 +231,6 @@ checkConsistency <- function(model,
                              stepNorm = 1,
                              descend = FALSE,
                              warn = FALSE) {
-  if(warn){
-    printExtrapolationWarning(model, minAge, maxAge, minNorm, maxNorm)
-  }
 
   i <- minAge
   j <- minNorm
@@ -301,15 +297,14 @@ checkConsistency <- function(model,
     base::message("\nNo violations of model consistency found.")
   } else if (major == 0) {
     base::message(base::paste0("\n", minor, " minor violations of model consistency found."))
+    base::message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   } else {
-    base::message(base::paste0("\nAt least ", major, " major and ", minor, " minor violations of
-                   model consistency found."))
-    base::message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the
-            valid value range accordingly.")
+    base::message(base::paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
+    base::message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
     base::message("Be careful with horizontal and vertical extrapolation.")
-  }
+    base::message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
 
-  return(results)
+  }
 }
 
 #' Regression function
@@ -393,22 +388,32 @@ derive <- function(model) {
   return(coeff)
 }
 
-#' Internal function to check for horizontal and vertical extrapolation
+#' Check for horizontal and vertical extrapolation
 #'
 #' Regression model only work in a specific range and extrapolation horizontally (outside
 #' the original range) or vertically (extreme norm values) might lead to inconsistent
-#' results. The function prints messages, indicating extrapolation.
+#' results. The function generates a message, indicating extrapolation and the range of the original data.
 #' @param model The regression model
 #' @param minA The lower age bound
 #' @param maxA The upper age bound
 #' @param minL The lower norm value bound
 #' @param maxL The upper norm value bound
-printExtrapolationWarning <- function(model, minA, maxA, minL, maxL){
-  if ((minA < model$minA1 || maxA > model$maxA1)&&(minL < model$minL1 || maxL > model$maxL1)) {
-    base::message("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm values outside the original sample.")
-  } else if (minA < model$minA1 || maxA > model$maxA1) {
-    base::message("Horizontal extrapolation detected. Be careful using age groups outside the original sample.")
-  } else if (minL < model$minL1 || maxL > model$maxL1) {
-    base::message("Vertical extrapolation detected. Be careful using extreme norm values exceeding the values of the original sample.")
+#' @param digits The precision fr rounding the norm and age data
+#' @return the report
+#' @export
+#' normData <- prepareData()
+#' m <- bestModel(normData)
+#' print(rangeCheck(m))
+rangeCheck <- function(model, minA=NULL, maxA=NULL, minL=NULL, maxL=NULL, digits=3){
+  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm value range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
+  reportOnly <- (is.null(minA)||is.null(maxA)||is.null(minL)||is.null(maxL))
+  if (!reportOnly&&(minA < model$minA1 || maxA > model$maxA1)&&(minL < model$minL1 || maxL > model$maxL1)) {
+    summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm values outside the original sample.", summary, sep="\n")
+  } else if (!reportOnly&&(minA < model$minA1 || maxA > model$maxA1)) {
+    summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep="\n")
+  } else if (!reportOnly&&(minL < model$minL1 || maxL > model$maxL1)) {
+    summary <- paste("Vertical extrapolation detected. Be careful using extreme norm values exceeding the values of the original sample.", summary, sep="\n")
   }
+
+  return(summary)
 }

@@ -1,9 +1,7 @@
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, formula)
-importFrom("stats", "ave")
+importFrom(stats, formula, ave, aggregate)
 importFrom("grDevices", "rainbow")
-importFrom("stats", "aggregate")
 importFrom(latticeExtra, panel.2dsmoother)
 export(
 	prepareData,
@@ -23,5 +21,6 @@ export(
 	derive,
 	checkConsistency,
 	derivationTable,
-	plotDerivative
+	plotDerivative,
+	rangeCheck
 )

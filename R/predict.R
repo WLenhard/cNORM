@@ -294,7 +294,7 @@ rawTable <- function(A,
     } else {
       base::message("The raw table generation yielded inconsistent entries. Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
     }
-    printExtrapolationWarning(model, A, A, minNorm, maxNorm)
+    print(cNORM::rangeCheck(model, A, A, minNorm, maxNorm))
   } else if (quick) {
     base::message("... done! Everything worked fine.")
   }

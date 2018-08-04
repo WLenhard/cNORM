@@ -31,9 +31,6 @@ indicate higher performance. Relevent f. e. in case of modelling errors}
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
 are displayed (default = FALSE)}
 }
-\value{
-List of warning messages
-}
 \description{
 While abilities increase and decline over age, within one age group, the
 norm values always have to show a linear increase with increasing raw

@@ -392,7 +392,7 @@ plotDerivative <- function(model,
                          stepNorm = 1,
                          descend = FALSE) {
 
-  printExtrapolationWarning(model, minAge, maxAge, minNorm, maxNorm)
+  print(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   rowS <- base::c(base::seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- base::c(base::seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
   coeff <- cNORM::derive(model)
