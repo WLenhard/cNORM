@@ -8,13 +8,15 @@
 #' @param scale the standard deviation
 #' @param slant Measure for skewness
 #' @return a skewed normal distribution
-#' @references Azzalini, A. with the collaboration of Capitanio, A. (2014). The Skew-Normal and Related Families. Cambridge University Press, IMS Monographs series.
-skewedNormal <- function(n, location, scale, slant=10){
+#' @references Azzalini, A. with the collaboration of Capitanio, A. (2014).
+#' The Skew-Normal and Related Families. Cambridge University Press,
+#' IMS Monographs series.
+skewedNormal <- function(n, location, scale, slant = 10) {
   u1 <- stats::rnorm(n)
   u2 <- stats::rnorm(n)
-  id <- (u2 > slant*u1)
+  id <- (u2 > slant * u1)
   u1[id] <- (-u1[id])
-  return(as.vector(location+scale*u1))
+  return(as.vector(location + scale * u1))
 }
 
 #' Simulate curve linear and skewed sample data
@@ -37,17 +39,17 @@ skewedNormal <- function(n, location, scale, slant=10){
 #' sample <- simData(100, minAge = 1, maxAge = 4, nGroups = 4)
 #' model <- bestModel(sample)
 #' plotPercentiles(sample, model)
-simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups=4, pow = 1, slant = 0, k = 4){
+simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups = 4, pow = 1, slant = 0, k = 4) {
 
   # first generate linear distribution of groups, mean and sd
-  groups <- base::seq(minAge, maxAge, length=nGroups)
+  groups <- base::seq(minAge, maxAge, length = nGroups)
 
-  min <- (maxRaw-minRaw) / (nGroups + 1)
-  max <- (maxRaw-minRaw) * (nGroups /(nGroups + 1))
-  m <-  base::seq(min, max, length=nGroups)
-  sd <- base::rep(min/2, nGroups)
+  min <- (maxRaw - minRaw) / (nGroups + 1)
+  max <- (maxRaw - minRaw) * (nGroups / (nGroups + 1))
+  m <- base::seq(min, max, length = nGroups)
+  sd <- base::rep(min / 2, nGroups)
 
-  fac <- (m / max) ^ pow
+  fac <- (m / max)^pow
   m <- fac * max
   sd <- sd * fac
 
@@ -56,21 +58,21 @@ simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups=
   base::names(sample) <- c("group", "raw")
 
   # generate sample data, so far drawn from normal distribution
-  while(i <= nGroups){
+  while (i <= nGroups) {
     f <- data.frame(matrix(ncol = 2, nrow = n))
     base::names(f) <- c("group", "raw")
 
     f$group <- base::rep(groups[[i]], n)
-    f$raw <- skewedNormal(n, m[[i]], sd[[i]], slant=slant)
+    f$raw <- skewedNormal(n, m[[i]], sd[[i]], slant = slant)
     sample <- base::rbind(sample, f)
     i <- i + 1
   }
 
   # restrict value range
-  sample$raw[sample$raw<minRaw] <- minRaw
-  sample$raw[sample$raw>maxRaw] <- maxRaw
+  sample$raw[sample$raw < minRaw] <- minRaw
+  sample$raw[sample$raw > maxRaw] <- maxRaw
 
-  #ranking and powers
+  # ranking and powers
   sample <- cNORM::rankByGroup(sample)
   sample <- cNORM::computePowers(sample, k)
 
