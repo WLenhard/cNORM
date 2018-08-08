@@ -401,6 +401,7 @@ derive <- function(model) {
 #' @param digits The precision fr rounding the norm and age data
 #' @return the report
 #' @export
+#' @examples
 #' normData <- prepareData()
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
