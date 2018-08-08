@@ -42,12 +42,12 @@ skewedNormal <- function(n, location, scale, slant = 10) {
 simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups = 4, pow = 1, slant = 0, k = 4) {
 
   # first generate linear distribution of groups, mean and sd
-  groups <- base::seq(minAge, maxAge, length = nGroups)
+  groups <- seq(minAge, maxAge, length = nGroups)
 
   min <- (maxRaw - minRaw) / (nGroups + 1)
   max <- (maxRaw - minRaw) * (nGroups / (nGroups + 1))
-  m <- base::seq(min, max, length = nGroups)
-  sd <- base::rep(min / 2, nGroups)
+  m <- seq(min, max, length = nGroups)
+  sd <- rep(min / 2, nGroups)
 
   fac <- (m / max)^pow
   m <- fac * max
@@ -55,16 +55,16 @@ simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups 
 
   i <- 1
   sample <- data.frame(matrix(ncol = 2, nrow = 0))
-  base::names(sample) <- c("group", "raw")
+  names(sample) <- c("group", "raw")
 
   # generate sample data, so far drawn from normal distribution
   while (i <= nGroups) {
     f <- data.frame(matrix(ncol = 2, nrow = n))
-    base::names(f) <- c("group", "raw")
+    names(f) <- c("group", "raw")
 
-    f$group <- base::rep(groups[[i]], n)
+    f$group <- rep(groups[[i]], n)
     f$raw <- skewedNormal(n, m[[i]], sd[[i]], slant = slant)
-    sample <- base::rbind(sample, f)
+    sample <- rbind(sample, f)
     i <- i + 1
   }
 

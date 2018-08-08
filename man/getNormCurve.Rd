@@ -5,7 +5,7 @@
 \title{Computes the curve for a specific T value}
 \usage{
 getNormCurve(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
-  minRaw = 0, maxRaw = 1000)
+  minRaw = -Inf, maxRaw = Inf)
 }
 \arguments{
 \item{normValue}{The norm value, e. g. T value}

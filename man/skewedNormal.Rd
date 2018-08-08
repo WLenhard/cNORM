@@ -24,5 +24,7 @@ package by Adelchi Azzalini (http://azzalini.stat.unipd.it/SN/). It
 is used for internal testing purposes.
 }
 \references{
-Azzalini, A. with the collaboration of Capitanio, A. (2014). The Skew-Normal and Related Families. Cambridge University Press, IMS Monographs series.
+Azzalini, A. with the collaboration of Capitanio, A. (2014).
+The Skew-Normal and Related Families. Cambridge University Press,
+IMS Monographs series.
 }

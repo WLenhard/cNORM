@@ -24,7 +24,7 @@ simData(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50,
 
 \item{slant}{Measure for skewness within each sample. Use 0 for symetric normal distributions,
 values > 1 for positively skewed data (e. g. 10), values lower than 0 for negatively skewed
-distributions. The according function is based on Azzalini (2014)}
+distributions. The according function is based on the SN package by Azzalini (2014)}
 
 \item{k}{The power paramerer for the computePowers and bestMode function}
 }

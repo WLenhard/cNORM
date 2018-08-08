@@ -55,17 +55,17 @@ bestModel <- function(data,
                       predictors = NULL,
                       terms = 0) {
   if (R2 <= 0 || R2 >= 1) {
-    base::message("R2 parameter out of bounds.")
+    message("R2 parameter out of bounds.")
     stop()
   }
 
   if (terms < 0) {
-    base::message("terms parameter out of bounds.")
+    message("terms parameter out of bounds.")
     stop()
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
-    base::message("k parameter out of bounds.")
+    message("k parameter out of bounds.")
     stop()
   }
 
@@ -94,16 +94,16 @@ bestModel <- function(data,
   }
 
   subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = 2 * k + k * k, force.in = NULL)
-  results <- base::summary(subsets)
+  results <- summary(subsets)
 
   i <- 1
   rAdj <- results$adjr2[i]
 
 
-  if (terms > 0 && terms <= base::length(results$adjr2)) {
+  if (terms > 0 && terms <= length(results$adjr2)) {
     i <- terms
     finished <- TRUE
-    base::message(paste0(
+    message(paste0(
       "\nUser specified solution: ",
       i,
       "\nR-Square Adj. amounts to ",
@@ -112,16 +112,16 @@ bestModel <- function(data,
   } else {
     # check upper and lower bounds and cycle through R2 list
     if (terms > 0) {
-      base::message("\n\nCould not determine best model based of number of terms, using R2 instead.")
+      message("\n\nCould not determine best model based of number of terms, using R2 instead.")
     }
     if (R2 < results$adjr2[i]) {
-      base::message(paste0(
+      message(paste0(
         "\nSpecified R2 falls below the value of the most primitive model. Falling back to model 1.\nR-Square Adj. amounts to ",
         results$adjr2[i]
       ))
-    } else if (results$adjr2[base::length(results$adjr2)] < R2) {
-      i <- base::length(results$adjr2)
-      base::message(paste0(
+    } else if (results$adjr2[length(results$adjr2)] < R2) {
+      i <- length(results$adjr2)
+      message(paste0(
         "\nSpecified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i, ".\nR-Square Adj. amounts to ",
         results$adjr2[i]
       ))
@@ -130,7 +130,7 @@ bestModel <- function(data,
         i <- i + 1
         rAdj <- results$adjr2[i]
       }
-      base::message(paste0(
+      message(paste0(
         "\nFinal solution: ",
         i,
         "\nR-Square Adj. amounts to ",
@@ -140,17 +140,17 @@ bestModel <- function(data,
   }
 
   text <- "raw ~ "
-  names <- base::colnames(results$outmat)
+  names <- colnames(results$outmat)
 
   j <- 1
   nr <- 0
-  while (j <= base::length(names)) {
+  while (j <= length(names)) {
     if (results$outmat[i, j] == "*") {
       text1 <- names[j]
       if (nr == 0) {
-        text <- base::paste(text, text1, sep = "")
+        text <- paste(text, text1, sep = "")
       } else {
-        text <- base::paste(text, text1, sep = " + ")
+        text <- paste(text, text1, sep = " + ")
       }
 
       nr <- nr + 1
@@ -158,23 +158,23 @@ bestModel <- function(data,
     j <- j + 1
   }
 
-  base::message(base::paste0("Final regression model: ", text))
-  base::message("Beta weights are accessible via 'model$coefficients':")
+  message(paste0("Final regression model: ", text))
+  message("Beta weights are accessible via 'model$coefficients':")
   bestformula <- stats::lm(text, data)
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
-  base::print(bestformula$coefficients)
+  print(bestformula$coefficients)
   # add information for horizontal and vertical extrapolation
-  bestformula$minA1 <- base::min(data$A1)
-  bestformula$maxA1 <- base::max(data$A1)
-  bestformula$minL1 <- base::min(data$L1)
-  bestformula$maxL1 <- base::max(data$L1)
+  bestformula$minA1 <- min(data$A1)
+  bestformula$maxA1 <- max(data$A1)
+  bestformula$minL1 <- min(data$L1)
+  bestformula$maxL1 <- max(data$L1)
 
 
-  base::message("\nRegression formula:")
-  base::print(regressionFunction(bestformula))
-  base::message("\nUse 'plotSubset(model)' to inspect model fit")
+  message("\nRegression formula:")
+  print(regressionFunction(bestformula))
+  message("\nUse 'plotSubset(model)' to inspect model fit")
 
   return(bestformula)
 }
@@ -244,45 +244,45 @@ checkConsistency <- function(model,
     )
     k <- 1
     maxRaw <- 0
-    while (k < base::length(norm$raw)) {
+    while (k < length(norm$raw)) {
       if (norm$raw[[k]] > maxRaw) {
         maxRaw <- norm$raw[[k]]
       }
       diff <- maxRaw - norm$raw[[k + 1]]
       if ((!descend && diff >= 1) || (descend && diff <= -1)) {
-        base::message(base::paste0(
+        message(paste0(
           "Considerable violation of consistency at age ",
-          base::round(i, digits = 1), ", raw value ",
-          base::round(norm$raw[[k]],
+          round(i, digits = 1), ", raw value ",
+          round(norm$raw[[k]],
             digits = 1
           )
         ))
-        results <- c(results, base::paste0(
+        results <- c(results, paste0(
           "Considerable violation of consistency at
                                        age ",
-          base::round(i, digits = 1), ",
+          round(i, digits = 1), ",
                                              raw value ",
-          base::round(norm$raw[[k]],
+          round(norm$raw[[k]],
             digits = 1
           )
         ))
         major <- major + 1
-        k <- base::length(norm$raw) + 1
+        k <- length(norm$raw) + 1
       } else if (warn & ((!descend && diff > 0) || (descend && diff < 0))) {
-        base::message(paste0(
+        message(paste0(
           "Neglectible violation of consistency at age ",
-          base::round(i, digits = 1),
+          round(i, digits = 1),
           ", raw value ",
-          base::round(norm$raw[[k]],
+          round(norm$raw[[k]],
             digits = 1
           )
         ))
-        results <- c(results, base::paste0(
+        results <- c(results, paste0(
           results, "Neglectible violation of
                                        consistency at age ",
-          base::round(i, digits = 1), ",
+          round(i, digits = 1), ",
                                              raw value ",
-          base::round(norm$raw[[k]],
+          round(norm$raw[[k]],
             digits = 1
           )
         ))
@@ -294,15 +294,15 @@ checkConsistency <- function(model,
     i <- i + stepAge
   }
   if (minor == 0 & major == 0) {
-    base::message("\nNo violations of model consistency found.")
+    message("\nNo violations of model consistency found.")
   } else if (major == 0) {
-    base::message(base::paste0("\n", minor, " minor violations of model consistency found."))
-    base::message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    message(paste0("\n", minor, " minor violations of model consistency found."))
+    message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   } else {
-    base::message(base::paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
-    base::message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
-    base::message("Be careful with horizontal and vertical extrapolation.")
-    base::message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    message(paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
+    message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
+    message("Be careful with horizontal and vertical extrapolation.")
+    message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
 
   }
 }
@@ -322,12 +322,12 @@ checkConsistency <- function(model,
 #' regressionFunction(model)
 #' @export
 regressionFunction <- function(model, raw = "raw") {
-  formulA <- base::paste(raw, model$coefficients[[1]], sep = " ~ ")
+  formulA <- paste(raw, model$coefficients[[1]], sep = " ~ ")
   i <- 2
-  while (i <= base::length(model$coefficients)) {
-    formulA <- base::paste0(
+  while (i <= length(model$coefficients)) {
+    formulA <- paste0(
       formulA, " + (", model$coefficients[[i]], "*",
-      base::names(model$coefficients[i]), ")"
+      names(model$coefficients[i]), ")"
     )
     i <- i + 1
   }
@@ -349,7 +349,7 @@ regressionFunction <- function(model, raw = "raw") {
 #' derivedCoefficients <- derive(m)
 #' @export
 derive <- function(model) {
-  coeff <- model$coefficients[base::grep("L", base::names(model$coefficients))]
+  coeff <- model$coefficients[grep("L", names(model$coefficients))]
   i <- 1
   name <- names(coeff)
 
@@ -358,24 +358,24 @@ derive <- function(model) {
   # easy, straight forward derivation of betas and variable names
   while (i <= length(coeff)) {
     j <- 1
-    nam <- base::strsplit(name[[i]], "")
+    nam <- strsplit(name[[i]], "")
 
     if (nam[[1]][1] == "L") {
-      coeff[[i]][1] <- coeff[[i]][1] * base::as.numeric(nam[[1]][2])
+      coeff[[i]][1] <- coeff[[i]][1] * as.numeric(nam[[1]][2])
     }
-    nam[[1]][2] <- base::as.numeric(nam[[1]][2]) - 1
+    nam[[1]][2] <- as.numeric(nam[[1]][2]) - 1
 
     newString <- ""
 
-    if (base::nchar(name[[i]]) == 2) {
+    if (nchar(name[[i]]) == 2) {
       if (nam[[1]][2] > 0) {
-        newString <- base::paste0(nam[[1]][1], nam[[1]][2])
+        newString <- paste0(nam[[1]][1], nam[[1]][2])
       }
     } else {
       if (nam[[1]][2] > 0) {
-        newString <- base::paste0(nam[[1]][1], nam[[1]][2], nam[[1]][3], nam[[1]][4])
+        newString <- paste0(nam[[1]][1], nam[[1]][2], nam[[1]][3], nam[[1]][4])
       } else {
-        newString <- base::paste0(nam[[1]][3], nam[[1]][4])
+        newString <- paste0(nam[[1]][3], nam[[1]][4])
       }
     }
     name[[i]] <- newString
@@ -383,7 +383,7 @@ derive <- function(model) {
     i <- i + 1
   }
 
-  base::names(coeff) <- name
+  names(coeff) <- name
 
   return(coeff)
 }

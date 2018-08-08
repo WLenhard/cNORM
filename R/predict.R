@@ -24,11 +24,11 @@ getNormCurve <-
              minAge = 2,
              maxAge = 5,
              step = 0.1,
-             minRaw = 0,
-             maxRaw = 1000) {
-    raw <- base::vector("list", (maxAge - minAge) / step)
-    age <- base::vector("list", (maxAge - minAge) / step)
-    normList <- base::vector("list", (maxAge - minAge) / step)
+             minRaw = -Inf,
+             maxRaw = Inf) {
+    raw <- vector("list", (maxAge - minAge) / step)
+    age <- vector("list", (maxAge - minAge) / step)
+    normList <- vector("list", (maxAge - minAge) / step)
 
     i <- 1
     while (minAge <= maxAge) {
@@ -37,14 +37,14 @@ getNormCurve <-
 
       raw[[i]] <- r
       age[[i]] <- minAge
-      normList[[i]] <- base::paste(normValue, "T")
+      normList[[i]] <- paste(normValue, "T")
       minAge <- minAge + step
       i <- i + 1
     }
     curve <-
       do.call(
-        base::rbind,
-        base::Map(
+        rbind,
+        Map(
           data.frame,
           norm = normList,
           age = age,
@@ -78,19 +78,19 @@ predictRaw <-
   function(normValue,
              age,
              coefficients,
-             min = 0,
-             max = 1000) {
+             min = -Inf,
+             max = Inf) {
     # first intercept
     coef <- coefficients
     predict <- 0
 
     i <- 1
-    while (i <= base::length(coef)) {
-      nam <- base::strsplit(names(coef[i]), "")
+    while (i <= length(coef)) {
+      nam <- strsplit(names(coef[i]), "")
       p <- coef[[i]][1]
 
       # first variable, either L or A
-      if (base::length(nam[[1]]) < 2 | base::length(nam[[1]]) > 4) {
+      if (length(nam[[1]]) < 2 | length(nam[[1]]) > 4) {
         # nothing to do
       } else if (nam[[1]][1] == "L") {
         j <- 1
@@ -107,7 +107,7 @@ predictRaw <-
       }
 
       # in case, second factor is present
-      if (base::length(nam[[1]]) == 4) {
+      if (length(nam[[1]]) == 4) {
         j <- 1
         while (j <= nam[[1]][4]) {
           p <- p * age
@@ -158,8 +158,8 @@ normTable <- function(A,
                       max = 75,
                       step = 0.1,
                       descend = FALSE) {
-  norm <- base::vector("list", (max - min) / step)
-  raw <- base::vector("list", (max - min) / step)
+  norm <- vector("list", (max - min) / step)
+  raw <- vector("list", (max - min) / step)
   i <- 1
   if (!descend) {
     while (min <= max) {
@@ -184,7 +184,7 @@ normTable <- function(A,
   }
 
   normTable <-
-    do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
+    do.call(rbind, Map(data.frame, norm = norm, raw = raw))
   return(normTable)
 }
 
@@ -244,11 +244,11 @@ rawTable <- function(A,
     if (SUCCESS) {
       return(table)
     } else {
-      base::message("Inconsistent norms found in fast iteration, reruning analysis with quick set to FALSE ...")
+      message("Inconsistent norms found in fast iteration, reruning analysis with quick set to FALSE ...")
     }
   }
-  norm <- base::vector("list", (max - min) / step)
-  raw <- base::vector("list", (max - min) / step)
+  norm <- vector("list", (max - min) / step)
+  raw <- vector("list", (max - min) / step)
   i <- 1
   if (!descend) {
     while (min <= max) {
@@ -273,7 +273,7 @@ rawTable <- function(A,
   }
 
   table <-
-    base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+    do.call(rbind, Map(data.frame, raw = raw, norm = norm))
   # checking consistency
   k <- 1
   SUCCESS <- TRUE
@@ -289,14 +289,14 @@ rawTable <- function(A,
 
   if (!SUCCESS) {
     if (quick) {
-      base::message("... still getting inconsistent entries.")
-      base::message("Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
+      message("... still getting inconsistent entries.")
+      message("Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
     } else {
-      base::message("The raw table generation yielded inconsistent entries. Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
+      message("The raw table generation yielded inconsistent entries. Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
     }
     print(cNORM::rangeCheck(model, A, A, minNorm, maxNorm))
   } else if (quick) {
-    base::message("... done! Everything worked fine.")
+    message("... done! Everything worked fine.")
   }
 
   return(table)
@@ -329,14 +329,14 @@ rawTableQuick <- function(A,
                           step = 1,
                           precision = .1,
                           descend = FALSE) {
-  norm <- base::vector("list", (max - min) / step)
-  raw <- base::vector("list", (max - min) / step)
+  norm <- vector("list", (max - min) / step)
+  raw <- vector("list", (max - min) / step)
   i <- 0
   if (!descend) {
     # first path, low precision
     normTab <-
       cNORM::normTable(A, model, minNorm, maxNorm, precision * 10)
-    rows <- base::nrow(normTab)
+    rows <- nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
 
@@ -351,7 +351,7 @@ rawTableQuick <- function(A,
         norm[[i]] <- highestNorm
       } else {
         # second path with high precision
-        index <- base::which.min(base::abs(normTab$raw - min))
+        index <- which.min(abs(normTab$raw - min))
         if (index <= 2) {
           mi <- lowestNorm
           ma <- normTab$norm[[3]]
@@ -385,7 +385,7 @@ rawTableQuick <- function(A,
     # first step, low precision
     normTab <-
       cNORM::normTable(A, model, minNorm, maxNorm, precision * 10, descend = TRUE)
-    rows <- base::nrow(normTab)
+    rows <- nrow(normTab)
     lowestRaw <- normTab$raw[[1]]
     highestRaw <- normTab$raw[[rows]]
 
@@ -400,7 +400,7 @@ rawTableQuick <- function(A,
         norm[[i]] <- highestNorm
       } else {
         # second step with high precision
-        index <- base::which.min(base::abs(normTab$raw - min))
+        index <- which.min(abs(normTab$raw - min))
         if (index <= 2) {
           mi <- rows - 2
           ma <- rows
@@ -423,7 +423,7 @@ rawTableQuick <- function(A,
   }
 
   table <-
-    base::do.call(base::rbind, base::Map(data.frame, raw = raw, norm = norm))
+    do.call(rbind, Map(data.frame, raw = raw, norm = norm))
   return(table)
 }
 
@@ -450,8 +450,8 @@ derivationTable <-
              min = 25,
              max = 75,
              step = 0.1) {
-    norm <- base::vector("list", 1 + (max - min) / step)
-    raw <- base::vector("list", 1 + (max - min) / step)
+    norm <- vector("list", 1 + (max - min) / step)
+    raw <- vector("list", 1 + (max - min) / step)
     i <- 1
     coeff <- cNORM::derive(model)
     while (min <= max) {
@@ -464,7 +464,7 @@ derivationTable <-
       min <- min + step
     }
     normTable <-
-      base::do.call(base::rbind, base::Map(data.frame, norm = norm, raw = raw))
+      do.call(rbind, Map(data.frame, norm = norm, raw = raw))
     return(normTable)
   }
 
@@ -503,6 +503,6 @@ predictNormValue <-
         max = max,
         step = precision
       )
-    index <- base::which.min(base::abs(norms$raw - raw))
+    index <- which.min(abs(norms$raw - raw))
     return(norms$norm[index])
   }

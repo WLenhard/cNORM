@@ -198,14 +198,14 @@ computePowers <-
              normVariable = "normValue",
              explanatoryVariable = "group") {
     if ((k < 1) | (k > 6)) {
-      base::message("Parameter k out of range, setting to 4")
+      message("Parameter k out of range, setting to 4")
       k <- 6
     }
 
 
     d <- data
-    L1 <- base::as.numeric(d[[normVariable]])
-    A1 <- base::as.numeric(d[[explanatoryVariable]])
+    L1 <- as.numeric(d[[normVariable]])
+    A1 <- as.numeric(d[[explanatoryVariable]])
     L1A1 <- L1 * A1
 
     d$L1 <- L1
