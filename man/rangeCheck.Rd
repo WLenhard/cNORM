@@ -28,3 +28,8 @@ Regression model only work in a specific range and extrapolation horizontally (o
 the original range) or vertically (extreme norm values) might lead to inconsistent
 results. The function generates a message, indicating extrapolation and the range of the original data.
 }
+\examples{
+normData <- prepareData()
+m <- bestModel(normData)
+print(rangeCheck(m))
+}

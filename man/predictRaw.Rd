@@ -28,9 +28,19 @@ Age (grouping variable) and the coefficients from a regression model.
 WARNING! This function, and all functions  depending on it, only works with regression
 functions including L, A and interactions. Manually adding predictors to bestModel via the
 predictors parameter is currently incompatible.
+In that case, and if you are primarily interested on fitting a complete data set,
+rather user the predict function of the stats:lm package on the ideal model solution.
+You than have to provide a prepared data frame with the according input variables.
 }
 \examples{
+# Prediction of single values
 normData <- prepareData()
 m <- bestModel(data = normData)
 predictRaw(35, 3.5, m$coefficients)
+
+# Fitting complete data sets
+fitted.values <- predict(m)
+
+# break up contribution of each predictor variable
+fitted.partial <- predict(m, type = "terms")
 }

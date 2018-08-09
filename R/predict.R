@@ -61,6 +61,9 @@ getNormCurve <-
 #' WARNING! This function, and all functions  depending on it, only works with regression
 #' functions including L, A and interactions. Manually adding predictors to bestModel via the
 #' predictors parameter is currently incompatible.
+#' In that case, and if you are primarily interested on fitting a complete data set,
+#' rather user the predict function of the stats:lm package on the ideal model solution.
+#' You than have to provide a prepared data frame with the according input variables.
 #' @param normValue The norm value, e. g. T value
 #' @param age The age value
 #' @param coefficients The coefficients from the regression model
@@ -70,9 +73,16 @@ getNormCurve <-
 #' usually set to the upper bound of the range of values of the test
 #' @return the predicted raw value
 #' @examples
+#' # Prediction of single values
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
 #' predictRaw(35, 3.5, m$coefficients)
+#'
+#' # Fitting complete data sets
+#' fitted.values <- predict(m)
+#'
+#' # break up contribution of each predictor variable
+#' fitted.partial <- predict(m, type = "terms")
 #' @export
 predictRaw <-
   function(normValue,
@@ -133,12 +143,12 @@ predictRaw <-
 #' Create a norm table based on model for specific age
 #'
 #' This function generates a norm table for a specific age based on the regression
-#' model by assigning raw values to norm values. Please specify the range of norm values,
-#' you want to cover. A T value of 25 corresponds to a percentile of .6. As a consequence,
-#' specifying a rang of T = 25 to T = 75 would cover 98.4 % of the population. Please be
-#' careful when extrapolating vertically (at the lower and upper end of the age specific
-#' distribution). Depending on the size of your norm sample, extreme values with
-#' T < 20 or T > 80 might lead to inconsistent results.
+#' model by assigning raw values to norm values. Please specify the
+#' range of norm values, you want to cover. A T value of 25 corresponds to a percentile
+#' of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
+#' the population. Please be careful when extrapolating vertically (at the lower and
+#' upper end of the age specific distribution). Depending on the size of your norm
+#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 #' @param A the age
 #' @param model The regression model
 #' @param min The lower bound of the norm value range
