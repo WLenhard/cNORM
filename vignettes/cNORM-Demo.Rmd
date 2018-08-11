@@ -67,7 +67,7 @@ To change the ranking method, please specify `method=x` (x = method index; consu
 
 ```
 # Percentile generation by a sliding window of the size 'width'
-normData2 <- rankBySlidingWindow(data = elfe, group = "group", raw = "raw", width = 0.5)
+normData2 <- rankBySlidingWindow(data = elfe, age = "group", raw = "raw", width = 0.5)
 ```
 
 The function 'rankBySlidingWindow' would however only make sense, if the age variable is truely contiuous, whereas in the sample data it is already grouped. With the sample dataset, we get exactly the same values that way. The data.frame now has two additional columns: percentile and normValue and usually. In case of the sliding window, there is another column 'n' indicating the number of cases, the norm value was based upon.
