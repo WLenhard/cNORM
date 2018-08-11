@@ -4,16 +4,21 @@
 \alias{normTable}
 \title{Create a norm table based on model for specific age}
 \usage{
-normTable(A, model, min = 25, max = 75, step = 0.1, descend = FALSE)
+normTable(A, model, minNorm = 25, maxNorm = 75, minRaw = -Inf,
+  maxRaw = Inf, step = 0.1, descend = FALSE)
 }
 \arguments{
 \item{A}{the age}
 
 \item{model}{The regression model}
 
-\item{min}{The lower bound of the norm value range}
+\item{minNorm}{The lower bound of the norm value range}
 
-\item{max}{The upper bound of the norm value range}
+\item{maxNorm}{The upper bound of the norm value range}
+
+\item{minRaw}{clipping parameter for the lower bound of raw values}
+
+\item{maxRaw}{clipping parameter for the upper bound of raw values}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
 

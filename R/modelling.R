@@ -135,7 +135,7 @@ bestModel <- function(data,
         "\nFinal solution: ",
         i,
         "\nR-Square Adj. amounts to ",
-        results$adjr2[i]
+        round(results$adjr2[i], digits = 5)
       ))
     }
   }
@@ -174,7 +174,7 @@ bestModel <- function(data,
 
 
   message("\nRegression formula:")
-  print(regressionFunction(bestformula))
+  print(regressionFunction(bestformula, digits=8))
   message("\nUse 'plotSubset(model)' to inspect model fit")
 
   return(bestformula)
@@ -317,6 +317,7 @@ checkConsistency <- function(model,
 #' It can be used to predict the raw values based on age and location.
 #' @param model The regression model from the bestModel function
 #' @param raw The name of the raw value variable (default 'raw')
+#' @param digits Number of digits for formatting the coefficients
 #' @return The regression formula as a string
 #'
 #' @examples
@@ -324,17 +325,29 @@ checkConsistency <- function(model,
 #' model <- bestModel(normData)
 #' regressionFunction(model)
 #' @export
-regressionFunction <- function(model, raw = "raw") {
-  formulA <- paste(raw, model$coefficients[[1]], sep = " ~ ")
+regressionFunction <- function(model, raw = "raw", digits=NULL) {
+
+
   i <- 2
-  while (i <= length(model$coefficients)) {
+  if(is.null(digits)){
+    formulA <- paste(raw, model$coefficients[[1]], sep = " ~ ")
+    while (i <= length(model$coefficients)) {
     formulA <- paste0(
       formulA, " + (", model$coefficients[[i]], "*",
       names(model$coefficients[i]), ")"
     )
     i <- i + 1
   }
-
+}else{
+  formulA <- paste(raw, format(model$coefficients[[1]], digits = digits), sep = " ~ ")
+  while (i <= length(model$coefficients)) {
+    formulA <- paste0(
+      formulA, " + (", format(model$coefficients[[i]], digits = digits), "*",
+      names(model$coefficients[i]), ")"
+    )
+    i <- i + 1
+  }
+  }
   return(formulA)
 }
 

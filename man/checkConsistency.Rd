@@ -4,8 +4,9 @@
 \alias{checkConsistency}
 \title{Check the consistency of the norm data model}
 \usage{
-checkConsistency(model, minAge, maxAge, minNorm, maxNorm, stepAge = 1,
-  stepNorm = 1, descend = FALSE, warn = FALSE)
+checkConsistency(model, minAge, maxAge, minNorm, maxNorm, minRaw = -Inf,
+  maxRaw = Inf, stepAge = 1, stepNorm = 1, descend = FALSE,
+  warn = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -55,6 +56,6 @@ several reasons, why this might occur:
 normData <- prepareData()
 m <- bestModel(normData)
 modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
-                   minNorm=25, maxNorm=75, stepNorm=1)
+                   minNorm=25, maxNorm=75, minRaw=0, maxRaw= 28, stepNorm=1)
 plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 }

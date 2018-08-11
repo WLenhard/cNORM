@@ -4,12 +4,14 @@
 \alias{regressionFunction}
 \title{Regression function}
 \usage{
-regressionFunction(model, raw = "raw")
+regressionFunction(model, raw = "raw", digits = NULL)
 }
 \arguments{
 \item{model}{The regression model from the bestModel function}
 
 \item{raw}{The name of the raw value variable (default 'raw')}
+
+\item{digits}{Number of digits for formatting the coefficients}
 }
 \value{
 The regression formula as a string

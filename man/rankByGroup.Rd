@@ -4,8 +4,8 @@
 \alias{rankByGroup}
 \title{Determine the norm values of the participants in each subsample}
 \usage{
-rankByGroup(data, group = "group", raw = "raw", method = 4, scale = "T",
-  descend = FALSE)
+rankByGroup(data, group = "group", raw = "raw", method = 4,
+  scale = "T", descend = FALSE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
