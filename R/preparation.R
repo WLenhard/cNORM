@@ -42,7 +42,7 @@ NULL
 }
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to Continuous Norming in R (cNORM). Hello world! cNORM greets you.")
+  packageStartupMessage("Good morning starshine, cNORM says 'Hello!'")
 }
 
 
