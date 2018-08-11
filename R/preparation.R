@@ -78,7 +78,7 @@ prepareData <- function(data = NULL, group = "group") {
 #'
 #' This is the initial step, usually done in all kinds of test norming projects,
 #' after the scale is constructed and the norm sample is established. First,
-#' the data is grouped according to a grouping variable and afterwards, the percentiles
+#' the data is grouped according to a grouping variable and afterwards, the percentile
 #' for each raw value is retrieved. The percentile can be used for the modeling
 #' procedure, but in case, the samples to not deviate too much from normality,
 #' T, IQ or z values can be computed via a normal rank procedure based on the
