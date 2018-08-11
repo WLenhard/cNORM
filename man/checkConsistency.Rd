@@ -19,6 +19,10 @@ checkConsistency(model, minAge, maxAge, minNorm, maxNorm, minRaw = -Inf,
 
 \item{maxNorm}{Upper end of the norm value range}
 
+\item{minRaw}{clipping parameter for the lower bound of raw values}
+
+\item{maxRaw}{clipping parameter for the upper bound of raw values}
+
 \item{stepAge}{Stepping parameter for the age check, usually 1 or 0.1; lower
 values indicate higher precision / closer checks}
 

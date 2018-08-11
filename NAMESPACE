@@ -3,6 +3,7 @@ importFrom(leaps, regsubsets)
 importFrom(stats, formula, ave, aggregate)
 importFrom("grDevices", "rainbow")
 importFrom(latticeExtra, panel.2dsmoother)
+importFrom("utils", "tail")
 export(
 	prepareData,
 	plotValues,

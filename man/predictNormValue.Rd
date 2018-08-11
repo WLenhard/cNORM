@@ -4,7 +4,8 @@
 \alias{predictNormValue}
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
-predictNormValue(raw, A, model, min = 25, max = 75, precision = 0.1)
+predictNormValue(raw, A, model, minNorm = 25, maxNorm = 75, minRaw = 0,
+  maxRaw = Inf, precision = 0.1)
 }
 \arguments{
 \item{raw}{The raw value}
@@ -13,9 +14,13 @@ predictNormValue(raw, A, model, min = 25, max = 75, precision = 0.1)
 
 \item{model}{The regression model}
 
-\item{min}{The lower bound of the norm value range}
+\item{minNorm}{The lower bound of the norm value range}
 
-\item{max}{The upper bound of the norm value range}
+\item{maxNorm}{The upper bound of the norm value range}
+
+\item{minRaw}{clipping parameter for the lower bound of raw values}
+
+\item{maxRaw}{clipping parameter for the upper bound of raw values}
 
 \item{precision}{The precision for the norm value generation with lower values
 indicating a higher precision. In case of T values, precision = 0.1 is sufficient.}
@@ -34,5 +39,5 @@ normData <- prepareData()
 m <- bestModel(data=normData)
 
 # return norm value for raw value 21 for grade 2, month 9
-specificNormValue <- predictNormValue(21, 2.75, m)
+specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
 }

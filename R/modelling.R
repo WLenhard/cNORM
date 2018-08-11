@@ -209,6 +209,8 @@ bestModel <- function(data,
 #' values indicate higher precision / closer checks
 #' @param minNorm Lower end of the norm value range
 #' @param maxNorm Upper end of the norm value range
+#' @param minRaw clipping parameter for the lower bound of raw values
+#' @param maxRaw clipping parameter for the upper bound of raw values
 #' @param stepNorm Stepping parameter for the norm table check within age with lower
 #' values indicating a higher precision. The choice depends of the norm scale
 #' used. With T values a stepping parameter of 1 is suitable

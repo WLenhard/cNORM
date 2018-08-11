@@ -491,8 +491,10 @@ derivationTable <-
 #' @param raw The raw value
 #' @param A the age
 #' @param model The regression model
-#' @param min The lower bound of the norm value range
-#' @param max The upper bound of the norm value range
+#' @param minNorm The lower bound of the norm value range
+#' @param maxNorm The upper bound of the norm value range
+#' @param minRaw clipping parameter for the lower bound of raw values
+#' @param maxRaw clipping parameter for the upper bound of raw values
 #' @param precision The precision for the norm value generation with lower values
 #' indicating a higher precision. In case of T values, precision = 0.1 is sufficient.
 #' @return The predicted norm value for a raw value
@@ -501,20 +503,24 @@ derivationTable <-
 #' m <- bestModel(data=normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
-#' specificNormValue <- predictNormValue(21, 2.75, m)
+#' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
 #' @export
 predictNormValue <-
   function(raw,
              A,
              model,
-             min = 25,
-             max = 75,
+             minNorm = 25,
+             maxNorm = 75,
+             minRaw = 0,
+             maxRaw = Inf,
              precision = 0.1) {
     norms <-
       cNORM::normTable(A,
         model,
-        min = min,
-        max = max,
+        minNorm = minNorm,
+        maxNorm = maxNorm,
+        minRaw = minRaw,
+        maxRaw = maxRaw,
         step = precision
       )
     index <- which.min(abs(norms$raw - raw))
