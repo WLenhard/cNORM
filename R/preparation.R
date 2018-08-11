@@ -90,7 +90,7 @@ prepareData <- function(data = NULL, group = "group") {
 #' group to FALSE cancels grouping (data is treated as one goup)
 #' @param raw name of the raw value variable (default 'raw')
 #' @param method Ranking method in case of bindings, please provide an index,
-#' choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 #' 6 = Filliben (1975), 7 = Yu & Huang (2001)
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
@@ -183,7 +183,7 @@ rankByGroup <-
 #' @param raw name of the raw value variable (default 'raw')
 #' @param width the width of the sliding window
 #' @param method Ranking method in case of bindings, please provide an index,
-#' choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 #' 6 = Filliben (1975), 7 = Yu & Huang (2001)
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
