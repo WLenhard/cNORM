@@ -47,6 +47,7 @@
 #' # It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
+#' @seealso plotSubset, plotPercentiles, checkConsistency
 #' @export
 bestModel <- function(data,
                       raw = "raw",
@@ -219,7 +220,7 @@ bestModel <- function(data,
 #' normData <- prepareData()
 #' m <- bestModel(normData)
 #' modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
-#'                    minNorm=25, maxNorm=75, stepNorm=1)
+#'                    minNorm=25, maxNorm=75, minRaw=0, maxRaw= 28, stepNorm=1)
 #' plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 #' @export
 checkConsistency <- function(model,
@@ -227,6 +228,8 @@ checkConsistency <- function(model,
                              maxAge,
                              minNorm,
                              maxNorm,
+                             minRaw = -Inf,
+                             maxRaw = Inf,
                              stepAge = 1,
                              stepNorm = 1,
                              descend = FALSE,
@@ -239,16 +242,16 @@ checkConsistency <- function(model,
   results <- c()
   while (i <= maxAge) {
     norm <- cNORM::normTable(i, model,
-      min = minNorm, max = maxNorm,
+      minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw,
       step = stepNorm, descend = descend
     )
     k <- 1
-    maxRaw <- 0
+    maxR <- 0
     while (k < length(norm$raw)) {
-      if (norm$raw[[k]] > maxRaw) {
-        maxRaw <- norm$raw[[k]]
+      if (norm$raw[[k]] > maxR) {
+        maxR <- norm$raw[[k]]
       }
-      diff <- maxRaw - norm$raw[[k + 1]]
+      diff <- maxR - norm$raw[[k + 1]]
       if ((!descend && diff >= 1) || (descend && diff <= -1)) {
         message(paste0(
           "Considerable violation of consistency at age ",

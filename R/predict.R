@@ -151,8 +151,10 @@ predictRaw <-
 #' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 #' @param A the age
 #' @param model The regression model
-#' @param min The lower bound of the norm value range
-#' @param max The upper bound of the norm value range
+#' @param minNorm The lower bound of the norm value range
+#' @param maxNorm The upper bound of the norm value range
+#' @param minRaw clipping parameter for the lower bound of raw values
+#' @param maxRaw clipping parameter for the upper bound of raw values
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
 #' indicate higher performance. Relevent f. e. in case of modelling errors
@@ -164,32 +166,34 @@ predictRaw <-
 #' @export
 normTable <- function(A,
                       model,
-                      min = 25,
-                      max = 75,
+                      minNorm = 25,
+                      maxNorm = 75,
+                      minRaw = -Inf,
+                      maxRaw = Inf,
                       step = 0.1,
                       descend = FALSE) {
-  norm <- vector("list", (max - min) / step)
-  raw <- vector("list", (max - min) / step)
+  norm <- vector("list", (maxNorm - minNorm) / step)
+  raw <- vector("list", (maxNorm - minNorm) / step)
   i <- 1
   if (!descend) {
-    while (min <= max) {
+    while (minNorm <= maxNorm) {
       i <- i + 1
-      r <- cNORM::predictRaw(min, A, model$coefficients)
+      r <- cNORM::predictRaw(minNorm, A, model$coefficients, min = minRaw, max = maxRaw)
 
-      norm[[i]] <- min
+      norm[[i]] <- minNorm
       raw[[i]] <- r
 
-      min <- min + step
+      minNorm <- minNorm + step
     }
   } else {
-    while (max >= min) {
+    while (maxNorm >= minNorm) {
       i <- i + 1
-      r <- cNORM::predictRaw(max, A, model$coefficients)
+      r <- cNORM::predictRaw(maxNorm, A, model$coefficients)
 
-      norm[[i]] <- max
+      norm[[i]] <- maxNorm
       raw[[i]] <- r
 
-      max <- max - step
+      maxNorm <- maxNorm - step
     }
   }
 

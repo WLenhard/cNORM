@@ -63,3 +63,6 @@ plotPercentiles(normData, model)
 preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 print(regressionFunction(preselectedModel))
 }
+\seealso{
+plotSubset, plotPercentiles, checkConsistency
+}
