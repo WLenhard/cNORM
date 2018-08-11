@@ -65,7 +65,7 @@ Until then, you can access the github development version via
 ```{r example}
 install.packages("devtools")
 devtools::install_github("WLenhard/cNORM")
-# In RStudio, press 'Build -> Load All' or 'CTRL + SHIFT + L' to activate package
+library(cNORM)
 ```
 
 The package is still under development. Please report errors. Suggestions for improvement are always welcome!
