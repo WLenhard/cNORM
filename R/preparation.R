@@ -129,7 +129,7 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-    d <- data
+    d <- as.data.frame(data)
     if (typeof(group) == "logical" && !group) {
       if (descend) {
         d$percentile <- (rank(-1 * (d[, raw])) + numerator[method]) / (length(d[, raw]) + denominator[method])
@@ -164,6 +164,118 @@ rankByGroup <-
 
     return(d)
   }
+
+
+#' Determine the norm values of the participants by sliding window (experimental)
+#'
+#' WARNING! EXPERIMENTAL! This function assigns a percentile and norm value for each
+#' individual by a sliding window approach. It collects all cases within the range of
+#' the width parameter (x +/- width/2) and applies the ranking. In case of bindings,
+#' the medium rank is used. Ranking and scaling parameters are the same as in
+#' rankByGroup. This function can be directly used with a continuous age variable in
+#' order to avoid grouping. When collecting data on the basis of a continuous age
+#' variable, cases located far from the mean age of the group receive distorted percentiles
+#' and this distortion can be avoided this way.
+#'
+#' @param data data.frame with norm sample data
+#' @param age the continuous age variable
+#' group to FALSE cancels grouping (data is treated as one goup)
+#' @param raw name of the raw value variable (default 'raw')
+#' @param width the width of the sliding window
+#' @param method Ranking method in case of bindings, please provide an index,
+#' choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+#' 6 = Filliben (1975), 7 = Yu & Huang (2001)
+#' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
+#' transformation); a double vector with the mean and standard deviation can as well,
+#' be provided f. e. c(10, 3) for Wechsler scale index points
+#' @param descend ranking order (default descent = FALSE): inverses the
+#' ranking order with higher raw values getting lower norm values; relevant
+#' for example when norming error values, where lower values mean higher
+#' performance
+#' @return the dataset with the individual percentiles and norm values
+#'
+#' @examples
+#' # Transformation using a sliding window
+#' normData <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
+#'
+#' # Comparing this to the traditional approach should give us exactly the same
+#' # values, since the sample dataset only has a grouping variable for age
+#' normData2 <- rankByGroup(elfe, group = "group")
+#' mean(normData$normValue - normData2$normValue)
+#' @seealso rankByGroup
+#' @export
+rankBySlidingWindow <- function(data,
+                              age = "age",
+                              raw = "raw",
+                              width,
+                              method = 4,
+                              scale = "T",
+                              descend = FALSE) {
+  # copy data frame
+  d <- as.data.frame(data)
+
+  # define Q-Q-plot alorithm, use rankit as standard
+  # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
+  # 6 = Filliben (1975), 7 = Yu & Huang (2001)
+  numerator <- c(-3.75, -1 / 3, 0, -0.5, -1 / 3, -0.3175, -0.326)
+  denominator <- c(0.25, 1 / 3, 1, 0, 0.4, 0.365, 0.348)
+
+  # add columns to data.frame
+  d$percentile <- NA
+  d$n <- NA
+
+  i <- 1
+  n <- nrow(d)
+  MIN.AGE <- min(d[, age])
+  MAX.AGE <- max(d[, age])
+
+  while (i <= n) {
+    a <- d[i, age]
+    r <- d[i, raw]
+    minAge <- a - (width/2)
+    maxAge <- a + (width/2)
+
+    # limitation at the upper and lower end of the distribution
+    if(minAge < MIN.AGE){
+      minAge <- MIN.AGE
+      maxAge <- MIN.AGE + width
+    }else if(maxAge > MAX.AGE){
+      minAge <- MAX.AGE - width
+      maxAge <- MAX.AGE
+    }
+
+    observations  <- d[which(d[, age]>=minAge & d[, age]<=maxAge), ]
+    nObs <- nrow(observations)
+
+    #print((rank(observations[, raw]) + numerator[method]) / (n + denominator[method]))
+    if(descend){
+      observations$percentile <- (rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+    }else{
+      observations$percentile <- (rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+    }
+    # get percentile for raw value in sliding window subsample
+    d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw]==r)], n=1)
+    d$n[[i]] <- nObs
+    i <- i + 1
+  }
+
+  # norm scale definition
+  if ((typeof(scale) == "double" && length(scale) == 2)) {
+    d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+  } else if (scale == "IQ") {
+    d$normValue <- stats::qnorm(d$percentile, 100, 15)
+  } else if (scale == "z") {
+    d$normValue <- stats::qnorm(d$percentile, 0, 1)
+  } else if (scale == "T") {
+    d$normValue <- stats::qnorm(d$percentile, 50, 10)
+  } else if (scale == "percentile") {
+    d$normValue <- d$percentile
+  }
+
+  return(d)
+}
+
 
 #' Compute powers of the explanatory variable #' a as well as of the person
 #' location l (data preparation)

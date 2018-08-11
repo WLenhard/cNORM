@@ -5,6 +5,18 @@ TODO
 
 
 
+Version in 0.8.6
+================
+Date: 2018.08.11
+
+Changes:
+-------
+- new function: 'rankBySlidingWindow' which can be used for data sets with continuous age variables
+- error corrected for data being loaded from SPSS files
+- improvements in the documentation
+
+
+
 Version in 0.8.5
 ================
 Date: 2018.08.06

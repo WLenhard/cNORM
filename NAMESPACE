@@ -16,6 +16,7 @@ export(
 	rawTable,
 	predictNormValue,
 	rankByGroup,
+	rankBySlidingWindow,
 	computePowers,
 	bestModel,
 	regressionFunction,
