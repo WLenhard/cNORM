@@ -100,6 +100,8 @@ prepareData <- function(data = NULL, group = "group") {
 #' ranking order with higher raw values getting lower norm values; relevant
 #' for example when norming error values, where lower values mean higher
 #' performance
+#' @param descriptives If set to TRUE (default), information in n, mean, median and
+#' standard deviation per group is added to each observation
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -109,7 +111,7 @@ prepareData <- function(data = NULL, group = "group") {
 #' #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
 #' normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 #'
-#'
+#' @seealso rankBySlidingWindow, computePowers
 #' @export
 rankByGroup <-
   function(data,
@@ -117,7 +119,19 @@ rankByGroup <-
              raw = "raw",
              method = 4,
              scale = "T",
-             descend = FALSE) {
+             descend = FALSE,
+             descriptives = TRUE) {
+
+    # check if columns exist
+    if((typeof(group) != "logical") && !(group %in% colnames(data))){
+      message(paste(c("ERROR: Grouping variable ", group, " does not exist in data object."), collapse = ""));
+      stop();
+    }
+
+    if(!(raw %in% colnames(data))){
+      message(paste(c("ERROR: Raw value variable ", data, " does not exist in data object."), collapse = ""));
+      stop();
+    }
 
     # define Q-Q-plot alorithm, use rankit as standard
     # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
@@ -136,6 +150,13 @@ rankByGroup <-
       } else {
         d$percentile <- (rank(d[, raw]) + numerator[method]) / (length(d[, raw]) + denominator[method])
       }
+
+      if (descriptives) {
+        d$n <- length(d[, raw])
+        d$m <- mean(d[, raw])
+        d$md <- md(d[, raw])
+        d$sd <- sd(d[, raw])
+      }
     } else {
       if (descend) {
         d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
@@ -144,6 +165,20 @@ rankByGroup <-
       } else {
         d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
           (rank(x) + numerator[method]) / (length(x) + denominator[method])
+        })
+      }
+      if (descriptives) {
+        d$n <- ave(d[, raw], d[, group], FUN = function(x) {
+          length(x)
+        })
+        d$m <- ave(d[, raw], d[, group], FUN = function(x) {
+          mean(x)
+        })
+        d$md <- ave(d[, raw], d[, group], FUN = function(x) {
+          median(x)
+        })
+        d$sd <- ave(d[, raw], d[, group], FUN = function(x) {
+          sd(x)
         })
       }
     }
@@ -168,15 +203,17 @@ rankByGroup <-
 
 #' Determine the norm values of the participants by sliding window (experimental)
 #'
-#' WARNING! EXPERIMENTAL! This function assigns a percentile and norm value for each
-#' individual by a sliding window approach. It collects all cases within the range of
-#' the width parameter (x +/- width/2) and applies the ranking. In case of bindings,
-#' the medium rank is used. Ranking and scaling parameters are the same as in
-#' rankByGroup. This function can be directly used with a continuous age variable in
-#' order to avoid grouping. When collecting data on the basis of a continuous age
-#' variable, cases located far from the mean age of the group receive distorted percentiles
-#' and this distortion can be avoided this way.
-#'
+#' The function retrieves all individuals in the predefined age range (x +/- width/2)
+#' around each case and ranks that individual based on this individually drawn sample.
+#' This function can be directly used with a continuous age variable in order to avoid grouping.
+#' When collecting data on the basis of a continuous age variable, cases located far
+#' from the mean age of the group receive distorted percentiles when building discrete
+#' groups and generating percentiles with the traditional approach. The distortion increases with
+#' distance from the group mean and this effect can be avoided by the sliding window.
+#' In case of bindings, the function uses the medium rank and applies the algorithms
+#' already described in the 'rankByGroup' function. At the upper and lower end of the
+#' data sample, the sliding stops and the sample is drawn from the interval min + width and
+#' max - width, repsectively
 #' @param data data.frame with norm sample data
 #' @param age the continuous age variable
 #' group to FALSE cancels grouping (data is treated as one goup)
@@ -193,6 +230,8 @@ rankByGroup <-
 #' ranking order with higher raw values getting lower norm values; relevant
 #' for example when norming error values, where lower values mean higher
 #' performance
+#' @param descriptives If set to TRUE (default), information in n, mean, median and
+#' standard deviation per group is added to each observation
 #' @return the dataset with the individual percentiles and norm values
 #'
 #' @examples
@@ -203,15 +242,27 @@ rankByGroup <-
 #' # values, since the sample dataset only has a grouping variable for age
 #' normData2 <- rankByGroup(elfe, group = "group")
 #' mean(normData$normValue - normData2$normValue)
-#' @seealso rankByGroup
+#' @seealso rankByGroup, computePowers
 #' @export
 rankBySlidingWindow <- function(data,
-                              age = "age",
-                              raw = "raw",
-                              width,
-                              method = 4,
-                              scale = "T",
-                              descend = FALSE) {
+                                age = "age",
+                                raw = "raw",
+                                width,
+                                method = 4,
+                                scale = "T",
+                                descend = FALSE) {
+
+  # check if columns exist
+  if(!(age %in% colnames(data))){
+    message(paste(c("ERROR: Age variable ", age, " does not exist in data object."), collapse = ""));
+    stop();
+  }
+
+  if(!(raw %in% colnames(data))){
+    message(paste(c("ERROR: Raw value variable ", data, " does not exist in data object."), collapse = ""));
+    stop();
+  }
+
   # copy data frame
   d <- as.data.frame(data)
 
@@ -223,40 +274,51 @@ rankBySlidingWindow <- function(data,
 
   # add columns to data.frame
   d$percentile <- NA
-  d$n <- NA
-
+  if (descriptives) {
+    d$n <- NA
+    d$m <- NA
+    d$md <- NA
+    d$sd <- NA
+  }
+  # upper and lower bounds
   i <- 1
   n <- nrow(d)
   MIN.AGE <- min(d[, age])
   MAX.AGE <- max(d[, age])
 
+
   while (i <= n) {
     a <- d[i, age]
     r <- d[i, raw]
-    minAge <- a - (width/2)
-    maxAge <- a + (width/2)
+    minAge <- a - (width / 2)
+    maxAge <- a + (width / 2)
 
     # limitation at the upper and lower end of the distribution
-    if(minAge < MIN.AGE){
+    if (minAge < MIN.AGE) {
       minAge <- MIN.AGE
       maxAge <- MIN.AGE + width
-    }else if(maxAge > MAX.AGE){
+    } else if (maxAge > MAX.AGE) {
       minAge <- MAX.AGE - width
       maxAge <- MAX.AGE
     }
 
-    observations  <- d[which(d[, age]>=minAge & d[, age]<=maxAge), ]
+    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
     nObs <- nrow(observations)
 
-    #print((rank(observations[, raw]) + numerator[method]) / (n + denominator[method]))
-    if(descend){
+    # print((rank(observations[, raw]) + numerator[method]) / (n + denominator[method]))
+    if (descend) {
       observations$percentile <- (rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
-    }else{
+    } else {
       observations$percentile <- (rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     }
     # get percentile for raw value in sliding window subsample
-    d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw]==r)], n=1)
-    d$n[[i]] <- nObs
+    d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
+    if (descriptives) {
+      d$n[[i]] <- nObs
+      d$m[[i]] <- mean(observations[, raw])
+      d$md[[i]] <- median(observations[, raw])
+      d$sd[[i]] <- sd(observations[, raw])
+    }
     i <- i + 1
   }
 
@@ -272,6 +334,17 @@ rankBySlidingWindow <- function(data,
   } else if (scale == "percentile") {
     d$normValue <- d$percentile
   }
+
+  # build grouping variable - unnecessary for norming, but necessary for plotting the percentiles
+  # TODO not working currently
+  # TODO add parameters to function to switch on/off
+  # numberOfGroups <- ((MAX.AGE - MIN.AGE) / width) - 1
+  # groups1 <- seq(MIN.AGE + width, MAX.AGE - width, length.out = numberOfGroups)
+  # groups2 <- c(-Inf, groups1)
+  # groups1 <- c(groups1, MAX.AGE)
+  #
+  # grouping <- groups1[findInterval(d[, age], groups2)]
+
 
   return(d)
 }
@@ -309,11 +382,22 @@ computePowers <-
              k = 4,
              normVariable = "normValue",
              explanatoryVariable = "group") {
+
+    # check if columns exist
+    if(!(normVariable %in% colnames(data))){
+      message(paste(c("ERROR: Norm variable ", normVariable, " does not exist in data object."), collapse = ""));
+      stop();
+    }
+
+    if(!(explanatoryVariable %in% colnames(data))){
+      message(paste(c("ERROR: Explanatory variable ", explanatoryVariable, " does not exist in data object."), collapse = ""));
+      stop();
+    }
+
     if ((k < 1) | (k > 6)) {
       message("Parameter k out of range, setting to 4")
       k <- 6
     }
-
 
     d <- data
     L1 <- as.numeric(d[[normVariable]])
