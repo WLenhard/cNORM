@@ -5,7 +5,7 @@
 \title{Determine the norm values of the participants by sliding window (experimental)}
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width, method = 4,
-  scale = "T", descend = FALSE)
+  scale = "T", descend = FALSE, descriptives = TRUE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -18,7 +18,7 @@ group to FALSE cancels grouping (data is treated as one goup)}
 \item{width}{the width of the sliding window}
 
 \item{method}{Ranking method in case of bindings, please provide an index,
-choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 6 = Filliben (1975), 7 = Yu & Huang (2001)}
 
@@ -30,19 +30,25 @@ be provided f. e. c(10, 3) for Wechsler scale index points}
 ranking order with higher raw values getting lower norm values; relevant
 for example when norming error values, where lower values mean higher
 performance}
+
+\item{descriptives}{If set to TRUE (default), information in n, mean, median and
+standard deviation per group is added to each observation}
 }
 \value{
 the dataset with the individual percentiles and norm values
 }
 \description{
-WARNING! EXPERIMENTAL! This function assigns a percentile and norm value for each
-individual by a sliding window approach. It collects all cases within the range of
-the width parameter (x +/- width/2) and applies the ranking. In case of bindings,
-the medium rank is used. Ranking and scaling parameters are the same as in
-rankByGroup. This function can be directly used with a continuous age variable in
-order to avoid grouping. When collecting data on the basis of a continuous age
-variable, cases located far from the mean age of the group receive distorted percentiles
-and this distortion can be avoided this way.
+The function retrieves all individuals in the predefined age range (x +/- width/2)
+around each case and ranks that individual based on this individually drawn sample.
+This function can be directly used with a continuous age variable in order to avoid grouping.
+When collecting data on the basis of a continuous age variable, cases located far
+from the mean age of the group receive distorted percentiles when building discrete
+groups and generating percentiles with the traditional approach. The distortion increases with
+distance from the group mean and this effect can be avoided by the sliding window.
+In case of bindings, the function uses the medium rank and applies the algorithms
+already described in the 'rankByGroup' function. At the upper and lower end of the
+data sample, the sliding stops and the sample is drawn from the interval min + width and
+max - width, repsectively
 }
 \examples{
 # Transformation using a sliding window
@@ -54,5 +60,5 @@ normData2 <- rankByGroup(elfe, group = "group")
 mean(normData$normValue - normData2$normValue)
 }
 \seealso{
-rankByGroup
+rankByGroup, computePowers
 }

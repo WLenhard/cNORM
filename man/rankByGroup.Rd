@@ -5,7 +5,7 @@
 \title{Determine the norm values of the participants in each subsample}
 \usage{
 rankByGroup(data, group = "group", raw = "raw", method = 4, scale = "T",
-  descend = FALSE)
+  descend = FALSE, descriptives = TRUE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -16,7 +16,7 @@ group to FALSE cancels grouping (data is treated as one goup)}
 \item{raw}{name of the raw value variable (default 'raw')}
 
 \item{method}{Ranking method in case of bindings, please provide an index,
-choosin from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
 6 = Filliben (1975), 7 = Yu & Huang (2001)}
 
@@ -28,6 +28,9 @@ be provided f. e. c(10, 3) for Wechsler scale index points}
 ranking order with higher raw values getting lower norm values; relevant
 for example when norming error values, where lower values mean higher
 performance}
+
+\item{descriptives}{If set to TRUE (default), information in n, mean, median and
+standard deviation per group is added to each observation}
 }
 \value{
 the dataset with the percentiles and norm scales per group
@@ -35,7 +38,7 @@ the dataset with the percentiles and norm scales per group
 \description{
 This is the initial step, usually done in all kinds of test norming projects,
 after the scale is constructed and the norm sample is established. First,
-the data is grouped according to a grouping variable and afterwards, the percentiles
+the data is grouped according to a grouping variable and afterwards, the percentile
 for each raw value is retrieved. The percentile can be used for the modeling
 procedure, but in case, the samples to not deviate too much from normality,
 T, IQ or z values can be computed via a normal rank procedure based on the
@@ -49,5 +52,7 @@ normData <- rankByGroup(elfe, group = "group")
 #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
 normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 
-
+}
+\seealso{
+rankBySlidingWindow, computePowers
 }

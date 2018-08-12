@@ -154,7 +154,7 @@ rankByGroup <-
       if (descriptives) {
         d$n <- length(d[, raw])
         d$m <- mean(d[, raw])
-        d$md <- md(d[, raw])
+        d$md <- median(d[, raw])
         d$sd <- sd(d[, raw])
       }
     } else {
@@ -250,7 +250,8 @@ rankBySlidingWindow <- function(data,
                                 width,
                                 method = 4,
                                 scale = "T",
-                                descend = FALSE) {
+                                descend = FALSE,
+                                descriptives = TRUE) {
 
   # check if columns exist
   if(!(age %in% colnames(data))){
