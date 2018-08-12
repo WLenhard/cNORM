@@ -56,18 +56,23 @@ bestModel <- function(data,
                       predictors = NULL,
                       terms = 0) {
   if (R2 <= 0 || R2 >= 1) {
-    message("R2 parameter out of bounds.")
-    stop()
+    stop("R2 parameter out of bounds.")
   }
 
   if (terms < 0) {
-    message("terms parameter out of bounds.")
-    stop()
+    stop("terms parameter out of bounds.")
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
-    message("k parameter out of bounds.")
-    stop()
+    stop("k parameter out of bounds.")
+  }
+
+  if(!(raw %in% colnames(data))){
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+  }
+
+  if ((!is.null(predictors))&&(!(predictors %in% colnames(data)))) {
+    stop("ERROR: Missing variables from predictors variable. Please check variable list.");
   }
 
   if ((k > 4 & is.null(predictors)) || (!is.null(predictors) && length(predictors) > 25)) {

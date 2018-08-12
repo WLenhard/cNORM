@@ -14,6 +14,10 @@
 #' plotValues(normData, m, group="group")
 #' @export
 plotValues <- function(data, model, group = "group") {
+  if(!(group %in% colnames(data))){
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  }
+
   d <- data
   d$fitted <- model$fitted.values
   d$group <- data[[group]]
@@ -159,6 +163,14 @@ plotPercentiles <- function(data,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = "T",
                             type = 7) {
+
+  if(!(raw %in% colnames(data))){
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+  }
+
+  if(!(group %in% colnames(data))){
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  }
 
   # compute norm values from percentile vector
   if ((typeof(scale) == "double" && length(scale) == 2)) {

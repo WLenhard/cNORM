@@ -69,6 +69,10 @@ prepareData <- function(data = NULL, group = "group") {
     normData <- data
   }
 
+  if(!(group %in% colnames(data))){
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  }
+
   normData <- rankByGroup(normData, group = "group")
   normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable = "group")
   return(normData)
@@ -124,13 +128,11 @@ rankByGroup <-
 
     # check if columns exist
     if((typeof(group) != "logical") && !(group %in% colnames(data))){
-      message(paste(c("ERROR: Grouping variable ", group, " does not exist in data object."), collapse = ""));
-      stop();
+      stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
     }
 
     if(!(raw %in% colnames(data))){
-      message(paste(c("ERROR: Raw value variable ", data, " does not exist in data object."), collapse = ""));
-      stop();
+      stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
     }
 
     # define Q-Q-plot alorithm, use rankit as standard
@@ -255,13 +257,11 @@ rankBySlidingWindow <- function(data,
 
   # check if columns exist
   if(!(age %in% colnames(data))){
-    message(paste(c("ERROR: Age variable ", age, " does not exist in data object."), collapse = ""));
-    stop();
+    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
   }
 
   if(!(raw %in% colnames(data))){
-    message(paste(c("ERROR: Raw value variable ", data, " does not exist in data object."), collapse = ""));
-    stop();
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
   }
 
   # copy data frame
@@ -386,13 +386,11 @@ computePowers <-
 
     # check if columns exist
     if(!(normVariable %in% colnames(data))){
-      message(paste(c("ERROR: Norm variable ", normVariable, " does not exist in data object."), collapse = ""));
-      stop();
+      stop(paste(c("ERROR: Norm variable '", normVariable, "' does not exist in data object."), collapse = ""));
     }
 
     if(!(explanatoryVariable %in% colnames(data))){
-      message(paste(c("ERROR: Explanatory variable ", explanatoryVariable, " does not exist in data object."), collapse = ""));
-      stop();
+      stop(paste(c("ERROR: Explanatory variable '", explanatoryVariable, "' does not exist in data object."), collapse = ""));
     }
 
     if ((k < 1) | (k > 6)) {
