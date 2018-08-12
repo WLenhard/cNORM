@@ -69,7 +69,7 @@ prepareData <- function(data = NULL, group = "group") {
     normData <- data
   }
 
-  if(!(group %in% colnames(data))){
+  if(!(group %in% colnames(normData))){
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
   }
 
