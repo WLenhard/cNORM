@@ -4,8 +4,8 @@
 \alias{rankBySlidingWindow}
 \title{Determine the norm values of the participants by sliding window (experimental)}
 \usage{
-rankBySlidingWindow(data, age = "age", raw = "raw", width, method = 4,
-  scale = "T", descend = FALSE, descriptives = TRUE)
+rankBySlidingWindow(data, age = "age", raw = "raw", width,
+  method = 4, scale = "T", descend = FALSE, descriptives = TRUE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}

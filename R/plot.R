@@ -211,10 +211,10 @@ plotPercentiles <- function(data,
     )
   }
   # compute percetile table
-  colnames(percentile.actual) <- c(c("group"), NAMES)
+  colnames(percentile.actual) <- c(c(group), NAMES)
 
   # build finer grained grouping variable for prediction
-  gr <- percentile.actual$group
+  gr <- percentile.actual[,group]
   leng <- length(gr)
   FIRST <- gr[[1]]
   LAST <- gr[[leng]]
@@ -226,7 +226,7 @@ plotPercentiles <- function(data,
     ncol = length(T) + 1
   ))
   percentile.fitted[, 1] <- AGEP
-  colnames(percentile.fitted) <- c(c("group"), NAMESP)
+  colnames(percentile.fitted) <- c(c(group), NAMESP)
 
   i <- 1
   while (i <= length(AGEP)) {
@@ -248,7 +248,7 @@ plotPercentiles <- function(data,
   # merge actual and predicted values und plot them show lines
   # for predicted values and dots for actual values
   percentile <- merge(percentile.actual, percentile.fitted,
-    by = "group", all.y = TRUE
+    by = group, all.y = TRUE
   )
 
   END <- 5 / 6

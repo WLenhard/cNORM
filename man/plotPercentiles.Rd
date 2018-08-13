@@ -5,8 +5,8 @@
 \title{Plot norm curves against actual percentiles}
 \usage{
 plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
-  group = "group", percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  scale = "T", type = 7)
+  group = "group", percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9,
+  0.975), scale = "T", type = 7)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm values}
