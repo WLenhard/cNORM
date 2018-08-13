@@ -503,10 +503,10 @@ derivationTable <-
 #' m <- bestModel(data=normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
+#' # Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw values
+#' # and age to calculate predicted norm values for original data.
 #' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
 #'
-#' # To predict complete list of values, in case of the sample dataset:
-#' # predictNormValue(as.list(normData$raw), as.list(normData$group), m, minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw= 28)
 #' @export
 predictNormValue <-
   function(raw,
