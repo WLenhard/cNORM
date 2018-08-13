@@ -8,9 +8,9 @@ predictNormValue(raw, A, model, minNorm = 25, maxNorm = 75,
   minRaw = 0, maxRaw = Inf, precision = 0.1)
 }
 \arguments{
-\item{raw}{The raw value}
+\item{raw}{The raw value, either single numeric or list of values}
 
-\item{A}{the age}
+\item{A}{the age, either single numeric or list of values}
 
 \item{model}{The regression model}
 
@@ -26,7 +26,7 @@ predictNormValue(raw, A, model, minNorm = 25, maxNorm = 75,
 indicating a higher precision. In case of T values, precision = 0.1 is sufficient.}
 }
 \value{
-The predicted norm value for a raw value
+The predicted norm value for a raw value, either single value or list of results
 }
 \description{
 In real test scenarios, usually the results are available as raw values, for
@@ -40,4 +40,7 @@ m <- bestModel(data=normData)
 
 # return norm value for raw value 21 for grade 2, month 9
 specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
+
+# To predict complete list of values, in case of the sample dataset:
+# predictNormValue(as.list(normData$raw), as.list(normData$group), m, minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw= 28)
 }

@@ -180,11 +180,35 @@ bestModel <- function(data,
 
   message("\nRegression formula:")
   print(regressionFunction(bestformula, digits=8))
-  message("\nUse 'plotSubset(model)' to inspect model fit")
+  message("\nUse 'printSubset(model)' and 'plotSubset(model)' to inspect model fit.")
 
   return(bestformula)
 }
 
+
+#' Convenience method for printing model selection information
+#'
+#' After conducting the model fitting procedure on the data set, the best fitting
+#' model has to be chosen. The print function shows the R2 and other information
+#' on the different best fitting models with increasing number of predictors.
+#' @param model The model from the 'bestModel' function
+#'
+#' @return A table with information criteria
+#' @export
+#'
+#' @examples
+#' model <- bestModel(prepareData())
+#' printSubset(model)
+#'
+printSubset <- function(model){
+  table <-
+    do.call(rbind, Map(data.frame, R2 = model$subsets$rsq,
+                       RSS = model$subsets$rss,
+                       R2adj = model$subsets$adjr2,
+                       Cp = model$subsets$cp,
+                       BIC = model$subsets$bic))
+  return(table)
+}
 
 #' Check the consistency of the norm data model
 #'

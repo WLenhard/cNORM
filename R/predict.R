@@ -488,8 +488,8 @@ derivationTable <-
 #' which norm values have to be looked up. This function conducts this reverse
 #' transformation via a numerical solution: A precise norm table is generated and
 #' the closest fitting norm value for a raw value is returned.
-#' @param raw The raw value
-#' @param A the age
+#' @param raw The raw value, either single numeric or list of values
+#' @param A the age, either single numeric or list of values
 #' @param model The regression model
 #' @param minNorm The lower bound of the norm value range
 #' @param maxNorm The upper bound of the norm value range
@@ -497,13 +497,16 @@ derivationTable <-
 #' @param maxRaw clipping parameter for the upper bound of raw values
 #' @param precision The precision for the norm value generation with lower values
 #' indicating a higher precision. In case of T values, precision = 0.1 is sufficient.
-#' @return The predicted norm value for a raw value
+#' @return The predicted norm value for a raw value, either single value or list of results
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
 #' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
+#'
+#' # To predict complete list of values, in case of the sample dataset:
+#' # predictNormValue(as.list(normData$raw), as.list(normData$group), m, minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw= 28)
 #' @export
 predictNormValue <-
   function(raw,
@@ -514,6 +517,7 @@ predictNormValue <-
              minRaw = 0,
              maxRaw = Inf,
              precision = 0.1) {
+    if(is.numeric(raw)&&is.numeric(A)){
     norms <-
       cNORM::normTable(A,
         model,
@@ -525,4 +529,31 @@ predictNormValue <-
       )
     index <- which.min(abs(norms$raw - raw))
     return(norms$norm[index])
+    } else if(is.vector(raw)&&is.vector(A)){
+      if(length(raw)!=length(A)){
+        stop("'A' and 'raw' need to have the same length.")
+      }
+      message("This might take some time. Processing case ... ")
+      n <- length(raw)
+      values <- rep(NA, n)
+      i <- 1
+      while(i <= n){
+
+        if(i%%10==0){
+          message(i)
+        }
+        values[[i]] <- predictNormValue(raw[[i]],
+                                        A[[i]],
+                                        model,
+                                        minNorm = minNorm,
+                                        maxNorm = maxNorm,
+                                        minRaw = minRaw,
+                                        maxRaw = maxRaw,
+                                        precision = precision )
+        i <- i + 1
+      }
+      return(values)
+    }else {
+      stop("Please check raw and A value.")
+    }
   }

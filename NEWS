@@ -5,9 +5,20 @@ TODO
 
 
 
-Version in 0.8.8
+Version in 0.8.9
 ================
 Date: 2018.08.13
+
+Changes:
+-------
+- Convenience method for selection best model added: 'printSubset'
+- predictNormValue now accepts lists of values as well
+
+
+
+Version in 0.8.8
+================
+Date: 2018.08.12
 
 Changes:
 -------
