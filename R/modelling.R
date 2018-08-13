@@ -145,7 +145,7 @@ bestModel <- function(data,
     }
   }
 
-  text <- "raw ~ "
+  text <- paste0(raw, " ~ ")
   names <- colnames(results$outmat)
 
   j <- 1
@@ -166,7 +166,7 @@ bestModel <- function(data,
 
   message(paste0("Final regression model: ", text))
   message("Beta weights are accessible via 'model$coefficients':")
-  bestformula <- stats::lm(text, data)
+  bestformula <- stats::lm(text, as.data.frame(data))
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
