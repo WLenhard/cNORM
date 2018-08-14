@@ -5,6 +5,17 @@ TODO
 
 
 
+Version in 0.9.0
+================
+Date: 2018.08.14
+
+Changes:
+-------
+- Box Cox power transformation for regression model at specific age: optional parametric modelling
+  for non-paramteric regression model
+
+
+
 Version in 0.8.9
 ================
 Date: 2018.08.13

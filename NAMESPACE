@@ -26,5 +26,6 @@ export(
 	plotDerivative,
 	simData,
 	rangeCheck,
-	printSubset
+	printSubset,
+	boxcox
 )
