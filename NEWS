@@ -14,6 +14,7 @@ Changes:
 - Added predictRawBC and predictNormBC for computing norm and raw values based on the parametric
   box cox power function parameters
 - New contributor: Sebastian Gary, welcome to the team!
+- Missing raw variable definition in plotValues corrected
 
 
 

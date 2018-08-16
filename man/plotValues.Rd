@@ -4,7 +4,7 @@
 \alias{plotValues}
 \title{Plot actual and predicted raw values}
 \usage{
-plotValues(data, model, group = "group")
+plotValues(data, model, group = "group", raw = "raw")
 }
 \arguments{
 \item{data}{The raw data within a data.frame}
@@ -12,6 +12,8 @@ plotValues(data, model, group = "group")
 \item{model}{The regression model}
 
 \item{group}{The grouping variable}
+
+\item{raw}{The raw value variable}
 }
 \description{
 The function plots the raw data against the predicted values from
@@ -23,5 +25,5 @@ regression line.
 # Load example data set, compute model and plot results
 normData <- prepareData()
 m <- bestModel(data = normData)
-plotValues(normData, m, group="group")
+plotValues(normData, m, group="group", raw="raw")
 }

@@ -7,28 +7,34 @@
 #' @param data The raw data within a data.frame
 #' @param model The regression model
 #' @param group The grouping variable
+#' @param raw The raw value variable
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotValues(normData, m, group="group")
+#' plotValues(normData, m, group="group", raw="raw")
 #' @export
-plotValues <- function(data, model, group = "group") {
+plotValues <- function(data, model, group = "group", raw = "raw") {
   if(!(group %in% colnames(data))){
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
   }
+  if(!(raw %in% colnames(data))){
+    stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""));
+  }
+
 
   d <- data
   d$fitted <- model$fitted.values
   d$group <- data[[group]]
   d$group <- as.factor(d$group)
+  d$raw <- data[raw]
   lattice::xyplot(fitted ~ raw | group, d,
-    main = paste("Actual vs. predicted raw values by ", group),
-    ylab = "Predicted values",
-    xlab = "Actual values",
-    grid = TRUE,
-    auto.key = TRUE,
-    abline = c(0, 1), lwd = 1
+                  main = paste("Actual vs. predicted raw values by ", group),
+                  ylab = "Predicted values",
+                  xlab = "Actual values",
+                  grid = TRUE,
+                  auto.key = TRUE,
+                  abline = c(0, 1), lwd = 1
   )
 }
 
