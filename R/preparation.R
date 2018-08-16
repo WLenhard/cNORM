@@ -398,7 +398,7 @@ computePowers <-
       k <- 6
     }
 
-    d <- data
+    d <-as.data.frame(data)
     L1 <- as.numeric(d[[normVariable]])
     A1 <- as.numeric(d[[explanatoryVariable]])
     L1A1 <- L1 * A1

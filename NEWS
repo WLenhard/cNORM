@@ -5,6 +5,18 @@ TODO
 
 
 
+Version in 0.9.1
+================
+Date: 2018.08.16
+
+Changes:
+-------
+- Added predictRawBC and predictNormBC for computing norm and raw values based on the parametric
+  box cox power function parameters
+- New contributor: Sebastian Gary, welcome to the team!
+
+
+
 Version in 0.9.0
 ================
 Date: 2018.08.14

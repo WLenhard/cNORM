@@ -13,8 +13,17 @@
 #' @param m Scale mean of norm scale (default 50)
 #' @param sd Scale sd of norm scale (default 10)
 #'
-#' @return data.frame with percentiles, normvalues, fitted raw values of the regression
-#' model and the fitted values of the box cox curve fitting (indicated by variable names 'BC')
+#' @return a list including the data.frame with percentiles, normvalues, fitted raw values of the regression
+#' model and the fitted values of the box cox curve fitting (indicated by variable names 'BC'), as well as the
+#' parameters for the box cox function (mean, sd, lambda) for the specified the age:
+#' \item{median}{The median of the raw value distribution, estimated by the regression model}
+#' \item{meanBC}{The mean of the box cox function}
+#' \item{sdBC}{The standard deviation of the box cox function}
+#' \item{lambdaBC}{The skewness parameter of the box cox function}
+#' \item{age}{The age for which the power function was modelled}
+#' \item{data}{The data frame including the generated percentiles, the according norm values,
+#' the fitted raw values according to the regression model, the retrieved norm value by the box cox transformation,
+#' the according density and percentile}
 #' @references
 #' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
 #' likelihood. Statistics in medicine, 11(10), 1305-1319.
@@ -27,8 +36,10 @@
 #' # model sample data set
 #' model <- bestModel(prepareData())
 #'
-#' # fitting values of regression model box cox power function at specific age
-#' bcFitted <- boxcox(model, 3)
+#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # the parameters for the box cox power function
+#' bcParameters <- boxcox(model, 3)
+#' @seealso predictNormBC, predictRawBC
 boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 
   # prepare simulated data and predicted values
@@ -102,5 +113,114 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
       densityBC = density,
       percentileBC = percentile
     ))
-  return(table)
+  return(list(median = md, meanBC=mlambda, sdBC=sdlambda, lambdaBC=lambda, age=age, data=table))
+}
+
+
+#' Calculate the raw value for a given percentile based on the paramteric box cox distribution
+#'
+#' In addition of the numeric solution to the regression function on 'predictRaw', this function
+#' can be used retrieving the raw values at a specific age via the parametric box cox power
+#' transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
+#' a percentile.
+#' @param boxcoxParameters The parameters of the box cox power function, calculated via 'boxcox'
+#' @param percentile The percentile (ranging from >0 to <1)
+#'
+#' @return the predicted raw value
+#' @references
+#' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+#' likelihood. Statistics in medicine, 11(10), 1305-1319.
+#' @references
+#' Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical
+#' Society. Series B (Methodological), 211-252.
+#' @export
+#' @seealso boxcox, predictRaw
+#'
+#' @examples
+#' # model sample data set
+#' model <- bestModel(prepareData())
+#'
+#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # the parameters for the box cox power function
+#' bcParameters <- boxcox(model, 3)
+#'
+#' # define percentile and according t value
+#' percentile <- .4
+#' tValue <- stats::qnorm(percentile)*10 + 50
+#'
+#' # predict raw value based on the regression model and via box cox
+#' predictRawBC(bcParameters, percentile)
+#' predictRaw(tValue, 3, model$coefficients)
+predictRawBC <- function(boxcoxParameters, percentile){
+  if(percentile<=0||percentile>=1){
+    stop("Percentile out of range. Use values between 0 and 1.")
+  }
+  # convert percentile to standardized z value
+  z <- stats::qnorm(percentile)
+
+  # compute box cox power function x for z
+  x <- z * boxcoxParameters$sdBC + boxcoxParameters$meanBC
+
+  # compute raw value based on BC function
+  raw <- ((x * boxcoxParameters$lambdaBC + 1)^( 1 / boxcoxParameters$lambdaBC))*boxcoxParameters$median
+
+  return(raw)
+}
+
+
+#' Calculate the norm value for a given raw value based on the paramteric box cox distribution
+#'
+#' In addition of the numeric solution to the regression function on 'predictNormValue', this function
+#' can be used retrieving the norm values at a specific age via the parametric box cox power
+#' transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
+#' a raw value.
+#' @param boxcoxParameters The parameters of the box cox power function, calculated via 'boxcox'
+#' @param raw The raw value (>0)
+#' @param scale type of norm scale, either T, IQ, z or percentile (= no
+#' transformation; default); a double vector with the mean and standard deviation can as well,
+#' be provided f. e. c(10, 3) for Wechsler scale index points
+#' @return the predicted raw value
+#' @references
+#' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+#' likelihood. Statistics in medicine, 11(10), 1305-1319.
+#' @references
+#' Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical
+#' Society. Series B (Methodological), 211-252.
+#' @export
+#' @seealso boxcox, predictNormValue, predictRawBC
+#'
+#' @examples
+#' # model sample data set
+#' model <- bestModel(prepareData())
+#'
+#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # the parameters for the box cox power function
+#' bcParameters <- boxcox(model, 3)
+#'
+#' # predict norm value for raw value 15 at age 3 based on the regression model and via box cox
+#' predictNormBC(bcParameters, 15, scale="T")
+#' predictNormValue(15, 3, model)
+predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
+  if(raw<0){
+    stop("Box Cox cannot handle negative raw values.")
+  }
+
+  # compute box cox power function x for raw value
+  x <- (((raw / boxcoxParameters$median) ^ boxcoxParameters$lambdaBC) - 1) / boxcoxParameters$lambdaBC
+
+  # compute z for x variable
+  z <- (x - boxcoxParameters$meanBC) / boxcoxParameters$sdBC
+
+  if ((typeof(scale) == "double" && length(scale) == 2)) {
+    return(z*scale[2] + scale[1])
+  }else if(scale == "z"){
+    return(z)
+  }else if(scale == "T"){
+    return(z*10 + 50)
+  }else if(scale == "IQ"){
+    return(z*15 + 100)
+  }else{
+    return(stats::pnorm(z))
+  }
+  return(raw)
 }

@@ -1,10 +1,10 @@
 Package: cNORM
 Type: Package
 Title: 'Non-parametric Continuous Norming in R'
-Version: 0.8.9
-Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut]
+Version: 0.9.1
+Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut], Sebastian Gary [ctb]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2018-08-12
+Date: 2018-08-16
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de"), person("Alexandra", "Lenhard", role=c("aut")))
 Description: Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
     (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. Non-parametric
