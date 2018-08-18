@@ -2,7 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating non-parametric regression based continuous norms, as f. e. for psychometric test development, biological and physiological growth curves, and
+The package cNorm provides methods for generating non-parametric regression based continuous norms, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and
 screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016).
 
 ## Approach
@@ -30,7 +30,7 @@ fitting models and in generating the norm tables.
 ```{r example}
 ## basic example code for modeling the sample dataset
 library(cNORM)
-normData <- prepareData()
+normData <- prepareData(elfe)
 model <- bestModel(normData)
 
 # Plot model
