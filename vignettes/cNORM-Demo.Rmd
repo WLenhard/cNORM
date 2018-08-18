@@ -49,8 +49,11 @@ library(cNORM)
 # copy data frame to global environment
 normData <- elfe
 
-# use PPVT 4instead
+# use PPVT4 instead
 normData <- ppvt
+
+# convenient method to already apply the data preparation (to skip ranking and computing powers)
+normData <- prepareData(normData)
 
 # Show the first rows of the data.frame
 head(normData)
