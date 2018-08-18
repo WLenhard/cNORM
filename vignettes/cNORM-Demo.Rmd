@@ -41,13 +41,16 @@ data$group <- c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
 ```
 
 
-Of course, you can use a dataset that already has a variable on norm values per group. For demonstration purposes, cNORM already includes a clean example data set, drawn from a test norming project (ELFE 1-6 Sentence Completion task, Lenhard & Schneider, 2006), which we will use in the following. To load it into your global environment, please type: 
+Of course, you can use a dataset that already has a variable on norm values per group. For demonstration purposes, cNORM already includes a clean example data set, drawn from a test norming project (ELFE 1-6 Sentence Completion task, Lenhard & Schneider, 2006), which we will use in the following. There is another large sample from the PPVT4 norming project (German adaption) that is based on chronological age and includes demografic data like sex, school form, migration background and language spoken at home as well. Please type '?elfe' and '?ppvt' to display information on both data sets. To load the ELFE 1-6 or PPVT4 data into your global environment, please type: 
 ```
 # load package
 library(cNORM)
 
 # copy data frame to global environment
 normData <- elfe
+
+# use PPVT 4instead
+normData <- ppvt
 
 # Show the first rows of the data.frame
 head(normData)
