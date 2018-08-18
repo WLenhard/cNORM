@@ -11,7 +11,7 @@ rankBySlidingWindow(data, age = "age", raw = "raw", width,
 \item{data}{data.frame with norm sample data}
 
 \item{age}{the continuous age variable
-group to FALSE cancels grouping (data is treated as one goup)}
+group to FALSE cancels grouping (data is treated as one group)}
 
 \item{raw}{name of the raw value variable (default 'raw')}
 
@@ -48,7 +48,7 @@ distance from the group mean and this effect can be avoided by the sliding windo
 In case of bindings, the function uses the medium rank and applies the algorithms
 already described in the 'rankByGroup' function. At the upper and lower end of the
 data sample, the sliding stops and the sample is drawn from the interval min + width and
-max - width, repsectively
+max - width, respectively.
 }
 \examples{
 # Transformation using a sliding window

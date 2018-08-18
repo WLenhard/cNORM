@@ -1,11 +1,12 @@
 #' Generate box cox power function for regression model at specific age
 #'
-#' Applies a curve fitting for the regression model with the Box-Cox power transformation
-#' at a specific age, simulates a data set and applies the transformation. It iteratively
-#' determines the power transformation lambda parameter with a precision up to 10^E-5 with a lambda value
-#' of 1 indicating normal distribution, values between 0 and 1 representing negative skew and
-#' values above 1 positive skewness of the distribution. The function is an optional step
-#' following the non-parametric modelling in order to conduct a parametric fitting of the percentiles.
+#' Applies a curve fitting for the regression model with the Box-Cox power transformation via the
+#' LMS method of Cole and Green (1992) at a specific age. Therefore, itsimulates a data set and
+#' applies the transformation. It iteratively #' determines the power transformation lambda
+#' parameter with a precision up to 10^E-5 with a lambda value of 1 indicating normal
+#' distribution, values between 0 and 1 representing negative skew and values above 1 positive
+#' skewness of the distribution. The function is an optional step following the non-parametric
+#' modelling in order to conduct a parametric fitting of the percentiles.
 #' @param model The regression model
 #' @param age The specific age
 #' @param n Number of simulated observations, used to span a percentile range from
@@ -13,7 +14,7 @@
 #' @param m Scale mean of norm scale (default 50)
 #' @param sd Scale sd of norm scale (default 10)
 #'
-#' @return a list including the data.frame with percentiles, normvalues, fitted raw values of the regression
+#' @return a list including the data.frame with percentiles, norm values, fitted raw values of the regression
 #' model and the fitted values of the box cox curve fitting (indicated by variable names 'BC'), as well as the
 #' parameters for the box cox function (mean, sd, lambda) for the specified the age:
 #' \item{median}{The median of the raw value distribution, estimated by the regression model}
@@ -170,7 +171,8 @@ predictRawBC <- function(boxcoxParameters, percentile){
 
 #' Calculate the norm value for a given raw value based on the paramteric box cox distribution
 #'
-#' In addition of the numeric solution to the regression function on 'predictNormValue', this function
+#' In addition to the numeric solution of the inversion of the regression function applied in
+#' 'predictNormValue', this function
 #' can be used retrieving the norm values at a specific age via the parametric box cox power
 #' transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
 #' a raw value.

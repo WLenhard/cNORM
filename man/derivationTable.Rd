@@ -24,10 +24,12 @@ derived regression function
 \description{
 In order to check model assumptions, a table of the first derivation of the model
 coefficients is created.
-TODO additional information necessary
 }
 \examples{
 normData <- prepareData()
 m <- bestModel(data=normData)
 d <- derivationTable(6, m, step=0.5)
+}
+\seealso{
+plotDerivative, derive
 }

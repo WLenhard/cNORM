@@ -7,7 +7,7 @@
 \title{cNORM: Continuous Norming with R}
 \description{
 The package provides methods for generating regression based continuous norms, as f. e.
-for psychometric test development, biological and physiological growth curves, and
+for psychometric test development, biometrics (e. g. physiological growth curves), and
 screenings in the medical domain. Contrary to parametric approaches, it does not rely on
 distribution assumptions of the initial norm data and is thus a very robust approach in
 generating norm tables.
@@ -42,16 +42,25 @@ fitting models and generating the norm tables.
   plotValues, derivationTable, plotDerative
   \item Norm tables: predictNormValue, predictRaw, normTable, getNormCurve, plotNormCurves
 }
-An example dataset is available for demonstration purposes ("elfe"; sample data
-from the references). Use \code{data <- prepareData()} to load and prepare example data
-for the modeling. Use \code{vignette(cNORM-Demo)} for a comprehensive
+Example datasets with large cohorts are available for demonstration purposes ('elfe' and 'ppvt' sample data
+from the references). Use \code{data <- prepareData(elfe)} or \code{data <- prepareData(ppvt)} to load and prepare example data
+for the modeling. Use  \code{vignette(cNORM-Demo)} for a comprehensive
 explanation for conducting  the modeling.
 }
 
 \references{
-Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution
-to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
+\enumerate{
+  \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
+  \item Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (German Adaption). Frankfurt a. M.: Pearson Assessment.
+}
 }
 \author{
 Wolfgang Lenhard & Alexandra Lenhard
 }
+\keyword{Based}
+\keyword{Biometrics,}
+\keyword{Development,}
+\keyword{Norming}
+\keyword{Psychometrics,}
+\keyword{Regression}
+\keyword{Test}

@@ -11,7 +11,7 @@
 #' @format A data frame with 1400 rows and 3 variables:
 #' \describe{
 #'   \item{personID}{ID of the student}
-#'   \item{group}{grade level, with x.5 indicating the end of the school year and x.0 indicatin the midth}
+#'   \item{group}{grade level, with x.5 indicating the end of the school year and x.0 indicating the middle of the school year}
 #'   \item{raw}{the raw score of the student, spanning values from 0 to 28}
 #' }
 #' @source \url{https://www.psychometrica.de/elfe2.html}
@@ -24,7 +24,7 @@
 
 #' Vocabulary development from 4 to 16
 #'
-#' A dataset based on an unstratified sample of PPVT4 data (German adaption), including demografic data like
+#' A dataset based on an unstratified sample of PPVT4 data (German adaption), including demographic data like
 #' age, sex, school form, migration background and language spoken at home. The PPVT4 consists of blocks of items with
 #' 12 items each. Each item consists of 4 pictures. The test taker is given a word orally and he or she has to point out
 #' the picture matching the oral word. Bottom and ceiling blocks of items are determined according to age and performance. For
@@ -35,14 +35,34 @@
 #'   \item{age}{the chronological age of the child}
 #'   \item{group}{the according age group, e.g. age group 4 consists of children age 3.5 to 4.5}
 #'   \item{sex}{the sex of the test taker, 1=male, 2=female}
-#'   \item{schoolform}{the type of school in the German school system, the child is in. 0=missing, 1=preschool,
-#'   2=elementary school, 3=Gesamtschule, 4=secondary modern school (Hauptschule), 5 = senior high school
-#'   (Realschule), 6 = grammar school (Gymnasium), 7 = Training on the job (Berufsschule), 8 = university,
-#'   9 = special educational services}
+#'   \item{schoolform}{the type of school in the German school system, the child is in.
+#'   \itemize{
+#'       \item 0 = missing
+#'       \item 1 = preschool
+#'       \item 2 = elementary school
+#'       \item 3 = comprehensive school (Gesamtschule)
+#'       \item 4 = secondary modern school (Hauptschule)
+#'       \item 5 = senior high school (Realschule)
+#'       \item 6 = grammar school (Gymnasium)
+#'       \item 7 = training on the job (Berufsschule)
+#'       \item 8 = university
+#'       \item 9 = special educational services
+#'   }}
 #'   \item{grade}{the grade, in case the child is in the school}
-#'   \item{migration}{the migration backgroun with 0 = no migration, 1 = either one of the parents or the child immigrated}
-#'   \item{language}{language spoken at home; 0 = missing, 1 = German, 2 = Turkish, 3 = Russian, 4 = Polish,
-#'   5 = Spanish, 6 = Italian, 7 = other}
+#'   \item{migration}{the migration background with
+#'   \itemize{
+#'       \item 0 = no migration
+#'       \item 1 = either one of the parents or the child immigrated}}
+#'   \item{language}{language spoken at home
+#'   \itemize{
+#'       \item 0 = missing
+#'       \item 1 = German
+#'       \item 2 = Turkish
+#'       \item 3 = Russian
+#'       \item 4 = Polish
+#'       \item 5 = Spanish
+#'       \item 6 = Italian
+#'       \item 7 = other}}
 #'   \item{raw}{the raw score of the student, spanning values from 0 to 228}
 #'   \item{duration}{the time needed for completing the test in ms}
 #' }

@@ -244,7 +244,7 @@ printSubset <- function(model){
 #' values indicating a higher precision. The choice depends of the norm scale
 #' used. With T values a stepping parameter of 1 is suitable
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
 #' @examples
@@ -386,7 +386,7 @@ regressionFunction <- function(model, raw = "raw", digits=NULL) {
 #'
 #' Calculates the first derivation of the location / norm value from the regression model. This
 #' is useful for finding violations of model assumptions and problematic distribution features as
-#' f. e. bottom and ceiling effects, non progressive norm values within an age group or in general
+#' f. e. bottom and ceiling effects, non-progressive norm values within an age group or in general
 #' intersecting percentile curves.
 #' @param model The regression model
 #' @return The derived coefficients
@@ -445,7 +445,7 @@ derive <- function(model) {
 #' @param maxA The upper age bound
 #' @param minL The lower norm value bound
 #' @param maxL The upper norm value bound
-#' @param digits The precision fr rounding the norm and age data
+#' @param digits The precision for rounding the norm and age data
 #' @return the report
 #' @export
 #' @examples

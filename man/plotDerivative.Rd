@@ -24,7 +24,7 @@ values indicate higher precision / closer checks}
 \item{stepNorm}{Stepping parameter for norm values}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevent f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \description{
 Plots the values obtained via the first derivation of the regression model
@@ -46,4 +46,7 @@ value scales ('descent' option)
 normData <- prepareData()
 m <- bestModel(data = normData)
 plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+}
+\seealso{
+checkConsistency, bestModel, derive
 }

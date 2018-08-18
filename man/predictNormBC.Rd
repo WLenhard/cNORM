@@ -19,7 +19,8 @@ be provided f. e. c(10, 3) for Wechsler scale index points}
 the predicted raw value
 }
 \description{
-In addition of the numeric solution to the regression function on 'predictNormValue', this function
+In addition to the numeric solution of the inversion of the regression function applied in
+'predictNormValue', this function
 can be used retrieving the norm values at a specific age via the parametric box cox power
 transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
 a raw value.

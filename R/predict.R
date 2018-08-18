@@ -1,7 +1,7 @@
 #' Computes the curve for a specific T value
 #'
 #' As with this continuous norming regression approach, raw values are modeled as a function of age and norm value
-#' (location), getNormCurve is a straight forward approach to show the raw value development over
+#' (location), getNormCurve is a straightforward approach to show the raw value development over
 #' age, while keeping the norm value constant. This way, e. g. academic performance or intelligence development
 #' of a specific ability is shown.
 #' @param normValue The norm value, e. g. T value
@@ -157,8 +157,9 @@ predictRaw <-
 #' @param maxRaw clipping parameter for the upper bound of raw values
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @return data.frame with norm values and the predicted raw value
+#' @seealso rawTable
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
@@ -220,11 +221,12 @@ normTable <- function(A,
 #' @param precision Precision for the norm value estimation. Lower values indicate
 #' higher precision (default .01)
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @param quick Forces the use of a shotgun method to quickly find the norm values
 #' with the desired precision. Reproduces the same results as the thorough search in
 #' case the model assumptions are met.
 #' @return data.frame with raw values and the predicted norm value
+#' @seealso normTable
 #' @examples
 #' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 #' normData <- prepareData()
@@ -332,7 +334,7 @@ rawTable <- function(A,
 #' @param precision Precision for the norm value estimation. Lower values indicate
 #' higher precision (default .1)
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @return data.frame with raw values and the predicted norm value
 rawTableQuick <- function(A,
                           model,
@@ -445,7 +447,6 @@ rawTableQuick <- function(A,
 #'
 #' In order to check model assumptions, a table of the first derivation of the model
 #' coefficients is created.
-#' TODO additional information necessary
 #' @param A the age
 #' @param model The regression model
 #' @param min The lower bound of the norm value range
@@ -453,6 +454,7 @@ rawTableQuick <- function(A,
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @return data.frame with norm values and the predicted value based on the
 #' derived regression function
+#' @seealso plotDerivative, derive
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)

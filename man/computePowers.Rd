@@ -2,7 +2,7 @@
 % Please edit documentation in R/preparation.R
 \name{computePowers}
 \alias{computePowers}
-\title{Compute powers of the explanatory variable #' a as well as of the person
+\title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
 computePowers(data, k = 4, normVariable = "normValue",
@@ -38,4 +38,7 @@ as well use the percentiles for the normVariable as well.
 normData <- elfe
 normData <- rankByGroup(normData, group="group")
 normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable="group")
+}
+\seealso{
+bestModel
 }

@@ -26,7 +26,7 @@ rawTableQuick(A, model, min, max, minNorm = 25, maxNorm = 75,
 higher precision (default .1)}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevent f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \value{
 data.frame with raw values and the predicted norm value

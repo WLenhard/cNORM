@@ -28,7 +28,7 @@ data.frame of the values raw, age and norm
 }
 \description{
 As with this continuous norming regression approach, raw values are modeled as a function of age and norm value
-(location), getNormCurve is a straight forward approach to show the raw value development over
+(location), getNormCurve is a straightforward approach to show the raw value development over
 age, while keeping the norm value constant. This way, e. g. academic performance or intelligence development
 of a specific ability is shown.
 }

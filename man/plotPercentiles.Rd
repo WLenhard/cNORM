@@ -53,3 +53,6 @@ normData <- prepareData()
 m <- bestModel(data = normData)
 plotPercentiles(normData, m, raw="raw", group="group")
 }
+\seealso{
+plotNormCurves
+}

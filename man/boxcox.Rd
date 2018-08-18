@@ -19,7 +19,7 @@ boxcox(model, age, n = 250, m = 50, sd = 10)
 \item{sd}{Scale sd of norm scale (default 10)}
 }
 \value{
-a list including the data.frame with percentiles, normvalues, fitted raw values of the regression
+a list including the data.frame with percentiles, norm values, fitted raw values of the regression
 model and the fitted values of the box cox curve fitting (indicated by variable names 'BC'), as well as the
 parameters for the box cox function (mean, sd, lambda) for the specified the age:
 \item{median}{The median of the raw value distribution, estimated by the regression model}
@@ -32,12 +32,13 @@ the fitted raw values according to the regression model, the retrieved norm valu
 the according density and percentile}
 }
 \description{
-Applies a curve fitting for the regression model with the Box-Cox power transformation
-at a specific age, simulates a data set and applies the transformation. It iteratively
-determines the power transformation lambda parameter with a precision up to 10^E-5 with a lambda value
-of 1 indicating normal distribution, values between 0 and 1 representing negative skew and
-values above 1 positive skewness of the distribution. The function is an optional step
-following the non-parametric modelling in order to conduct a parametric fitting of the percentiles.
+Applies a curve fitting for the regression model with the Box-Cox power transformation via the
+LMS method of Cole and Green (1992) at a specific age. Therefore, itsimulates a data set and
+applies the transformation. It iteratively #' determines the power transformation lambda
+parameter with a precision up to 10^E-5 with a lambda value of 1 indicating normal
+distribution, values between 0 and 1 representing negative skew and values above 1 positive
+skewness of the distribution. The function is an optional step following the non-parametric
+modelling in order to conduct a parametric fitting of the percentiles.
 }
 \examples{
 # model sample data set

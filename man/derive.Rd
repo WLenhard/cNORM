@@ -15,7 +15,7 @@ The derived coefficients
 \description{
 Calculates the first derivation of the location / norm value from the regression model. This
 is useful for finding violations of model assumptions and problematic distribution features as
-f. e. bottom and ceiling effects, non progressive norm values within an age group or in general
+f. e. bottom and ceiling effects, non-progressive norm values within an age group or in general
 intersecting percentile curves.
 }
 \examples{

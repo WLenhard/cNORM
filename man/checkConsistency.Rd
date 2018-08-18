@@ -31,7 +31,7 @@ values indicating a higher precision. The choice depends of the norm scale
 used. With T values a stepping parameter of 1 is suitable}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevent f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modelling errors}
 
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
 are displayed (default = FALSE)}

@@ -69,6 +69,7 @@ plotValues <- function(data, model, group = "group", raw = "raw") {
 #' @param minRaw Lower end of the raw value range, used for clipping implausible results
 #' (default = 0)
 #' @param maxRaw Upper end of the raw value range, used for clipping implausible results
+#' @seealso checkConsistency, derivationPlot, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
@@ -154,6 +155,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' f. e. c(10, 3) for Wechsler scale index points
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
+#' @seealso plotNormCurves
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
@@ -295,11 +297,12 @@ plotPercentiles <- function(data,
 #' begins to drop. Nonetheless, inspect the according model with \code{plotPercentiles(data, group)}
 #' to visually inspect the course of the percentiles.
 #' In the plot, Mallow's Cp is log, transformed and the BIC is always highly
-#' negative. The R2 cutoff, that was specified in the bestModel function is
+#' negative. The R2 cutoff that was specified in the bestModel function is
 #' displayed as a dashed line.
 #' @param model The regression model from the bestModel function
 #' @param bic Display the log transformed Mallow's Cp (bic = FALSE; default)
 #' or the Bayesian Information Criterion (BIC)
+#' @seealso bestModel, plotPercentiles
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
@@ -394,7 +397,8 @@ plotSubset <- function(model, bic = FALSE) {
 #' @param maxNorm Upper end of the norm value range, in case of T values, 25 might be good
 #' @param stepNorm Stepping parameter for norm values
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevent f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modelling errors
+#' @seealso checkConsistency, bestModel, derive
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()

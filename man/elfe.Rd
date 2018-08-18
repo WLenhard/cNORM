@@ -7,7 +7,7 @@
 \format{A data frame with 1400 rows and 3 variables:
 \describe{
   \item{personID}{ID of the student}
-  \item{group}{grade level, with x.5 indicating the end of the school year and x.0 indicatin the midth}
+  \item{group}{grade level, with x.5 indicating the end of the school year and x.0 indicating the middle of the school year}
   \item{raw}{the raw score of the student, spanning values from 0 to 28}
 }}
 \source{

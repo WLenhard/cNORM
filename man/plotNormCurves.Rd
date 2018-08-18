@@ -52,3 +52,6 @@ normData <- prepareData()
 m <- bestModel(data = normData)
 plotNormCurves(m, minAge=2, maxAge=5)
 }
+\seealso{
+checkConsistency, derivationPlot, plotPercentiles
+}

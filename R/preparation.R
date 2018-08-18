@@ -30,7 +30,7 @@
 #' values and interactions. Afterwards the best fitting model is determined, based on
 #' all default parameters.
 #' @param data data.frame with a grouping variable named 'group' and a raw value variable
-#' named 'raw'. In case no object is provided, cNORM uses the inbuild sample data to demonstrate
+#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
 #' the procedure
 #' @param group manually specify the grouping variable in the data
 #' @return data frame including the norm values, powers and interactions of the norm value and
@@ -67,7 +67,7 @@ prepareData <- function(data = NULL, group = "group") {
 #'
 #' @param data data.frame with norm sample data
 #' @param group name of the grouping variable (default 'group'), e. g. grade, setting
-#' group to FALSE cancels grouping (data is treated as one goup)
+#' group to FALSE cancels grouping (data is treated as one group)
 #' @param raw name of the raw value variable (default 'raw')
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
@@ -191,10 +191,10 @@ rankByGroup <-
 #' In case of bindings, the function uses the medium rank and applies the algorithms
 #' already described in the 'rankByGroup' function. At the upper and lower end of the
 #' data sample, the sliding stops and the sample is drawn from the interval min + width and
-#' max - width, repsectively
+#' max - width, respectively.
 #' @param data data.frame with norm sample data
 #' @param age the continuous age variable
-#' group to FALSE cancels grouping (data is treated as one goup)
+#' group to FALSE cancels grouping (data is treated as one group)
 #' @param raw name of the raw value variable (default 'raw')
 #' @param width the width of the sliding window
 #' @param method Ranking method in case of bindings, please provide an index,
@@ -327,7 +327,7 @@ rankBySlidingWindow <- function(data,
 }
 
 
-#' Compute powers of the explanatory variable #' a as well as of the person
+#' Compute powers of the explanatory variable a as well as of the person
 #' location l (data preparation)
 #'
 #' The function computes powers of the norm variable e. g. T values (location, L),
@@ -348,7 +348,7 @@ rankBySlidingWindow <- function(data,
 #' @param explanatoryVariable Variable like age or grade, which was as well used for the grouping.
 #' Can be either the grouping variable itself or a finer grained variable like the exact age
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
-#'
+#' @seealso bestModel
 #' @examples
 #' normData <- elfe
 #' normData <- rankByGroup(normData, group="group")

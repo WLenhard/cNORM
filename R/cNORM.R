@@ -36,13 +36,14 @@
 #' }
 #' Example datasets with large cohorts are available for demonstration purposes ('elfe' and 'ppvt' sample data
 #' from the references). Use \code{data <- prepareData(elfe)} or \code{data <- prepareData(ppvt)} to load and prepare example data
-#' for the modeling. Use \code{vignette(cNORM-Demo)} for a comprehensive
+#' for the modeling. Use  \code{vignette(cNORM-Demo)} for a comprehensive
 #' explanation for conducting  the modeling.
 #'
-#' @references Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution
-#' to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
-#' @references Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture
-#' Vocabulary Test - Revision IV (German Adaption). Frankfurt a. M.: Pearson Assessment.
+#' @references
+#' \enumerate{
+#'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
+#'   \item Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (German Adaption). Frankfurt a. M.: Pearson Assessment.
+#' }
 #' @author Wolfgang Lenhard & Alexandra Lenhard
 #' @keywords Psychometrics, Biometrics, Test Development, Regression Based Norming
 #' @docType package

@@ -11,7 +11,7 @@ rankByGroup(data, group = "group", raw = "raw", method = 4,
 \item{data}{data.frame with norm sample data}
 
 \item{group}{name of the grouping variable (default 'group'), e. g. grade, setting
-group to FALSE cancels grouping (data is treated as one goup)}
+group to FALSE cancels grouping (data is treated as one group)}
 
 \item{raw}{name of the raw value variable (default 'raw')}
 

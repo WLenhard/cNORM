@@ -18,7 +18,7 @@ rangeCheck(model, minA = NULL, maxA = NULL, minL = NULL,
 
 \item{maxL}{The upper norm value bound}
 
-\item{digits}{The precision fr rounding the norm and age data}
+\item{digits}{The precision for rounding the norm and age data}
 }
 \value{
 the report

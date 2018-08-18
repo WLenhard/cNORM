@@ -26,7 +26,7 @@ rawTable(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1,
 higher precision (default .01)}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevent f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modelling errors}
 
 \item{quick}{Forces the use of a shotgun method to quickly find the norm values
 with the desired precision. Reproduces the same results as the thorough search in
@@ -48,4 +48,7 @@ to FALSE for a thorough search.
 normData <- prepareData()
 m <- bestModel(data=normData)
 table <- rawTable(3 + 7/12, m, 0, 28, precision=.01)
+}
+\seealso{
+normTable
 }

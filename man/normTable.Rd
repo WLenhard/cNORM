@@ -23,7 +23,7 @@ normTable(A, model, minNorm = 25, maxNorm = 75, minRaw = -Inf,
 \item{step}{Stepping parameter with lower values indicating higher precision}
 
 \item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevent f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \value{
 data.frame with norm values and the predicted raw value
@@ -41,4 +41,7 @@ sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 normData <- prepareData()
 m <- bestModel(data=normData)
 norms <- normTable(3.5, m, step=0.5)
+}
+\seealso{
+rawTable
 }
