@@ -71,7 +71,7 @@ library(cNORM)
 The package is still under development. Please report errors. Suggestions for improvement are always welcome!
 
 ## Sample Data
-The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and the German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Type '?elfe' or '?ppvt' to display information on the data sets.
+The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and the German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Type `?elfe` or `?ppvt` to display information on the data sets.
 
 ## References
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437
