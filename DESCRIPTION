@@ -6,8 +6,8 @@ Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut], Sebastian Gary [ct
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-08-20
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de"), person("Alexandra", "Lenhard", role=c("aut")))
-Description: Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
-    (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. Non-parametric
+Description: Conventional methods for producing test norms in psychometrics or biometrics are often plagued 
+    with "jumps" or "gaps" (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores. 
     Continuous Norming generates continuous test norms on the basis of the raw data from norming samples, 
     without requiring assumptions about the distribution of the raw data: Norm values are directly established
     from raw data by modeling the latter ones as a function of both percentile scores and an explanatory
