@@ -261,7 +261,6 @@ plotPercentiles <- function(data,
     by = group, all.y = TRUE
   )
 
-
   END <- 5 / 6
   COL1 <- grDevices::rainbow(length(percentiles), end = END)
   COL2 <- c(grDevices::rainbow(length(percentiles), end = END), grDevices::rainbow(length(percentiles), end = END))

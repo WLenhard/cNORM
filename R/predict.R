@@ -519,7 +519,7 @@ predictNormValue <-
              minRaw = 0,
              maxRaw = Inf,
              precision = 0.1) {
-    if(is.numeric(raw)&&is.numeric(A)){
+    if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
     norms <-
       cNORM::normTable(A,
         model,
@@ -544,14 +544,18 @@ predictNormValue <-
         if(i%%10==0){
           message(i)
         }
-        values[[i]] <- predictNormValue(raw[[i]],
-                                        A[[i]],
-                                        model,
-                                        minNorm = minNorm,
-                                        maxNorm = maxNorm,
-                                        minRaw = minRaw,
-                                        maxRaw = maxRaw,
-                                        precision = precision )
+
+        norms <-
+          cNORM::normTable(A[[i]],
+                           model,
+                           minNorm = minNorm,
+                           maxNorm = maxNorm,
+                           minRaw = minRaw,
+                           maxRaw = maxRaw,
+                           step = precision
+          )
+        index <- which.min(abs(norms$raw - raw[[i]]))
+        values[[i]] <- norms$norm[index]
         i <- i + 1
       }
       return(values)
