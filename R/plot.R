@@ -15,11 +15,11 @@
 #' plotValues(normData, m, group="group", raw="raw")
 #' @export
 plotValues <- function(data, model, group = "group", raw = "raw") {
-  if(!(group %in% colnames(data))){
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  if (!(group %in% colnames(data))) {
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   }
-  if(!(raw %in% colnames(data))){
-    stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""));
+  if (!(raw %in% colnames(data))) {
+    stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
 
@@ -29,12 +29,12 @@ plotValues <- function(data, model, group = "group", raw = "raw") {
   d$group <- as.factor(d$group)
   d$raw <- data[raw]
   lattice::xyplot(fitted ~ raw | group, d,
-                  main = paste("Actual vs. predicted raw values by ", group),
-                  ylab = "Predicted values",
-                  xlab = "Actual values",
-                  grid = TRUE,
-                  auto.key = TRUE,
-                  abline = c(0, 1), lwd = 1
+    main = paste("Actual vs. predicted raw values by ", group),
+    ylab = "Predicted values",
+    xlab = "Actual values",
+    grid = TRUE,
+    auto.key = TRUE,
+    abline = c(0, 1), lwd = 1
   )
 }
 
@@ -82,15 +82,11 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
                            step = 0.1,
                            minRaw = 0,
                            maxRaw = 1000) {
-  valueList <- list()
+  valueList <- data.frame(n = factor(), raw = double(), age = double())
   n <- length(normList)
-  i <- 1
 
-  norm <- list()
-  raw <- list()
-  age <- list()
 
-  while (i <= n) {
+  for (i in 1:n) {
     normCurve <-
       cNORM::getNormCurve(
         normList[[i]],
@@ -101,26 +97,33 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
         minRaw = minRaw,
         maxRaw = maxRaw
       )
-    norm <- c(norm, normCurve$norm)
-    raw <- c(raw, normCurve$raw)
-    age <- c(age, normCurve$age)
 
-    i <- i + 1
+    currentDataFrame <- data.frame(n = normCurve$norm, raw = normCurve$raw, age = normCurve$age)
+    valueList <- rbind(valueList, currentDataFrame)
   }
 
-  valueList$n <- norm
-  valueList$raw <- raw
-  valueList$age <- age
-  dataFrame <- as.data.frame(valueList,
-    row.names = NULL,
-    optional = FALSE,
-    cut.names = FALSE,
-    col.names = names(c("n", "raw", "age")),
-    fix.empty.names = TRUE, stringsAsFactors = default.stringsAsFactors()
-  )
+  # generate variable names
+  NAMES <- paste("Norm ", normList, sep = "")
 
-  age <- norm
-  lattice::xyplot(raw ~ age, data = valueList, grid = TRUE)
+  # lattice display options
+  COL <- grDevices::rainbow(length(normList))
+  panelfun <- function(..., type, group.number) {
+    lattice::panel.lines(...)
+  }
+
+  lattice::xyplot(raw ~ age,
+    data = valueList, groups = n,
+    panel = function(...)
+      lattice::panel.superpose(..., panel.groups = panelfun),
+    main = "Norm Curves",
+    ylab = "Raw Value", xlab = "Age",
+    col = COL, lwd = 2, grid = TRUE,
+    key = list(
+      corner = c(0.99, 0.1),
+      lines = list(col = COL, lwd = 2),
+      text = list(NAMES)
+    )
+  )
 }
 
 
@@ -171,13 +174,12 @@ plotPercentiles <- function(data,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = "T",
                             type = 7) {
-
-  if(!(raw %in% colnames(data))){
-    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+  if (!(raw %in% colnames(data))) {
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if(!(group %in% colnames(data))){
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  if (!(group %in% colnames(data))) {
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   }
 
   # compute norm values from percentile vector
@@ -222,7 +224,7 @@ plotPercentiles <- function(data,
   colnames(percentile.actual) <- c(c(group), NAMES)
 
   # build finer grained grouping variable for prediction
-  gr <- percentile.actual[,group]
+  gr <- percentile.actual[, group]
   leng <- length(gr)
   FIRST <- gr[[1]]
   LAST <- gr[[leng]]
@@ -258,6 +260,7 @@ plotPercentiles <- function(data,
   percentile <- merge(percentile.actual, percentile.fitted,
     by = group, all.y = TRUE
   )
+
 
   END <- 5 / 6
   COL1 <- grDevices::rainbow(length(percentiles), end = END)
@@ -406,14 +409,13 @@ plotSubset <- function(model, bic = FALSE) {
 #' plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
 plotDerivative <- function(model,
-                         minAge = 2,
-                         maxAge = 5,
-                         minNorm = 25,
-                         maxNorm = 75,
-                         stepAge = 0.2,
-                         stepNorm = 1,
-                         descend = FALSE) {
-
+                           minAge = 2,
+                           maxAge = 5,
+                           minNorm = 25,
+                           maxNorm = 75,
+                           stepAge = 0.2,
+                           stepNorm = 1,
+                           descend = FALSE) {
   print(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   rowS <- c(seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))

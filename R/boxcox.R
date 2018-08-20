@@ -103,8 +103,8 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
   message(paste0("lambda: ", lambda))
 
   x <- ((x - mlambda) / sdlambda) * sd + m
-  density <- stats::dnorm(x, mean = m, sd = sd)
   percentile <- stats::pnorm(x, mean = m, sd = sd)
+  density <- stats::dnorm(x, mean = m, sd = sd)
 
   table <-
     do.call(rbind, Map(data.frame,
@@ -114,7 +114,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
       densityBC = density,
       percentileBC = percentile
     ))
-  return(list(median = md, meanBC=mlambda, sdBC=sdlambda, lambdaBC=lambda, age=age, data=table))
+  return(list(n = n, age=age, median = md, mean = m, sd = sd, meanBC=mlambda, sdBC=sdlambda, lambdaBC=lambda, data=table, regressionCoefficients = model$coefficients))
 }
 
 
@@ -225,4 +225,105 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
     return(stats::pnorm(z))
   }
   return(raw)
+}
+
+#' Plot regression model versus box cox for a specific age
+#'
+#' This plot can be used to compare, how well the regression data can be modelled via a
+#' Box Cox power transformation.
+#'
+#' @param regressionModel The regression model from the 'bestModel' function
+#' @param boxcoxParameters The parameters from the box cox power transformation
+#' @param minRaw The lower bound of raw values; must not fall below 0 due to restrictions of the
+#' box cox function
+#' @param maxRaw The upper bound of raw values
+#' @param type Type of plot; 0 = Show percentiles as function of raw values, 1 = Show raw values
+#' as function of norm values, 2 = Density plot
+#'
+#' @export
+#' @seealso boxcox
+#' @examples
+#'
+#' # Calculate model based on PPVT4 data
+#' data <- prepareData(ppvt)
+#' model <- bestModel(data)
+#'
+#' # compute power function for a specific age, e. g. 9.2
+#' bc <- boxcox(model, 9.2)
+#'
+#' # plot results as a function of norm values
+#' plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=1)
+#'
+#' # plot density
+#' plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=2)
+plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 100, type = 0){
+  if(minRaw<0){
+    stop("Negative values are not allowed in minRaw.")
+  }
+
+  percentiles <- seq(from = 0.5 / boxcoxParameters$n, to = (boxcoxParameters$n - 0.5) / boxcoxParameters$n, length.out = boxcoxParameters$n)
+  scale <- stats::qnorm(percentiles, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
+  density <- stats::dnorm(scale, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
+
+  rawBC <- rep(NA, length.out=length(percentiles))
+  rawRegression <- rep(NA, length.out=length(percentiles))
+
+  i <- 1
+  while(i <= length(percentiles)){
+    rawRegression[[i]] <- predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, min = minRaw, max = maxRaw)
+    rawBC[[i]] <- predictRawBC(boxcoxParameters, percentiles[[i]])
+    i <- i + 1
+  }
+
+  table <-
+    do.call(rbind, Map(data.frame,
+                       percentiles = percentiles, scale = scale, density = density, rawRegression = rawRegression,
+                       rawBoxCox = rawBC
+    ))
+
+  COL <- grDevices::rainbow(2)
+  panelfun <- function(..., type, group.number) {
+      lattice::panel.lines(...)
+  }
+
+  if(type == 0){
+  p <- lattice::xyplot(percentiles ~ rawRegression + rawBC, table,
+                  panel = function(...)
+                    lattice::panel.superpose(..., panel.groups = panelfun),
+                  main = "Regression Model vs. Box Cox Transformation",
+                  ylab = "Percentile", xlab = "Raw value",
+                  col = COL, lwd = 2, grid = TRUE,
+                  key = list(
+                    corner = c(0.99, 0.1),
+                    lines = list(col = COL, lwd = 2),
+                    text = list(c("Regression", "Box Cox"))
+                  )
+  )
+  } else if(type == 1){
+    p <- lattice::xyplot(rawRegression + rawBC ~ scale, table,
+                  panel = function(...)
+                    lattice::panel.superpose(..., panel.groups = panelfun),
+                  main = "Regression Model vs. Box Cox Transformation",
+                  ylab = "Raw Value", xlab = "Norm Scale",
+                  col = COL, lwd = 2, grid = TRUE,
+                  key = list(
+                    corner = c(0.99, 0.1),
+                    lines = list(col = COL, lwd = 2),
+                    text = list(c("Regression", "Box Cox"))
+                  )
+  )}else{  p <- lattice::xyplot(density ~ rawRegression + rawBC, table,
+                           panel = function(...)
+                             lattice::panel.superpose(..., panel.groups = panelfun),
+                           main = "Regression Model vs. Box Cox Transformation",
+                           ylab = "Density", xlab = "Raw value",
+                           col = COL, lwd = 2, grid = TRUE,
+                           key = list(
+                             corner = c(0.99, 0.1),
+                             lines = list(col = COL, lwd = 2),
+                             text = list(c("Regression", "Box Cox"))
+                           )
+  )}
+
+  print(p)
+  #return(table)
 }

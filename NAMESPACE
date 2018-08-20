@@ -29,5 +29,6 @@ export(
 	printSubset,
 	boxcox,
 	predictNormBC,
-	predictRawBC
+	predictRawBC,
+	plotBoxCox
 )
