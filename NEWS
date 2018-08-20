@@ -2,6 +2,7 @@ TODO
 ====
 - in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
 - Check rawTableQuick for usage with descending values
+- predictNormValue: Fix computation of vectors
 
 
 
