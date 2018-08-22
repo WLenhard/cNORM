@@ -345,28 +345,31 @@ rankBySlidingWindow <- function(data,
 #' @param k degree
 #' @param normVariable the variable containing the norm data in the data.frame; might be
 #' T values, IQ values, percentiles ...
-#' @param explanatoryVariable Variable like age or grade, which was as well used for the grouping.
-#' Can be either the grouping variable itself or a finer grained variable like the exact age
+#' @param age Explanatory variable like age or grade, which was as well used for the grouping.
+#' Can be either the grouping variable itself or a finer grained variable like the exact age. Other
+#' explanatory variables can be used here instead an age variable as well, as long as the variable is
+#' at least ordinal, e. g. language or development levels ... The label 'age' is used, as this is the
+#' most common field of application.
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
 #' @examples
 #' normData <- elfe
 #' normData <- rankByGroup(normData, group="group")
-#' normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable="group")
+#' normData <- computePowers(normData, k = 4, norm = "normValue", age="group")
 #' @export
 computePowers <-
   function(data,
              k = 4,
-             normVariable = "normValue",
-             explanatoryVariable = "group") {
+             norm = "normValue",
+             age = "group") {
 
     # check if columns exist
-    if(!(normVariable %in% colnames(data))){
-      stop(paste(c("ERROR: Norm variable '", normVariable, "' does not exist in data object."), collapse = ""));
+    if(!(norm %in% colnames(data))){
+      stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""));
     }
 
-    if(!(explanatoryVariable %in% colnames(data))){
-      stop(paste(c("ERROR: Explanatory variable '", explanatoryVariable, "' does not exist in data object."), collapse = ""));
+    if(!(age %in% colnames(data))){
+      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""));
     }
 
     if ((k < 1) | (k > 6)) {
@@ -375,8 +378,8 @@ computePowers <-
     }
 
     d <-as.data.frame(data)
-    L1 <- as.numeric(d[[normVariable]])
-    A1 <- as.numeric(d[[explanatoryVariable]])
+    L1 <- as.numeric(d[[norm]])
+    A1 <- as.numeric(d[[age]])
     L1A1 <- L1 * A1
 
     d$L1 <- L1
