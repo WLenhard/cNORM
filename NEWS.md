@@ -8,7 +8,6 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 0.9.3
-
 Date: 2018.08.20
 
 Changes:
@@ -20,7 +19,6 @@ Changes:
 
 
 ### Version in 0.9.2
-
 Date: 2018.08.18
 
 Changes:
@@ -30,7 +28,6 @@ Changes:
 
 
 ### Version in 0.9.1
-
 Date: 2018.08.16
 
 Changes:
@@ -42,7 +39,6 @@ Changes:
 
 
 ### Version in 0.9.0
-
 Date: 2018.08.14
 
 Changes:
@@ -75,7 +71,6 @@ Changes:
 
 
 ### Version in 0.8.6
-
 Date: 2018.08.11
 
 Changes:
@@ -87,7 +82,6 @@ Changes:
 
 
 ### Version in 0.8.5
-
 Date: 2018.08.06
 
 Changes:
@@ -97,7 +91,6 @@ Changes:
 
 
 ### Version in 0.8.3
-
 Date: 2018.08.03
 
 Changes:
@@ -107,7 +100,6 @@ Changes:
 
 
 ### Version in 0.8.2
-
 Date: 2018.08.02
 
 Changes:
@@ -119,7 +111,6 @@ Changes:
 
 
 ### Version in 0.8.0
-
 Date: 2018.08.01
 
 Changes:
@@ -129,7 +120,6 @@ Changes:
 
 
 ### Version in 0.7.11
-
 Date: 2018.07.31
 
 Changes:
@@ -139,7 +129,6 @@ Changes:
 
 
 ### Version in 0.7.10
-
 Date: 2018.07.28
 
 Changes:
@@ -150,7 +139,6 @@ Changes:
 
 
 ### Version in 0.7.9
-
 Date: 2018.07.28
 
 Changes:
@@ -162,7 +150,6 @@ Changes:
 
 
 ### Version in 0.7.8
-
 Date: 2018.07.27
 
 Changes:
@@ -172,7 +159,6 @@ Changes:
 
 
 ### Version in 0.7.7
-
 Date: 2018.07.27
 
 Changes:
@@ -194,7 +180,6 @@ Changes:
 
 
 ### Version in 0.7.5
-
 Date: 2018.07.26
 
 Changes:
@@ -218,7 +203,6 @@ Changes:
 
 
 ### Version in 0.7.3
-
 Date: 2018.07.25
 
 Changes:
@@ -230,7 +214,6 @@ Changes:
 
 
 ### Version in 0.7.2
-
 Date: 2018.07.24
 
 Changes:
