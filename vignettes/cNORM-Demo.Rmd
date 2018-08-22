@@ -78,10 +78,10 @@ normData2 <- rankBySlidingWindow(data = elfe, age = "group", raw = "raw", width 
 
 The function 'rankBySlidingWindow' would however only make sense, if the age variable is truely contiuous, whereas in the sample data it is already grouped. With the sample dataset, we get exactly the same values that way. The data.frame now has two additional columns: percentile and normValue and usually. In case of the sliding window, there is another column 'n' indicating the number of cases, the norm value was based upon.
 
-In test development, many researchers stop here, but now our modelling process starts. The normValue specifies the location (`L`) within the norm sample and the variable group will be our explanatory variable (`A`) in the following analyses. We finally build the powers of `A` and `L` up to the factor `k` and their interactions, simply by building all linear combinations through multiplication. As a rule of thumb, `k = 4` is usually sufficient to model human performance data. Please use the following function for the computation: 
+In test development, many researchers stop here, but now our modelling process starts. The norm variable specifies the location (`L`, usually norm scale value like T or IQ) within the norm sample and the variable group will be our explanatory variable age (`A`) in the following analyses. We finally build the powers of `A` and `L` up to the factor `k` and their interactions, simply by building all linear combinations through multiplication. As a rule of thumb, `k = 4` is usually sufficient to model human performance data. Please use the following function for the computation: 
 
 ```
-normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable = "group")
+normData <- computePowers(normData, k = 4, norm = "normValue", age = "group")
 ```
 The data set now has 24 new variables ( $2*k + k^{2}$ ), namely `L1`, `L2`, `L3`, `L4` (powers of the norm value), `A1`, `A2`, `A3`, `A4` (powers of the grouping variable) and the linear combinations `L1A1`, `L2A1` ... `L4A3`, `L4A4`. For the explanatory variable you can either specify the grouping variable or - if present - the original continuous age variable, which leads to a higher precision.
 

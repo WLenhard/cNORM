@@ -50,7 +50,7 @@ prepareData <- function(data = NULL, group = "group") {
   }
 
   normData <- rankByGroup(normData, group = "group")
-  normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable = "group")
+  normData <- computePowers(normData, k = 4, norm = "normValue", age = "group")
   return(normData)
 }
 
@@ -343,7 +343,7 @@ rankBySlidingWindow <- function(data,
 #'
 #' @param data data.frame with the norm data
 #' @param k degree
-#' @param normVariable the variable containing the norm data in the data.frame; might be
+#' @param norm the variable containing the norm data in the data.frame; might be
 #' T values, IQ values, percentiles ...
 #' @param age Explanatory variable like age or grade, which was as well used for the grouping.
 #' Can be either the grouping variable itself or a finer grained variable like the exact age. Other
