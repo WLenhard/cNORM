@@ -5,19 +5,21 @@
 \title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
-computePowers(data, k = 4, normVariable = "normValue",
-  explanatoryVariable = "group")
+computePowers(data, k = 4, norm = "normValue", age = "group")
 }
 \arguments{
 \item{data}{data.frame with the norm data}
 
 \item{k}{degree}
 
+\item{age}{Explanatory variable like age or grade, which was as well used for the grouping.
+Can be either the grouping variable itself or a finer grained variable like the exact age. Other
+explanatory variables can be used here instead an age variable as well, as long as the variable is
+at least ordinal, e. g. language or development levels ... The label 'age' is used, as this is the
+most common field of application.}
+
 \item{normVariable}{the variable containing the norm data in the data.frame; might be
 T values, IQ values, percentiles ...}
-
-\item{explanatoryVariable}{Variable like age or grade, which was as well used for the grouping.
-Can be either the grouping variable itself or a finer grained variable like the exact age}
 }
 \value{
 data.frame with the powers and interactions of location and explanatory variable / age
@@ -37,7 +39,7 @@ as well use the percentiles for the normVariable as well.
 \examples{
 normData <- elfe
 normData <- rankByGroup(normData, group="group")
-normData <- computePowers(normData, k = 4, normVariable = "normValue", explanatoryVariable="group")
+normData <- computePowers(normData, k = 4, norm = "normValue", age="group")
 }
 \seealso{
 bestModel
