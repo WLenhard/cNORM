@@ -31,7 +31,7 @@
 #' with the norm sample and includes doublettes of cases in order to align the sample size per age group. It is
 #' primarily intended for running the cNORM analyses. The cleaned and stratified data is available on request.
 #'
-#' @format A data frame with 5600 rows and 9 variables:
+#' @format A data frame with 5600 rows and 4 variables:
 #' \describe{
 #'   \item{age}{the chronological age of the child}
 #'   \item{group}{the according age group, e.g. age group 4 consists of children age 3.5 to 4.5}
