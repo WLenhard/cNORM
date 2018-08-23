@@ -149,6 +149,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @param model The model from the bestModel function
 #' @param minRaw Lower bound of the raw value scale (default = 0)
 #' @param maxRaw Upper bound of the raw value scale
+#' @param minAge Variable to restrict the lower bound of the plot to a specific age
+#' @param maxAge Variable to restrict the upper bound of the plot to a specific age
 #' @param raw The name of the raw variable
 #' @param group The name of the grouping variable; the distinct groups are automatically
 #' determined
@@ -169,6 +171,8 @@ plotPercentiles <- function(data,
                             model,
                             minRaw = 0,
                             maxRaw = 1000,
+                            minAge = NULL,
+                            maxAge = NULL,
                             raw = "raw",
                             group = "group",
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
@@ -180,6 +184,15 @@ plotPercentiles <- function(data,
 
   if (!(group %in% colnames(data))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+  }
+
+  if(is.null(minAge)){
+    minAge <- model$minA1
+  }
+
+
+  if(is.null(maxAge)){
+    maxAge <- model$maxA1
   }
 
   # compute norm values from percentile vector
@@ -277,7 +290,7 @@ plotPercentiles <- function(data,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = "Actual and predicted percentile curves",
-    ylab = "Raw value", xlab = "Explanatory Variable",
+    ylab = paste0("Raw value (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
     col = COL2, lwd = 2, grid = TRUE,
     key = list(
       corner = c(0.99, 0.01),

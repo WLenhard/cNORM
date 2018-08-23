@@ -4,9 +4,10 @@
 \alias{plotPercentiles}
 \title{Plot norm curves against actual percentiles}
 \usage{
-plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
-  group = "group", percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9,
-  0.975), scale = "T", type = 7)
+plotPercentiles(data, model, minRaw = 0, maxRaw = 1000,
+  minAge = NULL, maxAge = NULL, raw = "raw", group = "group",
+  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+  scale = "T", type = 7)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm values}
@@ -16,6 +17,10 @@ plotPercentiles(data, model, minRaw = 0, maxRaw = 1000, raw = "raw",
 \item{minRaw}{Lower bound of the raw value scale (default = 0)}
 
 \item{maxRaw}{Upper bound of the raw value scale}
+
+\item{minAge}{Variable to restrict the lower bound of the plot to a specific age}
+
+\item{maxAge}{Variable to restrict the upper bound of the plot to a specific age}
 
 \item{raw}{The name of the raw variable}
 

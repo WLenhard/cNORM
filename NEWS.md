@@ -4,6 +4,17 @@ This file documents the development of the package as well as open issues or poi
 ### TODO
 *   in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
 *   Check rawTableQuick for usage with descending values
+*   Shiny
+
+
+### Version in 0.9.4
+Date: 2018.08.23
+
+Changes:
+
+*   Generating group variable in rankBySlidingWindow
+*   prarameters in plotPercentile to restrict age range
+*   ppvt dataset restricted
 
 
 

@@ -5,7 +5,8 @@
 \title{Determine the norm values of the participants by sliding window (experimental)}
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width,
-  method = 4, scale = "T", descend = FALSE, descriptives = TRUE)
+  method = 4, scale = "T", descend = FALSE, descriptives = TRUE,
+  nGroup = 0)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -33,6 +34,11 @@ performance}
 
 \item{descriptives}{If set to TRUE (default), information in n, mean, median and
 standard deviation per group is added to each observation}
+
+\item{nGroup}{If set to a positive value, a grouping variable is created with the desired number of
+equi distant groups, named by the group mean age of each group. It creates the
+column 'group' in the data.frame and in case, there is already one with that name,
+overwrites it.}
 }
 \value{
 the dataset with the individual percentiles and norm values

@@ -210,6 +210,10 @@ rankByGroup <-
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
+#' @param nGroup If set to a positive value, a grouping variable is created with the desired number of
+#' equi distant groups, named by the group mean age of each group. It creates the
+#' column 'group' in the data.frame and in case, there is already one with that name,
+#' overwrites it.
 #' @return the dataset with the individual percentiles and norm values
 #'
 #' @examples
@@ -229,7 +233,8 @@ rankBySlidingWindow <- function(data,
                                 method = 4,
                                 scale = "T",
                                 descend = FALSE,
-                                descriptives = TRUE) {
+                                descriptives = TRUE,
+                                nGroup = 0) {
 
   # check if columns exist
   if(!(age %in% colnames(data))){
@@ -312,16 +317,14 @@ rankBySlidingWindow <- function(data,
     d$normValue <- d$percentile
   }
 
-  # build grouping variable - unnecessary for norming, but necessary for plotting the percentiles
-  # TODO not working currently
-  # TODO add parameters to function to switch on/off
-  # numberOfGroups <- ((MAX.AGE - MIN.AGE) / width) - 1
-  # groups1 <- seq(MIN.AGE + width, MAX.AGE - width, length.out = numberOfGroups)
-  # groups2 <- c(-Inf, groups1)
-  # groups1 <- c(groups1, MAX.AGE)
-  #
-  # grouping <- groups1[findInterval(d[, age], groups2)]
-
+  # build grouping variable - unnecessary for norming,
+  # but necessary for plotting the percentiles
+  if(nGroup > 0){
+    group <- as.factor( as.numeric( cut(d[, age],nGroup)))
+    d$group <- ave(d[, age], group, FUN = function(x) {
+      mean(x)
+    })
+  }
 
   return(d)
 }
@@ -348,7 +351,7 @@ rankBySlidingWindow <- function(data,
 #' @param age Explanatory variable like age or grade, which was as well used for the grouping.
 #' Can be either the grouping variable itself or a finer grained variable like the exact age. Other
 #' explanatory variables can be used here instead an age variable as well, as long as the variable is
-#' at least ordinal, e. g. language or development levels ... The label 'age' is used, as this is the
+#' at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 #' most common field of application.
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
