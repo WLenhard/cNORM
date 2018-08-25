@@ -45,3 +45,31 @@
 #' @name ppvt
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"
+
+#' BMI growth curves from age 2 to 25
+#'
+#' By the courtesy of the Center of Disease Control (CDC), cNORM includes human growth data for children and adolescents
+#' age 2 to 25 that can be used to model trajectories of the body mass index and to estimate centiles for clinical
+#' definitions of under- and overweight. The data stems from the NHANES surveys in the US and was published in 2012
+#' as public domain. The data was cleaned by removing missing values and it includes the following variables from or
+#' based on the original dataset.
+#'
+#' @format A data frame with 45053 rows and 7 variables:
+#' \describe{
+#'   \item{age}{continuous age in years, based on the month variable}
+#'   \item{group}{age group; chronological age in years at the time of examination}
+#'   \item{month}{chronological age in month at the time of examination}
+#'   \item{sex}{sex of the participant, 1 = male, 2 = female}
+#'   \item{height}{height of the participan in cm}
+#'   \item{weight}{weight of the participan in kg}
+#'   \item{bmi}{the body mass index, computed by (weight in kg)/(height in m)^2}
+#' }
+#' @docType data
+#' @keywords datasets
+#' @source \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
+#' @references CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related
+#' Documentation. available \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx} (date of retrieval: 25/08/2018)
+#' @keywords datasets, growth curves, bmi
+#' @name CDC
+#' @format A data frame with 45035 rows and 7 columns
+"CDC"

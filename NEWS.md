@@ -7,6 +7,17 @@ This file documents the development of the package as well as open issues or poi
 *   Shiny
 
 
+
+### Version in 0.9.5
+Date: 2018.08.25
+
+Changes:
+
+*   New, large dataset for BMI centile estimation from CDC included, type ?CDC for explanation
+*   Extensive documentation available via https://www.psychometrica.de/cNorm_en.html (in progress)
+
+
+
 ### Version in 0.9.4
 Date: 2018.08.23
 

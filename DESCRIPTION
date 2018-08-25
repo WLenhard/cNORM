@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: 'Continuous Norming in R'
-Version: 0.9.4
+Version: 0.9.5
 Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut], Sebastian Gary [ctb]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-08-23
@@ -27,5 +27,5 @@ NeedsCompilation: no
 Repository: CRAN
 Encoding: UTF-8
 LazyData: true
-URL: https://github.com/WLenhard/cNORM
+URL: https://www.psychometrica.de/cNorm_en.html, https://github.com/WLenhard/cNORM
 BugReports: https://github.com/WLenhard/cNORM/issues
