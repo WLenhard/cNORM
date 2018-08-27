@@ -29,9 +29,9 @@ plotValues <- function(data, model, group = "group", raw = "raw") {
   d$group <- as.factor(d$group)
   d$raw <- data[raw]
   lattice::xyplot(fitted ~ raw | group, d,
-    main = paste("Actual vs. predicted raw values by ", group),
-    ylab = "Predicted values",
-    xlab = "Actual values",
+    main = paste("Manifest vs. Fitted Raw Scores by ", group),
+    ylab = "Fitted Scores",
+    xlab = "Manifest Scores",
     grid = TRUE,
     auto.key = TRUE,
     abline = c(0, 1), lwd = 1
