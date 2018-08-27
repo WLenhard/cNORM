@@ -1,13 +1,13 @@
-#' Plot actual and predicted raw values
+#' Plot manifest and fitted raw scores
 #'
-#' The function plots the raw data against the predicted values from
+#' The function plots the raw data against the fitted scores from
 #' the regression model per group. This helps to inspect the precision
-#' of the modeling process. The values should not deviate too far from
+#' of the modeling process. The scores should not deviate too far from
 #' regression line.
 #' @param data The raw data within a data.frame
 #' @param model The regression model
 #' @param group The grouping variable
-#' @param raw The raw value variable
+#' @param raw The raw score variable
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
