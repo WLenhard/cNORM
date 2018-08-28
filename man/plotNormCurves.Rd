@@ -10,33 +10,33 @@ plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = 2,
 \arguments{
 \item{model}{The model from the bestModel function}
 
-\item{normList}{Vector with norm values to display}
+\item{normList}{Vector with norm scores to display}
 
 \item{minAge}{Age to start with checking}
 
 \item{maxAge}{Upper end of the age check}
 
 \item{step}{Stepping parameter for the age check, usually 1 or 0.1; lower
-values indicate higher precision / closer checks}
+scores indicate higher precision / closer checks}
 
-\item{minRaw}{Lower end of the raw value range, used for clipping implausible results
+\item{minRaw}{Lower end of the raw score range, used for clipping implausible results
 (default = 0)}
 
-\item{maxRaw}{Upper end of the raw value range, used for clipping implausible results}
+\item{maxRaw}{Upper end of the raw score range, used for clipping implausible results}
 }
 \description{
 The function plots the norm curves based on the regression model.
 Please check the function for inconsistent curves: The different
 curves should not intersect. Violations of this assumption are a strong
 indication for problems
-in modeling the relationship between raw and norm values. There are
+in modeling the relationship between raw and norm scores. There are
 several reasons, why this might occur:
 \enumerate{
-  \item Vertical extrapolation: Choosing extreme norm values, e. g. values
-  -3 <= x and x >= 3 In order to model these extreme values, a large sample
+  \item Vertical extrapolation: Choosing extreme norm scores, e. g. scores
+  -3 <= x and x >= 3 In order to model these extreme scores, a large sample
   dataset is necessary.
   \item Horizontal extrapolation: Taylor polynomials converge in a certain
-  radius. Using the model values outside the original dataset may
+  radius. Using the model scores outside the original dataset may
   lead to inconsistent results.
   \item The data cannot be modeled with Taylor polynomials, or you need
   another power parameter (k) or R2 for the model.

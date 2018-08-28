@@ -8,6 +8,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 0.9.6
+Date: 2018.08.28
+
+Changes:
+
+*   Minor improvements in function descriptions
+*   API of plotSubset changed due to new plotting options
+
+
+
 ### Version in 0.9.5
 Date: 2018.08.25
 

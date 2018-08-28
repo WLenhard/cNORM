@@ -14,32 +14,32 @@ plotDerivative(model, minAge = 2, maxAge = 5, minNorm = 25,
 
 \item{maxAge}{Upper end of the age check}
 
-\item{minNorm}{Lower end of the norm value range, in case of T values, 25 might be good}
+\item{minNorm}{Lower end of the norm score range, in case of T scores, 25 might be good}
 
-\item{maxNorm}{Upper end of the norm value range, in case of T values, 25 might be good}
+\item{maxNorm}{Upper end of the norm score range, in case of T scores, 25 might be good}
 
 \item{stepAge}{Stepping parameter for the age check, usually 1 or 0.1; lower
 values indicate higher precision / closer checks}
 
-\item{stepNorm}{Stepping parameter for norm values}
+\item{stepNorm}{Stepping parameter for norm scores}
 
-\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+\item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \description{
 Plots the values obtained via the first derivation of the regression model
-in dependence of the norm value. The results indicate the progression of the
-norm values within each age group. The regression based modeling approach
-relies on the assumption of a linear progression of the norm values.
-Negative values in the first order derivation indicate a violation of this
-assumption. Values near zero
+in dependence of the norm score. The results indicate the progression of the
+norm scores within each age group. The regression based modeling approach
+relies on the assumption of a linear progression of the norm scores.
+Negative scores in the first order derivation indicate a violation of this
+assumption. Scores near zero
 are typical for bottom and ceiling effects in the raw data.
 The regression models usually converge within the range of the original
 values. In case of vertical and horizontal extrapolation, with increasing
 distance to the original data, the risk of assumption violation increases
 as well.
 ATTENTION: plotDerivative is currently still incompatible with reversed raw
-value scales ('descent' option)
+score scales ('descent' option)
 }
 \examples{
 # Load example data set, compute model and plot results

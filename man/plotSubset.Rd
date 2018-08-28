@@ -4,13 +4,14 @@
 \alias{plotSubset}
 \title{Evaluate information criteria for regression model}
 \usage{
-plotSubset(model, bic = FALSE)
+plotSubset(model, type = 1)
 }
 \arguments{
 \item{model}{The regression model from the bestModel function}
 
-\item{bic}{Display the log transformed Mallow's Cp (bic = FALSE; default)
-or the Bayesian Information Criterion (BIC)}
+\item{type}{Type of chart with 0 = adjusted R2 by number of predictors,
+1 = log transformed Mallow's Cp by adjusted R2 and 2 = Bayesian Information
+Criterion (BIC) by adjusted R2}
 }
 \description{
 Plots the information criterion - either Cp (default) or BIC - against
@@ -32,5 +33,5 @@ m <- bestModel(data = normData)
 plotSubset(m)
 }
 \seealso{
-bestModel, plotPercentiles
+bestModel, plotPercentiles, printSubset
 }

@@ -10,13 +10,13 @@ plotPercentiles(data, model, minRaw = 0, maxRaw = 1000,
   scale = "T", type = 7)
 }
 \arguments{
-\item{data}{The raw data including the percentiles and norm values}
+\item{data}{The raw data including the percentiles and norm scores}
 
 \item{model}{The model from the bestModel function}
 
-\item{minRaw}{Lower bound of the raw value scale (default = 0)}
+\item{minRaw}{Lower bound of the raw score (default = 0)}
 
-\item{maxRaw}{Upper bound of the raw value scale}
+\item{maxRaw}{Upper bound of the raw score}
 
 \item{minAge}{Variable to restrict the lower bound of the plot to a specific age}
 
@@ -27,9 +27,9 @@ plotPercentiles(data, model, minRaw = 0, maxRaw = 1000,
 \item{group}{The name of the grouping variable; the distinct groups are automatically
 determined}
 
-\item{percentiles}{Vector with percentile values, ranging from 0 to 1 (exclusive)}
+\item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
 
-\item{scale}{The norm value scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+\item{scale}{The norm scale, either 'T' (default), 'IQ', 'z', 'percentile' or
 self defined with a double vector with the mean and standard deviation,
 f. e. c(10, 3) for Wechsler scale index points}
 
@@ -42,7 +42,7 @@ the actual percentiles from the raw data. As in 'plotNormCurves',
 please check for inconsistent curves, especially intersections.
 Violations of this assumption are a strong
 indication for problems
-in modeling the relationship between raw and norm values.
+in modeling the relationship between raw and norm scores.
 In general, extrapolation (point 1 and 2) can carefully be done to a
 certain degree outside the original sample, but it should in general
 be handled with caution.

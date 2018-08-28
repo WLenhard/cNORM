@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plotValues}
 \alias{plotValues}
-\title{Plot actual and predicted raw values}
+\title{Plot manifest and fitted raw scores}
 \usage{
 plotValues(data, model, group = "group", raw = "raw")
 }
@@ -13,12 +13,12 @@ plotValues(data, model, group = "group", raw = "raw")
 
 \item{group}{The grouping variable}
 
-\item{raw}{The raw value variable}
+\item{raw}{The raw score variable}
 }
 \description{
-The function plots the raw data against the predicted values from
+The function plots the raw data against the fitted scores from
 the regression model per group. This helps to inspect the precision
-of the modeling process. The values should not deviate too far from
+of the modeling process. The scores should not deviate too far from
 regression line.
 }
 \examples{
