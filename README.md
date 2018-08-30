@@ -10,7 +10,7 @@ screenings in the medical domain. It is based on the approach suggested by A. Le
 Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
 (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores.
 cNORM addresses these problems and also has the added advantage of not requiring
-assumptions about the distribution of the raw data: The norm values are established from
+assumptions about the distribution of the raw data: The standard scores are established from
 raw data by modeling the latter ones as a function  of both percentile scores and an
 explanatory variable (e.g., age) through Taylor polynomials. The method minimizes
 bias arising from sampling and measurement error, while handling marked deviations from

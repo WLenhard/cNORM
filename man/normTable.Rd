@@ -12,13 +12,13 @@ normTable(A, model, minNorm = 25, maxNorm = 75, minRaw = -Inf,
 
 \item{model}{The regression model}
 
-\item{minNorm}{The lower bound of the norm value range}
+\item{minNorm}{The lower bound of the norm score range}
 
-\item{maxNorm}{The upper bound of the norm value range}
+\item{maxNorm}{The upper bound of the norm score range}
 
-\item{minRaw}{clipping parameter for the lower bound of raw values}
+\item{minRaw}{clipping parameter for the lower bound of raw scores}
 
-\item{maxRaw}{clipping parameter for the upper bound of raw values}
+\item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
 
@@ -26,15 +26,15 @@ normTable(A, model, minNorm = 25, maxNorm = 75, minRaw = -Inf,
 indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \value{
-data.frame with norm values and the predicted raw value
+data.frame with norm scores and the predicted raw scores
 }
 \description{
 This function generates a norm table for a specific age based on the regression
-model by assigning raw values to norm values. Please specify the
-range of norm values, you want to cover. A T value of 25 corresponds to a percentile
+model by assigning raw scores to norm scores. Please specify the
+range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
 of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
 the population. Please be careful when extrapolating vertically (at the lower and
-upper end of the age specific distribution). Depending on the size of your norm
+upper end of the age specific distribution). Depending on the size of your standardization
 sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 }
 \examples{

@@ -7,21 +7,21 @@
 prepareData(data = NULL, group = "group")
 }
 \arguments{
-\item{data}{data.frame with a grouping variable named 'group' and a raw value variable
+\item{data}{data.frame with a grouping variable named 'group' and a raw score variable
 named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
 the procedure}
 
 \item{group}{manually specify the grouping variable in the data}
 }
 \value{
-data frame including the norm values, powers and interactions of the norm value and
+data frame including the norm scores, powers and interactions of the norm score and
 grouping variable
 }
 \description{
 This is a convenience method to either load the inbuilt sample dataset, or
-to provide a data frame with the variables "raw" (for the raw values) and "group"
+to provide a data frame with the variables "raw" (for the raw scores) and "group"
 The function ranks the data within groups, computes norm values, powers of the norm
-values and interactions. Afterwards the best fitting model is determined, based on
+scores and interactions. Afterwards the best fitting model is determined, based on
 all default parameters.
 }
 \examples{

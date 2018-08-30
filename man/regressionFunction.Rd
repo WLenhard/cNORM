@@ -19,7 +19,7 @@ The regression formula as a string
 \description{
 The method builds the regression function for the regression model,
 including the beta weights.
-It can be used to predict the raw values based on age and location.
+It can be used to predict the raw scores based on age and location.
 }
 \examples{
 normData <- prepareData()

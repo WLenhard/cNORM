@@ -25,7 +25,7 @@ the report
 }
 \description{
 Regression model only work in a specific range and extrapolation horizontally (outside
-the original range) or vertically (extreme norm values) might lead to inconsistent
+the original range) or vertically (extreme norm scores) might lead to inconsistent
 results. The function generates a message, indicating extrapolation and the range of the original data.
 }
 \examples{

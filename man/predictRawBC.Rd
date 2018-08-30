@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxcox.R
 \name{predictRawBC}
 \alias{predictRawBC}
-\title{Calculate the raw value for a given percentile based on the paramteric box cox distribution}
+\title{Calculate the raw score for a given percentile based on the paramteric box cox distribution}
 \usage{
 predictRawBC(boxcoxParameters, percentile)
 }
@@ -24,7 +24,7 @@ a percentile.
 # model sample data set
 model <- bestModel(prepareData())
 
-# fitting values of regression model box cox power function at specific age and retrieving
+# fitting scores of regression model box cox power function at specific age and retrieving
 # the parameters for the box cox power function
 bcParameters <- boxcox(model, 3)
 

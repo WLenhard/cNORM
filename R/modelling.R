@@ -16,12 +16,12 @@
 #' the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
 #' for the analyses.
 #' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-#' and predicted versus actual values can be plotted with 'plotValues' and 'plotPercentiles'.
+#' and fitted versus manifest scores can be plotted with 'plotValues' and 'plotPercentiles'.
 #'
 #' @param data The preprocessed dataset, which should include the variables 'raw'
-#'  and the powers and interactions of the norm value (L = Location; usually T values)
+#'  and the powers and interactions of the norm score (L = Location; usually T scores)
 #'  and an explanatory variably (usually age = A)
-#' @param raw the name of the raw value variable (default raw)
+#' @param raw the name of the raw score variable (default raw)
 #' @param terms Selection criterion for model building. The best fitting model with
 #' this number of terms is used
 #' @param R2 Adjusted R square as a stopping criterion for the model building
@@ -213,12 +213,12 @@ printSubset <- function(model){
 #' Check the consistency of the norm data model
 #'
 #' While abilities increase and decline over age, within one age group, the
-#' norm values always have to show a linear increase with increasing raw
-#' values. Violations of this assumption are a strong indication for problems
-#' in modeling the relationship between raw and norm values. There are
+#' norm scores always have to show a linear increase with increasing raw
+#' scores. Violations of this assumption are a strong indication for problems
+#' in modeling the relationship between raw and norm scores. There are
 #' several reasons, why this might occur:
 #' \enumerate{
-#'   \item Vertical extrapolation: Choosing extreme norm values, e. g. values
+#'   \item Vertical extrapolation: Choosing extreme norm scores, e. g. values
 #'   -3 <= x and x >= 3 In order to model these extreme values, a large sample
 #'   dataset is necessary.
 #'   \item Horizontal extrapolation: Taylor polynomials converge in a certain
@@ -238,12 +238,12 @@ printSubset <- function(model){
 #' values indicate higher precision / closer checks
 #' @param minNorm Lower end of the norm value range
 #' @param maxNorm Upper end of the norm value range
-#' @param minRaw clipping parameter for the lower bound of raw values
-#' @param maxRaw clipping parameter for the upper bound of raw values
+#' @param minRaw clipping parameter for the lower bound of raw scores
+#' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param stepNorm Stepping parameter for the norm table check within age with lower
-#' values indicating a higher precision. The choice depends of the norm scale
-#' used. With T values a stepping parameter of 1 is suitable
-#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' scores indicating a higher precision. The choice depends of the norm scale
+#' used. With T scores a stepping parameter of 1 is suitable
+#' @param descend Reverse raw scores order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
@@ -345,7 +345,7 @@ checkConsistency <- function(model,
 #'
 #' The method builds the regression function for the regression model,
 #' including the beta weights.
-#' It can be used to predict the raw values based on age and location.
+#' It can be used to predict the raw scores based on age and location.
 #' @param model The regression model from the bestModel function
 #' @param raw The name of the raw value variable (default 'raw')
 #' @param digits Number of digits for formatting the coefficients
@@ -386,7 +386,7 @@ regressionFunction <- function(model, raw = "raw", digits=NULL) {
 #'
 #' Calculates the first order derivative of the location / norm value from the regression model. This
 #' is useful for finding violations of model assumptions and problematic distribution features as
-#' f. e. bottom and ceiling effects, non-progressive norm values within an age group or in general
+#' f. e. bottom and ceiling effects, non-progressive norm scores within an age group or in general
 #' intersecting percentile curves.
 #' @param model The regression model
 #' @return The derived coefficients
@@ -438,7 +438,7 @@ derive <- function(model) {
 #' Check for horizontal and vertical extrapolation
 #'
 #' Regression model only work in a specific range and extrapolation horizontally (outside
-#' the original range) or vertically (extreme norm values) might lead to inconsistent
+#' the original range) or vertically (extreme norm scores) might lead to inconsistent
 #' results. The function generates a message, indicating extrapolation and the range of the original data.
 #' @param model The regression model
 #' @param minAge The lower age bound
@@ -456,11 +456,11 @@ rangeCheck <- function(model, minAge=NULL, maxAge=NULL, minNorm=NULL, maxNorm=NU
   summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm value range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
   reportOnly <- (is.null(minAge)||is.null(maxAge)||is.null(minNorm)||is.null(maxNorm))
   if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
-    summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm values outside the original sample.", summary, sep="\n")
+    summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep="\n")
   } else if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)) {
     summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep="\n")
   } else if (!reportOnly&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
-    summary <- paste("Vertical extrapolation detected. Be careful using extreme norm values exceeding the values of the original sample.", summary, sep="\n")
+    summary <- paste("Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.", summary, sep="\n")
   }
 
   return(summary)

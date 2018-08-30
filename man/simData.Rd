@@ -14,9 +14,9 @@ simData(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50,
 
 \item{maxAge}{the upper age bound}
 
-\item{minRaw}{the lower bound of raw values}
+\item{minRaw}{the lower bound of raw scores}
 
-\item{maxRaw}{the upper bound of raw values}
+\item{maxRaw}{the upper bound of raw scores}
 
 \item{nGroups}{number of samples, that should be drawn}
 

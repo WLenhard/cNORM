@@ -421,7 +421,7 @@ plotSubset <- function(model, type = 1) {
 
 #' Plot first order derivative of regression model
 #'
-#' Plots the values obtained via the first order derivative of the regression model
+#' Plots the scores obtained via the first order derivative of the regression model
 #' in dependence of the norm score. The results indicate the progression of the
 #' norm scores within each age group. The regression based modeling approach
 #' relies on the assumption of a linear progression of the norm scores.

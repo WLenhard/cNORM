@@ -1,18 +1,18 @@
 #' Computes the curve for a specific T value
 #'
-#' As with this continuous norming regression approach, raw values are modeled as a function of age and norm value
-#' (location), getNormCurve is a straightforward approach to show the raw value development over
+#' As with this continuous norming regression approach, raw scores are modeled as a function of age and norm score
+#' (location), getNormCurve is a straightforward approach to show the raw score development over
 #' age, while keeping the norm value constant. This way, e. g. academic performance or intelligence development
 #' of a specific ability is shown.
-#' @param normValue The norm value, e. g. T value
+#' @param normValue The norm scores, e. g. T value
 #' @param model The model from the regression modeling
 #' @param minAge Age to start from
 #' @param maxAge Age to stop at
 #' @param step Stepping parameter for the precision when retrieving of the values, lower
 #' values indicate higher precision (default 0.1).
-#' @param minRaw lower bound of the range of raw values (default = 0)
-#' @param maxRaw upper bound of raw values
-#' @return data.frame of the values raw, age and norm
+#' @param minRaw lower bound of the range of raw scores (default = 0)
+#' @param maxRaw upper bound of raw scores
+#' @return data.frame of the variables raw, age and norm
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
@@ -73,7 +73,7 @@ getNormCurve <-
 #' usually set to the upper bound of the range of values of the test
 #' @return the predicted raw value
 #' @examples
-#' # Prediction of single values
+#' # Prediction of single scores
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
 #' predictRaw(35, 3.5, m$coefficients)
@@ -143,22 +143,22 @@ predictRaw <-
 #' Create a norm table based on model for specific age
 #'
 #' This function generates a norm table for a specific age based on the regression
-#' model by assigning raw values to norm values. Please specify the
-#' range of norm values, you want to cover. A T value of 25 corresponds to a percentile
+#' model by assigning raw scores to norm scores. Please specify the
+#' range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
 #' of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
 #' the population. Please be careful when extrapolating vertically (at the lower and
-#' upper end of the age specific distribution). Depending on the size of your norm
+#' upper end of the age specific distribution). Depending on the size of your standardization
 #' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 #' @param A the age
 #' @param model The regression model
-#' @param minNorm The lower bound of the norm value range
-#' @param maxNorm The upper bound of the norm value range
-#' @param minRaw clipping parameter for the lower bound of raw values
-#' @param maxRaw clipping parameter for the upper bound of raw values
+#' @param minNorm The lower bound of the norm score range
+#' @param maxNorm The upper bound of the norm score range
+#' @param minRaw clipping parameter for the lower bound of raw scores
+#' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
 #' indicate higher performance. Relevant f. e. in case of modelling errors
-#' @return data.frame with norm values and the predicted raw value
+#' @return data.frame with norm scores and the predicted raw scores
 #' @seealso rawTable
 #' @examples
 #' normData <- prepareData()
@@ -203,29 +203,29 @@ normTable <- function(A,
   return(normTable)
 }
 
-#' Create a table with norms assigned to raw values for a specific age based on the regression model
+#' Create a table with norm scores assigned to raw scores for a specific age based on the regression model
 #'
 #' This function is comparable to 'normTable', despite it reverses the assignment:
-#' A table with raw values and the according norm values for a specific age based on the regression
+#' A table with raw scores and the according norm scores for a specific age based on the regression
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
 #' and smaller stepping, this function becomes computational intensive, especially when quick is set
 #' to FALSE for a thorough search.
 #' @param A the age
 #' @param model The regression model
-#' @param minRaw The lower bound of the raw value range
-#' @param maxRaw The upper bound of the raw value range
-#' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
-#' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
-#' @param step Stepping parameter for the raw values (default 1)
-#' @param precision Precision for the norm value estimation. Lower values indicate
+#' @param minRaw The lower bound of the raw score range
+#' @param maxRaw The upper bound of the raw score range
+#' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
+#' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
+#' @param step Stepping parameter for the raw scores (default 1)
+#' @param precision Precision for the norm score estimation. Lower values indicate
 #' higher precision (default .01)
-#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' @param descend Reverse raw score order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modelling errors
-#' @param quick Forces the use of a shotgun method to quickly find the norm values
+#' @param quick Forces the use of a shotgun method to quickly find the norm scores
 #' with the desired precision. Reproduces the same results as the thorough search in
 #' case the model assumptions are met.
-#' @return data.frame with raw values and the predicted norm value
+#' @return data.frame with raw scores and the predicted norm scores
 #' @seealso normTable
 #' @examples
 #' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
@@ -326,16 +326,16 @@ rawTable <- function(A,
 #'
 #' @param A the age
 #' @param model The regression model
-#' @param minRaw The lower bound of the raw value range
-#' @param maxRaw The upper bound of the raw value range
-#' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
-#' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
+#' @param minRaw The lower bound of the raw score range
+#' @param maxRaw The upper bound of the raw score range
+#' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
+#' @param maxNorm Clipping parameter for the upper bound of norm scores (default 75)
 #' @param step Stepping parameter for the raw values (default 1)
-#' @param precision Precision for the norm value estimation. Lower values indicate
+#' @param precision Precision for the norm score estimation. Lower values indicate
 #' higher precision (default .1)
-#' @param descend Reverse raw value order. If set to TRUE, lower raw values
+#' @param descend Reverse raw value order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modelling errors
-#' @return data.frame with raw values and the predicted norm value
+#' @return data.frame with raw scores and the predicted norm scores
 rawTableQuick <- function(A,
                           model,
                           minRaw,
@@ -451,7 +451,7 @@ rawTableQuick <- function(A,
 #' @param minNorm The lower bound of the norm value range
 #' @param maxNorm The upper bound of the norm value range
 #' @param step Stepping parameter with lower values indicating higher precision
-#' @return data.frame with norm values and the predicted value based on the
+#' @return data.frame with norm scores and the predicted scores based on the
 #' derived regression function
 #' @seealso plotDerivative, derive
 #' @examples
@@ -486,25 +486,25 @@ derivationTable <-
 #' Retrieve norm value for raw score at a specific age
 #'
 #' In real test scenarios, usually the results are available as raw values, for
-#' which norm values have to be looked up. This function conducts this reverse
+#' which norm scores have to be looked up. This function conducts this reverse
 #' transformation via a numerical solution: A precise norm table is generated and
-#' the closest fitting norm value for a raw value is returned.
+#' the closest fitting norm score for a raw score is returned.
 #' @param raw The raw value, either single numeric or list of values
 #' @param A the age, either single numeric or list of values
 #' @param model The regression model
-#' @param minNorm The lower bound of the norm value range
-#' @param maxNorm The upper bound of the norm value range
-#' @param minRaw clipping parameter for the lower bound of raw values
-#' @param maxRaw clipping parameter for the upper bound of raw values
-#' @param precision The precision for the norm value generation with lower values
-#' indicating a higher precision. In case of T values, precision = 0.1 is sufficient.
-#' @return The predicted norm value for a raw value, either single value or list of results
+#' @param minNorm The lower bound of the norm score range
+#' @param maxNorm The upper bound of the norm score range
+#' @param minRaw clipping parameter for the lower bound of raw scores
+#' @param maxRaw clipping parameter for the upper bound of raw scores
+#' @param precision The precision for the norm score generation with lower values
+#' indicating a higher precision. In case of T scores, precision = 0.1 is sufficient.
+#' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
-#' # Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw values
+#' # Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw scores
 #' # and age to calculate predicted norm values for original data.
 #' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
 #'

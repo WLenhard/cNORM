@@ -25,15 +25,15 @@
 #' Set up example dataset and compute model
 #'
 #' This is a convenience method to either load the inbuilt sample dataset, or
-#' to provide a data frame with the variables "raw" (for the raw values) and "group"
+#' to provide a data frame with the variables "raw" (for the raw scores) and "group"
 #' The function ranks the data within groups, computes norm values, powers of the norm
-#' values and interactions. Afterwards the best fitting model is determined, based on
+#' scores and interactions. Afterwards the best fitting model is determined, based on
 #' all default parameters.
-#' @param data data.frame with a grouping variable named 'group' and a raw value variable
+#' @param data data.frame with a grouping variable named 'group' and a raw score variable
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
 #' the procedure
 #' @param group manually specify the grouping variable in the data
-#' @return data frame including the norm values, powers and interactions of the norm value and
+#' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
 #' normData <- prepareData()
@@ -54,14 +54,14 @@ prepareData <- function(data = NULL, group = "group") {
   return(normData)
 }
 
-#' Determine the norm values of the participants in each subsample
+#' Determine the norm scores of the participants in each subsample
 #'
 #' This is the initial step, usually done in all kinds of test norming projects,
 #' after the scale is constructed and the norm sample is established. First,
 #' the data is grouped according to a grouping variable and afterwards, the percentile
 #' for each raw value is retrieved. The percentile can be used for the modeling
 #' procedure, but in case, the samples to not deviate too much from normality,
-#' T, IQ or z values can be computed via a normal rank procedure based on the
+#' T, IQ or z scores can be computed via a normal rank procedure based on the
 #' inverse cumulative normal distribution. In case of bindings, we use the medium rank
 #' and there are different methods for estimating the percentiles (default RankIt).
 #'
@@ -77,15 +77,15 @@ prepareData <- function(data = NULL, group = "group") {
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index points
 #' @param descend ranking order (default descent = FALSE): inverses the
-#' ranking order with higher raw values getting lower norm values; relevant
-#' for example when norming error values, where lower values mean higher
+#' ranking order with higher raw scores getting lower norm scores; relevant
+#' for example when norming error scores, where lower scores mean higher
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
-#' #Transformation with default parameters: RandIt and converting to T values
+#' #Transformation with default parameters: RandIt and converting to T scores
 #' normData <- rankByGroup(elfe, group = "group")
 #'
 #' #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
@@ -179,7 +179,7 @@ rankByGroup <-
   }
 
 
-#' Determine the norm values of the participants by sliding window (experimental)
+#' Determine the norm scores of the participants by sliding window (experimental)
 #'
 #' The function retrieves all individuals in the predefined age range (x +/- width/2)
 #' around each case and ranks that individual based on this individually drawn sample.
@@ -205,8 +205,8 @@ rankByGroup <-
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index points
 #' @param descend ranking order (default descent = FALSE): inverses the
-#' ranking order with higher raw values getting lower norm values; relevant
-#' for example when norming error values, where lower values mean higher
+#' ranking order with higher raw scores getting lower norm scores; relevant
+#' for example when norming error scores, where lower scores mean higher
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
@@ -214,7 +214,7 @@ rankByGroup <-
 #' equi distant groups, named by the group mean age of each group. It creates the
 #' column 'group' in the data.frame and in case, there is already one with that name,
 #' overwrites it.
-#' @return the dataset with the individual percentiles and norm values
+#' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
 #' # Transformation using a sliding window
@@ -333,7 +333,7 @@ rankBySlidingWindow <- function(data,
 #' Compute powers of the explanatory variable a as well as of the person
 #' location l (data preparation)
 #'
-#' The function computes powers of the norm variable e. g. T values (location, L),
+#' The function computes powers of the norm variable e. g. T scores (location, L),
 #' an explanatory variable, e. g. age or grade of a data frame (age, A) and the interactions of both (L X A). The k
 #' variable indicates the degree up to which powers and interactions are build.
 #' These predictors can be used later on in the 'bestModel' function to model the
@@ -347,7 +347,7 @@ rankBySlidingWindow <- function(data,
 #' @param data data.frame with the norm data
 #' @param k degree
 #' @param norm the variable containing the norm data in the data.frame; might be
-#' T values, IQ values, percentiles ...
+#' T scores, IQ scores, percentiles ...
 #' @param age Explanatory variable like age or grade, which was as well used for the grouping.
 #' Can be either the grouping variable itself or a finer grained variable like the exact age. Other
 #' explanatory variables can be used here instead an age variable as well, as long as the variable is

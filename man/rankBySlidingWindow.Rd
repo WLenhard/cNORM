@@ -2,7 +2,7 @@
 % Please edit documentation in R/preparation.R
 \name{rankBySlidingWindow}
 \alias{rankBySlidingWindow}
-\title{Determine the norm values of the participants by sliding window (experimental)}
+\title{Determine the norm scores of the participants by sliding window (experimental)}
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width,
   method = 4, scale = "T", descend = FALSE, descriptives = TRUE,
@@ -28,8 +28,8 @@ transformation); a double vector with the mean and standard deviation can as wel
 be provided f. e. c(10, 3) for Wechsler scale index points}
 
 \item{descend}{ranking order (default descent = FALSE): inverses the
-ranking order with higher raw values getting lower norm values; relevant
-for example when norming error values, where lower values mean higher
+ranking order with higher raw scores getting lower norm scores; relevant
+for example when norming error scores, where lower scores mean higher
 performance}
 
 \item{descriptives}{If set to TRUE (default), information in n, mean, median and
@@ -41,7 +41,7 @@ column 'group' in the data.frame and in case, there is already one with that nam
 overwrites it.}
 }
 \value{
-the dataset with the individual percentiles and norm values
+the dataset with the individual percentiles and norm scores
 }
 \description{
 The function retrieves all individuals in the predefined age range (x +/- width/2)

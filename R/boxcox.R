@@ -14,16 +14,16 @@
 #' @param m Scale mean of norm scale (default 50)
 #' @param sd Scale sd of norm scale (default 10)
 #'
-#' @return a list including the data.frame with percentiles, norm values, fitted raw values of the regression
-#' model and the fitted values of the box cox curve fitting (indicated by variable names 'BC'), as well as the
+#' @return a list including the data.frame with percentiles, norm scores, fitted raw scores of the regression
+#' model and the fitted scores of the box cox curve fitting (indicated by variable names 'BC'), as well as the
 #' parameters for the box cox function (mean, sd, lambda) for the specified the age:
 #' \item{median}{The median of the raw value distribution, estimated by the regression model}
 #' \item{meanBC}{The mean of the box cox function}
 #' \item{sdBC}{The standard deviation of the box cox function}
 #' \item{lambdaBC}{The skewness parameter of the box cox function}
 #' \item{age}{The age for which the power function was modelled}
-#' \item{data}{The data frame including the generated percentiles, the according norm values,
-#' the fitted raw values according to the regression model, the retrieved norm value by the box cox transformation,
+#' \item{data}{The data frame including the generated percentiles, the according norm scores,
+#' the fitted raw scores according to the regression model, the retrieved norm scores by the box cox transformation,
 #' the according density and percentile}
 #' @references
 #' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
@@ -37,13 +37,13 @@
 #' # model sample data set
 #' model <- bestModel(prepareData())
 #'
-#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function
 #' bcParameters <- boxcox(model, 3)
 #' @seealso predictNormBC, predictRawBC
 boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 
-  # prepare simulated data and predicted values
+  # prepare simulated data and predicted scores
   data <- seq(from = 0.5 / n, to = (n - 0.5) / n, length.out = n)
   perc <- data
   data <- stats::qnorm(data, mean = m, sd = sd)
@@ -96,7 +96,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
     pow <- pow - 1
   }
 
-  # print values
+  # print results
   message(paste0("BoxCox function parameters for age ", age, ":"))
   message(paste0("m: ", mlambda))
   message(paste0("sd: ", sdlambda))
@@ -118,7 +118,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 }
 
 
-#' Calculate the raw value for a given percentile based on the paramteric box cox distribution
+#' Calculate the raw score for a given percentile based on the paramteric box cox distribution
 #'
 #' In addition of the numeric solution to the regression function on 'predictRaw', this function
 #' can be used retrieving the raw values at a specific age via the parametric box cox power
@@ -141,7 +141,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #' # model sample data set
 #' model <- bestModel(prepareData())
 #'
-#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function
 #' bcParameters <- boxcox(model, 3)
 #'
@@ -173,7 +173,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
 #'
 #' In addition to the numeric solution of the inversion of the regression function applied in
 #' 'predictNormValue', this function
-#' can be used retrieving the norm values at a specific age via the parametric box cox power
+#' can be used retrieving the norm scores at a specific age via the parametric box cox power
 #' transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
 #' a raw value.
 #' @param boxcoxParameters The parameters of the box cox power function, calculated via 'boxcox'
@@ -195,7 +195,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
 #' # model sample data set
 #' model <- bestModel(prepareData())
 #'
-#' # fitting values of regression model box cox power function at specific age and retrieving
+#' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function
 #' bcParameters <- boxcox(model, 3)
 #'
@@ -234,11 +234,11 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
 #'
 #' @param regressionModel The regression model from the 'bestModel' function
 #' @param boxcoxParameters The parameters from the box cox power transformation
-#' @param minRaw The lower bound of raw values; must not fall below 0 due to restrictions of the
+#' @param minRaw The lower bound of raw scores; must not fall below 0 due to restrictions of the
 #' box cox function
-#' @param maxRaw The upper bound of raw values
-#' @param type Type of plot; 0 = Show percentiles as function of raw values, 1 = Show raw values
-#' as function of norm values, 2 = Density plot
+#' @param maxRaw The upper bound of raw scores
+#' @param type Type of plot; 0 = Show percentiles as function of raw scores, 1 = Show raw scores
+#' as function of norm scores, 2 = Density plot
 #'
 #' @export
 #' @seealso boxcox
@@ -251,7 +251,7 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
 #' # compute power function for a specific age, e. g. 9.2
 #' bc <- boxcox(model, 9.2)
 #'
-#' # plot results as a function of norm values
+#' # plot results as a function of norm scores
 #' plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=1)
 #'
 #' # plot density

@@ -9,10 +9,10 @@ bestModel(data, raw = "raw", R2 = 0.99, k = 4, predictors = NULL,
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
-and the powers and interactions of the norm value (L = Location; usually T values)
+and the powers and interactions of the norm score (L = Location; usually T scores)
 and an explanatory variably (usually age = A)}
 
-\item{raw}{the name of the raw value variable (default raw)}
+\item{raw}{the name of the raw score variable (default raw)}
 
 \item{R2}{Adjusted R square as a stopping criterion for the model building
 (default R2 = 0.99)}
@@ -50,7 +50,7 @@ might lead to on over-fit, so be careful! These paramters depend on the distribu
 the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
 for the analyses.
 \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-and predicted versus actual values can be plotted with 'plotValues' and 'plotPercentiles'.
+and fitted versus manifest scores can be plotted with 'plotValues' and 'plotPercentiles'.
 }
 \examples{
 # Standard example with sample data

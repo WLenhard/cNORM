@@ -12,13 +12,13 @@ plotBoxCox(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 100,
 
 \item{boxcoxParameters}{The parameters from the box cox power transformation}
 
-\item{minRaw}{The lower bound of raw values; must not fall below 0 due to restrictions of the
+\item{minRaw}{The lower bound of raw scores; must not fall below 0 due to restrictions of the
 box cox function}
 
-\item{maxRaw}{The upper bound of raw values}
+\item{maxRaw}{The upper bound of raw scores}
 
-\item{type}{Type of plot; 0 = Show percentiles as function of raw values, 1 = Show raw values
-as function of norm values, 2 = Density plot}
+\item{type}{Type of plot; 0 = Show percentiles as function of raw scores, 1 = Show raw scores
+as function of norm scores, 2 = Density plot}
 }
 \description{
 This plot can be used to compare, how well the regression data can be modelled via a
@@ -33,7 +33,7 @@ model <- bestModel(data)
 # compute power function for a specific age, e. g. 9.2
 bc <- boxcox(model, 9.2)
 
-# plot results as a function of norm values
+# plot results as a function of norm scores
 plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=1)
 
 # plot density

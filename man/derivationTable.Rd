@@ -18,7 +18,7 @@ derivationTable(A, model, minNorm = 25, maxNorm = 75, step = 0.1)
 \item{step}{Stepping parameter with lower values indicating higher precision}
 }
 \value{
-data.frame with norm values and the predicted value based on the
+data.frame with norm scores and the predicted scores based on the
 derived regression function
 }
 \description{

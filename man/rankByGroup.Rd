@@ -2,7 +2,7 @@
 % Please edit documentation in R/preparation.R
 \name{rankByGroup}
 \alias{rankByGroup}
-\title{Determine the norm values of the participants in each subsample}
+\title{Determine the norm scores of the participants in each subsample}
 \usage{
 rankByGroup(data, group = "group", raw = "raw", method = 4,
   scale = "T", descend = FALSE, descriptives = TRUE)
@@ -25,8 +25,8 @@ transformation); a double vector with the mean and standard deviation can as wel
 be provided f. e. c(10, 3) for Wechsler scale index points}
 
 \item{descend}{ranking order (default descent = FALSE): inverses the
-ranking order with higher raw values getting lower norm values; relevant
-for example when norming error values, where lower values mean higher
+ranking order with higher raw scores getting lower norm scores; relevant
+for example when norming error scores, where lower scores mean higher
 performance}
 
 \item{descriptives}{If set to TRUE (default), information in n, mean, median and
@@ -41,12 +41,12 @@ after the scale is constructed and the norm sample is established. First,
 the data is grouped according to a grouping variable and afterwards, the percentile
 for each raw value is retrieved. The percentile can be used for the modeling
 procedure, but in case, the samples to not deviate too much from normality,
-T, IQ or z values can be computed via a normal rank procedure based on the
+T, IQ or z scores can be computed via a normal rank procedure based on the
 inverse cumulative normal distribution. In case of bindings, we use the medium rank
 and there are different methods for estimating the percentiles (default RankIt).
 }
 \examples{
-#Transformation with default parameters: RandIt and converting to T values
+#Transformation with default parameters: RandIt and converting to T scores
 normData <- rankByGroup(elfe, group = "group")
 
 #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure

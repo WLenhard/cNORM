@@ -19,18 +19,18 @@ checkConsistency(model, minAge, maxAge, minNorm, maxNorm, minRaw = -Inf,
 
 \item{maxNorm}{Upper end of the norm value range}
 
-\item{minRaw}{clipping parameter for the lower bound of raw values}
+\item{minRaw}{clipping parameter for the lower bound of raw scores}
 
-\item{maxRaw}{clipping parameter for the upper bound of raw values}
+\item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
 \item{stepAge}{Stepping parameter for the age check, usually 1 or 0.1; lower
 values indicate higher precision / closer checks}
 
 \item{stepNorm}{Stepping parameter for the norm table check within age with lower
-values indicating a higher precision. The choice depends of the norm scale
-used. With T values a stepping parameter of 1 is suitable}
+scores indicating a higher precision. The choice depends of the norm scale
+used. With T scores a stepping parameter of 1 is suitable}
 
-\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+\item{descend}{Reverse raw scores order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
 
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
@@ -38,12 +38,12 @@ are displayed (default = FALSE)}
 }
 \description{
 While abilities increase and decline over age, within one age group, the
-norm values always have to show a linear increase with increasing raw
-values. Violations of this assumption are a strong indication for problems
-in modeling the relationship between raw and norm values. There are
+norm scores always have to show a linear increase with increasing raw
+scores. Violations of this assumption are a strong indication for problems
+in modeling the relationship between raw and norm scores. There are
 several reasons, why this might occur:
 \enumerate{
-  \item Vertical extrapolation: Choosing extreme norm values, e. g. values
+  \item Vertical extrapolation: Choosing extreme norm scores, e. g. values
   -3 <= x and x >= 3 In order to model these extreme values, a large sample
   dataset is necessary.
   \item Horizontal extrapolation: Taylor polynomials converge in a certain

@@ -19,16 +19,16 @@ boxcox(model, age, n = 250, m = 50, sd = 10)
 \item{sd}{Scale sd of norm scale (default 10)}
 }
 \value{
-a list including the data.frame with percentiles, norm values, fitted raw values of the regression
-model and the fitted values of the box cox curve fitting (indicated by variable names 'BC'), as well as the
+a list including the data.frame with percentiles, norm scores, fitted raw scores of the regression
+model and the fitted scores of the box cox curve fitting (indicated by variable names 'BC'), as well as the
 parameters for the box cox function (mean, sd, lambda) for the specified the age:
 \item{median}{The median of the raw value distribution, estimated by the regression model}
 \item{meanBC}{The mean of the box cox function}
 \item{sdBC}{The standard deviation of the box cox function}
 \item{lambdaBC}{The skewness parameter of the box cox function}
 \item{age}{The age for which the power function was modelled}
-\item{data}{The data frame including the generated percentiles, the according norm values,
-the fitted raw values according to the regression model, the retrieved norm value by the box cox transformation,
+\item{data}{The data frame including the generated percentiles, the according norm scores,
+the fitted raw scores according to the regression model, the retrieved norm scores by the box cox transformation,
 the according density and percentile}
 }
 \description{
@@ -44,7 +44,7 @@ modelling in order to conduct a parametric fitting of the percentiles.
 # model sample data set
 model <- bestModel(prepareData())
 
-# fitting values of regression model box cox power function at specific age and retrieving
+# fitting scores of regression model box cox power function at specific age and retrieving
 # the parameters for the box cox power function
 bcParameters <- boxcox(model, 3)
 }

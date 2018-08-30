@@ -14,32 +14,32 @@ predictNormValue(raw, A, model, minNorm = 25, maxNorm = 75,
 
 \item{model}{The regression model}
 
-\item{minNorm}{The lower bound of the norm value range}
+\item{minNorm}{The lower bound of the norm score range}
 
-\item{maxNorm}{The upper bound of the norm value range}
+\item{maxNorm}{The upper bound of the norm score range}
 
-\item{minRaw}{clipping parameter for the lower bound of raw values}
+\item{minRaw}{clipping parameter for the lower bound of raw scores}
 
-\item{maxRaw}{clipping parameter for the upper bound of raw values}
+\item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
-\item{precision}{The precision for the norm value generation with lower values
-indicating a higher precision. In case of T values, precision = 0.1 is sufficient.}
+\item{precision}{The precision for the norm score generation with lower values
+indicating a higher precision. In case of T scores, precision = 0.1 is sufficient.}
 }
 \value{
-The predicted norm value for a raw value, either single value or list of results
+The predicted norm score for a raw score, either single value or list of results
 }
 \description{
 In real test scenarios, usually the results are available as raw values, for
-which norm values have to be looked up. This function conducts this reverse
+which norm scores have to be looked up. This function conducts this reverse
 transformation via a numerical solution: A precise norm table is generated and
-the closest fitting norm value for a raw value is returned.
+the closest fitting norm score for a raw score is returned.
 }
 \examples{
 normData <- prepareData()
 m <- bestModel(data=normData)
 
 # return norm value for raw value 21 for grade 2, month 9
-# Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw values
+# Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw scores
 # and age to calculate predicted norm values for original data.
 specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
 

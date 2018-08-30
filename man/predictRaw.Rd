@@ -33,7 +33,7 @@ rather user the predict function of the stats:lm package on the ideal model solu
 You than have to provide a prepared data frame with the according input variables.
 }
 \examples{
-# Prediction of single values
+# Prediction of single scores
 normData <- prepareData()
 m <- bestModel(data = normData)
 predictRaw(35, 3.5, m$coefficients)

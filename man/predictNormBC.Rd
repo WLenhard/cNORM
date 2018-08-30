@@ -21,7 +21,7 @@ the predicted raw value
 \description{
 In addition to the numeric solution of the inversion of the regression function applied in
 'predictNormValue', this function
-can be used retrieving the norm values at a specific age via the parametric box cox power
+can be used retrieving the norm scores at a specific age via the parametric box cox power
 transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
 a raw value.
 }
@@ -29,7 +29,7 @@ a raw value.
 # model sample data set
 model <- bestModel(prepareData())
 
-# fitting values of regression model box cox power function at specific age and retrieving
+# fitting scores of regression model box cox power function at specific age and retrieving
 # the parameters for the box cox power function
 bcParameters <- boxcox(model, 3)
 

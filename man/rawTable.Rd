@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{rawTable}
 \alias{rawTable}
-\title{Create a table with norms assigned to raw values for a specific age based on the regression model}
+\title{Create a table with norm scores assigned to raw scores for a specific age based on the regression model}
 \usage{
 rawTable(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
   step = 1, precision = 0.01, descend = FALSE, quick = TRUE)
@@ -12,32 +12,32 @@ rawTable(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
 
 \item{model}{The regression model}
 
-\item{minRaw}{The lower bound of the raw value range}
+\item{minRaw}{The lower bound of the raw score range}
 
-\item{maxRaw}{The upper bound of the raw value range}
+\item{maxRaw}{The upper bound of the raw score range}
 
-\item{minNorm}{Clipping parameter for the lower bound of norm values (default 25)}
+\item{minNorm}{Clipping parameter for the lower bound of norm scores (default 25)}
 
-\item{maxNorm}{Clipping parameter for the upper bound of norm values (default 25)}
+\item{maxNorm}{Clipping parameter for the upper bound of norm scores (default 25)}
 
-\item{step}{Stepping parameter for the raw values (default 1)}
+\item{step}{Stepping parameter for the raw scores (default 1)}
 
-\item{precision}{Precision for the norm value estimation. Lower values indicate
+\item{precision}{Precision for the norm score estimation. Lower values indicate
 higher precision (default .01)}
 
-\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+\item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
 
-\item{quick}{Forces the use of a shotgun method to quickly find the norm values
+\item{quick}{Forces the use of a shotgun method to quickly find the norm scores
 with the desired precision. Reproduces the same results as the thorough search in
 case the model assumptions are met.}
 }
 \value{
-data.frame with raw values and the predicted norm value
+data.frame with raw scores and the predicted norm scores
 }
 \description{
 This function is comparable to 'normTable', despite it reverses the assignment:
-A table with raw values and the according norm values for a specific age based on the regression
+A table with raw scores and the according norm scores for a specific age based on the regression
 model is generated. This way, the inverse function of the regression model is solved numerically with
 brute force. Please specify the range of raw values, you want to cover. With higher precision
 and smaller stepping, this function becomes computational intensive, especially when quick is set

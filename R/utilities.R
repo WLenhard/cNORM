@@ -24,8 +24,8 @@ skewedNormal <- function(n, location, scale, slant = 10) {
 #' @param n number of observations
 #' @param minAge the lower age bound
 #' @param maxAge the upper age bound
-#' @param minRaw the lower bound of raw values
-#' @param maxRaw the upper bound of raw values
+#' @param minRaw the lower bound of raw scores
+#' @param maxRaw the upper bound of raw scores
 #' @param nGroups number of samples, that should be drawn
 #' @param pow Power factor. Values < 1 represent root functions (e. g. pow = .5)
 #' @param slant Measure for skewness within each sample. Use 0 for symetric normal distributions,

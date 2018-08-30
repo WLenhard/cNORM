@@ -12,24 +12,24 @@ rawTableQuick(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
 
 \item{model}{The regression model}
 
-\item{minRaw}{The lower bound of the raw value range}
+\item{minRaw}{The lower bound of the raw score range}
 
-\item{maxRaw}{The upper bound of the raw value range}
+\item{maxRaw}{The upper bound of the raw score range}
 
-\item{minNorm}{Clipping parameter for the lower bound of norm values (default 25)}
+\item{minNorm}{Clipping parameter for the lower bound of norm scores (default 25)}
 
-\item{maxNorm}{Clipping parameter for the upper bound of norm values (default 25)}
+\item{maxNorm}{Clipping parameter for the upper bound of norm scores (default 75)}
 
 \item{step}{Stepping parameter for the raw values (default 1)}
 
-\item{precision}{Precision for the norm value estimation. Lower values indicate
+\item{precision}{Precision for the norm score estimation. Lower values indicate
 higher precision (default .1)}
 
-\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
+\item{descend}{Reverse raw value order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \value{
-data.frame with raw values and the predicted norm value
+data.frame with raw scores and the predicted norm scores
 }
 \description{
 This function is comparable to 'rawTable', but uses an optimization to reduce computational

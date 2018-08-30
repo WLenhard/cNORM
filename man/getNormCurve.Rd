@@ -8,7 +8,7 @@ getNormCurve(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
   minRaw = -Inf, maxRaw = Inf)
 }
 \arguments{
-\item{normValue}{The norm value, e. g. T value}
+\item{normValue}{The norm scores, e. g. T value}
 
 \item{model}{The model from the regression modeling}
 
@@ -19,16 +19,16 @@ getNormCurve(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
 \item{step}{Stepping parameter for the precision when retrieving of the values, lower
 values indicate higher precision (default 0.1).}
 
-\item{minRaw}{lower bound of the range of raw values (default = 0)}
+\item{minRaw}{lower bound of the range of raw scores (default = 0)}
 
-\item{maxRaw}{upper bound of raw values}
+\item{maxRaw}{upper bound of raw scores}
 }
 \value{
-data.frame of the values raw, age and norm
+data.frame of the variables raw, age and norm
 }
 \description{
-As with this continuous norming regression approach, raw values are modeled as a function of age and norm value
-(location), getNormCurve is a straightforward approach to show the raw value development over
+As with this continuous norming regression approach, raw scores are modeled as a function of age and norm score
+(location), getNormCurve is a straightforward approach to show the raw score development over
 age, while keeping the norm value constant. This way, e. g. academic performance or intelligence development
 of a specific ability is shown.
 }

@@ -27,7 +27,7 @@ values indicate higher precision / closer checks}
 indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \description{
-Plots the values obtained via the first order derivative of the regression model
+Plots the scores obtained via the first order derivative of the regression model
 in dependence of the norm score. The results indicate the progression of the
 norm scores within each age group. The regression based modeling approach
 relies on the assumption of a linear progression of the norm scores.

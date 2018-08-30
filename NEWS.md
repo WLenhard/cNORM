@@ -8,6 +8,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 0.9.7
+Date: 2018.08.30
+
+Changes:
+
+*   License changed to AGPL
+*   Capitalizations in labels of plots
+*   min and max renamed to minRaw and maxRaw (where appropriate)
+*   terminology: standard or normal score instead of norm; score instead of value
+
+
+
 ### Version in 0.9.6
 Date: 2018.08.28
 
