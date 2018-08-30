@@ -289,8 +289,8 @@ plotPercentiles <- function(data,
   plot <- lattice::xyplot(stats::formula(xyFunction), percentile,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
-    main = "Manifest and fitted percentile curves",
-    ylab = paste0("Raw score (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
+    main = "Manifest and Fitted Percentile Curves",
+    ylab = paste0("Raw Score (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
     col = COL2, lwd = 2, grid = TRUE,
     key = list(
       corner = c(0.99, 0.01),
@@ -347,8 +347,8 @@ plotSubset <- function(model, type = 1) {
           lty = c(1, 2), lwd = 2
         ),
         text = list(c(
-          "model in ascending order",
-          "cutoff value"
+          "Model in Ascending Order",
+          "Cutoff Value"
         ))
       ), panel = function(x, y, ...) {
         lattice::panel.abline(
@@ -376,8 +376,8 @@ plotSubset <- function(model, type = 1) {
           lty = c(1, 2), lwd = 2
         ),
         text = list(c(
-          "model in ascending order",
-          "cutoff value"
+          "Model in Ascending Order",
+          "cutoff Value"
         ))
       ), panel = function(x, y, ...) {
         lattice::panel.abline(
@@ -404,7 +404,7 @@ plotSubset <- function(model, type = 1) {
                         col = c("#9933FF"),
                         lty = c(2), lwd = 2
                       ),
-                      text = list(c("cutoff value"
+                      text = list(c("Cutoff Value"
                       ))
                     ), panel = function(x, y, ...) {
                       lattice::panel.abline(
@@ -497,8 +497,8 @@ plotDerivative <- function(model,
       colorkey = key,
       col.regions = regions,
       panel = latticeExtra::panel.2dsmoother,
-      main = "Slope of the Regression Function\n(1st order derivative)",
-      ylab = "1st order derivate of norm score",
+      main = "Slope of the Regression Function\n(1st Order Derivative)",
+      ylab = "First Order Derivate of Norm Score",
       xlab = "Age"
     )
   } else {
@@ -507,8 +507,8 @@ plotDerivative <- function(model,
       at = sequence, region = T,
       colorkey = key,
       col.regions = regions,
-      main = "Slope of the Regression Function\n(1st order derivative)",
-      ylab = "1st order derivate of norm score",
+      main = "Slope of the Regression Function\n(1st Order Derivative)",
+      ylab = "1st Order Derivate of Norm Score",
       xlab = "Age"
     )
   }

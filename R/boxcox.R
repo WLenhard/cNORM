@@ -204,7 +204,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
 #' predictNormValue(15, 3, model)
 predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
   if(raw<0){
-    stop("Box Cox cannot handle negative raw values.")
+    stop("Box Cox cannot handle negative raw scores")
   }
 
   # compute box cox power function x for raw value
@@ -291,7 +291,7 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 1
                   panel = function(...)
                     lattice::panel.superpose(..., panel.groups = panelfun),
                   main = "Regression Model vs. Box Cox Transformation",
-                  ylab = "Percentile", xlab = "Raw value",
+                  ylab = "Percentile", xlab = "Raw Score",
                   col = COL, lwd = 2, grid = TRUE,
                   key = list(
                     corner = c(0.99, 0.1),
@@ -304,7 +304,7 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 1
                   panel = function(...)
                     lattice::panel.superpose(..., panel.groups = panelfun),
                   main = "Regression Model vs. Box Cox Transformation",
-                  ylab = "Raw Value", xlab = "Norm Scale",
+                  ylab = "Raw Score", xlab = "Standard Score",
                   col = COL, lwd = 2, grid = TRUE,
                   key = list(
                     corner = c(0.99, 0.1),
