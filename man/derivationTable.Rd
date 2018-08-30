@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{derivationTable}
 \alias{derivationTable}
-\title{Create a table based on first derivation of the regression model for specific age}
+\title{Create a table based on first order derivative of the regression model for specific age}
 \usage{
 derivationTable(A, model, min = 25, max = 75, step = 0.1)
 }
@@ -22,7 +22,7 @@ data.frame with norm values and the predicted value based on the
 derived regression function
 }
 \description{
-In order to check model assumptions, a table of the first derivation of the model
+In order to check model assumptions, a table of the first order derivative of the model
 coefficients is created.
 }
 \examples{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelling.R
 \name{derive}
 \alias{derive}
-\title{First derivation of regression model}
+\title{First order derivative of regression model}
 \usage{
 derive(model)
 }
@@ -13,7 +13,7 @@ derive(model)
 The derived coefficients
 }
 \description{
-Calculates the first derivation of the location / norm value from the regression model. This
+Calculates the first order derivative of the location / norm value from the regression model. This
 is useful for finding violations of model assumptions and problematic distribution features as
 f. e. bottom and ceiling effects, non-progressive norm values within an age group or in general
 intersecting percentile curves.

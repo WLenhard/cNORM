@@ -443,9 +443,9 @@ rawTableQuick <- function(A,
   return(table)
 }
 
-#' Create a table based on first derivation of the regression model for specific age
+#' Create a table based on first order derivative of the regression model for specific age
 #'
-#' In order to check model assumptions, a table of the first derivation of the model
+#' In order to check model assumptions, a table of the first order derivative of the model
 #' coefficients is created.
 #' @param A the age
 #' @param model The regression model

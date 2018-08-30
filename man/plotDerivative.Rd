@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plotDerivative}
 \alias{plotDerivative}
-\title{Plot first order derivation of regression model}
+\title{Plot first order derivative of regression model}
 \usage{
 plotDerivative(model, minAge = 2, maxAge = 5, minNorm = 25,
   maxNorm = 75, stepAge = 0.2, stepNorm = 1, descend = FALSE)
@@ -27,11 +27,11 @@ values indicate higher precision / closer checks}
 indicate higher performance. Relevant f. e. in case of modelling errors}
 }
 \description{
-Plots the values obtained via the first derivation of the regression model
+Plots the values obtained via the first order derivative of the regression model
 in dependence of the norm score. The results indicate the progression of the
 norm scores within each age group. The regression based modeling approach
 relies on the assumption of a linear progression of the norm scores.
-Negative scores in the first order derivation indicate a violation of this
+Negative scores in the first order derivative indicate a violation of this
 assumption. Scores near zero
 are typical for bottom and ceiling effects in the raw data.
 The regression models usually converge within the range of the original

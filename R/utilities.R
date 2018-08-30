@@ -79,3 +79,16 @@ simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups 
 
   return(sample)
 }
+
+getPlotSeries <- function(data){
+  model <- bestModel(data)
+  length <- length(model$subsets$adjr2)
+  i <- 1
+  l <- vector("list", length)
+
+  while(i <= length){
+    m <- bestModel(data, terms = i)
+    l[[i]] <- plotPercentiles(data, m, minRaw=-Inf, maxRaw=Inf)
+    i <- i + 1
+  }
+}

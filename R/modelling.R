@@ -382,9 +382,9 @@ regressionFunction <- function(model, raw = "raw", digits=NULL) {
   return(formulA)
 }
 
-#' First derivation of regression model
+#' First order derivative of regression model
 #'
-#' Calculates the first derivation of the location / norm value from the regression model. This
+#' Calculates the first order derivative of the location / norm value from the regression model. This
 #' is useful for finding violations of model assumptions and problematic distribution features as
 #' f. e. bottom and ceiling effects, non-progressive norm values within an age group or in general
 #' intersecting percentile curves.

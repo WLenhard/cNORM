@@ -286,7 +286,7 @@ plotPercentiles <- function(data,
     }
   }
 
-  lattice::xyplot(stats::formula(xyFunction), percentile,
+  plot <- lattice::xyplot(stats::formula(xyFunction), percentile,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = "Manifest and fitted percentile curves",
@@ -298,6 +298,9 @@ plotPercentiles <- function(data,
       text = list(NAMES)
     )
   )
+
+  print(plot)
+  return(plot)
 }
 
 #' Evaluate information criteria for regression model
@@ -416,13 +419,13 @@ plotSubset <- function(model, type = 1) {
   }
 }
 
-#' Plot first order derivation of regression model
+#' Plot first order derivative of regression model
 #'
-#' Plots the values obtained via the first derivation of the regression model
+#' Plots the values obtained via the first order derivative of the regression model
 #' in dependence of the norm score. The results indicate the progression of the
 #' norm scores within each age group. The regression based modeling approach
 #' relies on the assumption of a linear progression of the norm scores.
-#' Negative scores in the first order derivation indicate a violation of this
+#' Negative scores in the first order derivative indicate a violation of this
 #' assumption. Scores near zero
 #' are typical for bottom and ceiling effects in the raw data.
 #' The regression models usually converge within the range of the original
@@ -494,7 +497,7 @@ plotDerivative <- function(model,
       colorkey = key,
       col.regions = regions,
       panel = latticeExtra::panel.2dsmoother,
-      main = "Slope of the Regression Function\n(1st order derivation)",
+      main = "Slope of the Regression Function\n(1st order derivative)",
       ylab = "1st order derivate of norm score",
       xlab = "Age"
     )
@@ -504,7 +507,7 @@ plotDerivative <- function(model,
       at = sequence, region = T,
       colorkey = key,
       col.regions = regions,
-      main = "Slope of the Regression Function\n(1st order derivation)",
+      main = "Slope of the Regression Function\n(1st order derivative)",
       ylab = "1st order derivate of norm score",
       xlab = "Age"
     )
