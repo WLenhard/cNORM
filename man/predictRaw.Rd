@@ -4,7 +4,7 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(normValue, age, coefficients, min = -Inf, max = Inf)
+predictRaw(normValue, age, coefficients, minRaw = -Inf, maxRaw = Inf)
 }
 \arguments{
 \item{normValue}{The norm value, e. g. T value}
@@ -13,10 +13,10 @@ predictRaw(normValue, age, coefficients, min = -Inf, max = Inf)
 
 \item{coefficients}{The coefficients from the regression model}
 
-\item{min}{Minimum value for the results; can be used for clipping unrealistic outcomes,
+\item{minRaw}{Minimum value for the results; can be used for clipping unrealistic outcomes,
 usually set to the lower bound of the range of values of the test (default: 0)}
 
-\item{max}{Maximum value for the results; can be used for clipping unrealistic outcomes
+\item{maxRaw}{Maximum value for the results; can be used for clipping unrealistic outcomes
 usually set to the upper bound of the range of values of the test}
 }
 \value{

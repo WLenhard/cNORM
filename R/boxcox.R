@@ -50,11 +50,11 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
   y <- rep(NA, n)
   i <- 1
   while (i <= n) {
-    y[[i]] <- predictRaw(data[[i]], age, model$coefficients, min = 0)
+    y[[i]] <- cNORM::predictRaw(data[[i]], age, model$coefficients, minRaw = 0)
     i <- i + 1
   }
 
-  md <- predictRaw(m, age, model$coefficients)
+  md <- cNORM::predictRaw(m, age, model$coefficients)
 
   # determine optimal lambda
   # setting start values for iteration
@@ -270,8 +270,8 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 1
 
   i <- 1
   while(i <= length(percentiles)){
-    rawRegression[[i]] <- predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, min = minRaw, max = maxRaw)
-    rawBC[[i]] <- predictRawBC(boxcoxParameters, percentiles[[i]])
+    rawRegression[[i]] <- cNORM::predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+    rawBC[[i]] <- cNORM::predictRawBC(boxcoxParameters, percentiles[[i]])
     i <- i + 1
   }
 

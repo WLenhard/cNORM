@@ -67,9 +67,9 @@ getNormCurve <-
 #' @param normValue The norm value, e. g. T value
 #' @param age The age value
 #' @param coefficients The coefficients from the regression model
-#' @param min Minimum value for the results; can be used for clipping unrealistic outcomes,
+#' @param minRaw Minimum value for the results; can be used for clipping unrealistic outcomes,
 #' usually set to the lower bound of the range of values of the test (default: 0)
-#' @param max Maximum value for the results; can be used for clipping unrealistic outcomes
+#' @param maxRaw Maximum value for the results; can be used for clipping unrealistic outcomes
 #' usually set to the upper bound of the range of values of the test
 #' @return the predicted raw value
 #' @examples
@@ -88,8 +88,8 @@ predictRaw <-
   function(normValue,
              age,
              coefficients,
-             min = -Inf,
-             max = Inf) {
+             minRaw = -Inf,
+             maxRaw = Inf) {
     # first intercept
     coef <- coefficients
     predict <- 0
@@ -131,10 +131,10 @@ predictRaw <-
     }
 
     # check bounds
-    if (predict < min) {
-      predict <- min
-    } else if (predict > max) {
-      predict <- max
+    if (predict < minRaw) {
+      predict <- minRaw
+    } else if (predict > maxRaw) {
+      predict <- maxRaw
     }
 
     return(predict)
@@ -213,8 +213,8 @@ normTable <- function(A,
 #' to FALSE for a thorough search.
 #' @param A the age
 #' @param model The regression model
-#' @param min The lower bound of the raw value range
-#' @param max The upper bound of the raw value range
+#' @param minRaw The lower bound of the raw value range
+#' @param maxRaw The upper bound of the raw value range
 #' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
 #' @param step Stepping parameter for the raw values (default 1)
@@ -235,8 +235,8 @@ normTable <- function(A,
 #' @export
 rawTable <- function(A,
                      model,
-                     min,
-                     max,
+                     minRaw,
+                     maxRaw,
                      minNorm = 25,
                      maxNorm = 75,
                      step = 1,
@@ -244,7 +244,7 @@ rawTable <- function(A,
                      descend = FALSE,
                      quick = TRUE) {
   if (quick) {
-    table <- rawTableQuick(A, model, min, max, minNorm, maxNorm, step, precision, descend)
+    table <- rawTableQuick(A, model, minRaw, maxRaw, minNorm, maxNorm, step, precision, descend)
     # consistency check
     k <- 1
     SUCCESS <- TRUE
@@ -263,28 +263,28 @@ rawTable <- function(A,
       message("Inconsistent norms found in fast iteration, reruning analysis with quick set to FALSE ...")
     }
   }
-  norm <- vector("list", (max - min) / step)
-  raw <- vector("list", (max - min) / step)
+  norm <- vector("list", (maxRaw - minRaw) / step)
+  raw <- vector("list", (maxRaw - minRaw) / step)
   i <- 1
   if (!descend) {
-    while (min <= max) {
+    while (minRaw <= maxRaw) {
       i <- i + 1
       n <-
-        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+        cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
-      raw[[i]] <- min
+      raw[[i]] <- minRaw
 
-      min <- min + step
+      minRaw <- minRaw + step
     }
   } else {
-    while (max >= min) {
+    while (maxRaw >= minRaw) {
       i <- i + 1
       n <-
-        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+        cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
-      raw[[i]] <- max
+      raw[[i]] <- maxRaw
 
-      max <- max - step
+      maxRaw <- maxRaw - step
     }
   }
 
@@ -326,8 +326,8 @@ rawTable <- function(A,
 #'
 #' @param A the age
 #' @param model The regression model
-#' @param min The lower bound of the raw value range
-#' @param max The upper bound of the raw value range
+#' @param minRaw The lower bound of the raw value range
+#' @param maxRaw The upper bound of the raw value range
 #' @param minNorm Clipping parameter for the lower bound of norm values (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm values (default 25)
 #' @param step Stepping parameter for the raw values (default 1)
@@ -338,15 +338,15 @@ rawTable <- function(A,
 #' @return data.frame with raw values and the predicted norm value
 rawTableQuick <- function(A,
                           model,
-                          min,
-                          max,
+                          minRaw,
+                          maxRaw,
                           minNorm = 25,
                           maxNorm = 75,
                           step = 1,
                           precision = .1,
                           descend = FALSE) {
-  norm <- vector("list", (max - min) / step)
-  raw <- vector("list", (max - min) / step)
+  norm <- vector("list", (maxRaw - minRaw) / step)
+  raw <- vector("list", (maxRaw - minRaw) / step)
   i <- 0
   if (!descend) {
     # first path, low precision
@@ -359,15 +359,15 @@ rawTableQuick <- function(A,
     lowestNorm <- normTab$norm[[1]]
     highestNorm <- normTab$norm[[rows]]
 
-    while (min <= max) {
+    while (minRaw <= maxRaw) {
       i <- i + 1
-      if (min < lowestRaw) {
+      if(minRaw < lowestRaw) {
         norm[[i]] <- lowestNorm
-      } else if (min > highestRaw) {
+      } else if (minRaw > highestRaw) {
         norm[[i]] <- highestNorm
       } else {
         # second path with high precision
-        index <- which.min(abs(normTab$raw - min))
+        index <- which.min(abs(normTab$raw - minRaw))
         if (index <= 2) {
           mi <- lowestNorm
           ma <- normTab$norm[[3]]
@@ -380,22 +380,21 @@ rawTableQuick <- function(A,
         }
 
         n <-
-          cNORM::predictNormValue(min, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
+          cNORM::predictNormValue(minRaw, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
         norm[[i]] <- n
       }
 
-      raw[[i]] <- min
-      min <- min + step
+      raw[[i]] <- minRaw
+      minRaw <- minRaw + step
     }
   } else {
-    while (max >= min) {
+    while (maxRaw >= minRaw) {
       i <- i + 1
-      n <-
-        cNORM::predictNormValue(min, A, model, minNorm, maxNorm, precision)
+      n <- cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
-      raw[[i]] <- max
+      raw[[i]] <- maxRaw
 
-      max <- max - step
+      maxRaw <- maxRaw - step
     }
 
     # first step, low precision
@@ -408,15 +407,15 @@ rawTableQuick <- function(A,
     lowestNorm <- normTab$norm[[1]]
     highestNorm <- normTab$norm[[rows]]
 
-    while (max >= min) {
+    while (maxRaw >= minRaw) {
       i <- i + 1
-      if (max > lowestRaw) {
+      if (maxRaw > lowestRaw) {
         norm[[i]] <- lowestNorm
-      } else if (max < highestRaw) {
+      } else if (maxRaw < highestRaw) {
         norm[[i]] <- highestNorm
       } else {
         # second step with high precision
-        index <- which.min(abs(normTab$raw - min))
+        index <- which.min(abs(normTab$raw - minRaw))
         if (index <= 2) {
           mi <- rows - 2
           ma <- rows
@@ -429,12 +428,12 @@ rawTableQuick <- function(A,
         }
 
         n <-
-          cNORM::predictNormValue(min, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
+          cNORM::predictNormValue(minRaw, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
         norm[[i]] <- n
       }
 
-      raw[[i]] <- max
-      max <- max - step
+      raw[[i]] <- maxRaw
+      maxRaw <- maxRaw - step
     }
   }
 
@@ -449,8 +448,8 @@ rawTableQuick <- function(A,
 #' coefficients is created.
 #' @param A the age
 #' @param model The regression model
-#' @param min The lower bound of the norm value range
-#' @param max The upper bound of the norm value range
+#' @param minNorm The lower bound of the norm value range
+#' @param maxNorm The upper bound of the norm value range
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @return data.frame with norm values and the predicted value based on the
 #' derived regression function
@@ -463,21 +462,21 @@ rawTableQuick <- function(A,
 derivationTable <-
   function(A,
              model,
-             min = 25,
-             max = 75,
+             minNorm = 25,
+             maxNorm = 75,
              step = 0.1) {
-    norm <- vector("list", 1 + (max - min) / step)
-    raw <- vector("list", 1 + (max - min) / step)
+    norm <- vector("list", 1 + (maxNorm - minNorm) / step)
+    raw <- vector("list", 1 + (maxNorm - minNorm) / step)
     i <- 1
     coeff <- cNORM::derive(model)
-    while (min <= max) {
+    while (minNorm <= maxNorm) {
       i <- i + 1
-      r <- cNORM::predictRaw(min, A, coeff, min = -1000, max = 1000)
+      r <- cNORM::predictRaw(minNorm, A, coeff, min = -1000, max = 1000)
 
-      norm[[i]] <- min
+      norm[[i]] <- minNorm
       raw[[i]] <- r
 
-      min <- min + step
+      minNorm <- minNorm + step
     }
     normTable <-
       do.call(rbind, Map(data.frame, norm = norm, raw = raw))

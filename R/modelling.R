@@ -441,10 +441,10 @@ derive <- function(model) {
 #' the original range) or vertically (extreme norm values) might lead to inconsistent
 #' results. The function generates a message, indicating extrapolation and the range of the original data.
 #' @param model The regression model
-#' @param minA The lower age bound
-#' @param maxA The upper age bound
-#' @param minL The lower norm value bound
-#' @param maxL The upper norm value bound
+#' @param minAge The lower age bound
+#' @param maxAge The upper age bound
+#' @param minNorm The lower norm value bound
+#' @param maxNorm The upper norm value bound
 #' @param digits The precision for rounding the norm and age data
 #' @return the report
 #' @export
@@ -452,14 +452,14 @@ derive <- function(model) {
 #' normData <- prepareData()
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
-rangeCheck <- function(model, minA=NULL, maxA=NULL, minL=NULL, maxL=NULL, digits=3){
+rangeCheck <- function(model, minAge=NULL, maxAge=NULL, minNorm=NULL, maxNorm=NULL, digits=3){
   summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm value range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
-  reportOnly <- (is.null(minA)||is.null(maxA)||is.null(minL)||is.null(maxL))
-  if (!reportOnly&&(minA < model$minA1 || maxA > model$maxA1)&&(minL < model$minL1 || maxL > model$maxL1)) {
+  reportOnly <- (is.null(minAge)||is.null(maxAge)||is.null(minNorm)||is.null(maxNorm))
+  if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
     summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm values outside the original sample.", summary, sep="\n")
-  } else if (!reportOnly&&(minA < model$minA1 || maxA > model$maxA1)) {
+  } else if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)) {
     summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep="\n")
-  } else if (!reportOnly&&(minL < model$minL1 || maxL > model$maxL1)) {
+  } else if (!reportOnly&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
     summary <- paste("Vertical extrapolation detected. Be careful using extreme norm values exceeding the values of the original sample.", summary, sep="\n")
   }
 

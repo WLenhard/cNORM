@@ -4,19 +4,19 @@
 \alias{rangeCheck}
 \title{Check for horizontal and vertical extrapolation}
 \usage{
-rangeCheck(model, minA = NULL, maxA = NULL, minL = NULL,
-  maxL = NULL, digits = 3)
+rangeCheck(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
+  maxNorm = NULL, digits = 3)
 }
 \arguments{
 \item{model}{The regression model}
 
-\item{minA}{The lower age bound}
+\item{minAge}{The lower age bound}
 
-\item{maxA}{The upper age bound}
+\item{maxAge}{The upper age bound}
 
-\item{minL}{The lower norm value bound}
+\item{minNorm}{The lower norm value bound}
 
-\item{maxL}{The upper norm value bound}
+\item{maxNorm}{The upper norm value bound}
 
 \item{digits}{The precision for rounding the norm and age data}
 }

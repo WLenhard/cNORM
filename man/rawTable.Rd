@@ -4,17 +4,17 @@
 \alias{rawTable}
 \title{Create a table with norms assigned to raw values for a specific age based on the regression model}
 \usage{
-rawTable(A, model, min, max, minNorm = 25, maxNorm = 75, step = 1,
-  precision = 0.01, descend = FALSE, quick = TRUE)
+rawTable(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
+  step = 1, precision = 0.01, descend = FALSE, quick = TRUE)
 }
 \arguments{
 \item{A}{the age}
 
 \item{model}{The regression model}
 
-\item{min}{The lower bound of the raw value range}
+\item{minRaw}{The lower bound of the raw value range}
 
-\item{max}{The upper bound of the raw value range}
+\item{maxRaw}{The upper bound of the raw value range}
 
 \item{minNorm}{Clipping parameter for the lower bound of norm values (default 25)}
 

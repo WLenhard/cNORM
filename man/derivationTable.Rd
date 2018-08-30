@@ -4,16 +4,16 @@
 \alias{derivationTable}
 \title{Create a table based on first order derivative of the regression model for specific age}
 \usage{
-derivationTable(A, model, min = 25, max = 75, step = 0.1)
+derivationTable(A, model, minNorm = 25, maxNorm = 75, step = 0.1)
 }
 \arguments{
 \item{A}{the age}
 
 \item{model}{The regression model}
 
-\item{min}{The lower bound of the norm value range}
+\item{minNorm}{The lower bound of the norm value range}
 
-\item{max}{The upper bound of the norm value range}
+\item{maxNorm}{The upper bound of the norm value range}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
 }

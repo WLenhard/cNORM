@@ -4,7 +4,7 @@
 \alias{rawTableQuick}
 \title{Internal method for two step shotgun search of raw -> norm value table}
 \usage{
-rawTableQuick(A, model, min, max, minNorm = 25, maxNorm = 75,
+rawTableQuick(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
   step = 1, precision = 0.1, descend = FALSE)
 }
 \arguments{
@@ -12,9 +12,9 @@ rawTableQuick(A, model, min, max, minNorm = 25, maxNorm = 75,
 
 \item{model}{The regression model}
 
-\item{min}{The lower bound of the raw value range}
+\item{minRaw}{The lower bound of the raw value range}
 
-\item{max}{The upper bound of the raw value range}
+\item{maxRaw}{The upper bound of the raw value range}
 
 \item{minNorm}{Clipping parameter for the lower bound of norm values (default 25)}
 
