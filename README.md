@@ -2,7 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating non-parametric regression based continuous norms, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and
+The package cNorm provides methods for generating non-parametric regression based continuous standard scores, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and
 screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016).
 
 ## Approach

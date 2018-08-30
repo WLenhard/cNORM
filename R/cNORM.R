@@ -1,12 +1,12 @@
 #' cNORM: Continuous Norming with R
 #'
-#' The package provides methods for generating regression based continuous norms, as f. e.
+#' The package provides methods for generating regression based continuous standard scores, as f. e.
 #' for psychometric test development, biometrics (e. g. physiological growth curves), and
 #' screenings in the medical domain. Contrary to parametric approaches, it does not rely on
 #' distribution assumptions of the initial norm data and is thus a very robust approach in
 #' generating norm tables.
 #'
-#' Conventional methods for producing test norms are often plagued with "jumps" or "gaps"
+#' Conventional methods for producing test norm score tables are often plagued with "jumps" or "gaps"
 #' (i.e., discontinuities) in norm tables and low confidence for assessing extreme scores.
 #' cNORM addresses these problems and also has the added advantage of not requiring
 #' assumptions about the distribution of the raw data: The norm scores are established from
