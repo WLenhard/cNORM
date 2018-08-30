@@ -14,7 +14,7 @@ Description: Conventional methods for producing test norms in psychometrics or b
     variable (e.g., age). The method minimizes bias arising from sampling and measurement error, while 
     handling marked deviations from normality, addressing bottom or ceiling effects and capturing almost
     all of the variance in the original norm data sample.
-License: BSD 3-clause License + file LICENSE
+License: AGPL-3 + file LICENSE
 Depends:
     R (>= 3.1.0)
 Imports:
