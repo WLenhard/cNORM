@@ -1,7 +1,7 @@
 import(lattice)
 importFrom(leaps, regsubsets)
 importFrom(stats, formula, ave, aggregate, median, sd, qnorm)
-importFrom("grDevices", "rainbow")
+importFrom("grDevices", "rainbow", "dev.off")
 importFrom(latticeExtra, panel.2dsmoother)
 importFrom("utils", "tail")
 export(

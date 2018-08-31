@@ -361,7 +361,7 @@ plotPercentiles <- function(data,
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
 #' @param filename Prefix of the filename. If specified, the plots are saves as
-#' png files in the directory of the workspace
+#' png files in the directory of the workspace, instead of displaying them
 #' @seealso plotPercentiles
 #' @export
 #'
@@ -436,10 +436,10 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "g
                     title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4)))
 
     if(!is.null(filename)){
-    trellis.device(device="png", filename=paste0(filename, start, ".png"))
-    print(plot)
-    dev.off()
-}
+      trellis.device(device="png", filename=paste0(filename, start, ".png"))
+      print(plot)
+      dev.off()
+    }
     start <- start + 1
   }
 }
