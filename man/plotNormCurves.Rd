@@ -4,8 +4,8 @@
 \alias{plotNormCurves}
 \title{Plot norm curves}
 \usage{
-plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = 2,
-  maxAge = 5, step = 0.1, minRaw = 0, maxRaw = 1000)
+plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = NULL,
+  maxAge = NULL, step = 0.1, minRaw = NULL, maxRaw = NULL)
 }
 \arguments{
 \item{model}{The model from the bestModel function}

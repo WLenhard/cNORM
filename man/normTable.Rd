@@ -4,8 +4,8 @@
 \alias{normTable}
 \title{Create a norm table based on model for specific age}
 \usage{
-normTable(A, model, minNorm = 25, maxNorm = 75, minRaw = -Inf,
-  maxRaw = Inf, step = 0.1, descend = FALSE)
+normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
+  maxRaw = NULL, step = 0.1, descend = FALSE)
 }
 \arguments{
 \item{A}{the age}

@@ -4,7 +4,7 @@
 #' (location), getNormCurve is a straightforward approach to show the raw score development over
 #' age, while keeping the norm value constant. This way, e. g. academic performance or intelligence development
 #' of a specific ability is shown.
-#' @param normValue The norm scores, e. g. T value
+#' @param norm The specific norm score, e. g. T value
 #' @param model The model from the regression modeling
 #' @param minAge Age to start from
 #' @param maxAge Age to stop at
@@ -19,13 +19,29 @@
 #' getNormCurve(35, m)
 #' @export
 getNormCurve <-
-  function(normValue,
+  function(norm,
              model,
-             minAge = 2,
-             maxAge = 5,
+             minAge = NULL,
+             maxAge = NULL,
              step = 0.1,
-             minRaw = -Inf,
-             maxRaw = Inf) {
+             minRaw = NULL,
+             maxRaw = NULL) {
+
+    if(is.null(minAge)){
+      minAge <- model$minA1
+    }
+
+    if(is.null(maxAge)){
+      maxAge <- model$maxA1
+    }
+
+    if(is.null(minRaw)){
+      minRaw <- model$minRaw
+    }
+
+    if(is.null(maxRaw)){
+      maxRaw <- model$maxRaw
+    }
     raw <- vector("list", (maxAge - minAge) / step)
     age <- vector("list", (maxAge - minAge) / step)
     normList <- vector("list", (maxAge - minAge) / step)
@@ -33,11 +49,11 @@ getNormCurve <-
     i <- 1
     while (minAge <= maxAge) {
       r <-
-        cNORM::predictRaw(normValue, minAge, model$coefficients, minRaw, maxRaw)
+        cNORM::predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw)
 
       raw[[i]] <- r
       age[[i]] <- minAge
-      normList[[i]] <- paste(normValue, "T")
+      normList[[i]] <- paste(norm, "T")
       minAge <- minAge + step
       i <- i + 1
     }
@@ -56,7 +72,7 @@ getNormCurve <-
 
 #' Predict single raw value
 #'
-#' Most elementary function to predict raw value based on Location (L, T value),
+#' Most elementary function to predict raw score based on Location (L, T score),
 #' Age (grouping variable) and the coefficients from a regression model.
 #' WARNING! This function, and all functions  depending on it, only works with regression
 #' functions including L, A and interactions. Manually adding predictors to bestModel via the
@@ -64,14 +80,14 @@ getNormCurve <-
 #' In that case, and if you are primarily interested on fitting a complete data set,
 #' rather user the predict function of the stats:lm package on the ideal model solution.
 #' You than have to provide a prepared data frame with the according input variables.
-#' @param normValue The norm value, e. g. T value
+#' @param norm The norm score, e. g. a specific T score
 #' @param age The age value
 #' @param coefficients The coefficients from the regression model
-#' @param minRaw Minimum value for the results; can be used for clipping unrealistic outcomes,
+#' @param minRaw Minimum score for the results; can be used for clipping unrealistic outcomes,
 #' usually set to the lower bound of the range of values of the test (default: 0)
-#' @param maxRaw Maximum value for the results; can be used for clipping unrealistic outcomes
+#' @param maxRaw Maximum score for the results; can be used for clipping unrealistic outcomes
 #' usually set to the upper bound of the range of values of the test
-#' @return the predicted raw value
+#' @return the predicted raw score
 #' @examples
 #' # Prediction of single scores
 #' normData <- prepareData()
@@ -85,11 +101,12 @@ getNormCurve <-
 #' fitted.partial <- predict(m, type = "terms")
 #' @export
 predictRaw <-
-  function(normValue,
+  function(norm,
              age,
              coefficients,
-             minRaw = -Inf,
-             maxRaw = Inf) {
+             minRaw = 0,
+             maxRaw = 1000) {
+
     # first intercept
     coef <- coefficients
     predict <- 0
@@ -105,7 +122,7 @@ predictRaw <-
       } else if (nam[[1]][1] == "L") {
         j <- 1
         while (j <= nam[[1]][2]) {
-          p <- p * normValue
+          p <- p * norm
           j <- j + 1
         }
       } else if (nam[[1]][1] == "A") {
@@ -167,12 +184,29 @@ predictRaw <-
 #' @export
 normTable <- function(A,
                       model,
-                      minNorm = 25,
-                      maxNorm = 75,
-                      minRaw = -Inf,
-                      maxRaw = Inf,
+                      minNorm = NULL,
+                      maxNorm = NULL,
+                      minRaw = NULL,
+                      maxRaw = NULL,
                       step = 0.1,
                       descend = FALSE) {
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
   norm <- vector("list", (maxNorm - minNorm) / step)
   raw <- vector("list", (maxNorm - minNorm) / step)
   i <- 1
@@ -235,14 +269,31 @@ normTable <- function(A,
 #' @export
 rawTable <- function(A,
                      model,
-                     minRaw,
-                     maxRaw,
-                     minNorm = 25,
-                     maxNorm = 75,
+                     minRaw = NULL,
+                     maxRaw = NULL,
+                     minNorm = NULL,
+                     maxNorm = NULL,
                      step = 1,
                      precision = .01,
                      descend = FALSE,
                      quick = TRUE) {
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
   if (quick) {
     table <- rawTableQuick(A, model, minRaw, maxRaw, minNorm, maxNorm, step, precision, descend)
     # consistency check
@@ -338,13 +389,30 @@ rawTable <- function(A,
 #' @return data.frame with raw scores and the predicted norm scores
 rawTableQuick <- function(A,
                           model,
-                          minRaw,
-                          maxRaw,
-                          minNorm = 25,
-                          maxNorm = 75,
+                          minRaw = NULL,
+                          maxRaw = NULL,
+                          minNorm = NULL,
+                          maxNorm = NULL,
                           step = 1,
                           precision = .1,
                           descend = FALSE) {
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
   norm <- vector("list", (maxRaw - minRaw) / step)
   raw <- vector("list", (maxRaw - minRaw) / step)
   i <- 0
@@ -462,10 +530,19 @@ rawTableQuick <- function(A,
 derivationTable <-
   function(A,
              model,
-             minNorm = 25,
-             maxNorm = 75,
+             minNorm = NULL,
+             maxNorm = NULL,
              step = 0.1) {
-    norm <- vector("list", 1 + (maxNorm - minNorm) / step)
+
+    if(is.null(minNorm)){
+      minNorm <- model$minL1
+    }
+
+    if(is.null(maxNorm)){
+      maxNorm <- model$maxL1
+    }
+
+        norm <- vector("list", 1 + (maxNorm - minNorm) / step)
     raw <- vector("list", 1 + (maxNorm - minNorm) / step)
     i <- 1
     coeff <- cNORM::derive(model)
@@ -513,11 +590,28 @@ predictNormValue <-
   function(raw,
              A,
              model,
-             minNorm = 25,
-             maxNorm = 75,
-             minRaw = 0,
-             maxRaw = Inf,
+             minNorm = NULL,
+             maxNorm = NULL,
+             minRaw = NULL,
+             maxRaw = NULL,
              precision = 0.1) {
+
+    if(is.null(minNorm)){
+      minNorm <- model$minL1
+    }
+
+    if(is.null(maxNorm)){
+      maxNorm <- model$maxL1
+    }
+
+    if(is.null(minRaw)){
+      minRaw <- model$minRaw
+    }
+
+    if(is.null(maxRaw)){
+      maxRaw <- model$maxRaw
+    }
+
     if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
     norms <-
       cNORM::normTable(A,

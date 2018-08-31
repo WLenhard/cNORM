@@ -4,9 +4,9 @@
 \alias{checkConsistency}
 \title{Check the consistency of the norm data model}
 \usage{
-checkConsistency(model, minAge, maxAge, minNorm, maxNorm, minRaw = -Inf,
-  maxRaw = Inf, stepAge = 1, stepNorm = 1, descend = FALSE,
-  warn = FALSE)
+checkConsistency(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
+  maxNorm = NULL, minRaw = NULL, maxRaw = NULL, stepAge = 1,
+  stepNorm = 1, descend = FALSE, warn = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}

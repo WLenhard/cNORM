@@ -47,7 +47,7 @@
 #' # It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
-#' @seealso plotSubset, plotPercentiles, checkConsistency
+#' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
 bestModel <- function(data,
                       raw = "raw",
@@ -171,11 +171,17 @@ bestModel <- function(data,
   bestformula$cutoff <- R2
   bestformula$subsets <- results
   print(bestformula$coefficients)
+
   # add information for horizontal and vertical extrapolation
   bestformula$minA1 <- min(data$A1)
   bestformula$maxA1 <- max(data$A1)
   bestformula$minL1 <- min(data$L1)
   bestformula$maxL1 <- max(data$L1)
+  bestformula$minRaw <- min(data[, raw])
+  bestformula$maxRaw <- max(data[, raw])
+
+  bestformula$raw <- raw
+
 
 
   message("\nRegression formula:")
@@ -255,16 +261,41 @@ printSubset <- function(model){
 #' plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
 #' @export
 checkConsistency <- function(model,
-                             minAge,
-                             maxAge,
-                             minNorm,
-                             maxNorm,
-                             minRaw = -Inf,
-                             maxRaw = Inf,
+                             minAge = NULL,
+                             maxAge = NULL,
+                             minNorm = NULL,
+                             maxNorm = NULL,
+                             minRaw = NULL,
+                             maxRaw = NULL,
                              stepAge = 1,
                              stepNorm = 1,
                              descend = FALSE,
                              warn = FALSE) {
+
+  if(is.null(minAge)){
+    minAge <- model$minA1
+  }
+
+  if(is.null(maxAge)){
+    maxAge <- model$maxA1
+  }
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
 
   i <- minAge
   j <- minNorm
@@ -356,8 +387,11 @@ checkConsistency <- function(model,
 #' model <- bestModel(normData)
 #' regressionFunction(model)
 #' @export
-regressionFunction <- function(model, raw = "raw", digits=NULL) {
+regressionFunction <- function(model, raw = NULL, digits=NULL) {
 
+  if(is.null(raw)){
+    raw <- model$raw
+  }
 
   i <- 2
   if(is.null(digits)){
@@ -453,7 +487,7 @@ derive <- function(model) {
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
 rangeCheck <- function(model, minAge=NULL, maxAge=NULL, minNorm=NULL, maxNorm=NULL, digits=3){
-  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm value range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
+  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
   reportOnly <- (is.null(minAge)||is.null(maxAge)||is.null(minNorm)||is.null(maxNorm))
   if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
     summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep="\n")

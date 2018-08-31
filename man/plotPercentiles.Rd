@@ -4,10 +4,10 @@
 \alias{plotPercentiles}
 \title{Plot norm curves against actual percentiles}
 \usage{
-plotPercentiles(data, model, minRaw = 0, maxRaw = 1000,
-  minAge = NULL, maxAge = NULL, raw = "raw", group = "group",
+plotPercentiles(data, model, minRaw = NULL, maxRaw = NULL,
+  minAge = NULL, maxAge = NULL, raw = NULL, group = "group",
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  scale = "T", type = 7)
+  scale = "T", type = 7, title = NULL)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm scores}
@@ -35,6 +35,8 @@ f. e. c(10, 3) for Wechsler scale index points}
 
 \item{type}{The type parameter of the quantile function to estimate the percentiles
 of the raw data (default 7)}
+
+\item{title}{custom title for plot}
 }
 \description{
 The function plots the norm curves based on the regression model against
@@ -56,8 +58,8 @@ and change the 'type' parameter accordingly.
 # Load example data set, compute model and plot results
 normData <- prepareData()
 m <- bestModel(data = normData)
-plotPercentiles(normData, m, raw="raw", group="group")
+plotPercentiles(normData, m, group="group")
 }
 \seealso{
-plotNormCurves
+plotNormCurves, plotPercentileSeries
 }

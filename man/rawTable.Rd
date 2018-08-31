@@ -4,8 +4,9 @@
 \alias{rawTable}
 \title{Create a table with norm scores assigned to raw scores for a specific age based on the regression model}
 \usage{
-rawTable(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
-  step = 1, precision = 0.01, descend = FALSE, quick = TRUE)
+rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
+  maxNorm = NULL, step = 1, precision = 0.01, descend = FALSE,
+  quick = TRUE)
 }
 \arguments{
 \item{A}{the age}

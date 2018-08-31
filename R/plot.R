@@ -12,9 +12,13 @@
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotValues(normData, m, group="group", raw="raw")
+#' plotValues(normData, m, group="group")
 #' @export
-plotValues <- function(data, model, group = "group", raw = "raw") {
+plotValues <- function(data, model, group = "group", raw = NULL) {
+  if(is.null(raw)){
+    raw <- model$raw
+  }
+
   if (!(group %in% colnames(data))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   }
@@ -77,11 +81,27 @@ plotValues <- function(data, model, group = "group", raw = "raw") {
 #' plotNormCurves(m, minAge=2, maxAge=5)
 #' @export
 plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
-                           minAge = 2,
-                           maxAge = 5,
+                           minAge = NULL,
+                           maxAge = NULL,
                            step = 0.1,
-                           minRaw = 0,
-                           maxRaw = 1000) {
+                           minRaw = NULL,
+                           maxRaw = NULL) {
+  if(is.null(minAge)){
+    minAge <- model$minA1
+  }
+
+  if(is.null(maxAge)){
+    maxAge <- model$maxA1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
   valueList <- data.frame(n = factor(), raw = double(), age = double())
   n <- length(normList)
 
@@ -116,7 +136,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = "Norm Curves",
-    ylab = "Raw Score", xlab = "Age",
+    ylab = "Raw Score", xlab = "Explanatory Variable",
     col = COL, lwd = 2, grid = TRUE,
     key = list(
       corner = c(0.99, 0.1),
@@ -160,39 +180,54 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' f. e. c(10, 3) for Wechsler scale index points
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
-#' @seealso plotNormCurves
+#' @param title custom title for plot
+#' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotPercentiles(normData, m, raw="raw", group="group")
+#' plotPercentiles(normData, m, group="group")
 #' @export
 plotPercentiles <- function(data,
                             model,
-                            minRaw = 0,
-                            maxRaw = 1000,
+                            minRaw = NULL,
+                            maxRaw = NULL,
                             minAge = NULL,
                             maxAge = NULL,
-                            raw = "raw",
+                            raw = NULL,
                             group = "group",
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = "T",
-                            type = 7) {
+                            type = 7,
+                            title = NULL) {
+
+
+  if(is.null(minAge)){
+    minAge <- model$minA1
+  }
+
+  if(is.null(maxAge)){
+    maxAge <- model$maxA1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
+  if(is.null(raw)){
+    raw <- model$raw
+  }
+
   if (!(raw %in% colnames(data))) {
     stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
   if (!(group %in% colnames(data))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
-  }
-
-  if(is.null(minAge)){
-    minAge <- model$minA1
-  }
-
-
-  if(is.null(maxAge)){
-    maxAge <- model$maxA1
   }
 
   # compute norm scores from percentile vector
@@ -286,10 +321,13 @@ plotPercentiles <- function(data,
     }
   }
 
+  if(is.null(title)){
+    title <- "Manifest and Fitted Percentile Curves"
+  }
   plot <- lattice::xyplot(stats::formula(xyFunction), percentile,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
-    main = "Manifest and Fitted Percentile Curves",
+    main = title,
     ylab = paste0("Raw Score (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
     col = COL2, lwd = 2, grid = TRUE,
     key = list(
@@ -302,6 +340,101 @@ plotPercentiles <- function(data,
   print(plot)
   return(plot)
 }
+
+#' Generates a series of plots with number curves by percentile for different models
+#'
+#'This functions makes use of 'plotPercentiles' to generate a series of plots
+#'with different number of predictors. It draws on the information provided by the model object
+#'to determine the bounds of the modeling (age and standard score range). It can be used as an
+#'additional model check to determine the best fitting model. Please have a look at the
+#''plotPercentiles' function for further information.
+#' @param data The raw data including the percentiles and norm scores
+#' @param model The model from the bestModel function
+#' @param start Number of predictors to start with
+#' @param end Number of predictors to end with
+#' @param group The name of the grouping variable; the distinct groups are automatically
+#' determined
+#' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
+#' @param scale The norm scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+#' self defined with a double vector with the mean and standard deviation,
+#' f. e. c(10, 3) for Wechsler scale index points
+#' @param type The type parameter of the quantile function to estimate the percentiles
+#' of the raw data (default 7)
+#' @seealso plotPercentiles
+#' @export
+#'
+#' @examples
+#' # Load example data set, compute model and plot results
+#' normData <- prepareData(elfe)
+#' model <- bestModel(data = normData)
+#' plotPercentileSeries(normData, model, start=1, end=5, group="group")
+plotPercentileSeries <- function(data, model, start = 1, end = 10,  group = "group",
+                                 percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+                                 scale = "T",
+                                 type = 7) {
+  d <- as.data.frame(data)
+  if (end > length(model$subsets$rss)) {
+    end <- length(model$subsets$rss)
+  }
+
+  if (start < 1) {
+    start <- 1
+  }
+
+  if (start > end) {
+    start <- end
+  }
+
+  minR <- min(d[, model$raw])
+  maxR <- max(d[, model$raw])
+
+  while (start <= end) {
+    message(paste0("Plotting model ", start))
+    # compute model
+    text <- paste0(model$raw, " ~ ")
+    names <- colnames(model$subsets$outmat)
+
+    j <- 1
+    nr <- 0
+    while (j <= length(names)) {
+      if (model$subsets$outmat[start, j] == "*") {
+        text1 <- names[j]
+        if (nr == 0) {
+          text <- paste(text, text1, sep = "")
+        } else {
+          text <- paste(text, text1, sep = " + ")
+        }
+
+        nr <- nr + 1
+      }
+      j <- j + 1
+    }
+
+    bestformula <- stats::lm(text, d)
+    bestformula$ideal.model <- model$ideal.model
+    bestformula$cutoff <- model$cutoff
+    bestformula$subsets <- model$subsets
+
+    bestformula$maxA1 <- model$maxA1
+    bestformula$minA1 <- model$minA1
+    bestformula$minL1 <- model$minL1
+    bestformula$maxL1 <- model$maxL1
+    bestformula$minRaw <- minR
+    bestformula$maxRaw <- maxR
+    bestformula$raw <- model$raw
+
+    plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
+                    minRaw = minR,
+                    maxRaw = maxR,
+                    percentiles = percentiles,
+                    scale = scale,
+                    group = group,
+                    title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4)))
+
+    start <- start + 1
+  }
+}
+
 
 #' Evaluate information criteria for regression model
 #'
@@ -395,7 +528,7 @@ plotSubset <- function(model, type = 1) {
                     grid = TRUE,
                     main = "Information Function",
                     ylab = "Adjusted R2",
-                    xlab = "Number of predictors",
+                    xlab = "Number of Predictors",
                     key = list(
                       corner = c(
                         0.9,
@@ -452,13 +585,29 @@ plotSubset <- function(model, type = 1) {
 #' plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
 plotDerivative <- function(model,
-                           minAge = 2,
-                           maxAge = 5,
-                           minNorm = 25,
-                           maxNorm = 75,
+                           minAge = NULL,
+                           maxAge = NULL,
+                           minNorm = NULL,
+                           maxNorm = NULL,
                            stepAge = 0.2,
                            stepNorm = 1,
                            descend = FALSE) {
+  if(is.null(minAge)){
+    minAge <- model$minA1
+  }
+
+  if(is.null(maxAge)){
+    maxAge <- model$maxA1
+  }
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
   print(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   rowS <- c(seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
@@ -499,7 +648,7 @@ plotDerivative <- function(model,
       panel = latticeExtra::panel.2dsmoother,
       main = "Slope of the Regression Function\n(1st Order Derivative)",
       ylab = "First Order Derivate of Norm Score",
-      xlab = "Age"
+      xlab = "Explanatory Variable"
     )
   } else {
     p1 <- lattice::levelplot(Z ~ Y * X,
@@ -509,7 +658,7 @@ plotDerivative <- function(model,
       col.regions = regions,
       main = "Slope of the Regression Function\n(1st Order Derivative)",
       ylab = "1st Order Derivate of Norm Score",
-      xlab = "Age"
+      xlab = "Explanatory Variable"
     )
   }
   p2 <- lattice::contourplot(Z ~ Y * X, data = dev2)

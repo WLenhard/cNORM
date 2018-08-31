@@ -4,8 +4,8 @@
 \alias{predictNormValue}
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
-predictNormValue(raw, A, model, minNorm = 25, maxNorm = 75,
-  minRaw = 0, maxRaw = Inf, precision = 0.1)
+predictNormValue(raw, A, model, minNorm = NULL, maxNorm = NULL,
+  minRaw = NULL, maxRaw = NULL, precision = 0.1)
 }
 \arguments{
 \item{raw}{The raw value, either single numeric or list of values}

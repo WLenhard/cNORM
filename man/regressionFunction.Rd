@@ -4,7 +4,7 @@
 \alias{regressionFunction}
 \title{Regression function}
 \usage{
-regressionFunction(model, raw = "raw", digits = NULL)
+regressionFunction(model, raw = NULL, digits = NULL)
 }
 \arguments{
 \item{model}{The regression model from the bestModel function}

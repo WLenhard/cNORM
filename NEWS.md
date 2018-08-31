@@ -9,7 +9,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 0.9.7
-Date: 2018.08.30
+Date: 2018.08.31
 
 Changes:
 
@@ -17,6 +17,8 @@ Changes:
 *   Capitalizations in labels of plots
 *   min and max renamed to minRaw and maxRaw (where appropriate)
 *   terminology: standard or normal score instead of norm; score instead of value
+*   new function for model validation: plotPercentileSeries
+*   many functions now draw the default values from the model (plotting and predicting)
 
 
 

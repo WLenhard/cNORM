@@ -4,7 +4,7 @@
 \alias{derivationTable}
 \title{Create a table based on first order derivative of the regression model for specific age}
 \usage{
-derivationTable(A, model, minNorm = 25, maxNorm = 75, step = 0.1)
+derivationTable(A, model, minNorm = NULL, maxNorm = NULL, step = 0.1)
 }
 \arguments{
 \item{A}{the age}

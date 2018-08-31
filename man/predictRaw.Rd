@@ -4,26 +4,26 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(normValue, age, coefficients, minRaw = -Inf, maxRaw = Inf)
+predictRaw(norm, age, coefficients, minRaw = 0, maxRaw = 1000)
 }
 \arguments{
-\item{normValue}{The norm value, e. g. T value}
+\item{norm}{The norm score, e. g. a specific T score}
 
 \item{age}{The age value}
 
 \item{coefficients}{The coefficients from the regression model}
 
-\item{minRaw}{Minimum value for the results; can be used for clipping unrealistic outcomes,
+\item{minRaw}{Minimum score for the results; can be used for clipping unrealistic outcomes,
 usually set to the lower bound of the range of values of the test (default: 0)}
 
-\item{maxRaw}{Maximum value for the results; can be used for clipping unrealistic outcomes
+\item{maxRaw}{Maximum score for the results; can be used for clipping unrealistic outcomes
 usually set to the upper bound of the range of values of the test}
 }
 \value{
-the predicted raw value
+the predicted raw score
 }
 \description{
-Most elementary function to predict raw value based on Location (L, T value),
+Most elementary function to predict raw score based on Location (L, T score),
 Age (grouping variable) and the coefficients from a regression model.
 WARNING! This function, and all functions  depending on it, only works with regression
 functions including L, A and interactions. Manually adding predictors to bestModel via the

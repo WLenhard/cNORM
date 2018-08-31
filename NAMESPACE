@@ -9,6 +9,7 @@ export(
 	plotValues,
 	plotNormCurves,
 	plotPercentiles,
+	plotPercentileSeries,
 	plotSubset,
 	getNormCurve,
 	predictRaw,

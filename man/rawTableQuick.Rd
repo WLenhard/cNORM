@@ -4,8 +4,8 @@
 \alias{rawTableQuick}
 \title{Internal method for two step shotgun search of raw -> norm value table}
 \usage{
-rawTableQuick(A, model, minRaw, maxRaw, minNorm = 25, maxNorm = 75,
-  step = 1, precision = 0.1, descend = FALSE)
+rawTableQuick(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
+  maxNorm = NULL, step = 1, precision = 0.1, descend = FALSE)
 }
 \arguments{
 \item{A}{the age}

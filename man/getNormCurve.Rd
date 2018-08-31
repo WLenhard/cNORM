@@ -4,11 +4,11 @@
 \alias{getNormCurve}
 \title{Computes the curve for a specific T value}
 \usage{
-getNormCurve(normValue, model, minAge = 2, maxAge = 5, step = 0.1,
-  minRaw = -Inf, maxRaw = Inf)
+getNormCurve(norm, model, minAge = NULL, maxAge = NULL, step = 0.1,
+  minRaw = NULL, maxRaw = NULL)
 }
 \arguments{
-\item{normValue}{The norm scores, e. g. T value}
+\item{norm}{The specific norm score, e. g. T value}
 
 \item{model}{The model from the regression modeling}
 

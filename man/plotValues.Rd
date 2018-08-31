@@ -4,7 +4,7 @@
 \alias{plotValues}
 \title{Plot manifest and fitted raw scores}
 \usage{
-plotValues(data, model, group = "group", raw = "raw")
+plotValues(data, model, group = "group", raw = NULL)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}
@@ -25,5 +25,5 @@ regression line.
 # Load example data set, compute model and plot results
 normData <- prepareData()
 m <- bestModel(data = normData)
-plotValues(normData, m, group="group", raw="raw")
+plotValues(normData, m, group="group")
 }
