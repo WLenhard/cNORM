@@ -360,6 +360,8 @@ plotPercentiles <- function(data,
 #' f. e. c(10, 3) for Wechsler scale index points
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
+#' @param filename Prefix of the filename. If specified, the plots are saves as
+#' png files in the directory of the workspace
 #' @seealso plotPercentiles
 #' @export
 #'
@@ -371,7 +373,8 @@ plotPercentiles <- function(data,
 plotPercentileSeries <- function(data, model, start = 1, end = 10,  group = "group",
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  scale = "T",
-                                 type = 7) {
+                                 type = 7,
+                                 filename=NULL) {
   d <- as.data.frame(data)
   if (end > length(model$subsets$rss)) {
     end <- length(model$subsets$rss)
@@ -423,7 +426,8 @@ plotPercentileSeries <- function(data, model, start = 1, end = 10,  group = "gro
     bestformula$maxRaw <- maxR
     bestformula$raw <- model$raw
 
-    plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
+
+    plot <- plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
                     minRaw = minR,
                     maxRaw = maxR,
                     percentiles = percentiles,
@@ -431,6 +435,11 @@ plotPercentileSeries <- function(data, model, start = 1, end = 10,  group = "gro
                     group = group,
                     title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4)))
 
+    if(!is.null(filename)){
+    trellis.device(device="png", filename=paste0(filename, start, ".png"))
+    print(plot)
+    dev.off()
+}
     start <- start + 1
   }
 }
