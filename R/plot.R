@@ -370,13 +370,13 @@ plotPercentiles <- function(data,
 #' normData <- prepareData(elfe)
 #' model <- bestModel(data = normData)
 #' plotPercentileSeries(normData, model, start=1, end=5, group="group")
-plotPercentileSeries <- function(data, model, start = 1, end = 10,  group = "group",
+plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "group",
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  scale = "T",
                                  type = 7,
                                  filename=NULL) {
   d <- as.data.frame(data)
-  if (end > length(model$subsets$rss)) {
+  if ((is.null(end))||(end > length(model$subsets$rss))) {
     end <- length(model$subsets$rss)
   }
 
