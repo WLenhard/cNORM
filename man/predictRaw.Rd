@@ -4,7 +4,7 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(norm, age, coefficients, minRaw = 0, maxRaw = 1000)
+predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf)
 }
 \arguments{
 \item{norm}{The norm score, e. g. a specific T score}

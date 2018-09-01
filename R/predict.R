@@ -104,8 +104,8 @@ predictRaw <-
   function(norm,
              age,
              coefficients,
-             minRaw = 0,
-             maxRaw = 1000) {
+             minRaw = -Inf,
+             maxRaw = Inf) {
 
     # first intercept
     coef <- coefficients
@@ -148,7 +148,9 @@ predictRaw <-
     }
 
     # check bounds
-    if (predict < minRaw) {
+    if(is.na(predict)){
+      warning(paste0("NA value occured in predictValue with norm score ", norm, " and age ", age))
+    }else if (predict < minRaw) {
       predict <- minRaw
     } else if (predict > maxRaw) {
       predict <- maxRaw

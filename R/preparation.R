@@ -102,13 +102,23 @@ rankByGroup <-
              descend = FALSE,
              descriptives = TRUE) {
 
+    d <- as.data.frame(data)
+
     # check if columns exist
-    if((typeof(group) != "logical") && !(group %in% colnames(data))){
+    if((typeof(group) != "logical") && !(group %in% colnames(d))){
       stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
     }
 
-    if(!(raw %in% colnames(data))){
+    if(!(raw %in% colnames(d))){
       stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+    }
+
+    if(!is.numeric(d[, group])){
+      warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""));
+    }
+
+    if(!is.numeric(d[, raw])){
+      warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
     }
 
     # define Q-Q-plot alorithm, use rankit as standard
@@ -121,7 +131,6 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-    d <- as.data.frame(data)
     if (typeof(group) == "logical" && !group) {
       if (descend) {
         d$percentile <- (rank(-1 * (d[, raw])) + numerator[method]) / (length(d[, raw]) + denominator[method])
@@ -236,17 +245,27 @@ rankBySlidingWindow <- function(data,
                                 descriptives = TRUE,
                                 nGroup = 0) {
 
+  # copy data frame
+  d <- as.data.frame(data)
+
   # check if columns exist
-  if(!(age %in% colnames(data))){
+  if(!(age %in% colnames(d))){
     stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
   }
 
-  if(!(raw %in% colnames(data))){
+  if(!(raw %in% colnames(d))){
     stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
   }
 
-  # copy data frame
-  d <- as.data.frame(data)
+  if(!is.numeric(d[, age])){
+    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
+  }
+
+  if(!is.numeric(d[, raw])){
+    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
+  }
+
+
 
   # define Q-Q-plot alorithm, use rankit as standard
   # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
@@ -366,13 +385,23 @@ computePowers <-
              norm = "normValue",
              age = "group") {
 
+    d <-as.data.frame(data)
+
     # check if columns exist
-    if(!(norm %in% colnames(data))){
+    if(!(norm %in% colnames(d))){
       stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""));
     }
 
-    if(!(age %in% colnames(data))){
+    if(!(age %in% colnames(d))){
       stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""));
+    }
+
+    if(!is.numeric(d[, norm])){
+      warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""));
+    }
+
+    if(!is.numeric(d[, age])){
+      warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
     }
 
     if ((k < 1) | (k > 6)) {
@@ -380,7 +409,7 @@ computePowers <-
       k <- 6
     }
 
-    d <-as.data.frame(data)
+
     L1 <- as.numeric(d[[norm]])
     A1 <- as.numeric(d[[age]])
     L1A1 <- L1 * A1
