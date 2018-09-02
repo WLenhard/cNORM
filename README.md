@@ -2,7 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating non-parametric regression based continuous standard scores, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016). For an in-depth tutorial please consult the project homepage \url{https://www.psychometrica.de/cNorm_en.html}
+The package cNorm provides methods for generating non-parametric regression based continuous standard scores, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016). For an in-depth tutorial please consult the project homepage https://www.psychometrica.de/cNorm_en.html
 
 ## Approach
 
@@ -72,5 +72,8 @@ The package is still under development. Please report errors. Suggestions for im
 The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves) and life expectancy at birth per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC` or `?life` to display information on the data sets.
 
 ## References
+*   CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related Documentation. available https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx . (date of retrieval: 25/08/2018)
+*   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437
 *   Lenhard, W., & Schneider, W. (2006). ELFE 1-6: Ein Leseverständnistest für Erst- bis Sechstklässler. Göttingen: Hogrefe. 
+*   The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators. available https://data.worldbank.org/indicator/sp.dyn.le00.in . (date of retrieval: 01/09/2018)
