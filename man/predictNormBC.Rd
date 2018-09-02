@@ -35,7 +35,7 @@ bcParameters <- boxcox(model, 3)
 
 # predict norm value for raw value 15 at age 3 based on the regression model and via box cox
 predictNormBC(bcParameters, 15, scale="T")
-predictNormValue(15, 3, model)
+predictNormValue(15, 3, model, minNorm=25, maxNorm=75)
 }
 \references{
 Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized

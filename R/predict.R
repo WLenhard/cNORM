@@ -182,7 +182,7 @@ predictRaw <-
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
-#' norms <- normTable(3.5, m, step=0.5)
+#' norms <- normTable(3.5, m, , minNorm=25, maxNorm=75, step=0.5)
 #' @export
 normTable <- function(A,
                       model,
@@ -583,7 +583,7 @@ derivationTable <-
 #' # return norm value for raw value 21 for grade 2, month 9
 #' # Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw scores
 #' # and age to calculate predicted norm values for original data.
-#' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m)
+#' specificNormValue <- predictNormValue(raw = 21, A = 2.75, model = m, minNorm=25, maxNorm=75)
 #'
 #' @export
 predictNormValue <-

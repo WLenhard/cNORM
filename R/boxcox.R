@@ -201,7 +201,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
 #'
 #' # predict norm value for raw value 15 at age 3 based on the regression model and via box cox
 #' predictNormBC(bcParameters, 15, scale="T")
-#' predictNormValue(15, 3, model)
+#' predictNormValue(15, 3, model, minNorm=25, maxNorm=75)
 predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
   if(raw<0){
     stop("Box Cox cannot handle negative raw scores")

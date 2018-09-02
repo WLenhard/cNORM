@@ -40,7 +40,7 @@ sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 \examples{
 normData <- prepareData()
 m <- bestModel(data=normData)
-norms <- normTable(3.5, m, step=0.5)
+norms <- normTable(3.5, m, , minNorm=25, maxNorm=75, step=0.5)
 }
 \seealso{
 rawTable
