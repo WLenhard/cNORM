@@ -14,6 +14,7 @@ Date: 2018.09.01
 Changes:
 
 *   Life expectancy dataset of the World Bank added
+*   Mortality of infants per 1000 life birth from 1960 to 2017 added
 *   Minor chanes in functions to check data integrity and exceptions
 
 

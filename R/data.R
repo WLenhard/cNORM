@@ -98,3 +98,28 @@
 #' @name life
 #' @format A data frame with 11182 rows and 4 columns
 "life"
+
+#' Mortality of infants per 1000 life birth from 1960 to 2017
+#'
+#' The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
+#' It includes the mortality rate of life birth per country from 1960 to 2017. The data has been converted to
+#' long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
+#' with a broader scope spanning 5 years each has been added. It can be used for demonstrating intersecting percentile 
+#' curves at bottom effects.
+#'
+#' @format A data frame with 9547 rows and 4 variables:
+#' \describe{
+#'   \item{Country}{The name of the country}
+#'   \item{year}{reference year of data collection}
+#'   \item{life}{the life expectancy at birth}
+#'   \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
+#' }
+#' @docType data
+#' @keywords datasets
+#' @source \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN}
+#' @references The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available 
+#' \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
+#' @keywords datasets, child mortality, time series
+#' @name mortality
+#' @format A data frame with 9547 rows and 4 columns
+"mortality"
