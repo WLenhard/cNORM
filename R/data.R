@@ -73,3 +73,28 @@
 #' @name CDC
 #' @format A data frame with 45035 rows and 7 columns
 "CDC"
+
+#' Life expectancy at birth from 1960 to 2017
+#'
+#' The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
+#' It includes the life expectancy at birth on nation level from 1960 to 2017. The data has been converted to
+#' long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
+#' with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the 
+#' examples section of the cNORM tutorial, available via \url{https://www.psychometrica.de/cNorm_examples_en.html}
+#'
+#' @format A data frame with 11182 rows and 4 variables:
+#' \describe{
+#'   \item{Country}{The name of the country}
+#'   \item{year}{reference year of data collection}
+#'   \item{life}{the life expectancy at birth}
+#'   \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
+#' }
+#' @docType data
+#' @keywords datasets
+#' @source \url{https://data.worldbank.org/indicator/sp.dyn.le00.in}
+#' @references The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
+#' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
+#' @keywords datasets, life expectany, time series
+#' @name life
+#' @format A data frame with 11182 rows and 4 columns
+"life"
