@@ -8,6 +8,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 0.9.8
+Date: 2018.09.01
+
+Changes:
+
+*   Life expectancy dataset of the World Bank added
+*   Minor chanes in functions to check data integrity and exceptions
+
+
+
 ### Version in 0.9.7
 Date: 2018.08.31
 

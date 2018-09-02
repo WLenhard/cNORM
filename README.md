@@ -2,8 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating non-parametric regression based continuous standard scores, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and
-screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016).
+The package cNorm provides methods for generating non-parametric regression based continuous standard scores, as f. e. for psychometric test development, biometrics (biological and (e. g. physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016). For an in-depth tutorial please consult the project homepage \url{https://www.psychometrica.de/cNorm_en.html}
 
 ## Approach
 
@@ -24,8 +23,7 @@ Conducting the analysis consists of four steps:
 1.  Validating the model
 1.  Generating norm tables and plotting the results
 
-cNORM offers function for all of these steps, helps in selecting the best
-fitting models and in generating the norm tables.
+cNORM offers function for all of these steps, helps in selecting the best fitting models and in generating the norm tables.
 
 ```{r example}
 ## basic example code for modeling the sample dataset
@@ -71,7 +69,7 @@ library(cNORM)
 The package is still under development. Please report errors. Suggestions for improvement are always welcome!
 
 ## Sample Data
-The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and the German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Type `?elfe` or `?ppvt` to display information on the data sets.
+The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves) and life expectancy at birth per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC` or `?life` to display information on the data sets.
 
 ## References
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437
