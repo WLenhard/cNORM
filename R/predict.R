@@ -193,19 +193,17 @@ normTable <- function(A,
                       step = 0.1,
                       descend = FALSE) {
 
-  if(is.null(minNorm)){
-    minNorm <- model$minL1
-  }
-
-  if(is.null(maxNorm)){
-    maxNorm <- model$maxL1
+  if(is.null(minNorm)||is.null(maxNorm)){
+    stop("ERROR: Please specify minimum and maximum norm score")
   }
 
   if(is.null(minRaw)){
+    warning("Minimum raw score not specified. Taking value from original dataset.")
     minRaw <- model$minRaw
   }
 
   if(is.null(maxRaw)){
+    warning("Maximum raw score not specified. Taking value from original dataset.")
     maxRaw <- model$maxRaw
   }
 
@@ -598,12 +596,8 @@ predictNormValue <-
              maxRaw = NULL,
              precision = 0.1) {
 
-    if(is.null(minNorm)){
-      minNorm <- model$minL1
-    }
-
-    if(is.null(maxNorm)){
-      maxNorm <- model$maxL1
+    if(is.null(minNorm)||is.null(maxNorm)){
+      stop("ERROR: Please specify minimum and maximum norm score")
     }
 
     if(is.null(minRaw)){
