@@ -26,17 +26,25 @@ Conducting the analysis consists of four steps:
 cNORM offers function for all of these steps, helps in selecting the best fitting models and in generating the norm tables.
 
 ```{r example}
-## basic example code for modeling the sample dataset
+## Basic example code for modeling the sample dataset
 library(cNORM)
-normData <- prepareData(elfe)
-model <- bestModel(normData)
+
+# Rank data within groupd and compute powers and interactions
+data.elfe <- prepareData(elfe)
+
+# Find best fitting regression model
+model.elfe <- bestModel(data.elfe)
 
 # Plot model
-plotSubset(model)
-plotPercentiles(normData, model)
+plotSubset(model.elfe)
 
-# print norm table (for grade 3)
-normTable(3, model)
+# Plot percentiles and series of percentile with ascending
+# number of predictors up to 14 predictors.
+plotPercentiles(data.elfe, model.elfe)
+plotPercentileSeries(data.elfe, model.elfe, end=14)
+
+# Print norm table (for grade 3)
+normTable(3, model.elfe)
 
 # start vignette for a complete walk through
 vignette(cNORM-Demo)
@@ -69,7 +77,7 @@ library(cNORM)
 The package is still under development. Please report errors. Suggestions for improvement are always welcome!
 
 ## Sample Data
-The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves) and life expectancy at birth per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC`, '?mortality' or `?life` to display information on the data sets.
+The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves), life expectancy at birth and mortality per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC`, `?mortality` or `?life` to display information on the data sets.
 
 ## References
 *   CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related Documentation. available https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx . (date of retrieval: 25/08/2018)
