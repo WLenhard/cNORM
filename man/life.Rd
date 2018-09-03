@@ -27,6 +27,18 @@ and shows, that it can be better to reduce predictors. The model does not conver
 anymore after using 8 predictors and the optimal solution is achieved with four
 predictors, equaling R2=.9825
 }
+\examples{
+# data preparatiom
+data.life <- rankByGroup(life, raw="life")
+data.life <- computePowers(data.life, age="year")
+
+#determining best suiting model by plotting series
+model.life <- bestModel(data.life, raw="life")
+plotPercentileSeries(data.life, model.life, end=10)
+
+# model with foru predictors seems to work best
+model2.life <- bestModel(data.life, raw="life", terms=4)
+}
 \references{
 The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
 available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)

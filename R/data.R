@@ -99,7 +99,7 @@
 #' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
 #' @keywords datasets, life expectany, time series
 #' @name life
-#' @example
+#' @examples
 #' # data preparatiom
 #' data.life <- rankByGroup(life, raw="life")
 #' data.life <- computePowers(data.life, age="year")
@@ -135,5 +135,15 @@
 #' \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
 #' @keywords datasets, child mortality, time series
 #' @name mortality
+#' @examples
+#' # data preparation
+#' data.mortality <- rankByGroup(mortality, raw="mortality")
+#' data.mortality <- computePowers(data.mortality, age="year")
+#'
+#' # modelling
+#' model.mortality <- bestModel(data.mortality, raw="mortality")
+#' plotSubset(model.mortality, type = 0)
+#' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
+#'
 #' @format A data frame with 9547 rows and 4 columns
 "mortality"
