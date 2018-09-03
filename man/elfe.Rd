@@ -25,6 +25,12 @@ include verbs, adjectives, nouns, pronouns and conjunctives. Each item stems fro
 the same word type. The text is speeded, with a time cutoff of 180 seconds. The
 variables are as follows:
 }
+\examples{
+# prepare data, retrieve model and plot percentiles
+data.elfe <- prepareData(elfe)
+model.elfe <- bestModel(data.elfe)
+plotPercentiles(data.elfe, model.elfe)
+}
 \references{
 Lenhard, W. & Schneider, W.(2006). Ein Leseverstaendnistest fuer Erst- bis Sechstklaesser. Goettingen/Germany: Hogrefe.
 }

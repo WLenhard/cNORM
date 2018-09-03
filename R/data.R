@@ -19,6 +19,11 @@
 #' @docType data
 #' @keywords datasets
 #' @name elfe
+#' @examples
+#' # prepare data, retrieve model and plot percentiles
+#' data.elfe <- prepareData(elfe)
+#' model.elfe <- bestModel(data.elfe)
+#' plotPercentiles(data.elfe, model.elfe)
 #' @format A data frame with 1400 rows and 3 columns
 "elfe"
 
@@ -43,6 +48,20 @@
 #' @docType data
 #' @keywords datasets
 #' @name ppvt
+#' @examples
+#' # Example with continuous age variable
+#' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1)
+#' data.ppvt <- computePowers(data.ppvt, age="age")
+#' model.ppvt <- bestModel(data.ppvt)
+#'
+#' # plot information function
+#' plotSubset(model.ppvt, type=2)
+#'
+#' # check model consistency
+#' checkConsistency(model.ppvt)
+#'
+#' # plot percentiles
+#' plotPercentiles(data.ppvt, model.ppvt)
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"
 
