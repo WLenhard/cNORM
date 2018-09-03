@@ -21,7 +21,7 @@ life
 The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
 It includes the life expectancy at birth on nation level from 1960 to 2017. The data has been converted to
 long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
-with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the 
+with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the
 examples section of the cNORM tutorial, available via \url{https://www.psychometrica.de/cNorm_examples_en.html}
 }
 \references{

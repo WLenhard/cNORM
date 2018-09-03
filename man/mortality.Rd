@@ -8,7 +8,7 @@
 \describe{
   \item{Country}{The name of the country}
   \item{year}{reference year of data collection}
-  \item{life}{the life expectancy at birth}
+  \item{mortality}{the mortality per 1000 life born children}
   \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
 }}
 \source{
@@ -21,11 +21,11 @@ mortality
 The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
 It includes the mortality rate of life birth per country from 1960 to 2017. The data has been converted to
 long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
-with a broader scope spanning 5 years each has been added. It can be used for demonstrating intersecting percentile 
+with a broader scope spanning 5 years each has been added. It can be used for demonstrating intersecting percentile
 curves at bottom effects.
 }
 \references{
-The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available 
+The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available
 \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
 }
 \keyword{child}
