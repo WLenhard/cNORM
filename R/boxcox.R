@@ -1,8 +1,8 @@
 #' Generate box cox power function for regression model at specific age
 #'
 #' Applies a curve fitting for the regression model with the Box-Cox power transformation via the
-#' LMS method of Cole and Green (1992) at a specific age. Therefore, itsimulates a data set and
-#' applies the transformation. It iteratively #' determines the power transformation lambda
+#' LMS method of Cole and Green (1992) at a specific age. Therefore, it simulates a data set and
+#' applies the transformation. It iteratively determines the power transformation lambda
 #' parameter with a precision up to 10^E-5 with a lambda value of 1 indicating normal
 #' distribution, values between 0 and 1 representing negative skew and values above 1 positive
 #' skewness of the distribution. The function is an optional step following the non-parametric
