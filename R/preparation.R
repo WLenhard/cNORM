@@ -3,10 +3,10 @@
   op.cNORM <-
     list(
       cNORM.install.args = "",
-      cNORM.name = "Wolfgang & Alexandra Lenhard",
+      cNORM.name = "Wolfgang Lenhard, Alexandra Lenhard & Sebastian Gary",
       cNORM.desc.author = "Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de> [aut, cre];
-      Alexandra Lenhard <lenhard@psychometrica.de> [aut]",
-      cNORM.desc.license = "BSD 3-clause License",
+      Alexandra Lenhard <lenhard@psychometrica.de> [aut];  Sebastian Gary [aut]",
+      cNORM.desc.license = "AGPL-3",
       cNORM.desc = list()
     )
   toset <- !(names(op.cNORM) %in% names(op))
@@ -49,8 +49,8 @@ prepareData <- function(data = NULL, group = "group") {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
   }
 
-  normData <- rankByGroup(normData, group = "group")
-  normData <- computePowers(normData, k = 4, norm = "normValue", age = "group")
+  normData <- cNORM::rankByGroup(normData, group = "group")
+  normData <- cNORM::computePowers(normData, k = 4, norm = "normValue", age = "group")
   return(normData)
 }
 
@@ -340,7 +340,7 @@ rankBySlidingWindow <- function(data,
   # but necessary for plotting the percentiles
   if(nGroup > 0){
     group <- as.factor( as.numeric( cut(d[, age],nGroup)))
-    d$group <- ave(d[, age], group, FUN = function(x) {
+    d$group <- stats::ave(d[, age], group, FUN = function(x) {
       mean(x)
     })
   }

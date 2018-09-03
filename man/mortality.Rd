@@ -9,7 +9,7 @@
   \item{Country}{The name of the country}
   \item{year}{reference year of data collection}
   \item{mortality}{the mortality per 1000 life born children}
-  \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
+  \item{group}{grouping variable based on 'year' with a lower resolution; spans intervals of 4 years each}
 }}
 \source{
 \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN}
@@ -21,8 +21,8 @@ mortality
 The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
 It includes the mortality rate of life birth per country from 1960 to 2017. The data has been converted to
 long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
-with a broader scope spanning 5 years each has been added. It can be used for demonstrating intersecting percentile
-curves at bottom effects.
+with a broader scope spanning 4 years each has been added. It can be used for demonstrating intersecting
+percentile curves at bottom effects.
 }
 \examples{
 # data preparation

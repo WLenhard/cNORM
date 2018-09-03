@@ -20,6 +20,9 @@ box cox function}
 \item{type}{Type of plot; 0 = Show percentiles as function of raw scores, 1 = Show raw scores
 as function of norm scores, 2 = Density plot}
 }
+\value{
+data frame with fitted box cox and regression scores
+}
 \description{
 This plot can be used to compare, how well the regression data can be modelled via a
 Box Cox power transformation.

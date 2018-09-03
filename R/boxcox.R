@@ -239,7 +239,7 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
 #' @param maxRaw The upper bound of raw scores
 #' @param type Type of plot; 0 = Show percentiles as function of raw scores, 1 = Show raw scores
 #' as function of norm scores, 2 = Density plot
-#'
+#' @return data frame with fitted box cox and regression scores
 #' @export
 #' @seealso boxcox
 #' @examples
@@ -325,5 +325,5 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 1
   )}
 
   print(p)
-  #return(table)
+  return(table)
 }

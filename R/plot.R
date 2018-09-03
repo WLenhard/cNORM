@@ -427,7 +427,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "g
     bestformula$raw <- model$raw
 
 
-    plot <- plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
+    plot <- cNORM::plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
                     minRaw = minR,
                     maxRaw = maxR,
                     percentiles = percentiles,
@@ -436,9 +436,9 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "g
                     title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4)))
 
     if(!is.null(filename)){
-      trellis.device(device="png", filename=paste0(filename, start, ".png"))
+      lattice::trellis.device(device="png", filename=paste0(filename, start, ".png"))
       print(plot)
-      dev.off()
+      grDevices::dev.off()
     }
     start <- start + 1
   }

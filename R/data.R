@@ -98,11 +98,9 @@
 #' The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
 #' It includes the life expectancy at birth on nation level from 1960 to 2017. The data has been converted to
 #' long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
-#' with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the
-#' examples section of the cNORM tutorial, available via \url{https://www.psychometrica.de/cNorm_examples_en.html}
-#' and shows, that it can be better to reduce predictors. The model does not converge
-#' anymore after using 8 predictors and the optimal solution is achieved with four
-#' predictors, equaling R2=.9825
+#' with a broader scope spanning 4 years each has been added. It shows, that it can be better to reduce
+#' predictors. The model does not converge anymore after using 8 predictors and the optimal solution is
+#' achieved with four predictors, equaling R2=.9825.
 #'
 #' @format A data frame with 11182 rows and 4 variables:
 #' \describe{
@@ -137,15 +135,15 @@
 #' The data is available by the courtesy of the World Bank under Creative Commons Attribution 4.0 (CC-BY 4.0).
 #' It includes the mortality rate of life birth per country from 1960 to 2017. The data has been converted to
 #' long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
-#' with a broader scope spanning 5 years each has been added. It can be used for demonstrating intersecting percentile
-#' curves at bottom effects.
+#' with a broader scope spanning 4 years each has been added. It can be used for demonstrating intersecting
+#' percentile curves at bottom effects.
 #'
 #' @format A data frame with 9547 rows and 4 variables:
 #' \describe{
 #'   \item{Country}{The name of the country}
 #'   \item{year}{reference year of data collection}
 #'   \item{mortality}{the mortality per 1000 life born children}
-#'   \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
+#'   \item{group}{grouping variable based on 'year' with a lower resolution; spans intervals of 4 years each}
 #' }
 #' @docType data
 #' @keywords datasets
