@@ -127,7 +127,7 @@
 #' model.life <- bestModel(data.life, raw="life")
 #' plotPercentileSeries(data.life, model.life, end=10)
 #'
-#' # model with foru predictors seems to work best
+#' # model with four predictors seems to work best
 #' model2.life <- bestModel(data.life, raw="life", terms=4)
 #' @format A data frame with 11182 rows and 4 columns
 "life"
