@@ -81,6 +81,9 @@
 #' long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
 #' with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the
 #' examples section of the cNORM tutorial, available via \url{https://www.psychometrica.de/cNorm_examples_en.html}
+#' and shows, that it can be better to reduce predictors. The model does not converge
+#' anymore after using 8 predictors and the optimal solution is achieved with four
+#' predictors, equaling R2=.9825
 #'
 #' @format A data frame with 11182 rows and 4 variables:
 #' \describe{
@@ -96,6 +99,17 @@
 #' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
 #' @keywords datasets, life expectany, time series
 #' @name life
+#' @example
+#' # data preparatiom
+#' data.life <- rankByGroup(life, raw="life")
+#' data.life <- computePowers(data.life, age="year")
+#'
+#' #determining best suiting model by plotting series
+#' model.life <- bestModel(data.life, raw="life")
+#' plotPercentileSeries(data.life, model.life, end=10)
+#'
+#' # model with foru predictors seems to work best
+#' model2.life <- bestModel(data.life, raw="life", terms=4)
 #' @format A data frame with 11182 rows and 4 columns
 "life"
 

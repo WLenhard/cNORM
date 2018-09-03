@@ -23,6 +23,9 @@ It includes the life expectancy at birth on nation level from 1960 to 2017. The 
 long data format, aggregates for groups of nations and missings have been deleted and a grouping variable
 with a broader scope spanning 4 years each has been added. It is used for demonstration purposes in the
 examples section of the cNORM tutorial, available via \url{https://www.psychometrica.de/cNorm_examples_en.html}
+and shows, that it can be better to reduce predictors. The model does not converge
+anymore after using 8 predictors and the optimal solution is achieved with four
+predictors, equaling R2=.9825
 }
 \references{
 The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
