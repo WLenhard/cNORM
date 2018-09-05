@@ -226,6 +226,7 @@ rankByGroup <-
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
+#' \dontrun{
 #' # Transformation using a sliding window
 #' normData <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
 #'
@@ -233,6 +234,7 @@ rankByGroup <-
 #' # values, since the sample dataset only has a grouping variable for age
 #' normData2 <- rankByGroup(elfe, group = "group")
 #' mean(normData$normValue - normData2$normValue)
+#' }
 #' @seealso rankByGroup, computePowers
 #' @export
 rankBySlidingWindow <- function(data,
