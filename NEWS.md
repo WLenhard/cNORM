@@ -2,20 +2,20 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 ### TODO
-*   in general check parameter names for coherence (e. g. for the age / group / explanatory variable)
 *   Check rawTableQuick for usage with descending values
 *   Shiny
 
 
 
 ### Version in 0.9.8
-Date: 2018.09.01
+Date: 2018.09.05
 
 Changes:
 
 *   Life expectancy dataset of the World Bank added
 *   Mortality of infants per 1000 life birth from 1960 to 2017 added
 *   Minor chanes in functions to check data integrity and exceptions
+*   Vignette updated
 
 
 
