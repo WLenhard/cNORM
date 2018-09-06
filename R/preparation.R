@@ -32,25 +32,55 @@
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
 #' the procedure
-#' @param group manually specify the grouping variable in the data
+#' @param group grouping variable in the data, e. g. age groups, grades ...
+#' @param raw the raw scores
+#' @param age the continuous explanatory variable; by default set to "group"
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
+#' # conducts ranking and computation of powers and interactions with the 'elfe' dataset
 #' normData <- prepareData()
+#'
+#' # variable names can be specified as well, here with the BMI data included in the package
+#' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
 #' @export
-prepareData <- function(data = NULL, group = "group") {
+prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
     normData <- data
   }
 
+  # checks
   if(!(group %in% colnames(normData))){
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+  }else   if(!(raw %in% colnames(normData))){
+    stop(paste(c("ERROR: Raw score variable '", group, "' does not exist in data object."), collapse = ""));
+  }else   if(!(age %in% colnames(normData))){
+    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
   }
 
-  normData <- cNORM::rankByGroup(normData, group = "group")
-  normData <- cNORM::computePowers(normData, k = 4, norm = "normValue", age = "group")
+  if(!is.numeric(normData[, group])){
+    warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""));
+  }
+
+  if(!is.numeric(normData[, raw])){
+    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
+  }
+
+  if(!is.numeric(normData[, age])){
+    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
+  }
+
+  # exclude missings
+  normData <- as.data.frame(normData)
+  normData <- normData[!is.na(normData[, group]),]
+  normData <- normData[!is.na(normData[, raw]),]
+  normData <- normData[!is.na(normData[, age]),]
+
+  # ranking and powers
+  normData <- cNORM::rankByGroup(normData, group = group, raw = raw)
+  normData <- cNORM::computePowers(normData, k = 4, norm = "normValue", age = age)
   return(normData)
 }
 

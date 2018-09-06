@@ -4,14 +4,19 @@
 \alias{prepareData}
 \title{Set up example dataset and compute model}
 \usage{
-prepareData(data = NULL, group = "group")
+prepareData(data = NULL, group = "group", raw = "raw",
+  age = "group")
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
 named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
 the procedure}
 
-\item{group}{manually specify the grouping variable in the data}
+\item{group}{grouping variable in the data, e. g. age groups, grades ...}
+
+\item{raw}{the raw scores}
+
+\item{age}{the continuous explanatory variable; by default set to "group"}
 }
 \value{
 data frame including the norm scores, powers and interactions of the norm score and
@@ -25,5 +30,9 @@ scores and interactions. Afterwards the best fitting model is determined, based 
 all default parameters.
 }
 \examples{
+# conducts ranking and computation of powers and interactions with the 'elfe' dataset
 normData <- prepareData()
+
+# variable names can be specified as well, here with the BMI data included in the package
+data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
 }
