@@ -166,8 +166,7 @@ simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m =
   if(randomTheta == TRUE){
     theta <- stats::rnorm(items.n, items.m, items.sd)
   }else{
-    p <- seq(0, 1, length.out = items.n + 2)
-    p <- p[3:length(p)-1]
+    p <- seq(from = 0.5 / items.n, to = (items.n - 0.5) / items.n, length.out = items.n)
     theta <- stats::qnorm(p, items.m, items.sd)
   }
 
