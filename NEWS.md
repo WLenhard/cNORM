@@ -7,6 +7,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+
+### Version in 0.9.10
+Date: 2018.09.010
+
+Changes:
+
+*   'simulateRasch' to simulate test data was added
+
+
+
 ### Version in 0.9.9
 Date: 2018.09.06
 

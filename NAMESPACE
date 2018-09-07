@@ -1,9 +1,9 @@
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, formula, ave, aggregate, median, sd, qnorm)
-importFrom("grDevices", "rainbow", "dev.off")
+importFrom(stats, formula, ave, aggregate, median, sd, qnorm, rnorm, runif)
+importFrom(grDevices, rainbow, dev.off)
 importFrom(latticeExtra, panel.2dsmoother)
-importFrom("utils", "tail")
+importFrom(utils, tail)
 export(
 	prepareData,
 	plotValues,
@@ -31,5 +31,6 @@ export(
 	boxcox,
 	predictNormBC,
 	predictRawBC,
-	plotBoxCox
+	plotBoxCox,
+	simulateRasch
 )
