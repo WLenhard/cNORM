@@ -2,7 +2,7 @@
 #'
 #' The function generates a skewed normal distribution based on the SN
 #' package by Adelchi Azzalini (http://azzalini.stat.unipd.it/SN/). It
-#' is used for internal testing purposes.
+#' (is used for internal testing purposes only)
 #' @param n number of observations
 #' @param location mean of the distribution
 #' @param scale the standard deviation
@@ -73,8 +73,8 @@ simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups 
   sample$raw[sample$raw > maxRaw] <- maxRaw
 
   # ranking and powers
-  sample <- cNORM::rankByGroup(sample)
-  sample <- cNORM::computePowers(sample, k)
+  sample <- rankByGroup(sample)
+  sample <- computePowers(sample, k)
 
 
   return(sample)
@@ -152,17 +152,19 @@ simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m =
   }
 
   data <- data.frame(age, group, mean = simMean(age), sd = simSD(age))
-  data$z <- rnorm(nrow(data))
+  data$z <- stats::rnorm(nrow(data))
   data$latent <- data$z * data$sd + data$mean
 
   meanL <- mean(data$latent)
-  sdL <- sd(data$latent)
+  sdL <- stats::sd(data$latent)
 
+  # compute standardized value over complete sample
   data$zOverall <- (data$latent - meanL)/sdL
 
 
+  # generate item difficulties either randomly or evenly distributed
   if(randomTheta == TRUE){
-    theta <- rnorm(items.n, items.m, items.sd)
+    theta <- stats::rnorm(items.n, items.m, items.sd)
   }else{
     p <- seq(0, 1, length.out = items.n + 2)
     p <- p[3:length(p)-1]
