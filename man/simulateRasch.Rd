@@ -47,11 +47,9 @@ and the raw data via $data of the returned object.
 sim <- simulateRasch(n=150, minAge=1, maxAge=7, items.n = 30, items.m = -1.0, items.sd = 1, randomTheta = TRUE, width = 1.0)
 
 # Show item difficulties
-View(sim$theta)
 mean(sim$theta)
 sd(sim$theta)
-describe(sim$theta)
-hist(sim$theta)boxplot(raw~group, data=sim$data)
+hist(sim$theta)
 
 # Plot raw scores
 boxplot(raw~group, data=sim$data)
