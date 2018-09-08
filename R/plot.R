@@ -439,6 +439,8 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "g
       lattice::trellis.device(device="png", filename=paste0(filename, start, ".png"))
       print(plot)
       grDevices::dev.off()
+    }else{
+      Sys.sleep(.5)
     }
     start <- start + 1
   }
