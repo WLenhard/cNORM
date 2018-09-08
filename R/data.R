@@ -125,7 +125,9 @@
 #'
 #' #determining best suiting model by plotting series
 #' model.life <- bestModel(data.life, raw="life")
+#' \dontrun{
 #' plotPercentileSeries(data.life, model.life, end=10)
+#' }
 #'
 #' # model with four predictors seems to work best
 #' model2.life <- bestModel(data.life, raw="life", terms=4)
@@ -162,7 +164,8 @@
 #' # modelling
 #' model.mortality <- bestModel(data.mortality, raw="mortality")
 #' plotSubset(model.mortality, type = 0)
+#' \dontrun{
 #' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
-#'
+#' }
 #' @format A data frame with 9547 rows and 4 columns
 "mortality"

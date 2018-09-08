@@ -32,7 +32,9 @@ data.life <- computePowers(data.life, age="year")
 
 #determining best suiting model by plotting series
 model.life <- bestModel(data.life, raw="life")
+\dontrun{
 plotPercentileSeries(data.life, model.life, end=10)
+}
 
 # model with four predictors seems to work best
 model2.life <- bestModel(data.life, raw="life", terms=4)

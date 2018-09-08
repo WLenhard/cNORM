@@ -32,8 +32,9 @@ data.mortality <- computePowers(data.mortality, age="year")
 # modelling
 model.mortality <- bestModel(data.mortality, raw="mortality")
 plotSubset(model.mortality, type = 0)
+\dontrun{
 plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
-
+}
 }
 \references{
 The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available

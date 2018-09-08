@@ -9,11 +9,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 0.9.10
-Date: 2018.09.010
+Date: 2018.09.08
 
 Changes:
 
 *   'simulateRasch' to simulate test data was added
+*   old sim functions removed
 
 
 
