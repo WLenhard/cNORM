@@ -92,7 +92,7 @@ simData <- function(n, minAge = 1, maxAge = 4, minRaw = 0, maxRaw = 50, nGroups 
 #' x <- simMean(a)
 #' }
 simMean <- function(age){
-  return(0.82153 * age - 0.054437 * age^2 + 0.0001 * age^4)
+  return(age - 0.05 * age^2 + 0.0001 * age^4)
 }
 
 #' Simulate sd per age
@@ -106,7 +106,7 @@ simMean <- function(age){
 #' x <- simSD(a)
 #' }
 simSD <- function(age){
-  return((age * 0.25 + 1)^0.5)
+  return(((age * 0.25 + 1)^0.3)*0.5)
 }
 
 #' Simulate raw test scores based on Rasch model
@@ -125,6 +125,8 @@ simSD <- function(age){
 #' @param items.m The mean difficulty of the items
 #' @param items.sd The standard deviation of the item difficulty
 #' @param randomTheta If set to true, a random item sample with normally distributed difficulty is drawn, based
+#' @param width The width of the window size for the continuous age per group; +- 1/2 width around group
+#' center
 #' on items.m and item.sd; if set to FALSE, the distribution is not drawn randomly but normally nonetheless
 #'
 #' @return a list containing the simulated data and thetas
@@ -136,7 +138,7 @@ simSD <- function(age){
 #' @export
 #'
 #' @examples
-simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m = 0, items.sd = 1, randomTheta = TRUE){
+simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m = 0, items.sd = 1, randomTheta = TRUE, width = 1){
   # draw sample
   groups <- seq.int(from = minAge, to = maxAge)
   latent <- vector(mode="numeric", length=0)
@@ -146,7 +148,7 @@ simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m =
 
   while(i <= length(groups)){
     group <- c(group, rep(groups[i], times = n))
-    age <- c(age, runif(n, min = groups[i] - 0.5, max = groups[i] + 0.5))
+    age <- c(age, runif(n, min = groups[i] - (width/2), max = groups[i] + (width/2)))
 
     i <- i + 1
   }

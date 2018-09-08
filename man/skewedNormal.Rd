@@ -21,7 +21,7 @@ a skewed normal distribution
 \description{
 The function generates a skewed normal distribution based on the SN
 package by Adelchi Azzalini (http://azzalini.stat.unipd.it/SN/). It
-is used for internal testing purposes.
+(is used for internal testing purposes only)
 }
 \references{
 Azzalini, A. with the collaboration of Capitanio, A. (2014).

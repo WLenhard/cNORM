@@ -5,7 +5,7 @@
 \title{Simulate raw test scores based on Rasch model}
 \usage{
 simulateRasch(n = 100, minAge = 1, maxAge = 7, items.n = 21,
-  items.m = 0, items.sd = 1, randomTheta = TRUE)
+  items.m = 0, items.sd = 1, randomTheta = TRUE, width = 1)
 }
 \arguments{
 \item{n}{The sample size per age group}
@@ -20,7 +20,10 @@ simulateRasch(n = 100, minAge = 1, maxAge = 7, items.n = 21,
 
 \item{items.sd}{The standard deviation of the item difficulty}
 
-\item{randomTheta}{If set to true, a random item sample with normally distributed difficulty is drawn, based
+\item{randomTheta}{If set to true, a random item sample with normally distributed difficulty is drawn, based}
+
+\item{width}{The width of the window size for the continuous age per group; +- 1/2 width around group
+center
 on items.m and item.sd; if set to FALSE, the distribution is not drawn randomly but normally nonetheless}
 }
 \value{
