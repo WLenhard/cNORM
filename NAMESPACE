@@ -25,7 +25,6 @@ export(
 	checkConsistency,
 	derivationTable,
 	plotDerivative,
-	simData,
 	rangeCheck,
 	printSubset,
 	boxcox,
