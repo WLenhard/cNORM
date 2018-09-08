@@ -42,3 +42,23 @@ function of age, with at first fast progression, which slows down over age, and 
 standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
 and the raw data via $data of the returned object.
 }
+\examples{
+# simulate data
+sim <- simulateRasch(n=150, minAge=1, maxAge=7, items.n = 30, items.m = -1.0, items.sd = 1, randomTheta = TRUE, width = 1.0)
+
+# Show item difficulties
+View(sim$theta)
+mean(sim$theta)
+sd(sim$theta)
+describe(sim$theta)
+hist(sim$theta)boxplot(raw~group, data=sim$data)
+
+# Plot raw scores
+boxplot(raw~group, data=sim$data)
+
+# Model data
+data <- prepareData(sim$data, age="age")
+model <- bestModel(data, k = 4)
+printSubset(model)
+plotSubset(model, type=0)
+}
