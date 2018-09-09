@@ -62,6 +62,14 @@ plotPercentiles(normData, model)
 # It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
 preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 print(regressionFunction(preselectedModel))
+
+# Example for modelling based on continuous age variable and raw variable, based on the CDC data
+# We use the default k=4 parameter; raw variable has to be set to "bmi"
+bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
+bmi.model <- bestModel(bmi.data, raw="bmi")
+printSubset(bmi.model)
+
+
 }
 \seealso{
 plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
