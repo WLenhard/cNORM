@@ -34,6 +34,13 @@
 #' not part of the original model building. Please not, that adding other variables
 #' than those based on L and A, plotting, prediction and normTable function will most
 #' likely not work, but at least the regression formula can be obtained that way.
+#' @param force.in List of variable names forced into the regression function. This option
+#' can be used to force the regression to include covariates like sex or other background
+#' variables. This can be used to model seperate norm scales for different groups in order
+#' the sample. Variables specified here, that are not part of the initial regression function
+#' resp. list of predictors, are ignored without further notice and thus do not show up in
+#' the final result. Additionally, all other functions like norm table generation and plotting
+#' are so far not yet prepared to handle covariates.
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
@@ -44,16 +51,25 @@
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
 #'
-#' # It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
-#' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
+#' # It is possible to specify the variables explicitely - usefull to smuggle
+#' # in variables like sex
+#' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3",
+#'                               "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
 #'
-#' # Example for modelling based on continuous age variable and raw variable, based on the CDC data
-#' # We use the default k=4 parameter; raw variable has to be set to "bmi"
+#' # Example for modelling based on continuous age variable and raw variable,
+#' # based on the CDC data. We use the default k=4 parameter; raw variable has
+#' # to be set to "bmi".
 #' bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
 #' bmi.model <- bestModel(bmi.data, raw="bmi")
 #' printSubset(bmi.model)
 #'
+#' # Custom list of predictors (based on k = 3) and forcing in the sex variable
+#' # While calculating the regression model works well, all other functions like
+#' # plotting and norm table generation are not yet prepared to use covariates
+#' bmi.sex <- bestModel(bmi.data, raw="bmi", predictors = c("L1", "L2", "L3",
+#'                      "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+#'                      "L2A3", "L3A1", "L3A2", "L3A3", "sex"), force.in = c("sex"))
 #'
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
@@ -62,7 +78,8 @@ bestModel <- function(data,
                       R2 = 0.99,
                       k = 4,
                       predictors = NULL,
-                      terms = 0) {
+                      terms = 0,
+                      force.in = NULL) {
   if (R2 <= 0 || R2 >= 1) {
     stop("R2 parameter out of bounds.")
   }
@@ -83,9 +100,6 @@ bestModel <- function(data,
     stop("ERROR: Missing variables from predictors variable. Please check variable list.");
   }
 
-  if ((k > 4 & is.null(predictors)) || (!is.null(predictors) && length(predictors) > 25)) {
-    message("The computation might take some time ...")
-  }
   if (!is.null(predictors)) {
     lmX <- stats::formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
   } else if (k == 1) {
@@ -107,7 +121,21 @@ bestModel <- function(data,
     lmX <- stats::formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
   }
 
-  subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = 2 * k + k * k, force.in = NULL)
+  big = FALSE
+  nvmax = 2 * k + k * k + length(predictors)
+
+  if(nvmax>25){
+    big = TRUE
+    message("The computation might take some time ...")
+  }
+
+  index <- NULL
+  if(!is.null(force.in)){
+    c <- strsplit(format(paste0(lmX))[[3]], " \\+ ")
+    index <- match(force.in, c[[1]])
+  }
+
+  subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big)
   results <- summary(subsets)
 
   i <- 1

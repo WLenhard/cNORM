@@ -46,25 +46,28 @@ the dataset with the individual percentiles and norm scores
 \description{
 The function retrieves all individuals in the predefined age range (x +/- width/2)
 around each case and ranks that individual based on this individually drawn sample.
-This function can be directly used with a continuous age variable in order to avoid grouping.
-When collecting data on the basis of a continuous age variable, cases located far
-from the mean age of the group receive distorted percentiles when building discrete
-groups and generating percentiles with the traditional approach. The distortion increases with
-distance from the group mean and this effect can be avoided by the sliding window.
+This function can be directly used with a continuous age variable in order to avoid 
+grouping. When collecting data on the basis of a continuous age variable, cases 
+located far from the mean age of the group receive distorted percentiles when building 
+discrete groups and generating percentiles with the traditional approach. The distortion 
+increases with distance from the group mean and this effect can be avoided by the 
+sliding window.
+}
+\details{
 In case of bindings, the function uses the medium rank and applies the algorithms
-already described in the 'rankByGroup' function. At the upper and lower end of the
+already described in the \code{\link{rankByGroup}} function. At the upper and lower end of the
 data sample, the sliding stops and the sample is drawn from the interval min + width and
 max - width, respectively.
 }
 \examples{
 \dontrun{
 # Transformation using a sliding window
-normData <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
+data.elfe2 <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
 
 # Comparing this to the traditional approach should give us exactly the same
 # values, since the sample dataset only has a grouping variable for age
-normData2 <- rankByGroup(elfe, group = "group")
-mean(normData$normValue - normData2$normValue)
+data.elfe <- rankByGroup(elfe, group = "group")
+mean(data.elfe$normValue - data.elfe2$normValue)
 }
 }
 \seealso{

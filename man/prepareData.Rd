@@ -9,8 +9,8 @@ prepareData(data = NULL, group = "group", raw = "raw",
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
-named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
-the procedure}
+named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to 
+demonstrate the procedure.}
 
 \item{group}{grouping variable in the data, e. g. age groups, grades ...}
 
@@ -31,7 +31,7 @@ all default parameters.
 }
 \examples{
 # conducts ranking and computation of powers and interactions with the 'elfe' dataset
-normData <- prepareData()
+data.elfe <- prepareData()
 
 # variable names can be specified as well, here with the BMI data included in the package
 data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")

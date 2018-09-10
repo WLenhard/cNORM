@@ -30,8 +30,8 @@
 #' scores and interactions. Afterwards the best fitting model is determined, based on
 #' all default parameters.
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
-#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to demonstrate
-#' the procedure
+#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to 
+#' demonstrate the procedure.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
@@ -39,7 +39,7 @@
 #' grouping variable
 #' @examples
 #' # conducts ranking and computation of powers and interactions with the 'elfe' dataset
-#' normData <- prepareData()
+#' data.elfe <- prepareData()
 #'
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
@@ -116,10 +116,10 @@ prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
 #'
 #' @examples
 #' #Transformation with default parameters: RandIt and converting to T scores
-#' normData <- rankByGroup(elfe, group = "group")
+#' data.elfe <- rankByGroup(elfe, group = "group")
 #'
-#' #Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
-#' normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+#' #Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
+#' data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 #'
 #' @seealso rankBySlidingWindow, computePowers
 #' @export
@@ -222,13 +222,15 @@ rankByGroup <-
 #'
 #' The function retrieves all individuals in the predefined age range (x +/- width/2)
 #' around each case and ranks that individual based on this individually drawn sample.
-#' This function can be directly used with a continuous age variable in order to avoid grouping.
-#' When collecting data on the basis of a continuous age variable, cases located far
-#' from the mean age of the group receive distorted percentiles when building discrete
-#' groups and generating percentiles with the traditional approach. The distortion increases with
-#' distance from the group mean and this effect can be avoided by the sliding window.
+#' This function can be directly used with a continuous age variable in order to avoid 
+#' grouping. When collecting data on the basis of a continuous age variable, cases 
+#' located far from the mean age of the group receive distorted percentiles when building 
+#' discrete groups and generating percentiles with the traditional approach. The distortion 
+#' increases with distance from the group mean and this effect can be avoided by the 
+#' sliding window.
+#'
 #' In case of bindings, the function uses the medium rank and applies the algorithms
-#' already described in the 'rankByGroup' function. At the upper and lower end of the
+#' already described in the \code{\link{rankByGroup}} function. At the upper and lower end of the
 #' data sample, the sliding stops and the sample is drawn from the interval min + width and
 #' max - width, respectively.
 #' @param data data.frame with norm sample data
@@ -258,12 +260,12 @@ rankByGroup <-
 #' @examples
 #' \dontrun{
 #' # Transformation using a sliding window
-#' normData <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
+#' data.elfe2 <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
 #'
 #' # Comparing this to the traditional approach should give us exactly the same
 #' # values, since the sample dataset only has a grouping variable for age
-#' normData2 <- rankByGroup(elfe, group = "group")
-#' mean(normData$normValue - normData2$normValue)
+#' data.elfe <- rankByGroup(elfe, group = "group")
+#' mean(data.elfe$normValue - data.elfe2$normValue)
 #' }
 #' @seealso rankByGroup, computePowers
 #' @export
@@ -385,15 +387,16 @@ rankBySlidingWindow <- function(data,
 #' location l (data preparation)
 #'
 #' The function computes powers of the norm variable e. g. T scores (location, L),
-#' an explanatory variable, e. g. age or grade of a data frame (age, A) and the interactions of both (L X A). The k
-#' variable indicates the degree up to which powers and interactions are build.
-#' These predictors can be used later on in the 'bestModel' function to model the
-#' norm sample. Higher values of k allow for modeling the norm sample closer, but
-#' might lead to over-fit. In general k = 3 or k = 4 (default) is sufficient to model
-#' human performance data. For example, k = 2 results in the variables L1, L2, A1, A2,
-#' and their interactions L1A1, L2A1, L1A2 and L2A2.
-#' Please note, that you do not need to use a normal rank transformed scale like T r IQ, but you can
-#' as well use the percentiles for the normVariable as well.
+#' an explanatory variable, e. g. age or grade of a data frame (age, A) and the 
+#' interactions of both (L X A). The k variable indicates the degree up to which 
+#' powers and interactions are build. These predictors can be used later on in the 
+#' \code{\link{bestModel}} function to model the norm sample. Higher values of k 
+#' allow for modeling the norm sample closer, but might lead to over-fit. In general 
+#' k = 3 or k = 4 (default) is sufficient to model human performance data. For example, 
+#' k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2 
+#' and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that 
+#' you do not need to use a normal rank transformed scale like T r IQ, but you can
+#' as well use the percentiles for the 'normValue' as well.
 #'
 #' @param data data.frame with the norm data
 #' @param k degree
@@ -407,9 +410,13 @@ rankBySlidingWindow <- function(data,
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
 #' @examples
-#' normData <- elfe
-#' normData <- rankByGroup(normData, group="group")
-#' normData <- computePowers(normData, k = 4, norm = "normValue", age="group")
+#' # Dataset with grade levels as grouping
+#' data.elfe <- rankByGroup(elfe)
+#' data.elfe <- computePowers(data.elfe)
+#'
+#' # Dataset with continuous age variable and k = 5
+#' data.ppvt <- rankByGroup(ppvt)
+#' data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
 #' @export
 computePowers <-
   function(data,

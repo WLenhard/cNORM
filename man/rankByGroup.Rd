@@ -47,10 +47,10 @@ and there are different methods for estimating the percentiles (default RankIt).
 }
 \examples{
 #Transformation with default parameters: RandIt and converting to T scores
-normData <- rankByGroup(elfe, group = "group")
+data.elfe <- rankByGroup(elfe, group = "group")
 
-#Transformation into Wechsler points with Yu & Huang (2001) ranking procedure
-normData <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+#Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
+data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 
 }
 \seealso{

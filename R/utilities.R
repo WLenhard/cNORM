@@ -55,7 +55,7 @@ simSD <- function(age){
 #' @export
 #'
 #' @examples
-#' # simulate data
+#' # simulate data for a rather easy test (m = -1.0)
 #' sim <- simulateRasch(n=150, minAge=1,
 #'                      maxAge=7, items.n = 30, items.m = -1.0,
 #'                      items.sd = 1, randomTheta = TRUE, width = 1.0)

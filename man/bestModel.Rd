@@ -5,7 +5,7 @@
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
 bestModel(data, raw = "raw", R2 = 0.99, k = 4, predictors = NULL,
-  terms = 0)
+  terms = 0, force.in = NULL)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
@@ -29,6 +29,14 @@ likely not work, but at least the regression formula can be obtained that way.}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
+
+\item{force.in}{List of variable names forced into the regression function. This option
+can be used to force the regression to include covariates like sex or other background
+variables. This can be used to model seperate norm scales for different groups in order
+the sample. Variables specified here, that are not part of the initial regression function
+resp. list of predictors, are ignored without further notice and thus do not show up in
+the final result. Additionally, all other functions like norm table generation and plotting
+are so far not yet prepared to handle covariates.}
 }
 \value{
 The model meeting the R2 criteria with coefficients and variable selection
@@ -59,16 +67,25 @@ model <- bestModel(normData)
 plotSubset(model)
 plotPercentiles(normData, model)
 
-# It is possible to specify the variables explicitely - usefull to smuggle in variables like sex
-preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
+# It is possible to specify the variables explicitely - usefull to smuggle
+# in variables like sex
+preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3",
+                              "A2", "A3"))
 print(regressionFunction(preselectedModel))
 
-# Example for modelling based on continuous age variable and raw variable, based on the CDC data
-# We use the default k=4 parameter; raw variable has to be set to "bmi"
+# Example for modelling based on continuous age variable and raw variable,
+# based on the CDC data. We use the default k=4 parameter; raw variable has
+# to be set to "bmi".
 bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
 bmi.model <- bestModel(bmi.data, raw="bmi")
 printSubset(bmi.model)
 
+# Custom list of predictors (based on k = 3) and forcing in the sex variable
+# While calculating the regression model works well, all other functions like
+# plotting and norm table generation are not yet prepared to use covariates
+bmi.sex <- bestModel(bmi.data, raw="bmi", predictors = c("L1", "L2", "L3",
+                     "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+                     "L2A3", "L3A1", "L3A2", "L3A3", "sex"), force.in = c("sex"))
 
 }
 \seealso{
