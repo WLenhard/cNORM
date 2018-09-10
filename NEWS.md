@@ -8,13 +8,15 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 0.9.10
-Date: 2018.09.08
+### Version in 0.9.11
+Date: 2018.09.10
 
 Changes:
 
 *   'simulateRasch' to simulate test data was added
 *   old sim functions removed
+*   documentation improved
+*   new parameters to bestModel in order to force covariates into regression
 
 
 
