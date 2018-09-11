@@ -256,9 +256,18 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
 #'
 #' # plot density
 #' plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=2)
-plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 100, type = 0){
+plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw = NULL, type = 0){
+
+  if(is.null(minRaw)){
+    minRaw <- regressionModel$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- regressionModel$maxRaw
+  }
+
   if(minRaw<0){
-    stop("Negative values are not allowed in minRaw.")
+    stop("Negative values are not allowed in Box Cox transformations")
   }
 
   percentiles <- seq(from = 0.5 / boxcoxParameters$n, to = (boxcoxParameters$n - 0.5) / boxcoxParameters$n, length.out = boxcoxParameters$n)

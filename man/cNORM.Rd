@@ -51,6 +51,37 @@ comprehensive tutorial.
 data.elfe <- prepareData(elfe)
 model.elfe <- bestModel(data.elfe)
 plotPercentiles(data.elfe, model.elfe)
+
+# Show model fit of models with progressing number of predictors
+printSubset(model.elfe)
+plotSubset(model.elfe)
+
+# Plot manifest and predicted values, plot series of percentile charts
+plotValues(data.elfe, model.elfe)
+\dontrun{
+plotPercentileSeries(data.elfe, model.elfe)
+}
+
+# Additional tests: Check model assumptions
+checkConsistency(model.elfe)
+plotDerivative(model.elfe)
+
+# Generate norm tables; predict values, here: grade 3.75 from T score 25
+# to 75 and within the raw value range of this specific test (0 to 28)
+normTable <- normTable(3.75, model.elfe, , minNorm=25, maxNorm=75, step=0.5)
+rawTable <- rawTable(3.75, model.elfe, 0, 28, precision=.01)
+
+# Predict a specific norm score
+score <- predictNormValue(raw = 21, A = 3.75, model = model.elfe, minNorm=25, maxNorm=75)
+
+# Semi-parametric modelling with Box Cox power transformation for grade 3.75
+bcParameters <- boxcox(model.elfe, 3.75)
+# Print L, M and S
+bcParameters$lambdaBC
+bcParameters$meanBC
+bcParameters$sdBC
+# Plot density function of box cox versus regression model
+plotBoxCox(model.elfe, bcParameters, type=2)
 }
 \references{
 \enumerate{

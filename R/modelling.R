@@ -129,10 +129,12 @@ bestModel <- function(data,
     message("The computation might take some time ...")
   }
 
-  index <- NULL
+
   if(!is.null(force.in)){
     c <- strsplit(format(paste0(lmX))[[3]], " \\+ ")
     index <- match(force.in, c[[1]])
+  }else{
+    index <- NULL
   }
 
   subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big)

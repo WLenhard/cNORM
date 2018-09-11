@@ -7,9 +7,8 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-
 ### Version in 0.9.11
-Date: 2018.09.10
+Date: 2018.09.11
 
 Changes:
 
@@ -17,6 +16,7 @@ Changes:
 *   old sim functions removed
 *   documentation improved
 *   new parameters to bestModel in order to force covariates into regression
+*   additional checks in box cox functions
 
 
 

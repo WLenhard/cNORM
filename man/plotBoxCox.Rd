@@ -4,8 +4,8 @@
 \alias{plotBoxCox}
 \title{Plot regression model versus box cox for a specific age}
 \usage{
-plotBoxCox(regressionModel, boxcoxParameters, minRaw = 0, maxRaw = 100,
-  type = 0)
+plotBoxCox(regressionModel, boxcoxParameters, minRaw = NULL,
+  maxRaw = NULL, type = 0)
 }
 \arguments{
 \item{regressionModel}{The regression model from the 'bestModel' function}

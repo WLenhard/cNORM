@@ -182,7 +182,7 @@ predictRaw <-
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
-#' norms <- normTable(3.5, m, , minNorm=25, maxNorm=75, step=0.5)
+#' norms <- normTable(3.5, m, minNorm=25, maxNorm=75, step=0.5)
 #' @export
 normTable <- function(A,
                       model,
