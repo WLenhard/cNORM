@@ -7,7 +7,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 0.9.11
+### Version in 0.9.12
 Date: 2018.09.11
 
 Changes:
