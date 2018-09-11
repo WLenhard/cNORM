@@ -85,9 +85,5 @@ cNORM is licensed under GNU Affero General Public License v3 (AGPL-3.0). This me
 If you want to use cNORM for scientific publications, we would also ask you to quote the source.
 
 ## References
-*   CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related Documentation. available https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx . (date of retrieval: 25/08/2018)
 *   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437
-*   Lenhard, W., & Schneider, W. (2006). ELFE 1-6: Ein Leseverständnistest für Erst- bis Sechstklässler. Göttingen: Hogrefe. 
-*   The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators. available https://data.worldbank.org/indicator/sp.dyn.le00.in . (date of retrieval: 01/09/2018)
-*   The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available https://data.worldbank.org/indicator/SP.DYN.IMRT.IN (date of retrieval: 02/09/2018)
