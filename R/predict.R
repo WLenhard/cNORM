@@ -207,28 +207,31 @@ normTable <- function(A,
     maxRaw <- model$maxRaw
   }
 
-  norm <- vector("list", (maxNorm - minNorm) / step)
-  raw <- vector("list", (maxNorm - minNorm) / step)
+  norm <- vector("list", (maxNorm - minNorm) / step + 1)
+  raw <- vector("list", (maxNorm - minNorm) / step + 1)
   i <- 1
+  l <- length(norm)
   if (!descend) {
-    while (minNorm <= maxNorm) {
-      i <- i + 1
+    while (i <= l) {
+
       r <- cNORM::predictRaw(minNorm, A, model$coefficients, min = minRaw, max = maxRaw)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
 
       minNorm <- minNorm + step
+      i <- i + 1
     }
   } else {
     while (maxNorm >= minNorm) {
-      i <- i + 1
+
       r <- cNORM::predictRaw(maxNorm, A, model$coefficients)
 
       norm[[i]] <- maxNorm
       raw[[i]] <- r
 
       maxNorm <- maxNorm - step
+      i <- i + 1
     }
   }
 
@@ -588,13 +591,13 @@ derivationTable <-
 #' @export
 predictNormValue <-
   function(raw,
-             A,
-             model,
-             minNorm = NULL,
-             maxNorm = NULL,
-             minRaw = NULL,
-             maxRaw = NULL,
-             precision = 0.1) {
+           A,
+           model,
+           minNorm = NULL,
+           maxNorm = NULL,
+           minRaw = NULL,
+           maxRaw = NULL,
+           precision = 0.1) {
 
     if(is.null(minNorm)||is.null(maxNorm)){
       stop("ERROR: Please specify minimum and maximum norm score")
@@ -609,42 +612,81 @@ predictNormValue <-
     }
 
     if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
-    norms <-
-      cNORM::normTable(A,
-        model,
-        minNorm = minNorm,
-        maxNorm = maxNorm,
-        minRaw = minRaw,
-        maxRaw = maxRaw,
-        step = precision
-      )
-    index <- which.min(abs(norms$raw - raw))
-    return(norms$norm[index])
+      norms <-
+        cNORM::normTable(A,
+                         model,
+                         minNorm = minNorm,
+                         maxNorm = maxNorm,
+                         minRaw = minRaw,
+                         maxRaw = maxRaw,
+                         step = precision
+        )
+      index <- which.min(abs(norms$raw - raw))
+      return(norms$norm[index])
     } else if(is.vector(raw)&&is.vector(A)){
       if(length(raw)!=length(A)){
         stop("'A' and 'raw' need to have the same length.")
       }
       message("This might take some time. Processing case ... ")
+
+      #  initialize vectors and starting values
       n <- length(raw)
       values <- rep(NA, n)
       i <- 1
+      roughStep <- (maxNorm - minNorm) / 10
+      prec = -log10(presicion)
+
       while(i <= n){
 
-        if(i%%10==0){
+        if(i%%100==0){
           message(i)
         }
 
-        norms <-
-          cNORM::normTable(A[[i]],
-                           model,
-                           minNorm = minNorm,
-                           maxNorm = maxNorm,
-                           minRaw = minRaw,
-                           maxRaw = maxRaw,
-                           step = precision
-          )
-        index <- which.min(abs(norms$raw - raw[[i]]))
-        values[[i]] <- norms$norm[index]
+        norm1 <- minNorm
+        norm2 <- maxNorm
+        step <- roughStep
+
+        j <- 0
+        while(j <= prec){
+          normTemp <-
+            cNORM::normTable(A[[i]],
+                             model,
+                             minNorm = minNorm,
+                             maxNorm = maxNorm,
+                             minRaw = minRaw,
+                             maxRaw = maxRaw,
+                             step = step / 10^j
+            )
+          index <- which.min(abs(normTemp$raw - raw[[i]]))
+
+          if(index == 1){
+            norm1 <- normTemp$norm[1]
+            norm2 <- normTemp$norm[2]
+          }else if(index == 11){
+            norm1 <- normTemp$norm[10]
+            norm2 <- normTemp$norm[11]
+          }else{
+            norm1 <- normTemp$norm[index - 1]
+            norm2 <- normTemp$norm[index + 1]
+          }
+
+
+          if(is.na(norm1)|!is.numeric(norm1)|(norm1 < minNorm)){
+            norm1 <- minNorm
+          }
+
+          if(is.na(norm2)|!is.numeric(norm2)|(norm2 > maxNorm)){
+            norm2 <- maxNorm
+          }
+
+          # increase precision
+          j <- j + 1
+        }
+
+        # fetch value
+        values[[i]] <- normTemp$norm[index]
+
+        # next case
         i <- i + 1
       }
       return(values)
