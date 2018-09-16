@@ -634,7 +634,7 @@ predictNormValue <-
       values <- rep(NA, n)
       i <- 1
       roughStep <- (maxNorm - minNorm) / 10
-      prec = -log10(presicion)
+      prec = -log10(precision)
 
       while(i <= n){
 
