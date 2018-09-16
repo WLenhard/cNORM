@@ -612,16 +612,38 @@ predictNormValue <-
     }
 
     if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
-      norms <-
+
+      minN <- minNorm
+      maxN <- maxNorm
+      stepping <- (maxN - minN) / 4
+
+      while(stepping > precision){
+        norms <-
         cNORM::normTable(A,
                          model,
-                         minNorm = minNorm,
-                         maxNorm = maxNorm,
+                         minNorm = minN,
+                         maxNorm = maxN,
                          minRaw = minRaw,
                          maxRaw = maxRaw,
-                         step = precision
+                         step = stepping
         )
       index <- which.min(abs(norms$raw - raw))
+
+      if(index==1){
+        minN <- norms$norm[1]
+        maxN <- norms$norm[3]
+      } else if(index==5){
+        minN <- norms$norm[3]
+        maxN <- norms$norm[5]
+      }  else{
+        minN <- norms$norm[index - 1]
+        maxN <- norms$norm[index + 1]
+      }
+
+      stepping <- stepping / 2
+
+      }
+
       return(norms$norm[index])
     } else if(is.vector(raw)&&is.vector(A)){
       if(length(raw)!=length(A)){
@@ -633,60 +655,48 @@ predictNormValue <-
       n <- length(raw)
       values <- rep(NA, n)
       i <- 1
-      roughStep <- (maxNorm - minNorm) / 10
-      prec = -log10(precision)
 
+      # iterate through cases and increase precision by factor 2 in each step
       while(i <= n){
 
         if(i%%100==0){
           message(i)
         }
 
-        norm1 <- minNorm
-        norm2 <- maxNorm
-        step <- roughStep
 
-        j <- 0
-        while(j <= prec){
-          normTemp <-
+        minN <- minNorm
+        maxN <- maxNorm
+        stepping <- (maxN - minN) / 4
+
+        while(stepping > precision){
+          norms <-
             cNORM::normTable(A[[i]],
                              model,
-                             minNorm = minNorm,
-                             maxNorm = maxNorm,
+                             minNorm = minN,
+                             maxNorm = maxN,
                              minRaw = minRaw,
                              maxRaw = maxRaw,
-                             step = step / 10^j
+                             step = stepping
             )
-          index <- which.min(abs(normTemp$raw - raw[[i]]))
+          index <- which.min(abs(norms$raw - raw[[i]]))
 
-          if(index == 1){
-            norm1 <- normTemp$norm[1]
-            norm2 <- normTemp$norm[2]
-          }else if(index == 11){
-            norm1 <- normTemp$norm[10]
-            norm2 <- normTemp$norm[11]
-          }else{
-            norm1 <- normTemp$norm[index - 1]
-            norm2 <- normTemp$norm[index + 1]
+          if(index==1){
+            minN <- norms$norm[1]
+            maxN <- norms$norm[3]
+          } else if(index==5){
+            minN <- norms$norm[3]
+            maxN <- norms$norm[5]
+          }  else{
+            minN <- norms$norm[index - 1]
+            maxN <- norms$norm[index + 1]
           }
 
+          stepping <- stepping / 2
 
-          if(is.na(norm1)|!is.numeric(norm1)|(norm1 < minNorm)){
-            norm1 <- minNorm
-          }
-
-          if(is.na(norm2)|!is.numeric(norm2)|(norm2 > maxNorm)){
-            norm2 <- maxNorm
-          }
-
-          # increase precision
-          j <- j + 1
         }
 
-        # fetch value
-        values[[i]] <- normTemp$norm[index]
 
-        # next case
+        values[[i]] <- norms$norm[index]
         i <- i + 1
       }
       return(values)
