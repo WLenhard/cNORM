@@ -2,8 +2,17 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 ### TODO
-*   Check rawTableQuick for usage with descending values
 *   Shiny
+
+
+
+### Version in 0.9.13
+Date: 2018.09.16
+
+Changes:
+
+*   predictNormValue with higher precision and effectivity
+*   rawTableQuick removed from source code
 
 
 

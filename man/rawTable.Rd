@@ -5,8 +5,7 @@
 \title{Create a table with norm scores assigned to raw scores for a specific age based on the regression model}
 \usage{
 rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
-  maxNorm = NULL, step = 1, precision = 0.01, descend = FALSE,
-  quick = TRUE)
+  maxNorm = NULL, step = 1, precision = 0.01, descend = FALSE)
 }
 \arguments{
 \item{A}{the age}
@@ -28,10 +27,6 @@ higher precision (default .01)}
 
 \item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
-
-\item{quick}{Forces the use of a shotgun method to quickly find the norm scores
-with the desired precision. Reproduces the same results as the thorough search in
-case the model assumptions are met.}
 }
 \value{
 data.frame with raw scores and the predicted norm scores
@@ -41,8 +36,7 @@ This function is comparable to 'normTable', despite it reverses the assignment:
 A table with raw scores and the according norm scores for a specific age based on the regression
 model is generated. This way, the inverse function of the regression model is solved numerically with
 brute force. Please specify the range of raw values, you want to cover. With higher precision
-and smaller stepping, this function becomes computational intensive, especially when quick is set
-to FALSE for a thorough search.
+and smaller stepping, this function becomes computational intensive.
 }
 \examples{
 # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3

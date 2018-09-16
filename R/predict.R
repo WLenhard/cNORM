@@ -246,8 +246,7 @@ normTable <- function(A,
 #' A table with raw scores and the according norm scores for a specific age based on the regression
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
-#' and smaller stepping, this function becomes computational intensive, especially when quick is set
-#' to FALSE for a thorough search.
+#' and smaller stepping, this function becomes computational intensive.
 #' @param A the age
 #' @param model The regression model
 #' @param minRaw The lower bound of the raw score range
@@ -259,9 +258,6 @@ normTable <- function(A,
 #' higher precision (default .01)
 #' @param descend Reverse raw score order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modelling errors
-#' @param quick Forces the use of a shotgun method to quickly find the norm scores
-#' with the desired precision. Reproduces the same results as the thorough search in
-#' case the model assumptions are met.
 #' @return data.frame with raw scores and the predicted norm scores
 #' @seealso normTable
 #' @examples
@@ -278,8 +274,7 @@ rawTable <- function(A,
                      maxNorm = NULL,
                      step = 1,
                      precision = .01,
-                     descend = FALSE,
-                     quick = TRUE) {
+                     descend = FALSE) {
 
   if(is.null(minNorm)){
     minNorm <- model$minL1
@@ -297,26 +292,6 @@ rawTable <- function(A,
     maxRaw <- model$maxRaw
   }
 
-  if (quick) {
-    table <- rawTableQuick(A, model, minRaw, maxRaw, minNorm, maxNorm, step, precision, descend)
-    # consistency check
-    k <- 1
-    SUCCESS <- TRUE
-    while (k < nrow(table)) {
-      if (table$norm[k] > table$norm[k + 1]) {
-        # inconsistent results -> warning
-        SUCCESS <- FALSE
-      }
-
-      k <- k + 1
-    }
-
-    if (SUCCESS) {
-      return(table)
-    } else {
-      message("Inconsistent norms found in fast iteration, reruning analysis with quick set to FALSE ...")
-    }
-  }
   norm <- vector("list", (maxRaw - minRaw) / step)
   raw <- vector("list", (maxRaw - minRaw) / step)
   i <- 1
@@ -358,160 +333,14 @@ rawTable <- function(A,
   }
 
   if (!SUCCESS) {
-    if (quick) {
-      message("... still getting inconsistent entries.")
-      message("Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
-    } else {
-      message("The raw table generation yielded inconsistent entries. Please check model consistency and/or rerun table creation with quick set to FALSE and higher precision.")
-    }
+    message("The raw table generation yielded inconsistent entries. Please check model consistency.")
     print(cNORM::rangeCheck(model, A, A, minNorm, maxNorm))
-  } else if (quick) {
-    message("... done! Everything worked fine.")
   }
 
   return(table)
 }
 
-#' Internal method for two step shotgun search of raw -> norm value table
-#'
-#' This function is comparable to 'rawTable', but uses an optimization to reduce computational
-#' resources. It is the default method in the 'rawTable' function. TODO: It still has to be checked for
-#' descending values.
-#'
-#' @param A the age
-#' @param model The regression model
-#' @param minRaw The lower bound of the raw score range
-#' @param maxRaw The upper bound of the raw score range
-#' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
-#' @param maxNorm Clipping parameter for the upper bound of norm scores (default 75)
-#' @param step Stepping parameter for the raw values (default 1)
-#' @param precision Precision for the norm score estimation. Lower values indicate
-#' higher precision (default .1)
-#' @param descend Reverse raw value order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modelling errors
-#' @return data.frame with raw scores and the predicted norm scores
-rawTableQuick <- function(A,
-                          model,
-                          minRaw = NULL,
-                          maxRaw = NULL,
-                          minNorm = NULL,
-                          maxNorm = NULL,
-                          step = 1,
-                          precision = .1,
-                          descend = FALSE) {
 
-  if(is.null(minNorm)){
-    minNorm <- model$minL1
-  }
-
-  if(is.null(maxNorm)){
-    maxNorm <- model$maxL1
-  }
-
-  if(is.null(minRaw)){
-    minRaw <- model$minRaw
-  }
-
-  if(is.null(maxRaw)){
-    maxRaw <- model$maxRaw
-  }
-
-  norm <- vector("list", (maxRaw - minRaw) / step)
-  raw <- vector("list", (maxRaw - minRaw) / step)
-  i <- 0
-  if (!descend) {
-    # first path, low precision
-    normTab <-
-      cNORM::normTable(A, model, minNorm, maxNorm, precision * 10)
-    rows <- nrow(normTab)
-    lowestRaw <- normTab$raw[[1]]
-    highestRaw <- normTab$raw[[rows]]
-
-    lowestNorm <- normTab$norm[[1]]
-    highestNorm <- normTab$norm[[rows]]
-
-    while (minRaw <= maxRaw) {
-      i <- i + 1
-      if(minRaw < lowestRaw) {
-        norm[[i]] <- lowestNorm
-      } else if (minRaw > highestRaw) {
-        norm[[i]] <- highestNorm
-      } else {
-        # second path with high precision
-        index <- which.min(abs(normTab$raw - minRaw))
-        if (index <= 2) {
-          mi <- lowestNorm
-          ma <- normTab$norm[[3]]
-        } else if (index >= rows - 2) {
-          mi <- rows - 2
-          ma <- rows
-        } else {
-          mi <- index - 1
-          ma <- index + 1
-        }
-
-        n <-
-          cNORM::predictNormValue(minRaw, A, model, normTab$norm[[mi]], normTab$norm[[ma]], precision)
-        norm[[i]] <- n
-      }
-
-      raw[[i]] <- minRaw
-      minRaw <- minRaw + step
-    }
-  } else {
-    while (maxRaw >= minRaw) {
-      i <- i + 1
-      n <- cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
-      norm[[i]] <- n
-      raw[[i]] <- maxRaw
-
-      maxRaw <- maxRaw - step
-    }
-
-    # first step, low precision
-    normTab <-
-      cNORM::normTable(A, model, minNorm, maxNorm, precision * 10, descend = TRUE)
-    rows <- nrow(normTab)
-    lowestRaw <- normTab$raw[[1]]
-    highestRaw <- normTab$raw[[rows]]
-
-    lowestNorm <- normTab$norm[[1]]
-    highestNorm <- normTab$norm[[rows]]
-
-    while (maxRaw >= minRaw) {
-      i <- i + 1
-      if (maxRaw > lowestRaw) {
-        norm[[i]] <- lowestNorm
-      } else if (maxRaw < highestRaw) {
-        norm[[i]] <- highestNorm
-      } else {
-        # second step with high precision
-        index <- which.min(abs(normTab$raw - minRaw))
-        if (index <= 2) {
-          mi <- rows - 2
-          ma <- rows
-        } else if (index >= rows - 2) {
-          mi <- lowestNorm
-          ma <- normTab$norm[[3]]
-        } else {
-          mi <- index - 1
-          ma <- index + 1
-        }
-
-        n <-
-          cNORM::predictNormValue(minRaw, A, model, normTab$norm[[ma]], normTab$norm[[mi]], precision)
-        norm[[i]] <- n
-      }
-
-      raw[[i]] <- maxRaw
-      maxRaw <- maxRaw - step
-    }
-  }
-
-  table <-
-    do.call(rbind, Map(data.frame, raw = raw, norm = norm))
-  return(table)
-}
 
 #' Create a table based on first order derivative of the regression model for specific age
 #'
