@@ -46,15 +46,15 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
   # prepare simulated data and predicted scores
   data <- seq(from = 0.5 / n, to = (n - 0.5) / n, length.out = n)
   perc <- data
-  data <- stats::qnorm(data, mean = m, sd = sd)
+  data <- qnorm(data, mean = m, sd = sd)
   y <- rep(NA, n)
   i <- 1
   while (i <= n) {
-    y[[i]] <- cNORM::predictRaw(data[[i]], age, model$coefficients, minRaw = 0)
+    y[[i]] <- predictRaw(data[[i]], age, model$coefficients, minRaw = 0)
     i <- i + 1
   }
 
-  md <- cNORM::predictRaw(m, age, model$coefficients)
+  md <- predictRaw(m, age, model$coefficients)
 
   # determine optimal lambda
   # setting start values for iteration
@@ -103,8 +103,8 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
   message(paste0("lambda: ", lambda))
 
   x <- ((x - mlambda) / sdlambda) * sd + m
-  percentile <- stats::pnorm(x, mean = m, sd = sd)
-  density <- stats::dnorm(x, mean = m, sd = sd)
+  percentile <- pnorm(x, mean = m, sd = sd)
+  density <- dnorm(x, mean = m, sd = sd)
 
   table <-
     do.call(rbind, Map(data.frame,
@@ -271,16 +271,16 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw 
   }
 
   percentiles <- seq(from = 0.5 / boxcoxParameters$n, to = (boxcoxParameters$n - 0.5) / boxcoxParameters$n, length.out = boxcoxParameters$n)
-  scale <- stats::qnorm(percentiles, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
-  density <- stats::dnorm(scale, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
+  scale <- qnorm(percentiles, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
+  density <- dnorm(scale, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
 
   rawBC <- rep(NA, length.out=length(percentiles))
   rawRegression <- rep(NA, length.out=length(percentiles))
 
   i <- 1
   while(i <= length(percentiles)){
-    rawRegression[[i]] <- cNORM::predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, minRaw = minRaw, maxRaw = maxRaw)
-    rawBC[[i]] <- cNORM::predictRawBC(boxcoxParameters, percentiles[[i]])
+    rawRegression[[i]] <- predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+    rawBC[[i]] <- predictRawBC(boxcoxParameters, percentiles[[i]])
     i <- i + 1
   }
 

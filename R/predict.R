@@ -49,7 +49,7 @@ getNormCurve <-
     i <- 1
     while (minAge <= maxAge) {
       r <-
-        cNORM::predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw)
+        predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw)
 
       raw[[i]] <- r
       age[[i]] <- minAge
@@ -214,7 +214,7 @@ normTable <- function(A,
   if (!descend) {
     while (i <= l) {
 
-      r <- cNORM::predictRaw(minNorm, A, model$coefficients, min = minRaw, max = maxRaw)
+      r <- predictRaw(minNorm, A, model$coefficients, min = minRaw, max = maxRaw)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
@@ -225,7 +225,7 @@ normTable <- function(A,
   } else {
     while (maxNorm >= minNorm) {
 
-      r <- cNORM::predictRaw(maxNorm, A, model$coefficients)
+      r <- predictRaw(maxNorm, A, model$coefficients)
 
       norm[[i]] <- maxNorm
       raw[[i]] <- r
@@ -299,7 +299,7 @@ rawTable <- function(A,
     while (minRaw <= maxRaw) {
       i <- i + 1
       n <-
-        cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
+        predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- minRaw
 
@@ -309,7 +309,7 @@ rawTable <- function(A,
     while (maxRaw >= minRaw) {
       i <- i + 1
       n <-
-        cNORM::predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
+        predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
       norm[[i]] <- n
       raw[[i]] <- maxRaw
 
@@ -334,7 +334,7 @@ rawTable <- function(A,
 
   if (!SUCCESS) {
     message("The raw table generation yielded inconsistent entries. Please check model consistency.")
-    print(cNORM::rangeCheck(model, A, A, minNorm, maxNorm))
+    print(rangeCheck(model, A, A, minNorm, maxNorm))
   }
 
   return(table)
@@ -377,10 +377,10 @@ derivationTable <-
         norm <- vector("list", 1 + (maxNorm - minNorm) / step)
     raw <- vector("list", 1 + (maxNorm - minNorm) / step)
     i <- 1
-    coeff <- cNORM::derive(model)
+    coeff <- derive(model)
     while (minNorm <= maxNorm) {
       i <- i + 1
-      r <- cNORM::predictRaw(minNorm, A, coeff, min = -1000, max = 1000)
+      r <- predictRaw(minNorm, A, coeff, min = -1000, max = 1000)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
@@ -448,7 +448,7 @@ predictNormValue <-
 
       while(stepping > precision){
         norms <-
-        cNORM::normTable(A,
+        normTable(A,
                          model,
                          minNorm = minN,
                          maxNorm = maxN,
@@ -499,7 +499,7 @@ predictNormValue <-
 
         while(stepping > precision){
           norms <-
-            cNORM::normTable(A[[i]],
+            normTable(A[[i]],
                              model,
                              minNorm = minN,
                              maxNorm = maxN,
