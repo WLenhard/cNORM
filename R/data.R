@@ -49,11 +49,11 @@
 #' @keywords datasets
 #' @name ppvt
 #' @examples
-#' \dontrun{
+#'
 #' # Example with continuous age variable
-#' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1)
+#' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1.5)
 #' data.ppvt <- computePowers(data.ppvt, age="age")
-#' model.ppvt <- bestModel(data.ppvt)
+#' model.ppvt <- bestModel(data.ppvt, R2 = .994)
 #'
 #' # plot information function
 #' plotSubset(model.ppvt, type=2)
@@ -63,7 +63,7 @@
 #'
 #' # plot percentiles
 #' plotPercentiles(data.ppvt, model.ppvt)
-#' }
+#'
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"
 
