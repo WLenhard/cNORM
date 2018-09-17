@@ -458,6 +458,12 @@ predictNormValue <-
         )
       index <- which.min(abs(norms$raw - raw))
 
+      # work around if algorithm falls into local optimum
+      if(norms$norm[1]==minN){
+        result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
+        index <- result[length(result)]
+      }
+
       if(index==1){
         minN <- norms$norm[1]
         maxN <- norms$norm[3]
@@ -508,6 +514,12 @@ predictNormValue <-
                              step = stepping
             )
           index <- which.min(abs(norms$raw - raw[[i]]))
+
+          # work around if algorithm falls into local optimum
+          if(norms$norm[1]==minN){
+            result <- which(abs(norms$raw - raw[[i]]) == min(abs(norms$raw - raw[[i]])))
+            index <- result[length(result)]
+          }
 
           if(index==1){
             minN <- norms$norm[1]
