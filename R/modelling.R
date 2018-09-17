@@ -204,7 +204,7 @@ bestModel <- function(data,
 
   message(paste0("Final regression model: ", text))
   message("Beta weights are accessible via 'model$coefficients':")
-  bestformula <- stats::lm(text, as.data.frame(data))
+  bestformula <- lm(text, as.data.frame(data))
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
@@ -341,7 +341,7 @@ checkConsistency <- function(model,
   major <- 0
   results <- c()
   while (i <= maxAge) {
-    norm <- cNORM::normTable(i, model,
+    norm <- normTable(i, model,
       minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw,
       step = stepNorm, descend = descend
     )

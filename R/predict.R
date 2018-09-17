@@ -214,7 +214,7 @@ normTable <- function(A,
   if (!descend) {
     while (i <= l) {
 
-      r <- predictRaw(minNorm, A, model$coefficients, min = minRaw, max = maxRaw)
+      r <- predictRaw(minNorm, A, model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
@@ -380,7 +380,7 @@ derivationTable <-
     coeff <- derive(model)
     while (minNorm <= maxNorm) {
       i <- i + 1
-      r <- predictRaw(minNorm, A, coeff, min = -1000, max = 1000)
+      r <- predictRaw(minNorm, A, coeff)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
