@@ -30,7 +30,7 @@
 #' scores and interactions. Afterwards the best fitting model is determined, based on
 #' all default parameters.
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
-#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to 
+#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 #' demonstrate the procedure.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
 #' @param raw the raw scores
@@ -200,19 +200,38 @@ rankByGroup <-
       }
     }
 
+    scaleM <- NA
+    scaleSD <- NA
 
 
     if ((typeof(scale) == "double" && length(scale) == 2)) {
       d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+      scaleM <- scale[1]
+      scaleSD <- scale[2]
     } else if (scale == "IQ") {
       d$normValue <- stats::qnorm(d$percentile, 100, 15)
+      scaleM <- 100
+      scaleSD <- 15
     } else if (scale == "z") {
       d$normValue <- stats::qnorm(d$percentile, 0, 1)
+      scaleM <- 0
+      scaleSD <- 1
     } else if (scale == "T") {
+      scaleM <- 50
+      scaleSD <- 10
       d$normValue <- stats::qnorm(d$percentile, 50, 10)
     } else if (scale == "percentile") {
       d$normValue <- d$percentile
     }
+
+    # add attributes to d
+    attr(d, "group") <- group
+    attr(d, "age") <- group
+    attr(d, "raw") <- raw
+    attr(d, "scaleMean") <- scaleM
+    attr(d, "scaleSD") <- scaleSD
+    attr(d, "descend") <- descend
+    attr(d, "normValue") <- "normValue"
 
     return(d)
   }
@@ -222,11 +241,11 @@ rankByGroup <-
 #'
 #' The function retrieves all individuals in the predefined age range (x +/- width/2)
 #' around each case and ranks that individual based on this individually drawn sample.
-#' This function can be directly used with a continuous age variable in order to avoid 
-#' grouping. When collecting data on the basis of a continuous age variable, cases 
-#' located far from the mean age of the group receive distorted percentiles when building 
-#' discrete groups and generating percentiles with the traditional approach. The distortion 
-#' increases with distance from the group mean and this effect can be avoided by the 
+#' This function can be directly used with a continuous age variable in order to avoid
+#' grouping. When collecting data on the basis of a continuous age variable, cases
+#' located far from the mean age of the group receive distorted percentiles when building
+#' discrete groups and generating percentiles with the traditional approach. The distortion
+#' increases with distance from the group mean and this effect can be avoided by the
 #' sliding window.
 #'
 #' In case of bindings, the function uses the medium rank and applies the algorithms
@@ -358,13 +377,24 @@ rankBySlidingWindow <- function(data,
   }
 
   # norm scale definition
+  scaleM <- NA
+  scaleSD <- NA
+
   if ((typeof(scale) == "double" && length(scale) == 2)) {
     d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+    scaleM <- scale[1]
+    scaleSD <- scale[2]
   } else if (scale == "IQ") {
     d$normValue <- stats::qnorm(d$percentile, 100, 15)
+    scaleM <- 100
+    scaleSD <- 15
   } else if (scale == "z") {
     d$normValue <- stats::qnorm(d$percentile, 0, 1)
+    scaleM <- 0
+    scaleSD <- 1
   } else if (scale == "T") {
+    scaleM <- 50
+    scaleSD <- 10
     d$normValue <- stats::qnorm(d$percentile, 50, 10)
   } else if (scale == "percentile") {
     d$normValue <- d$percentile
@@ -377,7 +407,17 @@ rankBySlidingWindow <- function(data,
     d$group <- stats::ave(d[, age], group, FUN = function(x) {
       mean(x)
     })
+    attr(d, "group") <- "group"
+
   }
+
+  # add attributes to d
+  attr(d, "age") <- age
+  attr(d, "raw") <- raw
+  attr(d, "scaleMean") <- scaleM
+  attr(d, "scaleSD") <- scaleSD
+  attr(d, "descend") <- descend
+  attr(d, "normValue") <- "normValue"
 
   return(d)
 }
@@ -387,14 +427,14 @@ rankBySlidingWindow <- function(data,
 #' location l (data preparation)
 #'
 #' The function computes powers of the norm variable e. g. T scores (location, L),
-#' an explanatory variable, e. g. age or grade of a data frame (age, A) and the 
-#' interactions of both (L X A). The k variable indicates the degree up to which 
-#' powers and interactions are build. These predictors can be used later on in the 
-#' \code{\link{bestModel}} function to model the norm sample. Higher values of k 
-#' allow for modeling the norm sample closer, but might lead to over-fit. In general 
-#' k = 3 or k = 4 (default) is sufficient to model human performance data. For example, 
-#' k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2 
-#' and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that 
+#' an explanatory variable, e. g. age or grade of a data frame (age, A) and the
+#' interactions of both (L X A). The k variable indicates the degree up to which
+#' powers and interactions are build. These predictors can be used later on in the
+#' \code{\link{bestModel}} function to model the norm sample. Higher values of k
+#' allow for modeling the norm sample closer, but might lead to over-fit. In general
+#' k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
+#' k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
+#' and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that
 #' you do not need to use a normal rank transformed scale like T r IQ, but you can
 #' as well use the percentiles for the 'normValue' as well.
 #'
@@ -421,10 +461,19 @@ rankBySlidingWindow <- function(data,
 computePowers <-
   function(data,
              k = 4,
-             norm = "normValue",
-             age = "group") {
+             norm = NULL,
+             age = NULL) {
 
     d <-as.data.frame(data)
+
+    # check variables, if NULL take attributes from d
+    if(is.null(norm)){
+      norm <- attributes(d)$normValue
+    }
+
+    if(is.null(age)){
+      norm <- attributes(d)$age
+    }
 
     # check if columns exist
     if(!(norm %in% colnames(d))){
@@ -518,6 +567,11 @@ computePowers <-
       d$L6A5 <- d$L6 * d$A5
       d$L6A6 <- d$L6 * d$A6
     }
+
+    # attributes
+    attr(d, "age") <- age
+    attr(d, "normValue") <- normValue
+    attr(d, "k") <- k
 
     return(d)
   }

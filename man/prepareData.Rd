@@ -9,7 +9,7 @@ prepareData(data = NULL, group = "group", raw = "raw",
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
-named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to 
+named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 demonstrate the procedure.}
 
 \item{group}{grouping variable in the data, e. g. age groups, grades ...}

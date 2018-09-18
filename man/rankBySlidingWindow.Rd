@@ -46,11 +46,11 @@ the dataset with the individual percentiles and norm scores
 \description{
 The function retrieves all individuals in the predefined age range (x +/- width/2)
 around each case and ranks that individual based on this individually drawn sample.
-This function can be directly used with a continuous age variable in order to avoid 
-grouping. When collecting data on the basis of a continuous age variable, cases 
-located far from the mean age of the group receive distorted percentiles when building 
-discrete groups and generating percentiles with the traditional approach. The distortion 
-increases with distance from the group mean and this effect can be avoided by the 
+This function can be directly used with a continuous age variable in order to avoid
+grouping. When collecting data on the basis of a continuous age variable, cases
+located far from the mean age of the group receive distorted percentiles when building
+discrete groups and generating percentiles with the traditional approach. The distortion
+increases with distance from the group mean and this effect can be avoided by the
 sliding window.
 }
 \details{

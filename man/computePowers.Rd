@@ -5,7 +5,7 @@
 \title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
-computePowers(data, k = 4, norm = "normValue", age = "group")
+computePowers(data, k = 4, norm = NULL, age = NULL)
 }
 \arguments{
 \item{data}{data.frame with the norm data}
@@ -26,14 +26,14 @@ data.frame with the powers and interactions of location and explanatory variable
 }
 \description{
 The function computes powers of the norm variable e. g. T scores (location, L),
-an explanatory variable, e. g. age or grade of a data frame (age, A) and the 
-interactions of both (L X A). The k variable indicates the degree up to which 
-powers and interactions are build. These predictors can be used later on in the 
-\code{\link{bestModel}} function to model the norm sample. Higher values of k 
-allow for modeling the norm sample closer, but might lead to over-fit. In general 
-k = 3 or k = 4 (default) is sufficient to model human performance data. For example, 
-k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2 
-and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that 
+an explanatory variable, e. g. age or grade of a data frame (age, A) and the
+interactions of both (L X A). The k variable indicates the degree up to which
+powers and interactions are build. These predictors can be used later on in the
+\code{\link{bestModel}} function to model the norm sample. Higher values of k
+allow for modeling the norm sample closer, but might lead to over-fit. In general
+k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
+k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
+and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that
 you do not need to use a normal rank transformed scale like T r IQ, but you can
 as well use the percentiles for the 'normValue' as well.
 }
