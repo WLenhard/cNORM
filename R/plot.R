@@ -14,13 +14,17 @@
 #' m <- bestModel(data = normData)
 #' plotValues(normData, m, group="group")
 #' @export
-plotValues <- function(data, model, group = "group", raw = NULL) {
+plotValues <- function(data, model, group = NULL, raw = NULL) {
   if(is.null(raw)){
-    raw <- model$raw
+    raw <- attr(data, "raw")
+  }
+
+  if(is.null(group)){
+    group <- attr(data, "group")
   }
 
   if (!(group %in% colnames(data))) {
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
   }
   if (!(raw %in% colnames(data))) {
     stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""))
@@ -175,9 +179,10 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @param group The name of the grouping variable; the distinct groups are automatically
 #' determined
 #' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
-#' @param scale The norm scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+#' @param scale The norm scale, either 'T', 'IQ', 'z', 'percentile' or
 #' self defined with a double vector with the mean and standard deviation,
-#' f. e. c(10, 3) for Wechsler scale index points
+#' f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
+#' data preparation is used (default)
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
 #' @param title custom title for plot
@@ -186,7 +191,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotPercentiles(normData, m, group="group")
+#' plotPercentiles(normData, m)
 #' @export
 plotPercentiles <- function(data,
                             model,
@@ -195,12 +200,16 @@ plotPercentiles <- function(data,
                             minAge = NULL,
                             maxAge = NULL,
                             raw = NULL,
-                            group = "group",
+                            group = NULL,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-                            scale = "T",
+                            scale = NULL,
                             type = 7,
                             title = NULL) {
 
+
+  if(is.null(group)){
+    group <- attr(data, "group")
+  }
 
   if(is.null(minAge)){
     minAge <- model$minA1
@@ -231,7 +240,10 @@ plotPercentiles <- function(data,
   }
 
   # compute norm scores from percentile vector
-  if ((typeof(scale) == "double" && length(scale) == 2)) {
+  if (is.null(scale)){
+    # fetch scale information from model
+    T <- stats::qnorm(percentiles, model$scaleM, model$scaleSD)
+  }else if ((typeof(scale) == "double" && length(scale) == 2)) {
     T <- stats::qnorm(percentiles, scale[1], scale[2])
   } else if (scale == "IQ") {
     T <- stats::qnorm(percentiles, 100, 15)
@@ -341,6 +353,97 @@ plotPercentiles <- function(data,
   return(plot)
 }
 
+
+#' Plot the density function per group by raw score
+#'
+#' The function plots the density  curves based on the regression model against
+#' the actual percentiles from the raw data. As in 'plotNormCurves',
+#' please check for inconsistent curves, especially curves showing implausible shapes.
+#' @param model The model from the bestModel function
+#' @param minRaw Lower bound of the raw score
+#' @param maxRaw Upper bound of the raw score
+#' @param minNorm Lower bound of the norm score
+#' @param maxNorm Upper bound of the norm score
+#' @param group Column of groups to plot
+#' @seealso plotNormCurves, plotPercentiles
+#' @examples
+#' # Load example data set, compute model and plot results for age values 2, 4 and 6
+#' normData <- prepareData()
+#' m <- bestModel(data = normData)
+#' plotDensity(m, group = c (2, 4, 6))
+#' @export
+plotDensity <- function(    model,
+                            minRaw = NULL,
+                            maxRaw = NULL,
+                            minNorm = NULL,
+                            maxNorm = NULL,
+                            group = NULL) {
+
+
+  if(is.null(minNorm)){
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    maxNorm <- model$maxL1
+  }
+
+  if(is.null(minRaw)){
+    minRaw <- model$minRaw
+  }
+
+  if(is.null(maxRaw)){
+    maxRaw <- model$maxRaw
+  }
+
+  if(is.null(group)){
+    group <- c(model$minA1, (model$maxA1 + model$minA1)/2, model$maxA1)
+  }
+
+  step <- (maxNorm - minNorm) / 100
+
+  i <- 1
+  while (i <= length(group)) {
+    norm <- normTable(group[[i]], model, minNorm, maxNorm, minRaw, maxRaw, step = step)
+    norm$group <- rep(group[[i]], length.out = nrow(norm))
+
+    if(i==1){
+      matrix <- norm
+    }else{
+      matrix <- rbind(matrix, norm)
+    }
+
+    i <- i + 1
+  }
+  matrix <- matrix[matrix$norm>minNorm & matrix$norm<maxNorm, ]
+  matrix <- matrix[matrix$raw>minRaw&matrix$raw<maxRaw, ]
+  matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
+
+   # lattice display options
+  COL <- grDevices::rainbow(length(group))
+  NAMES <- paste("Group ", group, sep = "")
+    panelfun <- function(..., type, group.number) {
+    lattice::panel.lines(...)
+  }
+
+  plot <- lattice::xyplot(density ~ raw,
+                  data = matrix, groups = group,
+                  panel = function(...)
+                    lattice::panel.superpose(..., panel.groups = panelfun),
+                  main = "Density function",
+                  ylab = "Raw Score", xlab = "Density",
+                  col = COL, lwd = 2, grid = TRUE,
+                  key = list(
+                    corner = c(0, 1),
+                    lines = list(col = COL, lwd = 2),
+                    text = list(NAMES)
+                  )
+  )
+  print(plot)
+  return(matrix)
+}
+
+
 #' Generates a series of plots with number curves by percentile for different models
 #'
 #'This functions makes use of 'plotPercentiles' to generate a series of plots
@@ -355,9 +458,6 @@ plotPercentiles <- function(data,
 #' @param group The name of the grouping variable; the distinct groups are automatically
 #' determined
 #' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
-#' @param scale The norm scale, either 'T' (default), 'IQ', 'z', 'percentile' or
-#' self defined with a double vector with the mean and standard deviation,
-#' f. e. c(10, 3) for Wechsler scale index points
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
 #' @param filename Prefix of the filename. If specified, the plots are saves as
@@ -370,9 +470,8 @@ plotPercentiles <- function(data,
 #' normData <- prepareData(elfe)
 #' model <- bestModel(data = normData)
 #' plotPercentileSeries(normData, model, start=1, end=5, group="group")
-plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "group",
+plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-                                 scale = "T",
                                  type = 7,
                                  filename=NULL) {
   d <- as.data.frame(data)
@@ -425,13 +524,19 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = "g
     bestformula$minRaw <- minR
     bestformula$maxRaw <- maxR
     bestformula$raw <- model$raw
+    bestformula$scaleSD <- attributes(d)$scaleSD
+    bestformula$scaleM <- attributes(d)$scaleM
+    bestformula$descend <- attributes(d)$descend
+    bestformula$group <- attributes(d)$group
+    bestformula$age <- attributes(d)$age
+    bestformula$k <- attributes(d)$k
 
 
     plot <- cNORM::plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
                     minRaw = minR,
                     maxRaw = maxR,
                     percentiles = percentiles,
-                    scale = scale,
+                    scale = NULL,
                     group = group,
                     title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4)))
 

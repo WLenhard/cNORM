@@ -191,10 +191,14 @@ normTable <- function(A,
                       minRaw = NULL,
                       maxRaw = NULL,
                       step = 0.1,
-                      descend = FALSE) {
+                      descend = NULL) {
 
   if(is.null(minNorm)||is.null(maxNorm)){
     stop("ERROR: Please specify minimum and maximum norm score")
+  }
+
+  if(is.null(descend)){
+    descend <- model$descend
   }
 
   if(is.null(minRaw)){
@@ -274,10 +278,14 @@ rawTable <- function(A,
                      maxNorm = NULL,
                      step = 1,
                      precision = .01,
-                     descend = FALSE) {
+                     descend = NULL) {
 
   if(is.null(minNorm)){
     minNorm <- model$minL1
+  }
+
+  if(is.null(descend)){
+    descend <- model$descend
   }
 
   if(is.null(maxNorm)){

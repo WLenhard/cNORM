@@ -5,9 +5,9 @@
 \title{Plot norm curves against actual percentiles}
 \usage{
 plotPercentiles(data, model, minRaw = NULL, maxRaw = NULL,
-  minAge = NULL, maxAge = NULL, raw = NULL, group = "group",
+  minAge = NULL, maxAge = NULL, raw = NULL, group = NULL,
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  scale = "T", type = 7, title = NULL)
+  scale = NULL, type = 7, title = NULL)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm scores}
@@ -29,9 +29,10 @@ determined}
 
 \item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
 
-\item{scale}{The norm scale, either 'T' (default), 'IQ', 'z', 'percentile' or
+\item{scale}{The norm scale, either 'T', 'IQ', 'z', 'percentile' or
 self defined with a double vector with the mean and standard deviation,
-f. e. c(10, 3) for Wechsler scale index points}
+f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
+data preparation is used (default)}
 
 \item{type}{The type parameter of the quantile function to estimate the percentiles
 of the raw data (default 7)}
@@ -58,7 +59,7 @@ and change the 'type' parameter accordingly.
 # Load example data set, compute model and plot results
 normData <- prepareData()
 m <- bestModel(data = normData)
-plotPercentiles(normData, m, group="group")
+plotPercentiles(normData, m)
 }
 \seealso{
 plotNormCurves, plotPercentileSeries

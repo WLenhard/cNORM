@@ -4,7 +4,7 @@
 \alias{plotValues}
 \title{Plot manifest and fitted raw scores}
 \usage{
-plotValues(data, model, group = "group", raw = NULL)
+plotValues(data, model, group = NULL, raw = NULL)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}

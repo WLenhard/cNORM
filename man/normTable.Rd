@@ -5,7 +5,7 @@
 \title{Create a norm table based on model for specific age}
 \usage{
 normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
-  maxRaw = NULL, step = 0.1, descend = FALSE)
+  maxRaw = NULL, step = 0.1, descend = NULL)
 }
 \arguments{
 \item{A}{the age}

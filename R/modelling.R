@@ -74,22 +74,34 @@
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
 bestModel <- function(data,
-                      raw = "raw",
+                      raw = NULL,
                       R2 = 0.99,
-                      k = 4,
+                      k = NULL,
                       predictors = NULL,
                       terms = 0,
                       force.in = NULL) {
+
+  # retrieve attributes
+  if(is.null(raw)){
+    raw <- attr(data, "raw")
+  }
+
+  if(is.null(k)){
+    k <- attr(data, "k")
+  }
+
+
+  # check variable range
   if (R2 <= 0 || R2 >= 1) {
     stop("R2 parameter out of bounds.")
   }
 
   if (terms < 0) {
-    stop("terms parameter out of bounds.")
+    stop("terms parameter out of bounds. The value has to be positive.")
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
-    stop("k parameter out of bounds.")
+    stop("k parameter out of bounds. Please specify a value between 1 and 6 (default = 4).")
   }
 
   if(!(raw %in% colnames(data))){
@@ -205,6 +217,8 @@ bestModel <- function(data,
   message(paste0("Final regression model: ", text))
   message("Beta weights are accessible via 'model$coefficients':")
   bestformula <- lm(text, as.data.frame(data))
+
+  # Model information
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
@@ -217,11 +231,15 @@ bestModel <- function(data,
   bestformula$maxL1 <- max(data$L1)
   bestformula$minRaw <- min(data[, raw])
   bestformula$maxRaw <- max(data[, raw])
-
   bestformula$raw <- raw
+  bestformula$scaleSD <- attributes(data)$scaleSD
+  bestformula$scaleM <- attributes(data)$scaleM
+  bestformula$descend <- attributes(data)$descend
+  bestformula$group <- attributes(data)$group
+  bestformula$age <- attributes(data)$age
+  bestformula$k <- attributes(data)$k
 
-
-
+  # Print output
   message("\nRegression formula:")
   print(regressionFunction(bestformula, digits=8))
   message("\nUse 'printSubset(model)' and 'plotSubset(model)' to inspect model fit.")
@@ -334,6 +352,9 @@ checkConsistency <- function(model,
     maxRaw <- model$maxRaw
   }
 
+  if(is.null(descend)){
+    descend <- model$descend
+  }
 
   i <- minAge
   j <- minNorm

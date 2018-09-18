@@ -407,7 +407,7 @@ rankBySlidingWindow <- function(data,
     d$group <- stats::ave(d[, age], group, FUN = function(x) {
       mean(x)
     })
-    attr(d, "group") <- "group"
+
 
   }
 
@@ -418,6 +418,7 @@ rankBySlidingWindow <- function(data,
   attr(d, "scaleSD") <- scaleSD
   attr(d, "descend") <- descend
   attr(d, "normValue") <- "normValue"
+  attr(d, "group") <- "group"
 
   return(d)
 }
@@ -468,11 +469,11 @@ computePowers <-
 
     # check variables, if NULL take attributes from d
     if(is.null(norm)){
-      norm <- attributes(d)$normValue
+      norm <- attr(d, "normValue")
     }
 
     if(is.null(age)){
-      norm <- attributes(d)$age
+      age <- attr(d, "age")
     }
 
     # check if columns exist
@@ -570,7 +571,7 @@ computePowers <-
 
     # attributes
     attr(d, "age") <- age
-    attr(d, "normValue") <- normValue
+    attr(d, "normValue") <- norm
     attr(d, "k") <- k
 
     return(d)

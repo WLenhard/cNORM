@@ -111,7 +111,8 @@ simulateRasch <- function(n = 100, minAge = 1, maxAge=7, items.n = 21, items.m =
   # compute propabilities
   i <- 1
   while(i <= items.n){
-    prob <- exp(data$zOverall - theta[i])/(1 + exp(data$zOverall - theta[i]))
+    # prob <- exp(data$zOverall - theta[i])/(1 + exp(data$zOverall - theta[i]))
+    prob <- pnorm(data$zOverall - theta[i]) # use real cumulative normal instead of logit
     name <- paste0("prob", i)
     data <- cbind(data, prob)
     names(data)[[ncol(data)]] <- name
