@@ -3,6 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 ### TODO
 *   Shiny
+*   BUG! predictNormValue falling in local optimum at the lower or upper raw score range
 
 
 

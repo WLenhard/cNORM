@@ -467,10 +467,20 @@ predictNormValue <-
       index <- which.min(abs(norms$raw - raw))
 
       # work around if algorithm falls into local optimum
-      if(norms$norm[1]==minN){
+      if(norms$norm[1]==minN && norms$norm[2]==minN){
         result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
+
+        # break on first cycle if all values are equal
+        #if(length(result) == 5){
+        #    return(NA)
+        #}
+
         index <- result[length(result)]
-      }
+      }#else if(norms$norm[1]==maxN){
+        # break if lowest value is already at max
+        #return(NA)
+      #}
+
 
       if(index==1){
         minN <- norms$norm[1]
