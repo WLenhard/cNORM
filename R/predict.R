@@ -26,20 +26,19 @@ getNormCurve <-
              step = 0.1,
              minRaw = NULL,
              maxRaw = NULL) {
-
-    if(is.null(minAge)){
+    if (is.null(minAge)) {
       minAge <- model$minA1
     }
 
-    if(is.null(maxAge)){
+    if (is.null(maxAge)) {
       maxAge <- model$maxA1
     }
 
-    if(is.null(minRaw)){
+    if (is.null(minRaw)) {
       minRaw <- model$minRaw
     }
 
-    if(is.null(maxRaw)){
+    if (is.null(maxRaw)) {
       maxRaw <- model$maxRaw
     }
     raw <- vector("list", (maxAge - minAge) / step)
@@ -148,9 +147,9 @@ predictRaw <-
     }
 
     # check bounds
-    if(is.na(predict)){
+    if (is.na(predict)) {
       warning(paste0("NA value occured in predictValue with norm score ", norm, " and age ", age))
-    }else if (predict < minRaw) {
+    } else if (predict < minRaw) {
       predict <- minRaw
     } else if (predict > maxRaw) {
       predict <- maxRaw
@@ -192,21 +191,20 @@ normTable <- function(A,
                       maxRaw = NULL,
                       step = 0.1,
                       descend = NULL) {
-
-  if(is.null(minNorm)||is.null(maxNorm)){
+  if (is.null(minNorm) || is.null(maxNorm)) {
     stop("ERROR: Please specify minimum and maximum norm score")
   }
 
-  if(is.null(descend)){
+  if (is.null(descend)) {
     descend <- model$descend
   }
 
-  if(is.null(minRaw)){
+  if (is.null(minRaw)) {
     warning("Minimum raw score not specified. Taking value from original dataset.")
     minRaw <- model$minRaw
   }
 
-  if(is.null(maxRaw)){
+  if (is.null(maxRaw)) {
     warning("Maximum raw score not specified. Taking value from original dataset.")
     maxRaw <- model$maxRaw
   }
@@ -217,7 +215,6 @@ normTable <- function(A,
   l <- length(norm)
   if (!descend) {
     while (i <= l) {
-
       r <- predictRaw(minNorm, A, model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
 
       norm[[i]] <- minNorm
@@ -228,7 +225,6 @@ normTable <- function(A,
     }
   } else {
     while (maxNorm >= minNorm) {
-
       r <- predictRaw(maxNorm, A, model$coefficients)
 
       norm[[i]] <- maxNorm
@@ -279,24 +275,23 @@ rawTable <- function(A,
                      step = 1,
                      precision = .01,
                      descend = NULL) {
-
-  if(is.null(minNorm)){
+  if (is.null(minNorm)) {
     minNorm <- model$minL1
   }
 
-  if(is.null(descend)){
+  if (is.null(descend)) {
     descend <- model$descend
   }
 
-  if(is.null(maxNorm)){
+  if (is.null(maxNorm)) {
     maxNorm <- model$maxL1
   }
 
-  if(is.null(minRaw)){
+  if (is.null(minRaw)) {
     minRaw <- model$minRaw
   }
 
-  if(is.null(maxRaw)){
+  if (is.null(maxRaw)) {
     maxRaw <- model$maxRaw
   }
 
@@ -373,16 +368,15 @@ derivationTable <-
              minNorm = NULL,
              maxNorm = NULL,
              step = 0.1) {
-
-    if(is.null(minNorm)){
+    if (is.null(minNorm)) {
       minNorm <- model$minL1
     }
 
-    if(is.null(maxNorm)){
+    if (is.null(maxNorm)) {
       maxNorm <- model$maxL1
     }
 
-        norm <- vector("list", 1 + (maxNorm - minNorm) / step)
+    norm <- vector("list", 1 + (maxNorm - minNorm) / step)
     raw <- vector("list", 1 + (maxNorm - minNorm) / step)
     i <- 1
     coeff <- derive(model)
@@ -431,71 +425,93 @@ derivationTable <-
 #' @export
 predictNormValue <-
   function(raw,
-           A,
-           model,
-           minNorm = NULL,
-           maxNorm = NULL,
-           minRaw = NULL,
-           maxRaw = NULL,
-           precision = 0.1, rawStep = 0) {
-
-    if(is.null(minNorm)||is.null(maxNorm)){
+             A,
+             model,
+             minNorm = NULL,
+             maxNorm = NULL,
+             minRaw = NULL,
+             maxRaw = NULL,
+             precision = 0.1, rawStep = 0) {
+    if (is.null(minNorm) || is.null(maxNorm)) {
       stop("ERROR: Please specify minimum and maximum norm score")
     }
 
-    if(is.null(minRaw)){
+    if (is.null(minRaw)) {
       minRaw <- model$minRaw
     }
 
-    if(is.null(maxRaw)){
+    if (is.null(maxRaw)) {
       maxRaw <- model$maxRaw
     }
 
     stepR <- rawStep / 2
 
-    if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
+    if (length(raw) == 1 && length(A) == 1 && is.numeric(raw) && is.numeric(A)) {
 
-      minN <- minNorm
-      maxN <- maxNorm
+      # check if raw lies in upper or lower half of the distribution
+      median <- predictRaw(model$scaleM, A, model$coefficients,
+        minRaw = minRaw,
+        maxRaw = maxRaw
+      )
+
+      if (raw >= median) {
+        upper <- TRUE
+        minN <- (maxNorm - minNorm) / 2 + minNorm
+        maxN <- maxNorm
+      } else {
+        upper <- FALSE
+        minN <- minNorm
+        maxN <- (maxNorm - minNorm) / 2 + minNorm
+      }
+      # minN <- minNorm
+      # maxN <- maxNorm
       stepping <- (maxN - minN) / 4
 
-      while(stepping > precision){
+      while (stepping > precision) {
         norms <-
-        normTable(A,
-                         model,
-                         minNorm = minN,
-                         maxNorm = maxN,
-                         minRaw = minRaw,
-                         maxRaw = maxRaw,
-                         step = stepping
-        )
-      index <- which.min(abs(norms$raw - raw))
+          normTable(A,
+            model,
+            minNorm = minN,
+            maxNorm = maxN,
+            minRaw = minRaw,
+            maxRaw = maxRaw,
+            step = stepping
+          )
+        index <- which.min(abs(norms$raw - raw))
 
-      # work around if algorithm falls into local optimum
-      if(norms$raw[1]==minRaw){
-        result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
-        index <- result[length(result)]
-      }
+        # work around if algorithm falls into local optimum
+        if (norms$raw[1] == minRaw) {
+          result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
+          index <- result[length(result)]
+        }
 
 
-      if(index==1){
-        minN <- norms$norm[1]
-        maxN <- norms$norm[3]
-      } else if(index==5){
-        minN <- norms$norm[3]
-        maxN <- norms$norm[5]
-      }  else{
-        minN <- norms$norm[index - 1]
-        maxN <- norms$norm[index + 1]
-      }
+        if (index == 1) {
+          minN <- norms$norm[1]
+          maxN <- norms$norm[3]
+        } else if (index == 5) {
+          minN <- norms$norm[3]
+          maxN <- norms$norm[5]
+        } else {
+          minN <- norms$norm[index - 1]
+          maxN <- norms$norm[index + 1]
+        }
 
-      stepping <- stepping / 2
-
+        # check for upper and lower bound and terminate if necessary
+        if (upper && ((norms$raw[1] + stepR) > maxRaw)) {
+          stepping <- precision
+          index <- 1
+        } else if (!upper && ((norms$raw[5] - stepR) < minRaw)) {
+          stepping <- precision
+          index <- 5
+        } else {
+          stepping <- stepping / 2
+        }
       }
 
       return(norms$norm[index])
-    } else if(is.vector(raw)&&is.vector(A)){
-      if(length(raw)!=length(A)){
+    } else if (is.vector(raw) && is.vector(A)) {
+      if (length(raw) != length(A)) {
         stop("'A' and 'raw' need to have the same length.")
       }
       message("This might take some time. Processing case ... ")
@@ -506,67 +522,68 @@ predictNormValue <-
       i <- 1
 
       # iterate through cases and increase precision by factor 2 in each step
-      while(i <= n){
-
-        if(i%%100==0){
+      while (i <= n) {
+        if (i %% 100 == 0) {
           message(i)
         }
 
         # check if raw lies in upper or lower half of the distribution
-        median <- predictRaw(model$scaleM, A[[i]], model$coefficients, minRaw = minRaw,
-                             maxRaw = maxRaw)
+        median <- predictRaw(model$scaleM, A[[i]], model$coefficients,
+          minRaw = minRaw,
+          maxRaw = maxRaw
+        )
 
-        if(raw[[i]] >= median){
+        if (raw[[i]] >= median) {
           upper <- TRUE
           minN <- (maxNorm - minNorm) / 2 + minNorm
           maxN <- maxNorm
-        }else{
+        } else {
           upper <- FALSE
           minN <- minNorm
           maxN <- (maxNorm - minNorm) / 2 + minNorm
         }
-        #minN <- minNorm
-        #maxN <- maxNorm
+        # minN <- minNorm
+        # maxN <- maxNorm
         stepping <- (maxN - minN) / 4
 
-        while(stepping > precision){
+        while (stepping > precision) {
           norms <-
             normTable(A[[i]],
-                      model,
-                      minNorm = minN,
-                      maxNorm = maxN,
-                      minRaw = minRaw,
-                      maxRaw = maxRaw,
-                      step = stepping
+              model,
+              minNorm = minN,
+              maxNorm = maxN,
+              minRaw = minRaw,
+              maxRaw = maxRaw,
+              step = stepping
             )
           index <- which.min(abs(norms$raw - raw[[i]]))
 
           # work around if algorithm falls into local optimum
-          if(norms$raw[1]==minRaw){
+          if (norms$raw[1] == minRaw) {
             result <- which(abs(norms$raw - raw[[i]]) == min(abs(norms$raw - raw[[i]])))
             index <- result[length(result)]
           }
 
 
-          if(index==1){
+          if (index == 1) {
             minN <- norms$norm[1]
             maxN <- norms$norm[3]
-          } else if(index==5){
+          } else if (index == 5) {
             minN <- norms$norm[3]
             maxN <- norms$norm[5]
-          }  else{
+          } else {
             minN <- norms$norm[index - 1]
             maxN <- norms$norm[index + 1]
           }
 
-          #check for upper and lower bound and terminate if necessary
-          if( upper && ((norms$raw[1] + stepR) > maxRaw)){
+          # check for upper and lower bound and terminate if necessary
+          if (upper && ((norms$raw[1] + stepR) > maxRaw)) {
             stepping <- precision
             index <- 1
-          }else if( !upper && ((norms$raw[5] - stepR) < minRaw)){
+          } else if (!upper && ((norms$raw[5] - stepR) < minRaw)) {
             stepping <- precision
             index <- 5
-          }else{
+          } else {
             stepping <- stepping / 2
           }
         }
@@ -575,7 +592,7 @@ predictNormValue <-
         i <- i + 1
       }
       return(values)
-    }else {
+    } else {
       stop("Please check raw and A value.")
     }
   }
