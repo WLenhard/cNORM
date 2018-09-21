@@ -16,7 +16,7 @@
 #' the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
 #' for the analyses.
 #' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-#' and fitted versus manifest scores can be plotted with 'plotValues' and 'plotPercentiles'.
+#' and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
 #'
 #' @param data The preprocessed dataset, which should include the variables 'raw'
 #'  and the powers and interactions of the norm score (L = Location; usually T scores)

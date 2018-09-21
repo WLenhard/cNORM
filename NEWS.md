@@ -8,6 +8,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 0.9.16
+Date: 2018.09.21
+
+Changes:
+
+*   bug in predictNormValue partly fixed (further optimization necessary)
+*   API change: plotValues renamed to plotRaw
+*   new function: plotNorm
+
+
+
 ### Version in 0.9.15
 Date: 2018.09.18
 
@@ -15,7 +26,6 @@ Changes:
 
 *   plotDensity function added
 *   attributes added to data.frame to increase usability
-*   bug in predictNormValue partly fixed (further optimization necessary)
 
 
 

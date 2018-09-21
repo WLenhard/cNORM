@@ -12,18 +12,18 @@
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
-#' plotValues(normData, m, group="group")
+#' plotRaw(normData, m, group="group")
 #' @export
-plotValues <- function(data, model, group = NULL, raw = NULL) {
+plotRaw <- function(data, model, group = NULL, raw = NULL) {
   if(is.null(raw)){
     raw <- attr(data, "raw")
   }
 
-  if(is.null(group)){
-    group <- attr(data, "group")
-  }
+  # if(is.null(group)){
+  #   group <- attr(data, "group")
+  # }
 
-  if (!(group %in% colnames(data))) {
+  if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
   }
   if (!(raw %in% colnames(data))) {
@@ -33,8 +33,9 @@ plotValues <- function(data, model, group = NULL, raw = NULL) {
 
   d <- data
   d$fitted <- model$fitted.values
-  d$group <- data[[group]]
-  d$group <- as.factor(d$group)
+  if(group != "" && !is.null(group)){
+    d$group <- data[[group]]
+    d$group <- as.factor(d$group)
   d$raw <- data[raw]
   lattice::xyplot(fitted ~ raw | group, d,
     main = paste("Manifest vs. Fitted Raw Scores by ", group),
@@ -44,6 +45,75 @@ plotValues <- function(data, model, group = NULL, raw = NULL) {
     auto.key = TRUE,
     abline = c(0, 1), lwd = 1
   )
+  }else{
+    d$raw <- data[raw]
+    lattice::xyplot(fitted ~ raw, d,
+                    main = paste("Manifest vs. Fitted Raw Scores"),
+                    ylab = "Fitted Scores",
+                    xlab = "Manifest Scores",
+                    grid = TRUE,
+                    auto.key = TRUE,
+                    abline = c(0, 1), lwd = 1
+    )
+  }
+}
+
+#' Plot manifest and fitted norm scores
+#'
+#' The function plots the manifest norm score against the fitted norm score from
+#' the inverse regression model per group. This helps to inspect the precision
+#' of the modeling process. The scores should not deviate too far from
+#' regression line.
+#' @param data The raw data within a data.frame
+#' @param model The regression model
+#' @param group The grouping variable, use empty string "" for no group
+#' @param minNorm lower bound of fitted norm scores
+#' @param maxNorm upper bound of fitted norm scores
+#' @param precision The precision of the norm score calculation
+#' @param stepRaw The resolution of the raw value scale, usually 1 for whole point scales
+#' @examples
+#' # Load example data set, compute model and plot results
+#' \dontrun{
+#' normData <- prepareData()
+#' m <- bestModel(data = normData)
+#' plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
+#' }
+#' @export
+plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, precision = .1, stepRaw = 1) {
+  if(is.null(minNorm)||is.null(maxNorm)){
+    stop("Please specify min and max norm.")
+  }
+
+  if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+  }
+
+  d <- data
+  raw <- data[[model$raw]]
+  age <- data[[model$age]]
+  fitted <- predictNormValue(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = model$minRaw, maxRaw = model$maxRaw, precision = precision, rawStep = stepRaw)
+
+  if(group != "" && !is.null(group)){
+    d$group <- data[[group]]
+    d$group <- as.factor(d$group)
+    lattice::xyplot(fitted ~ normValue | group, d,
+                    main = paste("Manifest vs. Fitted Norm Scores by ", group),
+                    ylab = "Fitted Scores",
+                    xlab = "Manifest Scores",
+                    grid = TRUE,
+                    auto.key = TRUE,
+                    abline = c(0, 1), lwd = 1
+    )
+  }else{
+    lattice::xyplot(fitted ~ normValue, d,
+                    main = paste("Manifest vs. Fitted Norm Scores"),
+                    ylab = "Fitted Scores",
+                    xlab = "Manifest Scores",
+                    grid = TRUE,
+                    auto.key = TRUE,
+                    abline = c(0, 1), lwd = 1
+    )
+  }
 }
 
 #' Plot norm curves

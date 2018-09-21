@@ -25,7 +25,7 @@
 #'   \code{\link{printSubset}}, \code{\link{plotSubset}}, \code{\link{regressionFunction}},
 #'   \code{\link{derive}})
 #'   \item Validating the model (\code{\link{checkConsistency}}, \code{\link{plotPercentiles}},
-#'   \code{\link{plotPercentileSeries}}, \code{\link{plotValues}}, \code{\link{derivationTable}},
+#'   \code{\link{plotPercentileSeries}}, \code{\link{plotRaw}}, \code{\link{plotNorm}}, \code{\link{derivationTable}},
 #'   \code{\link{plotDerivative}})
 #'   \item Generating norm tables and predicting scores (\code{\link{predictNormValue}},
 #'   \code{\link{predictRaw}}, \code{\link{normTable}}, \code{\link{getNormCurve}},
@@ -71,7 +71,7 @@
 #' plotSubset(model.elfe)
 #'
 #' # Plot manifest and predicted values, plot series of percentile charts
-#' plotValues(data.elfe, model.elfe)
+#' plotRaw(data.elfe, model.elfe)
 #' \dontrun{
 #' plotPercentileSeries(data.elfe, model.elfe)
 #' }
@@ -82,11 +82,13 @@
 #'
 #' # Generate norm tables; predict values, here: grade 3.75 from T score 25
 #' # to 75 and within the raw value range of this specific test (0 to 28)
-#' normTable <- normTable(3.75, model.elfe, , minNorm=25, maxNorm=75, step=0.5)
-#' rawTable <- rawTable(3.75, model.elfe, 0, 28, precision=.01)
+#' normTable <- normTable(3.75, model.elfe, minNorm=25, maxNorm=75, step=0.5)
+#' rawTable <- rawTable(3.75, model.elfe, minRaw = 0, maxRaw = 28, minNorm=25,
+#'                      maxNorm=75, precision=.01)
 #'
 #' # Predict a specific norm score
-#' score <- predictNormValue(raw = 21, A = 3.75, model = model.elfe, minNorm=25, maxNorm=75)
+#' score <- predictNormValue(raw = 21, A = 3.75,
+#'                           model = model.elfe, minNorm=25, maxNorm=75)
 #'
 #' # Semi-parametric modelling with Box Cox power transformation for grade 3.75
 #' bcParameters <- boxcox(model.elfe, 3.75)

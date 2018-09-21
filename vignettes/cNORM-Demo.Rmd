@@ -179,14 +179,19 @@ If you are not sure yet, which model to choose, you can display a series of plot
 plotPercentileSeries(normData, model)
 ```
 
-### plotValues
+### plotRaw
 In the next figure, the fitted and the manifest data are compared separately for each (age) group:
 ```{r fig4, fig.height = 4, fig.width = 7}
-plotValues(normData, model, group="group")
+plotRaw(normData, model, group="group")
 ```
 
 The adjustment is particularly good if all points are as close as possible to the bisecting line. However, it must be noted that deviations in the extremely upper, but particularly in the extremely lower performance range often occur because the manifest data in these areas are also associated with low reliability.
 
+### plotNorm
+This function does the same as plotRaw, but instead uses norm values. Please note, that it might take some time depending on the sample size:
+```
+plotNorm(normData, model, group="group", minNorm = 25, maxNorm = 75)
+```
 ### plotDerivative
 To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. This can be done in the following way:
 

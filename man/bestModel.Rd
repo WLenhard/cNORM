@@ -58,7 +58,7 @@ might lead to on over-fit, so be careful! These paramters depend on the distribu
 the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
 for the analyses.
 \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-and fitted versus manifest scores can be plotted with 'plotValues' and 'plotPercentiles'.
+and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
 }
 \examples{
 # Standard example with sample data
