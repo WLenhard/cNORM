@@ -4,10 +4,13 @@
 \alias{simulateRasch}
 \title{Simulate raw test scores based on Rasch model}
 \usage{
-simulateRasch(n = 100, minAge = 1, maxAge = 7, items.n = 21,
-  items.m = 0, items.sd = 1, randomTheta = TRUE, width = 1)
+simulateRasch(data = NULL, n = 100, minAge = 1, maxAge = 7,
+  items.n = 21, items.m = 0, items.sd = 1, Theta = "random",
+  width = 1)
 }
 \arguments{
+\item{data}{data.frame from previous simulations for recomputation (overrides n, minAge, maxAge)}
+
 \item{n}{The sample size per age group}
 
 \item{minAge}{The minimum age (default 1)}
@@ -20,7 +23,9 @@ simulateRasch(n = 100, minAge = 1, maxAge = 7, items.n = 21,
 
 \item{items.sd}{The standard deviation of the item difficulty}
 
-\item{randomTheta}{If set to true, a random item sample with normally distributed difficulty is drawn, based}
+\item{Theta}{irt scales difficulty parameters, either "random" for drawing a random sample,
+"even" for evently distributed or a set auf predefined values, which then overides the item.n
+parameters}
 
 \item{width}{The width of the window size for the continuous age per group; +- 1/2 width around group
 center
@@ -46,7 +51,7 @@ and the raw data via $data of the returned object.
 # simulate data for a rather easy test (m = -1.0)
 sim <- simulateRasch(n=150, minAge=1,
                      maxAge=7, items.n = 30, items.m = -1.0,
-                     items.sd = 1, randomTheta = TRUE, width = 1.0)
+                     items.sd = 1, Theta = "random", width = 1.0)
 
 # Show item difficulties
 mean(sim$theta)

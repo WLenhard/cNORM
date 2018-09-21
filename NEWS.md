@@ -4,6 +4,7 @@ This file documents the development of the package as well as open issues or poi
 ### TODO
 *   Shiny
 *   BUG! predictNormValue falling in local optimum at the lower or upper raw score range
+    (Partly fixed)
 
 
 
@@ -14,6 +15,7 @@ Changes:
 
 *   plotDensity function added
 *   attributes added to data.frame to increase usability
+*   bug in predictNormValue partly fixed (further optimization necessary)
 
 
 

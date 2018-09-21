@@ -415,6 +415,9 @@ derivationTable <-
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param precision The precision for the norm score generation with lower values
 #' indicating a higher precision. In case of T scores, precision = 0.1 is sufficient.
+#' @param rawStep Resolution of raw scores (default 0 for completely contiuous variables).
+#' Please set to 1 for tests, where raw scores are whole numbers or to 0.5 for test,
+#' where half points can be achived.
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
@@ -434,7 +437,7 @@ predictNormValue <-
            maxNorm = NULL,
            minRaw = NULL,
            maxRaw = NULL,
-           precision = 0.1) {
+           precision = 0.1, rawStep = 0) {
 
     if(is.null(minNorm)||is.null(maxNorm)){
       stop("ERROR: Please specify minimum and maximum norm score")
@@ -447,6 +450,8 @@ predictNormValue <-
     if(is.null(maxRaw)){
       maxRaw <- model$maxRaw
     }
+
+    stepR <- rawStep / 2
 
     if(length(raw)==1&&length(A)==1&&is.numeric(raw)&&is.numeric(A)){
 
@@ -467,19 +472,10 @@ predictNormValue <-
       index <- which.min(abs(norms$raw - raw))
 
       # work around if algorithm falls into local optimum
-      if(norms$norm[1]==minN && norms$norm[2]==minN){
+      if(norms$raw[1]==minRaw){
         result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
-
-        # break on first cycle if all values are equal
-        #if(length(result) == 5){
-        #    return(NA)
-        #}
-
         index <- result[length(result)]
-      }#else if(norms$norm[1]==maxN){
-        # break if lowest value is already at max
-        #return(NA)
-      #}
+      }
 
 
       if(index==1){
@@ -516,28 +512,41 @@ predictNormValue <-
           message(i)
         }
 
+        # check if raw lies in upper or lower half of the distribution
+        median <- predictRaw(model$scaleM, A[[i]], model$coefficients, minRaw = minRaw,
+                             maxRaw = maxRaw)
 
-        minN <- minNorm
-        maxN <- maxNorm
+        if(raw[[i]] >= median){
+          upper <- TRUE
+          minN <- (maxNorm - minNorm) / 2 + minNorm
+          maxN <- maxNorm
+        }else{
+          upper <- FALSE
+          minN <- minNorm
+          maxN <- (maxNorm - minNorm) / 2 + minNorm
+        }
+        #minN <- minNorm
+        #maxN <- maxNorm
         stepping <- (maxN - minN) / 4
 
         while(stepping > precision){
           norms <-
             normTable(A[[i]],
-                             model,
-                             minNorm = minN,
-                             maxNorm = maxN,
-                             minRaw = minRaw,
-                             maxRaw = maxRaw,
-                             step = stepping
+                      model,
+                      minNorm = minN,
+                      maxNorm = maxN,
+                      minRaw = minRaw,
+                      maxRaw = maxRaw,
+                      step = stepping
             )
           index <- which.min(abs(norms$raw - raw[[i]]))
 
           # work around if algorithm falls into local optimum
-          if(norms$norm[1]==minN){
+          if(norms$raw[1]==minRaw){
             result <- which(abs(norms$raw - raw[[i]]) == min(abs(norms$raw - raw[[i]])))
             index <- result[length(result)]
           }
+
 
           if(index==1){
             minN <- norms$norm[1]
@@ -550,10 +559,17 @@ predictNormValue <-
             maxN <- norms$norm[index + 1]
           }
 
-          stepping <- stepping / 2
-
+          #check for upper and lower bound and terminate if necessary
+          if( upper && ((norms$raw[1] + stepR) > maxRaw)){
+            stepping <- precision
+            index <- 1
+          }else if( !upper && ((norms$raw[5] - stepR) < minRaw)){
+            stepping <- precision
+            index <- 5
+          }else{
+            stepping <- stepping / 2
+          }
         }
-
 
         values[[i]] <- norms$norm[index]
         i <- i + 1
