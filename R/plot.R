@@ -501,7 +501,7 @@ plotDensity <- function(    model,
                   panel = function(...)
                     lattice::panel.superpose(..., panel.groups = panelfun),
                   main = "Density function",
-                  ylab = "Raw Score", xlab = "Density",
+                  ylab = "Density", xlab = "Raw Score",
                   col = COL, lwd = 2, grid = TRUE,
                   key = list(
                     corner = c(0, 1),
