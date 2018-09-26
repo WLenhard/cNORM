@@ -524,7 +524,7 @@ predictNormValue <-
 
       # iterate through cases and increase precision by factor 2 in each step
       while (i <= n) {
-        if (i %% 100 == 0) {
+        if (i %% 1000 == 0) {
           message(i)
         }
 
@@ -543,6 +543,7 @@ predictNormValue <-
           minN <- minNorm
           maxN <- (maxNorm - minNorm) / 2 + minNorm
         }
+
         # minN <- minNorm
         # maxN <- maxNorm
         stepping <- (maxN - minN) / 4
