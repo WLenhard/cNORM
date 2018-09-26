@@ -309,6 +309,7 @@ printSubset <- function(model){
 #' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
+#' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(normData)
@@ -419,15 +420,17 @@ checkConsistency <- function(model,
   }
   if (minor == 0 & major == 0) {
     message("\nNo violations of model consistency found.")
+    return(FALSE)
   } else if (major == 0) {
     message(paste0("\n", minor, " minor violations of model consistency found."))
     message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    return(TRUE)
   } else {
     message(paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
     message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
     message("Be careful with horizontal and vertical extrapolation.")
     message(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
-
+    return(TRUE)
   }
 }
 
