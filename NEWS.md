@@ -3,6 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 ### TODO
 *   Shiny
+*   rename predictNormValue -> predictNorm
 
 
 
@@ -13,6 +14,7 @@ Changes:
 
 *   predictNormValue fixed and optimized (many thanks to Sebastian Gary)
 *   API change with respect to predictNormValue, rawTable and plotNorm
+*   plotNorm: norm score boundaries guessed by min and max score from modelling 
 
 
 

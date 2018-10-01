@@ -78,8 +78,14 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
 #' }
 #' @export
 plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL) {
-  if(is.null(minNorm)||is.null(maxNorm)){
-    stop("Please specify min and max norm.")
+  if(is.null(minNorm)){
+    warning("minNorm not specified, taking absolute minimum norm score from modelling...")
+    minNorm <- model$minL1
+  }
+
+  if(is.null(maxNorm)){
+    warning("maxNorm not specified, taking absolute maximum norm score from modelling...")
+    maxNorm <- model$maxL1
   }
 
   if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
