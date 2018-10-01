@@ -222,7 +222,7 @@ plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = 2, maxAge = 5, 
 ### predictNormValue
 The 'predictNormValue' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores can be limited to a minimum and maximum value in order to take into account the limits of model validity.
 ```{r}
-predictNormValue(15, 4.7, model, minNorm = 25, maxNorm = 75, precision = 0.1)
+predictNormValue(15, 4.7, model, minNorm = 25, maxNorm = 75)
 ```
 
 ### predictRaw
@@ -246,7 +246,7 @@ Norm tables, in which the raw score or the range of raw scores is given for a ce
 The function 'rawTable' is similar to 'normTable', but reverses the assignment: The normal scores are assigned to a pre-specified series of raw scores at a certain age. This requires an inversion of the regression function, which is determined numerically.
 ```{r}
 # Generate raw table for grade 3.5
-rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1, precision = .1, descend = FALSE)
+rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1, descend = FALSE)
 ```
 You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores. With higher precision and smaller increments, this function becomes computationally intensive.
 

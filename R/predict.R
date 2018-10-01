@@ -254,8 +254,6 @@ normTable <- function(A,
 #' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
 #' @param step Stepping parameter for the raw scores (default 1)
-#' @param precision Precision for the norm score estimation. Lower values indicate
-#' higher precision (default .01)
 #' @param descend Reverse raw score order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @return data.frame with raw scores and the predicted norm scores
@@ -265,7 +263,7 @@ normTable <- function(A,
 #' normData <- prepareData()
 #' m <- bestModel(data=normData)
 #' table <- rawTable(3 + 7/12, m, minRaw = 0, maxRaw = 28,
-#'                   minNorm = 25, maxNorm = 75, precision=.01)
+#'                   minNorm = 25, maxNorm = 75)
 #' @export
 rawTable <- function(A,
                      model,
@@ -274,7 +272,6 @@ rawTable <- function(A,
                      minNorm = NULL,
                      maxNorm = NULL,
                      step = 1,
-                     precision = .01,
                      descend = NULL) {
   if (is.null(minNorm)) {
     minNorm <- model$minL1
@@ -303,7 +300,7 @@ rawTable <- function(A,
     while (minRaw <= maxRaw) {
       i <- i + 1
       n <-
-        predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
+        predictNormValue(minRaw, A, model, minNorm, maxNorm)
       norm[[i]] <- n
       raw[[i]] <- minRaw
 
@@ -313,7 +310,7 @@ rawTable <- function(A,
     while (maxRaw >= minRaw) {
       i <- i + 1
       n <-
-        predictNormValue(minRaw, A, model, minNorm, maxNorm, precision)
+        predictNormValue(minRaw, A, model, minNorm, maxNorm)
       norm[[i]] <- n
       raw[[i]] <- maxRaw
 
@@ -406,13 +403,6 @@ derivationTable <-
 #' @param model The regression model
 #' @param minNorm The lower bound of the norm score range
 #' @param maxNorm The upper bound of the norm score range
-#' @param minRaw clipping parameter for the lower bound of raw scores
-#' @param maxRaw clipping parameter for the upper bound of raw scores
-#' @param precision The precision for the norm score generation with lower values
-#' indicating a higher precision. In case of T scores, precision = 0.1 is sufficient.
-#' @param rawStep Resolution of raw scores (default 0 for completely contiuous variables).
-#' Please set to 1 for tests, where raw scores are whole numbers or to 0.5 for test,
-#' where half points can be achived.
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
@@ -429,169 +419,45 @@ predictNormValue <-
              A,
              model,
              minNorm = NULL,
-             maxNorm = NULL,
-             minRaw = NULL,
-             maxRaw = NULL,
-             precision = 0.1, rawStep = 0) {
+             maxNorm = NULL) {
     if (is.null(minNorm) || is.null(maxNorm)) {
       stop("ERROR: Please specify minimum and maximum norm score")
     }
 
-    if (is.null(minRaw)) {
-      minRaw <- model$minRaw
-    }
 
-    if (is.null(maxRaw)) {
-      maxRaw <- model$maxRaw
-    }
-
-    stepR <- rawStep / 2
-
+    # determine single norm value by optimization
     if (length(raw) == 1 && length(A) == 1 && is.numeric(raw) && is.numeric(A)) {
+      startNormScore <- minNorm
+      currentRawValue <- predictRaw(norm = minNorm, age = A, coefficients = model$coefficients)
 
-      # check if raw lies in upper or lower half of the distribution
-      median <- predictRaw(model$scaleM, A, model$coefficients,
-        minRaw = minRaw,
-        maxRaw = maxRaw
-      )
-
-      if (raw >= median) {
-        upper <- TRUE
-        minN <- (maxNorm - minNorm) / 2 + minNorm
-        maxN <- maxNorm
-      } else {
-        upper <- FALSE
-        minN <- minNorm
-        maxN <- (maxNorm - minNorm) / 2 + minNorm
-      }
-      # minN <- minNorm
-      # maxN <- maxNorm
-      stepping <- (maxN - minN) / 4
-
-      while (stepping > precision) {
-        norms <-
-          normTable(A,
-            model,
-            minNorm = minN,
-            maxNorm = maxN,
-            minRaw = minRaw,
-            maxRaw = maxRaw,
-            step = stepping
-          )
-        index <- which.min(abs(norms$raw - raw))
-
-        # work around if algorithm falls into local optimum
-        if (norms$raw[1] == minRaw) {
-          result <- which(abs(norms$raw - raw) == min(abs(norms$raw - raw)))
-          index <- result[length(result)]
-        }
-
-
-        if (index == 1) {
-          minN <- norms$norm[1]
-          maxN <- norms$norm[3]
-        } else if (index == 5) {
-          minN <- norms$norm[3]
-          maxN <- norms$norm[5]
-        } else {
-          minN <- norms$norm[index - 1]
-          maxN <- norms$norm[index + 1]
-        }
-
-        # check for upper and lower bound and terminate if necessary
-        if (upper && ((norms$raw[1] + stepR) > maxRaw)) {
-          stepping <- precision
-          index <- 1
-        } else if (!upper && ((norms$raw[5] - stepR) < minRaw)) {
-          stepping <- precision
-          index <- 5
-        } else {
-          stepping <- stepping / 2
-        }
+      functionToMinimize <- function(norm){
+        currentRawValue <- predictRaw(norm = norm, age = A, coefficients = model$coefficients)
+        functionValue <- (currentRawValue - raw)^2
       }
 
-      return(norms$norm[index])
+      optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
+      return(optimum$minimum)
     } else if (is.vector(raw) && is.vector(A)) {
       if (length(raw) != length(A)) {
         stop("'A' and 'raw' need to have the same length.")
       }
-      message("This might take some time. Processing case ... ")
-
+      print("This might take some time. Please stand by ... ")
       #  initialize vectors and starting values
       n <- length(raw)
       values <- rep(NA, n)
-      i <- 1
 
       # iterate through cases and increase precision by factor 2 in each step
-      while (i <= n) {
-        if (i %% 1000 == 0) {
-          message(i)
+      for(i in 1:n) {
+        startNormScore <- minNorm
+        currentRawValue <- predictRaw(norm = minNorm, age = A[[i]], coefficients = model$coefficients)
+
+        functionToMinimize <- function(norm){
+          currentRawValue <- predictRaw(norm = norm, age = A[[i]], coefficients = model$coefficients)
+          functionValue <- (currentRawValue - raw[[i]])^2
         }
 
-        # check if raw lies in upper or lower half of the distribution
-        median <- predictRaw(model$scaleM, A[[i]], model$coefficients,
-          minRaw = minRaw,
-          maxRaw = maxRaw
-        )
-
-        if (raw[[i]] >= median) {
-          upper <- TRUE
-          minN <- (maxNorm - minNorm) / 2 + minNorm
-          maxN <- maxNorm
-        } else {
-          upper <- FALSE
-          minN <- minNorm
-          maxN <- (maxNorm - minNorm) / 2 + minNorm
-        }
-
-        # minN <- minNorm
-        # maxN <- maxNorm
-        stepping <- (maxN - minN) / 4
-
-        while (stepping > precision) {
-          norms <-
-            normTable(A[[i]],
-              model,
-              minNorm = minN,
-              maxNorm = maxN,
-              minRaw = minRaw,
-              maxRaw = maxRaw,
-              step = stepping
-            )
-          index <- which.min(abs(norms$raw - raw[[i]]))
-
-          # work around if algorithm falls into local optimum
-          if (norms$raw[1] == minRaw) {
-            result <- which(abs(norms$raw - raw[[i]]) == min(abs(norms$raw - raw[[i]])))
-            index <- result[length(result)]
-          }
-
-
-          if (index == 1) {
-            minN <- norms$norm[1]
-            maxN <- norms$norm[3]
-          } else if (index == 5) {
-            minN <- norms$norm[3]
-            maxN <- norms$norm[5]
-          } else {
-            minN <- norms$norm[index - 1]
-            maxN <- norms$norm[index + 1]
-          }
-
-          # check for upper and lower bound and terminate if necessary
-          if (upper && ((norms$raw[1] + stepR) > maxRaw)) {
-            stepping <- precision
-            index <- 1
-          } else if (!upper && ((norms$raw[5] - stepR) < minRaw)) {
-            stepping <- precision
-            index <- 5
-          } else {
-            stepping <- stepping / 2
-          }
-        }
-
-        values[[i]] <- norms$norm[index]
-        i <- i + 1
+        optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
+        values[[i]] <- optimum$minimum
       }
       return(values)
     } else {

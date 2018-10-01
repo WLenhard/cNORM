@@ -4,8 +4,7 @@
 \alias{predictNormValue}
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
-predictNormValue(raw, A, model, minNorm = NULL, maxNorm = NULL,
-  minRaw = NULL, maxRaw = NULL, precision = 0.1, rawStep = 0)
+predictNormValue(raw, A, model, minNorm = NULL, maxNorm = NULL)
 }
 \arguments{
 \item{raw}{The raw value, either single numeric or list of values}
@@ -17,17 +16,6 @@ predictNormValue(raw, A, model, minNorm = NULL, maxNorm = NULL,
 \item{minNorm}{The lower bound of the norm score range}
 
 \item{maxNorm}{The upper bound of the norm score range}
-
-\item{minRaw}{clipping parameter for the lower bound of raw scores}
-
-\item{maxRaw}{clipping parameter for the upper bound of raw scores}
-
-\item{precision}{The precision for the norm score generation with lower values
-indicating a higher precision. In case of T scores, precision = 0.1 is sufficient.}
-
-\item{rawStep}{Resolution of raw scores (default 0 for completely contiuous variables).
-Please set to 1 for tests, where raw scores are whole numbers or to 0.5 for test,
-where half points can be achived.}
 }
 \value{
 The predicted norm score for a raw score, either single value or list of results

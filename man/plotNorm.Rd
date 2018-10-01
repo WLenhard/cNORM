@@ -4,8 +4,7 @@
 \alias{plotNorm}
 \title{Plot manifest and fitted norm scores}
 \usage{
-plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL,
-  precision = 0.1, stepRaw = 1)
+plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}
@@ -17,10 +16,6 @@ plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL,
 \item{minNorm}{lower bound of fitted norm scores}
 
 \item{maxNorm}{upper bound of fitted norm scores}
-
-\item{precision}{The precision of the norm score calculation}
-
-\item{stepRaw}{The resolution of the raw value scale, usually 1 for whole point scales}
 }
 \description{
 The function plots the manifest norm score against the fitted norm score from

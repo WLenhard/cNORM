@@ -5,7 +5,7 @@
 \title{Create a table with norm scores assigned to raw scores for a specific age based on the regression model}
 \usage{
 rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
-  maxNorm = NULL, step = 1, precision = 0.01, descend = NULL)
+  maxNorm = NULL, step = 1, descend = NULL)
 }
 \arguments{
 \item{A}{the age}
@@ -21,9 +21,6 @@ rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
 \item{maxNorm}{Clipping parameter for the upper bound of norm scores (default 25)}
 
 \item{step}{Stepping parameter for the raw scores (default 1)}
-
-\item{precision}{Precision for the norm score estimation. Lower values indicate
-higher precision (default .01)}
 
 \item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modelling errors}
@@ -43,7 +40,7 @@ and smaller stepping, this function becomes computational intensive.
 normData <- prepareData()
 m <- bestModel(data=normData)
 table <- rawTable(3 + 7/12, m, minRaw = 0, maxRaw = 28,
-                  minNorm = 25, maxNorm = 75, precision=.01)
+                  minNorm = 25, maxNorm = 75)
 }
 \seealso{
 normTable

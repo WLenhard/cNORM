@@ -143,6 +143,8 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
     i <- i + 1
   }
   sim <- transform(data, raw = rowSums(data[, (9 + items.n):ncol(data)]))
-  dat <- sim[, c(1, 2, ncol(sim))]
+  dat <- sim[, c(1, 2, 5, ncol(sim))]
   return(list(data = dat, sim = sim, theta = theta))
 }
+
+

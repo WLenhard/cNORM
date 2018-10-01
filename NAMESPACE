@@ -1,6 +1,6 @@
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif)
+importFrom(stats, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(latticeExtra, panel.2dsmoother)
 importFrom(utils, tail)

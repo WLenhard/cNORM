@@ -84,7 +84,7 @@
 #' # to 75 and within the raw value range of this specific test (0 to 28)
 #' normTable <- normTable(3.75, model.elfe, minNorm=25, maxNorm=75, step=0.5)
 #' rawTable <- rawTable(3.75, model.elfe, minRaw = 0, maxRaw = 28, minNorm=25,
-#'                      maxNorm=75, precision=.01)
+#'                      maxNorm=75)
 #'
 #' # Predict a specific norm score
 #' score <- predictNormValue(raw = 21, A = 3.75,

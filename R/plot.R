@@ -69,8 +69,6 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
 #' @param group The grouping variable, use empty string "" for no group
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
-#' @param precision The precision of the norm score calculation
-#' @param stepRaw The resolution of the raw value scale, usually 1 for whole point scales
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
@@ -79,7 +77,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
 #' plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
 #' }
 #' @export
-plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, precision = .1, stepRaw = 1) {
+plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL) {
   if(is.null(minNorm)||is.null(maxNorm)){
     stop("Please specify min and max norm.")
   }
@@ -91,7 +89,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, pr
   d <- data
   raw <- data[[model$raw]]
   age <- data[[model$age]]
-  fitted <- predictNormValue(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = model$minRaw, maxRaw = model$maxRaw, precision = precision, rawStep = stepRaw)
+  fitted <- predictNormValue(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
 
   if(group != "" && !is.null(group)){
     d$group <- data[[group]]

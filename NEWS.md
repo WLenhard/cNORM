@@ -3,8 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 ### TODO
 *   Shiny
-*   BUG! predictNormValue falling in local optimum at the lower or upper raw score range
-    (Partly fixed)
+
+
+
+### Version in 0.9.17
+Date: 2018.10.01
+
+Changes:
+
+*   predictNormValue fixed and optimized (many thanks to Sebastian Gary)
+*   API change with respect to predictNormValue, rawTable and plotNorm
 
 
 
