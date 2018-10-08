@@ -448,16 +448,21 @@ predictNormValue <-
 
       # iterate through cases and increase precision by factor 2 in each step
       for(i in 1:n) {
-        startNormScore <- minNorm
-        currentRawValue <- predictRaw(norm = minNorm, age = A[[i]], coefficients = model$coefficients)
-
-        functionToMinimize <- function(norm){
-          currentRawValue <- predictRaw(norm = norm, age = A[[i]], coefficients = model$coefficients)
-          functionValue <- (currentRawValue - raw[[i]])^2
+        # startNormScore <- minNorm
+        # currentRawValue <- predictRaw(norm = minNorm, age = A[[i]], coefficients = model$coefficients)
+        #
+        # functionToMinimize <- function(norm){
+        #   currentRawValue <- predictRaw(norm = norm, age = A[[i]], coefficients = model$coefficients)
+        #   functionValue <- (currentRawValue - raw[[i]])^2
+        # }
+        #
+        # optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
+        v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
+        if(length(v)==0){
+          v <- NA
         }
-
-        optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
-        values[[i]] <- optimum$minimum
+        values[[i]] <- v
+        #values[[i]] <- optimum$minimum
       }
       return(values)
     } else {

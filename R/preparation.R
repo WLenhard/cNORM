@@ -55,7 +55,7 @@ prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
   if(!(group %in% colnames(normData))){
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
   }else   if(!(raw %in% colnames(normData))){
-    stop(paste(c("ERROR: Raw score variable '", group, "' does not exist in data object."), collapse = ""));
+    stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""));
   }else   if(!(age %in% colnames(normData))){
     stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
   }

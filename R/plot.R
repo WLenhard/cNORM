@@ -48,7 +48,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
   }else{
     d$raw <- data[raw]
     lattice::xyplot(fitted ~ raw, d,
-                    main = paste("Manifest vs. Fitted Raw Scores"),
+                    main = paste("Manifest vs. Fitted Raw Scores\n", "r = ", round(cor(d$fitted, d$raw), digits = 4)),
                     ylab = "Fitted Scores",
                     xlab = "Manifest Scores",
                     grid = TRUE,
