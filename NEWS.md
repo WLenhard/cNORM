@@ -2,9 +2,16 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 ### TODO
-*   Shiny
 *   rename predictNormValue -> predictNorm
 
+
+
+### Version in 0.9.18
+Date: 2018.10.08
+
+Changes:
+
+*   First shiny prototype (many thanks to Sebastian Gary); please use cNORM.GUI() to start user interface
 
 
 ### Version in 0.9.17
