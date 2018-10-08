@@ -18,6 +18,7 @@ License: AGPL-3 + file LICENSE
 Depends:
     R (>= 3.1.0)
 Imports:
+    shiny,
     lattice (>= 0.20),
     leaps (>= 3.0.0), latticeExtra (>= 0.6)
 Suggests: knitr, rmarkdown

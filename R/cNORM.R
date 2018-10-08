@@ -99,3 +99,9 @@
 #' # Plot density function of box cox versus regression model
 #' plotBoxCox(model.elfe, bcParameters, type=2)
 NULL
+
+
+cNORM.GUI <- function(launch.browser=TRUE){
+  shiny::runApp(system.file('shiny', package='cNORM'),
+                launch.browser=launch.browser)
+}
