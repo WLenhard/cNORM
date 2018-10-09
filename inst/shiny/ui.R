@@ -29,8 +29,7 @@ shinyUI(fluidPage(
                sidebarPanel(
                  tags$h3("Choose"),
                  uiOutput("GroupingVariable"),
-                 tags$h5("Variable which is used to divide the observations into groups"),
-                 tags$h5("For example, variable age by rounding to a half or a full year"),
+                 tags$h5("Variable which is used to divide the observations into groups, for example variable age by rounding to a half or a full year"),
                  tags$br(),
                  uiOutput("RawValues"),
                  tags$h5("Raw values, for example testscores or physiological data "),
@@ -74,7 +73,7 @@ shinyUI(fluidPage(
     # Tab returns bestModel with information function and plot of real and predicted raw values
     tabPanel("Best Model",
              sidebarLayout(sidebarPanel(tags$h3("Calc best model"), tags$h5("Button starts calculation of the best model and returns its coefficients as well as the information function"),  actionButton(inputId = "CalcBestModel",
-                                                     label = "Calc best model"), tags$h5("HINT: If no file is chosen and prepared, no calculation is done!")),
+                                                     label = "Calc best model"), tags$h5("HINT: Please ensure that the data is loaded and prepared, before starting the modelling. The calculation might take a few seconds.")),
                            mainPanel(verbatimTextOutput("BestModel"), plotOutput("PlotWL"), plotOutput("PlotValues")))),
 
     # Defines panel for plots

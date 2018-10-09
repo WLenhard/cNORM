@@ -89,14 +89,14 @@ shinyServer(function(input, output, session) {
     if(is.element("group", currentNames)|| is.element("Group", currentNames))
     {
       if(is.element("group", currentNames)){
-      selectInput(inputId = "InputGroupingVariable", "Gropuing variable", choices = variableNames(), selected = "group")
+      selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = "group")
       }
       else{
-        selectInput(inputId = "InputGroupingVariable", "Gropuing variable", choices = variableNames(), selected = "Group")
+        selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = "group")
 
       }
       }
-    else{    selectInput(inputId = "InputGroupingVariable", "Gropuing variable", choices = variableNames(), selected = NULL)
+    else{    selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = NULL)
 }
   })
 
