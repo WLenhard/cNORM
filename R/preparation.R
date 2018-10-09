@@ -79,8 +79,8 @@ prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
   normData <- normData[!is.na(normData[, age]),]
 
   # ranking and powers
-  normData <- cNORM::rankByGroup(normData, group = group, raw = raw)
-  normData <- cNORM::computePowers(normData, k = 4, norm = "normValue", age = age)
+  normData <- rankByGroup(normData, group = group, raw = raw)
+  normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
   return(normData)
 }
 
@@ -205,21 +205,21 @@ rankByGroup <-
 
 
     if ((typeof(scale) == "double" && length(scale) == 2)) {
-      d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+      d$normValue <- qnorm(d$percentile, scale[1], scale[2])
       scaleM <- scale[1]
       scaleSD <- scale[2]
     } else if (scale == "IQ") {
-      d$normValue <- stats::qnorm(d$percentile, 100, 15)
+      d$normValue <- qnorm(d$percentile, 100, 15)
       scaleM <- 100
       scaleSD <- 15
     } else if (scale == "z") {
-      d$normValue <- stats::qnorm(d$percentile, 0, 1)
+      d$normValue <- qnorm(d$percentile, 0, 1)
       scaleM <- 0
       scaleSD <- 1
     } else if (scale == "T") {
       scaleM <- 50
       scaleSD <- 10
-      d$normValue <- stats::qnorm(d$percentile, 50, 10)
+      d$normValue <- qnorm(d$percentile, 50, 10)
     } else if (scale == "percentile") {
       d$normValue <- d$percentile
     }
@@ -381,21 +381,21 @@ rankBySlidingWindow <- function(data,
   scaleSD <- NA
 
   if ((typeof(scale) == "double" && length(scale) == 2)) {
-    d$normValue <- stats::qnorm(d$percentile, scale[1], scale[2])
+    d$normValue <- qnorm(d$percentile, scale[1], scale[2])
     scaleM <- scale[1]
     scaleSD <- scale[2]
   } else if (scale == "IQ") {
-    d$normValue <- stats::qnorm(d$percentile, 100, 15)
+    d$normValue <- qnorm(d$percentile, 100, 15)
     scaleM <- 100
     scaleSD <- 15
   } else if (scale == "z") {
-    d$normValue <- stats::qnorm(d$percentile, 0, 1)
+    d$normValue <- qnorm(d$percentile, 0, 1)
     scaleM <- 0
     scaleSD <- 1
   } else if (scale == "T") {
     scaleM <- 50
     scaleSD <- 10
-    d$normValue <- stats::qnorm(d$percentile, 50, 10)
+    d$normValue <- qnorm(d$percentile, 50, 10)
   } else if (scale == "percentile") {
     d$normValue <- d$percentile
   }
@@ -404,7 +404,7 @@ rankBySlidingWindow <- function(data,
   # but necessary for plotting the percentiles
   if(nGroup > 0){
     group <- as.factor( as.numeric( cut(d[, age],nGroup)))
-    d$group <- stats::ave(d[, age], group, FUN = function(x) {
+    d$group <- ave(d[, age], group, FUN = function(x) {
       mean(x)
     })
 

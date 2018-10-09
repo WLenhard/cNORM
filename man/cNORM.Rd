@@ -103,6 +103,9 @@ plotBoxCox(model.elfe, bcParameters, type=2)
   (date of retrieval: 01/09/2018)
 }
 }
+\seealso{
+cNORM.GUI
+}
 \author{
 Wolfgang Lenhard, Alexandra Lenhard and Sebastian Gary
 }

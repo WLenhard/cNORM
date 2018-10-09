@@ -186,7 +186,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 
   for (i in 1:n) {
     normCurve <-
-      cNORM::getNormCurve(
+      getNormCurve(
         normList[[i]],
         model,
         minAge = minAge,
@@ -204,7 +204,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
   NAMES <- paste("Norm ", normList, sep = "")
 
   # lattice display options
-  COL <- grDevices::rainbow(length(normList))
+  COL <- rainbow(length(normList))
   panelfun <- function(..., type, group.number) {
     lattice::panel.lines(...)
   }
@@ -241,7 +241,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' The original percentiles are displayed as distinct points in the according
 #' color, the model based projection of percentiles are drawn as lines.
 #' Please note, that the estimation of the percentiles of the raw data is done with
-#' the stats::quantile function with the default settings. Please consult help(quantile)
+#' the quantile function with the default settings. Please consult help(quantile)
 #' and change the 'type' parameter accordingly.
 #' @param data The raw data including the percentiles and norm scores
 #' @param model The model from the bestModel function
@@ -316,15 +316,15 @@ plotPercentiles <- function(data,
   # compute norm scores from percentile vector
   if (is.null(scale)){
     # fetch scale information from model
-    T <- stats::qnorm(percentiles, model$scaleM, model$scaleSD)
+    T <- qnorm(percentiles, model$scaleM, model$scaleSD)
   }else if ((typeof(scale) == "double" && length(scale) == 2)) {
-    T <- stats::qnorm(percentiles, scale[1], scale[2])
+    T <- qnorm(percentiles, scale[1], scale[2])
   } else if (scale == "IQ") {
-    T <- stats::qnorm(percentiles, 100, 15)
+    T <- qnorm(percentiles, 100, 15)
   } else if (scale == "z") {
-    T <- stats::qnorm(percentiles)
+    T <- qnorm(percentiles)
   } else if (scale == "T") {
-    T <- stats::qnorm(percentiles, 50, 10)
+    T <- qnorm(percentiles, 50, 10)
   } else {
     # no transformation
     T <- percentiles
@@ -345,9 +345,9 @@ plotPercentiles <- function(data,
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
     percentile.actual <- do.call(
       data.frame,
-      stats::aggregate(data[, raw],
+      aggregate(data[, raw],
         list(data[, group]),
-        FUN = function(x) stats::quantile(x,
+        FUN = function(x) quantile(x,
             probs = percentiles,
             type = type
           )
@@ -377,7 +377,7 @@ plotPercentiles <- function(data,
     j <- 1
 
     while (j <= length(T)) {
-      percentile.fitted[i, j + 1] <- cNORM::predictRaw(
+      percentile.fitted[i, j + 1] <- predictRaw(
         T[[j]],
         AGEP[[i]],
         model$coefficients,
@@ -396,8 +396,8 @@ plotPercentiles <- function(data,
   )
 
   END <- 5 / 6
-  COL1 <- grDevices::rainbow(length(percentiles), end = END)
-  COL2 <- c(grDevices::rainbow(length(percentiles), end = END), grDevices::rainbow(length(percentiles), end = END))
+  COL1 <- rainbow(length(percentiles), end = END)
+  COL2 <- c(rainbow(length(percentiles), end = END), rainbow(length(percentiles), end = END))
 
   panelfun <- function(..., type, group.number) {
     if (group.number > length(T)) {
@@ -410,7 +410,7 @@ plotPercentiles <- function(data,
   if(is.null(title)){
     title <- "Manifest and Fitted Percentile Curves"
   }
-  plot <- lattice::xyplot(stats::formula(xyFunction), percentile,
+  plot <- lattice::xyplot(formula(xyFunction), percentile,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = title,
@@ -494,7 +494,7 @@ plotDensity <- function(    model,
   matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
 
    # lattice display options
-  COL <- grDevices::rainbow(length(group))
+  COL <- rainbow(length(group))
   NAMES <- paste("Group ", group, sep = "")
     panelfun <- function(..., type, group.number) {
     lattice::panel.lines(...)
@@ -586,7 +586,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
       j <- j + 1
     }
 
-    bestformula <- stats::lm(text, d)
+    bestformula <- lm(text, d)
     bestformula$ideal.model <- model$ideal.model
     bestformula$cutoff <- model$cutoff
     bestformula$subsets <- model$subsets
@@ -617,7 +617,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
     if(!is.null(filename)){
       lattice::trellis.device(device="png", filename=paste0(filename, start, ".png"))
       print(plot)
-      grDevices::dev.off()
+      dev.off()
     }
 
     start <- start + 1
@@ -824,7 +824,7 @@ plotDerivative <- function(model,
   min <- min(dev2$Z) - .1
   max <- max(dev2$Z) + .1
   step <- (max - min) / 1000
-  regions <- grDevices::rainbow(1000, end = .8)
+  regions <- rainbow(1000, end = .8)
   key <- list(at = seq(min, max, by = step))
   sequence <- seq(min, max, by = step)
 

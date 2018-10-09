@@ -60,6 +60,7 @@
 #' @keywords Psychometrics, Biometrics, Test Development, Regression Based Norming
 #' @docType package
 #' @name cNORM
+#' @seealso cNORM.GUI
 #' @examples
 #' # Model internal 'elfe' dataset with the default k = 4 regression on T scores
 #' data.elfe <- prepareData(elfe)
@@ -101,7 +102,23 @@
 NULL
 
 
+#' Launcher for the graphical user interface of cNORM
+#'
+#' @param launch.browser Default TRUE; automatically open browser for GUI
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Launch graphical user interface
+#' cNORM.GUI()
+#' }
 cNORM.GUI <- function(launch.browser=TRUE){
+  if (!requireNamespace(c("shiny", "foreign", "readxl"), quietly = TRUE)) {
+    stop("Packages \"shiny\", \"foreign\" and \"readxl\" are needed for this function to work. Please install them.",
+         call. = FALSE)
+  }
+
   shiny::runApp(system.file('shiny', package='cNORM'),
-                launch.browser=launch.browser)
+                launch.browser=TRUE)
 }

@@ -147,7 +147,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #'
 #' # define percentile and according t value
 #' percentile <- .4
-#' tValue <- stats::qnorm(percentile)*10 + 50
+#' tValue <- qnorm(percentile)*10 + 50
 #'
 #' # predict raw value based on the regression model and via box cox
 #' predictRawBC(bcParameters, percentile)
@@ -157,7 +157,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
     stop("Percentile out of range. Use values between 0 and 1.")
   }
   # convert percentile to standardized z value
-  z <- stats::qnorm(percentile)
+  z <- qnorm(percentile)
 
   # compute box cox power function x for z
   x <- z * boxcoxParameters$sdBC + boxcoxParameters$meanBC
@@ -222,7 +222,7 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
   }else if(scale == "IQ"){
     return(z*15 + 100)
   }else{
-    return(stats::pnorm(z))
+    return(pnorm(z))
   }
   return(raw)
 }
@@ -290,7 +290,7 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw 
                        rawBoxCox = rawBC
     ))
 
-  COL <- grDevices::rainbow(2)
+  COL <- rainbow(2)
   panelfun <- function(..., type, group.number) {
       lattice::panel.lines(...)
   }

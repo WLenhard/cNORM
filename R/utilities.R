@@ -93,11 +93,11 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
     }
 
     data <- data.frame(age, group, mean = simMean(age), sd = simSD(age))
-    data$z <- stats::rnorm(nrow(data))
+    data$z <- rnorm(nrow(data))
     data$latent <- data$z * data$sd + data$mean
 
     meanL <- mean(data$latent)
-    sdL <- stats::sd(data$latent)
+    sdL <- sd(data$latent)
 
     # compute standardized value over complete sample
     data$zOverall <- (data$latent - meanL) / sdL
@@ -106,10 +106,10 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   # generate item difficulties either randomly or evenly distributed
   if (is.character(Theta)) {
     if (Theta == "random") {
-      theta <- stats::rnorm(items.n, items.m, items.sd)
+      theta <- rnorm(items.n, items.m, items.sd)
     } else if (Theta == "even") {
       p <- seq(from = 0.5 / items.n, to = (items.n - 0.5) / items.n, length.out = items.n)
-      theta <- stats::qnorm(p, items.m, items.sd)
+      theta <- qnorm(p, items.m, items.sd)
     }
   } else {
     theta <- Theta

@@ -30,7 +30,7 @@ bcParameters <- boxcox(model, 3)
 
 # define percentile and according t value
 percentile <- .4
-tValue <- stats::qnorm(percentile)*10 + 50
+tValue <- qnorm(percentile)*10 + 50
 
 # predict raw value based on the regression model and via box cox
 predictRawBC(bcParameters, percentile)
