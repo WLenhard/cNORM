@@ -32,6 +32,7 @@
 #'   \code{\link{plotNormCurves}})
 #' }
 #'
+#' For an easy start, you can use the graphical user interface by typing \code{cNORM.GUI()} on the console.
 #' Example datasets with large cohorts are available for demonstration purposes ('elfe',
 #' 'ppvt', 'CDC', 'life' and 'mortality' sample data from the references). Use
 #' \code{data <- prepareData(elfe)} or \code{data <- prepareData(ppvt)} to load and prepare
