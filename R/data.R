@@ -49,7 +49,7 @@
 #' @keywords datasets
 #' @name ppvt
 #' @examples
-#'
+#'\dontrun{
 #' # Example with continuous age variable
 #' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1.5)
 #' data.ppvt <- computePowers(data.ppvt, age="age")
@@ -63,7 +63,7 @@
 #'
 #' # plot percentiles
 #' plotPercentiles(data.ppvt, model.ppvt)
-#'
+#'}
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"
 
@@ -119,18 +119,18 @@
 #' @keywords datasets, life expectany, time series
 #' @name life
 #' @examples
+#' \dontrun{
 #' # data preparatiom
 #' data.life <- rankByGroup(life, raw="life")
 #' data.life <- computePowers(data.life, age="year")
 #'
 #' #determining best suiting model by plotting series
 #' model.life <- bestModel(data.life, raw="life")
-#' \dontrun{
 #' plotPercentileSeries(data.life, model.life, end=10)
-#' }
 #'
 #' # model with four predictors seems to work best
 #' model2.life <- bestModel(data.life, raw="life", terms=4)
+#' }
 #' @format A data frame with 11182 rows and 4 columns
 "life"
 
@@ -157,6 +157,7 @@
 #' @keywords datasets, child mortality, time series
 #' @name mortality
 #' @examples
+#' \dontrun{
 #' # data preparation
 #' data.mortality <- rankByGroup(mortality, raw="mortality")
 #' data.mortality <- computePowers(data.mortality, age="year")
@@ -164,7 +165,6 @@
 #' # modelling
 #' model.mortality <- bestModel(data.mortality, raw="mortality")
 #' plotSubset(model.mortality, type = 0)
-#' \dontrun{
 #' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
 #' }
 #' @format A data frame with 9547 rows and 4 columns

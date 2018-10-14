@@ -26,7 +26,7 @@ with the norm sample and includes doublettes of cases in order to align the samp
 primarily intended for running the cNORM analyses. The cleaned and stratified data is available on request.
 }
 \examples{
-
+\dontrun{
 # Example with continuous age variable
 data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1.5)
 data.ppvt <- computePowers(data.ppvt, age="age")
@@ -40,7 +40,7 @@ checkConsistency(model.ppvt)
 
 # plot percentiles
 plotPercentiles(data.ppvt, model.ppvt)
-
+}
 }
 \references{
 Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.

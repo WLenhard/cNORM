@@ -25,6 +25,7 @@ with a broader scope spanning 4 years each has been added. It can be used for de
 percentile curves at bottom effects.
 }
 \examples{
+\dontrun{
 # data preparation
 data.mortality <- rankByGroup(mortality, raw="mortality")
 data.mortality <- computePowers(data.mortality, age="year")
@@ -32,7 +33,6 @@ data.mortality <- computePowers(data.mortality, age="year")
 # modelling
 model.mortality <- bestModel(data.mortality, raw="mortality")
 plotSubset(model.mortality, type = 0)
-\dontrun{
 plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
 }
 }
