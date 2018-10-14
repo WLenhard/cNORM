@@ -29,6 +29,11 @@ cNORM offers function for all of these steps, helps in selecting the best fittin
 ## Basic example code for modeling the sample dataset
 library(cNORM)
 
+# Start the graphical user interface (needs shiny installed)
+# The GUI includes the most important functions. For specific cases,
+# please use cNORM on the console.
+cNORM.GUI()
+
 # Rank data within groupd and compute powers and interactions
 data.elfe <- prepareData(elfe)
 
