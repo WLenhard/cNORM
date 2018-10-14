@@ -10,7 +10,7 @@ shinyServer(function(input, output, session) {
   })
 
 
-# Returnss currently chosen file; returns null,if no file was chosen
+# Returns currently chosen file; returns null,if no file was chosen
   currentFile <- reactive({
 
     inFile <- input$file
@@ -125,6 +125,23 @@ shinyServer(function(input, output, session) {
 
   })
 
+# Shows introduction text until a file was chosen
+  output$introduction <- renderText({
+
+    if(is.null(currentFile())){
+
+      output <- readChar("www/introduction.html", file.info("www/introduction.html")$size)
+      #output <- textreadr::read_html(file = "www/introduction.html")
+      includeHTML("www/introduction.html")
+    }
+    else{
+      return(NULL)
+    }
+
+
+
+  })
+
 # Shows the current data file
   output$table <- renderDataTable({
     if(is.null(currentFile())){ return(NULL)}
@@ -206,6 +223,29 @@ shinyServer(function(input, output, session) {
   })
 
 
+  #
+  output$NumberOfTerms <- renderUI({
+
+    k <- as.numeric(chosenNumberOfPowers())
+    terms_max <- k*k + 2*k
+    numericInput("InputNumberOfTerms", "Number of terms", value = NULL, min = 1, max = terms_max, step = 1)
+  })
+
+  chosenCoeffOfDet <- reactive({
+
+    return(as.numeric(input$ChosenDetCoeff))
+  })
+
+  chosenNumberOfTerms <- reactive({
+
+    if(!is.null(input$InputNumberOfTerms)){
+      return(as.numeric(input$InputNumberOfTerms))
+
+    }
+    else{
+      return(0)
+    }
+  })
   # Calculates best model using cNORM
   bestModel <- eventReactive(input$CalcBestModel, {
 
@@ -213,6 +253,7 @@ shinyServer(function(input, output, session) {
                                          raw = chosenRaw(),
                                          k = chosenNumberOfPowers(),
                                          predictors = NULL,
+                                         R2 = chosenCoeffOfDet(),
                                          terms = 0)
 
     return(currentBestModel)
@@ -228,9 +269,28 @@ shinyServer(function(input, output, session) {
 
   })
 
-  wlPlot <- eventReactive(input$CalcBestModel, {
+  modelDensity <- eventReactive(input$CalcBestModel, {
 
-    cNORM::plotSubset(bestModel())
+    MIN_RAW <- bestModel()$minRaw
+    MAX_RAW <- bestModel()$maxRaw
+    MIN_NORM <- bestModel()$minL1
+    MAX_NORM <- bestModel()$maxL1
+
+    cNORM::plotDensity(bestModel())
+
+  })
+
+  chosenTypeOfPlotSubset <- reactive({
+    return(input$chosenTypePlotSubset)
+    })
+
+  changeObject <- reactive({
+    paste(input$CalcBestModel, input$chosenTypePlotSubset)
+  })
+
+  wlPlot <- eventReactive(changeObject(), {
+
+    cNORM::plotSubset(bestModel(), type = chosenTypeOfPlotSubset())
 
   })
 
@@ -240,14 +300,21 @@ shinyServer(function(input, output, session) {
   })
   # Prints best model
   output$BestModel <- renderPrint({
+
     return(bestModel())
   })
+
+
+
 
   # Plots model derivation
   output$PlotDerivatives <- renderPlot({
     return(modelDerivatives())
   })
 
+  output$PlotDensity <- renderPlot({
+    return(modelDensity())
+  })
 
   output$PlotWL <- renderPlot({
     return(wlPlot())
@@ -256,6 +323,10 @@ shinyServer(function(input, output, session) {
   output$PlotValues <- renderPlot({
 
     return(valuesPlot())
+  })
+
+  output$PrintSubset <- renderDataTable({
+    return(cNORM::printSubset(bestModel()))
   })
 
   normCurves <- reactive({
@@ -351,10 +422,12 @@ shinyServer(function(input, output, session) {
 
   output$InputNormTable <- renderUI({
       tagList(numericInput(inputId = "NormTableInput", label = "Choose age for prediction of norm values", value = NULL,min = 0, max = bestModel()$maxA1),
-              numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = NULL),
-              numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = NULL),
+              numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = bestModel()$scaleM - bestModel()$scaleSD*2.5),
+              numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = bestModel()$scaleM + bestModel()$scaleSD*2.5),
               numericInput(inputId = "NormTableInputStepping", label = "Choose stepping value", value = NULL),
-              actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL))
+              actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL),
+              downloadButton("DownloadNormTable", "Download norm table"))
+
       })
 
 
@@ -387,13 +460,24 @@ shinyServer(function(input, output, session) {
     return(normTable())
   })
 
+  output$DownloadNormTable <- downloadHandler(
+    filename = function(){
+      "NormTable.csv"
+    },
+    content = function(file){
+      output <- as.data.frame(normTable())
+      write.csv(output, file)
+    }
+  )
+
 
   output$InputRawTable <- renderUI({
     tagList(numericInput(inputId = "RawTableInput", label = "Choose age for prediction of raw values", value = NULL,min = 0, max = bestModel()$maxA1),
-            numericInput(inputId = "RawTableInputStart", label = "Choose raw start value", value = NULL),
-            numericInput(inputId = "RawTableInputEnd", label = "Choose raw end value", value = NULL),
+            numericInput(inputId = "RawTableInputStart", label = "Choose raw start value", value = bestModel()$minRaw),
+            numericInput(inputId = "RawTableInputEnd", label = "Choose raw end value", value = bestModel()$maxRaw),
             numericInput(inputId = "RawTableInputStepping", label = "Choose stepping value", value = NULL),
-            actionButton(inputId = "CalcRawTables",label = "Generate raw table"))
+            actionButton(inputId = "CalcRawTables",label = "Generate raw table"),
+            downloadButton("DownloadRawTable", label = "Download raw table"))
   })
 
 
@@ -424,7 +508,15 @@ shinyServer(function(input, output, session) {
     return(rawTable())
   })
 
-
+  output$DownloadRawTable <- downloadHandler(
+    filename = function(){
+      "RawTable.csv"
+    },
+    content = function(file){
+      output <- as.data.frame(rawTable())
+      write.csv(output, file)
+    }
+  )
 
   # Generates and plots modelled against actual data values
   output$PlotValues <- renderPlot({

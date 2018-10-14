@@ -114,8 +114,8 @@ NULL
 #' cNORM.GUI()
 #' }
 cNORM.GUI <- function(launch.browser=TRUE){
-  if (!requireNamespace(c("shiny", "foreign", "readxl"), quietly = TRUE)) {
-    stop("Packages \"shiny\", \"foreign\" and \"readxl\" are needed for this function to work. Please install them.",
+  if (!requireNamespace(c("shiny", "foreign", "readxl", "shinythemes"), quietly = TRUE)) {
+    stop("Packages \"shiny\", \"shinythemes\", \"foreign\" and \"readxl\" are needed for this function to work. Please install them.",
          call. = FALSE)
   }
 

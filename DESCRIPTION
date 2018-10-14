@@ -20,7 +20,7 @@ Depends:
 Imports:
     lattice (>= 0.20),
     leaps (>= 3.0.0), latticeExtra (>= 0.6)
-Suggests: knitr, rmarkdown, shiny, foreign, readxl
+Suggests: knitr, rmarkdown, shiny, shinythemes, foreign, readxl
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 NeedsCompilation: no
