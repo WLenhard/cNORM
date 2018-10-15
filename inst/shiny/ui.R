@@ -10,7 +10,7 @@ shinyUI(fluidPage(
   # Set tab title
   title = "cNORM - Shiny",
   # Shiny theme selector for testing different style themes
-  shinythemes::themeSelector(),
+  #shinythemes::themeSelector(),
 
   # Tabsetpanel for single tabs
   tabsetPanel(
@@ -30,7 +30,7 @@ shinyUI(fluidPage(
 
     # Panel for Data Preparation (choosing and visualizing)
     tabPanel(
-      "Data Preperation",
+      "Data Preparation",
       # Define layout for sidebar
       sidebarLayout(
 
