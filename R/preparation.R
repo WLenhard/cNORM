@@ -44,7 +44,7 @@
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
 #' @export
-prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group") {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
@@ -52,31 +52,31 @@ prepareData <- function(data = NULL, group = "group", raw="raw", age="group") {
   }
 
   # checks
-  if(!(group %in% colnames(normData))){
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
-  }else   if(!(raw %in% colnames(normData))){
-    stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""));
-  }else   if(!(age %in% colnames(normData))){
-    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
+  if (!(group %in% colnames(normData))) {
+    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+  } else if (!(raw %in% colnames(normData))) {
+    stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""))
+  } else if (!(age %in% colnames(normData))) {
+    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""))
   }
 
-  if(!is.numeric(normData[, group])){
-    warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""));
+  if (!is.numeric(normData[, group])) {
+    warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
   }
 
-  if(!is.numeric(normData[, raw])){
-    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
+  if (!is.numeric(normData[, raw])) {
+    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
   }
 
-  if(!is.numeric(normData[, age])){
-    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
+  if (!is.numeric(normData[, age])) {
+    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
   }
 
   # exclude missings
   normData <- as.data.frame(normData)
-  normData <- normData[!is.na(normData[, group]),]
-  normData <- normData[!is.na(normData[, raw]),]
-  normData <- normData[!is.na(normData[, age]),]
+  normData <- normData[!is.na(normData[, group]), ]
+  normData <- normData[!is.na(normData[, raw]), ]
+  normData <- normData[!is.na(normData[, age]), ]
 
   # ranking and powers
   normData <- rankByGroup(normData, group = group, raw = raw)
@@ -131,24 +131,23 @@ rankByGroup <-
              scale = "T",
              descend = FALSE,
              descriptives = TRUE) {
-
     d <- as.data.frame(data)
 
     # check if columns exist
-    if((typeof(group) != "logical") && !(group %in% colnames(d))){
-      stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""));
+    if ((typeof(group) != "logical") && !(group %in% colnames(d))) {
+      stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
     }
 
-    if(!(raw %in% colnames(d))){
-      stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+    if (!(raw %in% colnames(d))) {
+      stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
     }
 
-    if(!is.numeric(d[, group])){
-      warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""));
+    if (!is.numeric(d[, group])) {
+      warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
     }
 
-    if(!is.numeric(d[, raw])){
-      warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
+    if (!is.numeric(d[, raw])) {
+      warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
     }
 
     # define Q-Q-plot alorithm, use rankit as standard
@@ -302,20 +301,20 @@ rankBySlidingWindow <- function(data,
   d <- as.data.frame(data)
 
   # check if columns exist
-  if(!(age %in% colnames(d))){
-    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""));
+  if (!(age %in% colnames(d))) {
+    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""))
   }
 
-  if(!(raw %in% colnames(d))){
-    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+  if (!(raw %in% colnames(d))) {
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if(!is.numeric(d[, age])){
-    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
+  if (!is.numeric(d[, age])) {
+    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
   }
 
-  if(!is.numeric(d[, raw])){
-    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""));
+  if (!is.numeric(d[, raw])) {
+    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
   }
 
 
@@ -402,13 +401,11 @@ rankBySlidingWindow <- function(data,
 
   # build grouping variable - unnecessary for norming,
   # but necessary for plotting the percentiles
-  if(nGroup > 0){
-    group <- as.factor( as.numeric( cut(d[, age],nGroup)))
+  if (nGroup > 0) {
+    group <- as.factor(as.numeric(cut(d[, age], nGroup)))
     d$group <- ave(d[, age], group, FUN = function(x) {
       mean(x)
     })
-
-
   }
 
   # add attributes to d
@@ -464,33 +461,32 @@ computePowers <-
              k = 4,
              norm = NULL,
              age = NULL) {
-
-    d <-as.data.frame(data)
+    d <- as.data.frame(data)
 
     # check variables, if NULL take attributes from d
-    if(is.null(norm)){
+    if (is.null(norm)) {
       norm <- attr(d, "normValue")
     }
 
-    if(is.null(age)){
+    if (is.null(age)) {
       age <- attr(d, "age")
     }
 
     # check if columns exist
-    if(!(norm %in% colnames(d))){
-      stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""));
+    if (!(norm %in% colnames(d))) {
+      stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""))
     }
 
-    if(!(age %in% colnames(d))){
-      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""));
+    if (!(age %in% colnames(d))) {
+      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""))
     }
 
-    if(!is.numeric(d[, norm])){
-      warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""));
+    if (!is.numeric(d[, norm])) {
+      warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""))
     }
 
-    if(!is.numeric(d[, age])){
-      warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""));
+    if (!is.numeric(d[, age])) {
+      warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
     }
 
     if ((k < 1) | (k > 6)) {
