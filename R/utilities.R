@@ -146,5 +146,3 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   dat <- sim[, c(1, 2, 5, ncol(sim))]
   return(list(data = dat, sim = sim, theta = theta))
 }
-
-
