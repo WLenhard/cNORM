@@ -49,7 +49,7 @@
 #' @keywords datasets
 #' @name ppvt
 #' @examples
-#'\dontrun{
+#' \dontrun{
 #' # Example with continuous age variable
 #' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1.5)
 #' data.ppvt <- computePowers(data.ppvt, age="age")
@@ -63,7 +63,7 @@
 #'
 #' # plot percentiles
 #' plotPercentiles(data.ppvt, model.ppvt)
-#'}
+#' }
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"
 
