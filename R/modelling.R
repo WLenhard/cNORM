@@ -82,11 +82,11 @@ bestModel <- function(data,
                       force.in = NULL) {
 
   # retrieve attributes
-  if(is.null(raw)){
+  if (is.null(raw)) {
     raw <- attr(data, "raw")
   }
 
-  if(is.null(k)){
+  if (is.null(k)) {
     k <- attr(data, "k")
   }
 
@@ -104,12 +104,12 @@ bestModel <- function(data,
     stop("k parameter out of bounds. Please specify a value between 1 and 6 (default = 4).")
   }
 
-  if(!(raw %in% colnames(data))){
-    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""));
+  if (!(raw %in% colnames(data))) {
+    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if ((!is.null(predictors))&&(!(predictors %in% colnames(data)))) {
-    stop("ERROR: Missing variables from predictors variable. Please check variable list.");
+  if ((!is.null(predictors)) && (!(predictors %in% colnames(data)))) {
+    stop("ERROR: Missing variables from predictors variable. Please check variable list.")
   }
 
   if (!is.null(predictors)) {
@@ -133,19 +133,19 @@ bestModel <- function(data,
     lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
   }
 
-  big = FALSE
-  nvmax = 2 * k + k * k + length(predictors)
+  big <- FALSE
+  nvmax <- 2 * k + k * k + length(predictors)
 
-  if(nvmax>25){
-    big = TRUE
+  if (nvmax > 25) {
+    big <- TRUE
     message("The computation might take some time ...")
   }
 
 
-  if(!is.null(force.in)){
+  if (!is.null(force.in)) {
     c <- strsplit(format(paste0(lmX))[[3]], " \\+ ")
     index <- match(force.in, c[[1]])
-  }else{
+  } else {
     index <- NULL
   }
 
@@ -241,7 +241,7 @@ bestModel <- function(data,
 
   # Print output
   message("\nRegression formula:")
-  print(regressionFunction(bestformula, digits=8))
+  print(regressionFunction(bestformula, digits = 8))
   message("\nUse 'printSubset(model)' and 'plotSubset(model)' to inspect model fit.")
 
   return(bestformula)
@@ -262,13 +262,15 @@ bestModel <- function(data,
 #' model <- bestModel(prepareData())
 #' printSubset(model)
 #'
-printSubset <- function(model){
+printSubset <- function(model) {
   table <-
-    do.call(rbind, Map(data.frame, R2 = model$subsets$rsq,
-                       RSS = model$subsets$rss,
-                       R2adj = model$subsets$adjr2,
-                       Cp = model$subsets$cp,
-                       BIC = model$subsets$bic))
+    do.call(rbind, Map(data.frame,
+      R2 = model$subsets$rsq,
+      RSS = model$subsets$rss,
+      R2adj = model$subsets$adjr2,
+      Cp = model$subsets$cp,
+      BIC = model$subsets$bic
+    ))
   return(table)
 }
 
@@ -328,32 +330,31 @@ checkConsistency <- function(model,
                              stepNorm = 1,
                              descend = FALSE,
                              warn = FALSE) {
-
-  if(is.null(minAge)){
+  if (is.null(minAge)) {
     minAge <- model$minA1
   }
 
-  if(is.null(maxAge)){
+  if (is.null(maxAge)) {
     maxAge <- model$maxA1
   }
 
-  if(is.null(minNorm)){
+  if (is.null(minNorm)) {
     minNorm <- model$minL1
   }
 
-  if(is.null(maxNorm)){
+  if (is.null(maxNorm)) {
     maxNorm <- model$maxL1
   }
 
-  if(is.null(minRaw)){
+  if (is.null(minRaw)) {
     minRaw <- model$minRaw
   }
 
-  if(is.null(maxRaw)){
+  if (is.null(maxRaw)) {
     maxRaw <- model$maxRaw
   }
 
-  if(is.null(descend)){
+  if (is.null(descend)) {
     descend <- model$descend
   }
 
@@ -449,31 +450,30 @@ checkConsistency <- function(model,
 #' model <- bestModel(normData)
 #' regressionFunction(model)
 #' @export
-regressionFunction <- function(model, raw = NULL, digits=NULL) {
-
-  if(is.null(raw)){
+regressionFunction <- function(model, raw = NULL, digits = NULL) {
+  if (is.null(raw)) {
     raw <- model$raw
   }
 
   i <- 2
-  if(is.null(digits)){
+  if (is.null(digits)) {
     formulA <- paste(raw, model$coefficients[[1]], sep = " ~ ")
     while (i <= length(model$coefficients)) {
-    formulA <- paste0(
-      formulA, " + (", model$coefficients[[i]], "*",
-      names(model$coefficients[i]), ")"
-    )
-    i <- i + 1
-  }
-}else{
-  formulA <- paste(raw, format(model$coefficients[[1]], digits = digits), sep = " ~ ")
-  while (i <= length(model$coefficients)) {
-    formulA <- paste0(
-      formulA, " + (", format(model$coefficients[[i]], digits = digits), "*",
-      names(model$coefficients[i]), ")"
-    )
-    i <- i + 1
-  }
+      formulA <- paste0(
+        formulA, " + (", model$coefficients[[i]], "*",
+        names(model$coefficients[i]), ")"
+      )
+      i <- i + 1
+    }
+  } else {
+    formulA <- paste(raw, format(model$coefficients[[1]], digits = digits), sep = " ~ ")
+    while (i <= length(model$coefficients)) {
+      formulA <- paste0(
+        formulA, " + (", format(model$coefficients[[i]], digits = digits), "*",
+        names(model$coefficients[i]), ")"
+      )
+      i <- i + 1
+    }
   }
   return(formulA)
 }
@@ -548,15 +548,15 @@ derive <- function(model) {
 #' normData <- prepareData()
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
-rangeCheck <- function(model, minAge=NULL, maxAge=NULL, minNorm=NULL, maxNorm=NULL, digits=3){
+rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
   summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
-  reportOnly <- (is.null(minAge)||is.null(maxAge)||is.null(minNorm)||is.null(maxNorm))
-  if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
-    summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep="\n")
-  } else if (!reportOnly&&(minAge < model$minA1 || maxAge > model$maxA1)) {
-    summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep="\n")
-  } else if (!reportOnly&&(minNorm < model$minL1 || maxNorm > model$maxL1)) {
-    summary <- paste("Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.", summary, sep="\n")
+  reportOnly <- (is.null(minAge) || is.null(maxAge) || is.null(minNorm) || is.null(maxNorm))
+  if (!reportOnly && (minAge < model$minA1 || maxAge > model$maxA1) && (minNorm < model$minL1 || maxNorm > model$maxL1)) {
+    summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep = "\n")
+  } else if (!reportOnly && (minAge < model$minA1 || maxAge > model$maxA1)) {
+    summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep = "\n")
+  } else if (!reportOnly && (minNorm < model$minL1 || maxNorm > model$maxL1)) {
+    summary <- paste("Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.", summary, sep = "\n")
   }
 
   return(summary)
