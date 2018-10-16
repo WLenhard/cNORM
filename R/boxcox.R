@@ -114,7 +114,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
       densityBC = density,
       percentileBC = percentile
     ))
-  return(list(n = n, age=age, median = md, mean = m, sd = sd, meanBC=mlambda, sdBC=sdlambda, lambdaBC=lambda, data=table, regressionCoefficients = model$coefficients))
+  return(list(n = n, age = age, median = md, mean = m, sd = sd, meanBC = mlambda, sdBC = sdlambda, lambdaBC = lambda, data = table, regressionCoefficients = model$coefficients))
 }
 
 
@@ -152,8 +152,8 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #' # predict raw value based on the regression model and via box cox
 #' predictRawBC(bcParameters, percentile)
 #' predictRaw(tValue, 3, model$coefficients)
-predictRawBC <- function(boxcoxParameters, percentile){
-  if(percentile<=0||percentile>=1){
+predictRawBC <- function(boxcoxParameters, percentile) {
+  if (percentile <= 0 || percentile >= 1) {
     stop("Percentile out of range. Use values between 0 and 1.")
   }
   # convert percentile to standardized z value
@@ -163,7 +163,7 @@ predictRawBC <- function(boxcoxParameters, percentile){
   x <- z * boxcoxParameters$sdBC + boxcoxParameters$meanBC
 
   # compute raw value based on BC function
-  raw <- ((x * boxcoxParameters$lambdaBC + 1)^( 1 / boxcoxParameters$lambdaBC))*boxcoxParameters$median
+  raw <- ((x * boxcoxParameters$lambdaBC + 1)^(1 / boxcoxParameters$lambdaBC)) * boxcoxParameters$median
 
   return(raw)
 }
@@ -202,26 +202,26 @@ predictRawBC <- function(boxcoxParameters, percentile){
 #' # predict norm value for raw value 15 at age 3 based on the regression model and via box cox
 #' predictNormBC(bcParameters, 15, scale="T")
 #' predictNormValue(15, 3, model, minNorm=25, maxNorm=75)
-predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
-  if(raw<0){
+predictNormBC <- function(boxcoxParameters, raw, scale = "percentile") {
+  if (raw < 0) {
     stop("Box Cox cannot handle negative raw scores")
   }
 
   # compute box cox power function x for raw value
-  x <- (((raw / boxcoxParameters$median) ^ boxcoxParameters$lambdaBC) - 1) / boxcoxParameters$lambdaBC
+  x <- (((raw / boxcoxParameters$median)^boxcoxParameters$lambdaBC) - 1) / boxcoxParameters$lambdaBC
 
   # compute z for x variable
   z <- (x - boxcoxParameters$meanBC) / boxcoxParameters$sdBC
 
   if ((typeof(scale) == "double" && length(scale) == 2)) {
-    return(z*scale[2] + scale[1])
-  }else if(scale == "z"){
+    return(z * scale[2] + scale[1])
+  } else if (scale == "z") {
     return(z)
-  }else if(scale == "T"){
-    return(z*10 + 50)
-  }else if(scale == "IQ"){
-    return(z*15 + 100)
-  }else{
+  } else if (scale == "T") {
+    return(z * 10 + 50)
+  } else if (scale == "IQ") {
+    return(z * 15 + 100)
+  } else {
     return(pnorm(z))
   }
   return(raw)
@@ -256,17 +256,16 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile"){
 #'
 #' # plot density
 #' plotBoxCox(model, bc, minRaw=0, maxRaw=228, type=2)
-plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw = NULL, type = 0){
-
-  if(is.null(minRaw)){
+plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw = NULL, type = 0) {
+  if (is.null(minRaw)) {
     minRaw <- regressionModel$minRaw
   }
 
-  if(is.null(maxRaw)){
+  if (is.null(maxRaw)) {
     maxRaw <- regressionModel$maxRaw
   }
 
-  if(minRaw<0){
+  if (minRaw < 0) {
     stop("Negative values are not allowed in Box Cox transformations")
   }
 
@@ -274,11 +273,11 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw 
   scale <- qnorm(percentiles, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
   density <- dnorm(scale, mean = boxcoxParameters$mean, sd = boxcoxParameters$sd)
 
-  rawBC <- rep(NA, length.out=length(percentiles))
-  rawRegression <- rep(NA, length.out=length(percentiles))
+  rawBC <- rep(NA, length.out = length(percentiles))
+  rawRegression <- rep(NA, length.out = length(percentiles))
 
   i <- 1
-  while(i <= length(percentiles)){
+  while (i <= length(percentiles)) {
     rawRegression[[i]] <- predictRaw(scale[[i]], boxcoxParameters$age, regressionModel$coefficients, minRaw = minRaw, maxRaw = maxRaw)
     rawBC[[i]] <- predictRawBC(boxcoxParameters, percentiles[[i]])
     i <- i + 1
@@ -286,52 +285,55 @@ plotBoxCox <- function(regressionModel, boxcoxParameters, minRaw = NULL, maxRaw 
 
   table <-
     do.call(rbind, Map(data.frame,
-                       percentiles = percentiles, scale = scale, density = density, rawRegression = rawRegression,
-                       rawBoxCox = rawBC
+      percentiles = percentiles, scale = scale, density = density, rawRegression = rawRegression,
+      rawBoxCox = rawBC
     ))
 
   COL <- rainbow(2)
   panelfun <- function(..., type, group.number) {
-      lattice::panel.lines(...)
+    lattice::panel.lines(...)
   }
 
-  if(type == 0){
-  p <- lattice::xyplot(percentiles ~ rawRegression + rawBC, table,
-                  panel = function(...)
-                    lattice::panel.superpose(..., panel.groups = panelfun),
-                  main = "Regression Model vs. Box Cox Transformation",
-                  ylab = "Percentile", xlab = "Raw Score",
-                  col = COL, lwd = 2, grid = TRUE,
-                  key = list(
-                    corner = c(0.99, 0.1),
-                    lines = list(col = COL, lwd = 2),
-                    text = list(c("Regression", "Box Cox"))
-                  )
-  )
-  } else if(type == 1){
+  if (type == 0) {
+    p <- lattice::xyplot(percentiles ~ rawRegression + rawBC, table,
+      panel = function(...)
+        lattice::panel.superpose(..., panel.groups = panelfun),
+      main = "Regression Model vs. Box Cox Transformation",
+      ylab = "Percentile", xlab = "Raw Score",
+      col = COL, lwd = 2, grid = TRUE,
+      key = list(
+        corner = c(0.99, 0.1),
+        lines = list(col = COL, lwd = 2),
+        text = list(c("Regression", "Box Cox"))
+      )
+    )
+  } else if (type == 1) {
     p <- lattice::xyplot(rawRegression + rawBC ~ scale, table,
-                  panel = function(...)
-                    lattice::panel.superpose(..., panel.groups = panelfun),
-                  main = "Regression Model vs. Box Cox Transformation",
-                  ylab = "Raw Score", xlab = "Standard Score",
-                  col = COL, lwd = 2, grid = TRUE,
-                  key = list(
-                    corner = c(0.99, 0.1),
-                    lines = list(col = COL, lwd = 2),
-                    text = list(c("Regression", "Box Cox"))
-                  )
-  )}else{  p <- lattice::xyplot(density ~ rawRegression + rawBC, table,
-                           panel = function(...)
-                             lattice::panel.superpose(..., panel.groups = panelfun),
-                           main = "Regression Model vs. Box Cox Transformation",
-                           ylab = "Density", xlab = "Raw value",
-                           col = COL, lwd = 2, grid = TRUE,
-                           key = list(
-                             corner = c(0.99, 0.1),
-                             lines = list(col = COL, lwd = 2),
-                             text = list(c("Regression", "Box Cox"))
-                           )
-  )}
+      panel = function(...)
+        lattice::panel.superpose(..., panel.groups = panelfun),
+      main = "Regression Model vs. Box Cox Transformation",
+      ylab = "Raw Score", xlab = "Standard Score",
+      col = COL, lwd = 2, grid = TRUE,
+      key = list(
+        corner = c(0.99, 0.1),
+        lines = list(col = COL, lwd = 2),
+        text = list(c("Regression", "Box Cox"))
+      )
+    )
+  } else {
+    p <- lattice::xyplot(density ~ rawRegression + rawBC, table,
+      panel = function(...)
+        lattice::panel.superpose(..., panel.groups = panelfun),
+      main = "Regression Model vs. Box Cox Transformation",
+      ylab = "Density", xlab = "Raw value",
+      col = COL, lwd = 2, grid = TRUE,
+      key = list(
+        corner = c(0.99, 0.1),
+        lines = list(col = COL, lwd = 2),
+        text = list(c("Regression", "Box Cox"))
+      )
+    )
+  }
 
   print(p)
   return(table)
