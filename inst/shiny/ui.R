@@ -10,7 +10,7 @@ shinyUI(fluidPage(
   # Set tab title
   title = "cNORM - Shiny",
   # Shiny theme selector for testing different style themes
-  #shinythemes::themeSelector(),
+  # shinythemes::themeSelector(),
 
   # Tabsetpanel for single tabs
   tabsetPanel(
@@ -18,9 +18,9 @@ shinyUI(fluidPage(
     tabPanel("Data Input", sidebarLayout(
       sidebarPanel(
         img(src = "logo.png", align = "right"), tags$h3("Data Input"), tags$h5("Please choose a data set for your calculations. You can use an inbuilt example or load your own file:"), selectizeInput("Example",
-          label = "Example:",
-          choices = c("", "elfe", "ppvt", "CDC"), selected = character(0),
-          multiple = FALSE
+                                                                                                                                                                                                        label = "Example:",
+                                                                                                                                                                                                        choices = c("", "elfe", "ppvt", "CDC"), selected = character(0),
+                                                                                                                                                                                                        multiple = FALSE
         ), hr(),
         fileInput("file", "Choose a file", multiple = FALSE, accept = c(".csv", ".xlsx", ".xls", ".rda", ".sav")),
         tags$h5(tags$b("HINT: If you choose a file from your own directory, the chosen example will not be used during the session anymore!"))

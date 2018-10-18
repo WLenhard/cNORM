@@ -10,7 +10,7 @@ shinyServer(function(input, output, session) {
   })
 
 
-# Returns currently chosen file; returns null,if no file was chosen
+  # Returns currently chosen file; returns null,if no file was chosen
   currentFile <- reactive({
 
     inFile <- input$file
@@ -72,7 +72,7 @@ shinyServer(function(input, output, session) {
     return(currentData)
   })
 
-# Returns column names of chosen data file
+  # Returns column names of chosen data file
   variableNames <- reactive({
 
     if (is.null(currentFile())) {
@@ -82,31 +82,31 @@ shinyServer(function(input, output, session) {
 
   })
 
-# Generates selectInput for choosing grouping variable for data analysis
+  # Generates selectInput for choosing grouping variable for data analysis
   output$GroupingVariable <- renderUI({
 
     currentNames <- names(currentFile())
     if(is.element("group", currentNames)|| is.element("Group", currentNames))
     {
       if(is.element("group", currentNames)){
-      selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = "group")
+        selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = "group")
       }
       else{
         selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = "group")
 
       }
-      }
+    }
     else{    selectInput(inputId = "InputGroupingVariable", "Grouping variable", choices = variableNames(), selected = NULL)
-}
+    }
   })
 
-# Generates selectINput for choosing explanatory variable for data analysis
+  # Generates selectINput for choosing explanatory variable for data analysis
   output$ExplanatoryVariable <- renderUI({
 
     selectInput(inputId = "InputExplanatoryVariable", "Explanatory variable", choices = variableNames(), selected = input$InputGroupingVariable)
   })
 
-# Generates selectInput for choosing raw values for data analysis
+  # Generates selectInput for choosing raw values for data analysis
   output$RawValues <- renderUI({
 
     currentNames <- names(currentFile())
@@ -125,7 +125,7 @@ shinyServer(function(input, output, session) {
 
   })
 
-# Shows introduction text until a file was chosen
+  # Shows introduction text until a file was chosen
   output$introduction <- renderText({
 
     if(is.null(currentFile())){
@@ -142,14 +142,14 @@ shinyServer(function(input, output, session) {
 
   })
 
-# Shows the current data file
+  # Shows the current data file
   output$table <- renderDataTable({
     if(is.null(currentFile())){ return(NULL)}
     else{return(currentFile())}
 
   })
 
-# Updating chosen variables for group, raw, explanatory and powers
+  # Updating chosen variables for group, raw, explanatory and powers
 
   # Retruns chosen variable for grouping
   chosenGrouping <- reactive({
@@ -249,12 +249,31 @@ shinyServer(function(input, output, session) {
   # Calculates best model using cNORM
   bestModel <- eventReactive(input$CalcBestModel, {
 
-    currentBestModel <- cNORM::bestModel(data = preparedData(),
-                                         raw = chosenRaw(),
-                                         k = chosenNumberOfPowers(),
-                                         predictors = NULL,
-                                         R2 = chosenCoeffOfDet(),
-                                         terms = 0)
+
+    # CAUTION: The value of a non-specified numericInput-value is NA and not NULL!
+    # Therefore use is.na() to check, whether a specific number of terms were chosen or not
+    if(!is.na(chosenNumberOfTerms()))
+    {
+      currentBestModel <- cNORM::bestModel(data = preparedData(),
+                                           raw = chosenRaw(),
+                                           k = chosenNumberOfPowers(),
+                                           predictors = NULL,
+                                           terms = chosenNumberOfTerms())
+    }
+    else{
+      currentBestModel <- cNORM::bestModel(data = preparedData(),
+                                           raw = chosenRaw(),
+                                           k = chosenNumberOfPowers(),
+                                           predictors = NULL,
+                                           R2 = chosenCoeffOfDet(),
+                                           terms = 0)
+    }
+
+
+
+
+
+
 
     return(currentBestModel)
   })
@@ -282,7 +301,7 @@ shinyServer(function(input, output, session) {
 
   chosenTypeOfPlotSubset <- reactive({
     return(input$chosenTypePlotSubset)
-    })
+  })
 
   changeObject <- reactive({
     paste(input$CalcBestModel, input$chosenTypePlotSubset)
@@ -335,8 +354,8 @@ shinyServer(function(input, output, session) {
     MAX_AGE <- max((currentFile())[chosenGrouping()])
 
     currentBestModel <- cNORM::plotNormCurves(bestModel(),
-                          minAge = MIN_AGE,
-                          maxAge = MAX_AGE)
+                                              minAge = MIN_AGE,
+                                              maxAge = MAX_AGE)
     return(currentBestModel)
   })
 
@@ -408,7 +427,7 @@ shinyServer(function(input, output, session) {
       MAX_RAW <- currentBestModel$maxRaw
 
       currentRawValue <- cNORM::predictRaw(currentNormForRawValue, currentAgeForRawValue, coefficients = currentBestModel$coefficients,
-                                                  minRaw = MIN_RAW, maxRaw = MAX_RAW)
+                                           minRaw = MIN_RAW, maxRaw = MAX_RAW)
       return(currentRawValue)
     }
   })
@@ -421,36 +440,36 @@ shinyServer(function(input, output, session) {
 
 
   output$InputNormTable <- renderUI({
-      tagList(numericInput(inputId = "NormTableInput", label = "Choose age for prediction of norm values", value = NULL,min = 0, max = bestModel()$maxA1),
-              numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = bestModel()$scaleM - bestModel()$scaleSD*2.5),
-              numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = bestModel()$scaleM + bestModel()$scaleSD*2.5),
-              numericInput(inputId = "NormTableInputStepping", label = "Choose stepping value", value = NULL),
-              actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL),
-              downloadButton("DownloadNormTable", "Download norm table"))
+    tagList(numericInput(inputId = "NormTableInput", label = "Choose age for prediction of norm values", value = NULL,min = 0, max = bestModel()$maxA1),
+            numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = bestModel()$scaleM - bestModel()$scaleSD*2.5),
+            numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = bestModel()$scaleM + bestModel()$scaleSD*2.5),
+            numericInput(inputId = "NormTableInputStepping", label = "Choose stepping value", value = NULL),
+            actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL),
+            downloadButton("DownloadNormTable", "Download norm table"))
 
-      })
-
-
-   normTable <- eventReactive(input$CalcNormTables, {
-
-        check_inputs <- is.null(input$NormTableInput) || is.null(input$NormTableInputStart) || is.null(input$NormTableInputEnd) || is.null(input$NormTableInputStepping)
-       if(check_inputs){return()}
-       else{
-         currentAgeForNormTable <- input$NormTableInput
-         currentBestModel <- bestModel()
-         MIN_NORM <- as.numeric(input$NormTableInputStart)
-         MAX_NORM <- as.numeric(input$NormTableInputEnd)
-         STEPPING <- as.numeric(input$NormTableInputStepping)
-         MIN_RAW <- currentBestModel$minRaw
-         MAX_RAW <- currentBestModel$maxRaw
+  })
 
 
-         currentNormTable <- cNORM::normTable(currentAgeForNormTable, bestModel(), minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                              minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
+  normTable <- eventReactive(input$CalcNormTables, {
 
-         currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
-         return(currentNormTable)}
-        })
+    check_inputs <- is.null(input$NormTableInput) || is.null(input$NormTableInputStart) || is.null(input$NormTableInputEnd) || is.null(input$NormTableInputStepping)
+    if(check_inputs){return()}
+    else{
+      currentAgeForNormTable <- input$NormTableInput
+      currentBestModel <- bestModel()
+      MIN_NORM <- as.numeric(input$NormTableInputStart)
+      MAX_NORM <- as.numeric(input$NormTableInputEnd)
+      STEPPING <- as.numeric(input$NormTableInputStepping)
+      MIN_RAW <- currentBestModel$minRaw
+      MAX_RAW <- currentBestModel$maxRaw
+
+
+      currentNormTable <- cNORM::normTable(currentAgeForNormTable, bestModel(), minNorm = MIN_NORM, maxNorm = MAX_NORM,
+                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
+
+      currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
+      return(currentNormTable)}
+  })
 
 
 
@@ -496,7 +515,7 @@ shinyServer(function(input, output, session) {
 
 
       currentRawTable <- cNORM::rawTable(currentAgeForRawTable, currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
+                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
       currentRawTable$norm <- round(currentRawTable$norm, digits = 3)
 
       return(currentRawTable)}
@@ -544,5 +563,3 @@ shinyServer(function(input, output, session) {
 
 
 })
-
-
