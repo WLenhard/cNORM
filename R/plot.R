@@ -537,6 +537,7 @@ plotDensity <- function(    model,
 #' @param filename Prefix of the filename. If specified, the plots are saves as
 #' png files in the directory of the workspace, instead of displaying them
 #' @seealso plotPercentiles
+#' @return the complete list of plots
 #' @export
 #'
 #' @examples
@@ -563,6 +564,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
 
   minR <- min(d[, model$raw])
   maxR <- max(d[, model$raw])
+  l <- list()
 
   while (start <= end) {
     message(paste0("Plotting model ", start))
@@ -606,7 +608,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
     bestformula$k <- attributes(d)$k
 
 
-    plot <- cNORM::plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
+    l[[length(l) + 1]] <- cNORM::plotPercentiles(d, bestformula, minAge = model$minA1, maxAge=model$maxA1,
                     minRaw = minR,
                     maxRaw = maxR,
                     percentiles = percentiles,
@@ -616,12 +618,12 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
 
     if(!is.null(filename)){
       lattice::trellis.device(device="png", filename=paste0(filename, start, ".png"))
-      print(plot)
+      print(l[[length(l)]])
       dev.off()
     }
-
     start <- start + 1
   }
+  return(l)
 }
 
 
