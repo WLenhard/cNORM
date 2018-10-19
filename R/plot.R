@@ -215,10 +215,10 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = "Norm Curves",
     ylab = "Raw Score", xlab = "Explanatory Variable",
-    col = COL, lwd = 2, grid = TRUE,
+    col = COL, lwd = 1.5, grid = TRUE,
     key = list(
       corner = c(0.99, 0.1),
-      lines = list(col = COL, lwd = 2),
+      lines = list(col = COL, lwd = 1.5),
       text = list(NAMES)
     )
   )
@@ -415,10 +415,10 @@ plotPercentiles <- function(data,
       lattice::panel.superpose(..., panel.groups = panelfun),
     main = title,
     ylab = paste0("Raw Score (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
-    col = COL2, lwd = 2, grid = TRUE,
+    col = COL2, lwd = 1.5, grid = TRUE,
     key = list(
       corner = c(0.99, 0.01),
-      lines = list(col = COL1, lwd = 2),
+      lines = list(col = COL1, lwd = 1.5),
       text = list(NAMES)
     )
   )
@@ -506,10 +506,10 @@ plotDensity <- function(    model,
                     lattice::panel.superpose(..., panel.groups = panelfun),
                   main = "Density function",
                   ylab = "Density", xlab = "Raw Score",
-                  col = COL, lwd = 2, grid = TRUE,
+                  col = COL, lwd = 1.5, grid = TRUE,
                   key = list(
                     corner = c(0, 1),
-                    lines = list(col = COL, lwd = 2),
+                    lines = list(col = COL, lwd = 1.5),
                     text = list(NAMES)
                   )
   )
