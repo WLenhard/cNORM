@@ -1,5 +1,5 @@
 library(shiny)
-library(shinythemes)
+#library(shinythemes)
 library(markdown)
 
 title <- "cNORM-Shiny"
