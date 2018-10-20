@@ -102,7 +102,7 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm) {
       return(output)
     } else if (length(output) > 1) {
       # fetch the solution closest to median
-      warning(paste0("Multiple roots found for ", raw, " at age ", age, "; returning most plausible normscore."))
+      # warning(paste0("Multiple roots found for ", raw, " at age ", age, "; returning most plausible normscore."))
       return(output[which.min((output - model$scaleM)^2)])
     } else {
       # nothing worked, apply numerical searching strategy
@@ -118,6 +118,8 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm) {
 
       if (optimum$minimum < minNorm || optimum$minimum > maxNorm) {
         # everything failed, return NA
+        warning(paste0("No plausible norm score available for ", raw, " at age ", age, "; returning NA"))
+
         return(NA)
       }
 

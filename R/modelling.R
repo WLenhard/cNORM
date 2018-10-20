@@ -311,6 +311,7 @@ printSubset <- function(model) {
 #' indicate higher performance. Relevant f. e. in case of modelling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
+#' @param silent turn off messages
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
 #' normData <- prepareData()
@@ -329,7 +330,8 @@ checkConsistency <- function(model,
                              stepAge = 1,
                              stepNorm = 1,
                              descend = FALSE,
-                             warn = FALSE) {
+                             warn = FALSE,
+                             silent = FALSE) {
   if (is.null(minAge)) {
     minAge <- model$minA1
   }

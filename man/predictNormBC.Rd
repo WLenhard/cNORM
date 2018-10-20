@@ -20,7 +20,7 @@ the predicted raw value
 }
 \description{
 In addition to the numeric solution of the inversion of the regression function applied in
-'predictNormValue', this function
+'predictNorm', this function
 can be used retrieving the norm scores at a specific age via the parametric box cox power
 transformation. Please provide the box cox parameters retrieved via the 'boxcox'-function and
 a raw value.
@@ -35,7 +35,7 @@ bcParameters <- boxcox(model, 3)
 
 # predict norm value for raw value 15 at age 3 based on the regression model and via box cox
 predictNormBC(bcParameters, 15, scale="T")
-predictNormValue(15, 3, model, minNorm=25, maxNorm=75)
+predictNorm(15, 3, model, minNorm=25, maxNorm=75)
 }
 \references{
 Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
@@ -45,5 +45,5 @@ Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the 
 Society. Series B (Methodological), 211-252.
 }
 \seealso{
-boxcox, predictNormValue, predictRawBC
+boxcox, predictNorm, predictRawBC
 }

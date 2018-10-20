@@ -6,7 +6,7 @@
 \usage{
 checkConsistency(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
   maxNorm = NULL, minRaw = NULL, maxRaw = NULL, stepAge = 1,
-  stepNorm = 1, descend = FALSE, warn = FALSE)
+  stepNorm = 1, descend = FALSE, warn = FALSE, silent = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -35,6 +35,8 @@ indicate higher performance. Relevant f. e. in case of modelling errors}
 
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
 are displayed (default = FALSE)}
+
+\item{silent}{turn off messages}
 }
 \value{
 Boolean, indicating model violations (TRUE) or no problems (FALSE)

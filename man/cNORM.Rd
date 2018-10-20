@@ -34,7 +34,7 @@ norm tables (according functions in brackets):
   \item Validating the model (\code{\link{checkConsistency}}, \code{\link{plotPercentiles}},
   \code{\link{plotPercentileSeries}}, \code{\link{plotRaw}}, \code{\link{plotNorm}}, \code{\link{derivationTable}},
   \code{\link{plotDerivative}})
-  \item Generating norm tables and predicting scores (\code{\link{predictNormValue}},
+  \item Generating norm tables and predicting scores (\code{\link{predictNorm}},
   \code{\link{predictRaw}}, \code{\link{normTable}}, \code{\link{getNormCurve}},
   \code{\link{plotNormCurves}})
 }
@@ -74,7 +74,7 @@ rawTable <- rawTable(3.75, model.elfe, minRaw = 0, maxRaw = 28, minNorm=25,
                      maxNorm=75)
 
 # Predict a specific norm score
-score <- predictNormValue(raw = 21, A = 3.75,
+score <- predictNorm(raw = 21, A = 3.75,
                           model = model.elfe, minNorm=25, maxNorm=75)
 
 # Semi-parametric modelling with Box Cox power transformation for grade 3.75

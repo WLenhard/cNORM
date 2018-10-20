@@ -396,7 +396,7 @@ shinyServer(function(input, output, session) {
       MIN_RAW <- currentBestModel$minRaw
       MAX_RAW <- currentBestModel$maxRaw
 
-      currentNormValue <- cNORM::predictNormValue(currentRawForNormValue, currentAgeForNormValue, model =currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM)
+      currentNormValue <- cNORM::predictNorm(currentRawForNormValue, currentAgeForNormValue, model =currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM)
       return(currentNormValue)
     }
   })

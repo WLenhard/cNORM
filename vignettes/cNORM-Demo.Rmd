@@ -219,10 +219,10 @@ The 'plotNormCurves' function plots the fitted raw scores for pre-specified norm
 plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = 2, maxAge = 5, step = 0.1, minRaw = 0, maxRaw = 28)
 ```
 
-### predictNormValue
-The 'predictNormValue' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores can be limited to a minimum and maximum value in order to take into account the limits of model validity.
+### predictNorm
+The 'predictNorm' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores can be limited to a minimum and maximum value in order to take into account the limits of model validity.
 ```{r}
-predictNormValue(15, 4.7, model, minNorm = 25, maxNorm = 75)
+predictNorm(15, 4.7, model, minNorm = 25, maxNorm = 75)
 ```
 
 ### predictRaw
