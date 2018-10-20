@@ -115,8 +115,8 @@ NULL
 #' cNORM.GUI()
 #' }
 cNORM.GUI <- function(launch.browser=TRUE){
-  if (!requireNamespace(c("shiny", "foreign", "readxl", "rmarkdown", "shinythemes"), quietly = TRUE)) {
-    utils::install.packages(c("shiny", "foreign", "readxl", "rmarkdown", "shinythemes"))
+  if (!requireNamespace(c("shiny", "foreign", "readxl", "rmarkdown"), quietly = TRUE)) {
+    utils::install.packages(c("shiny", "foreign", "readxl", "rmarkdown"))
   }
 
   shiny::runApp(system.file('shiny', package='cNORM'),
