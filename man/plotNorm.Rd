@@ -4,7 +4,8 @@
 \alias{plotNorm}
 \title{Plot manifest and fitted norm scores}
 \usage{
-plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL)
+plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL,
+  type = 0)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}
@@ -16,6 +17,9 @@ plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL)
 \item{minNorm}{lower bound of fitted norm scores}
 
 \item{maxNorm}{upper bound of fitted norm scores}
+
+\item{type}{Type of display: 0 = plot manifest against fitted values, 1 = plot
+manifest against difference values}
 }
 \description{
 The function plots the manifest norm score against the fitted norm score from

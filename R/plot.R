@@ -8,45 +8,63 @@
 #' @param model The regression model
 #' @param group The grouping variable
 #' @param raw The raw score variable
+#' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
+#' manifest against difference values
 #' @examples
 #' # Load example data set, compute model and plot results
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
 #' plotRaw(normData, m, group="group")
 #' @export
-plotRaw <- function(data, model, group = NULL, raw = NULL) {
+plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
   if(is.null(raw)){
     raw <- attr(data, "raw")
   }
 
-  # if(is.null(group)){
-  #   group <- attr(data, "group")
-  # }
 
   if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    group <- NULL
   }
+
   if (!(raw %in% colnames(data))) {
     stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
 
   d <- data
+  d$raw <- data[[raw]]
   d$fitted <- model$fitted.values
+  d$diff <- d$fitted - d$raw
+  d <- as.data.frame(d)
   if(group != "" && !is.null(group)){
     d$group <- data[[group]]
     d$group <- as.factor(d$group)
-  d$raw <- data[raw]
-  lattice::xyplot(fitted ~ raw | group, d,
+
+  if ( type == 0) {
+    lattice::xyplot(fitted ~ raw | group, d,
     main = paste("Manifest vs. Fitted Raw Scores by ", group),
     ylab = "Fitted Scores",
     xlab = "Manifest Scores",
     grid = TRUE,
     auto.key = TRUE,
     abline = c(0, 1), lwd = 1
-  )
+    )
   }else{
-    d$raw <- data[raw]
+    lattice::xyplot(diff ~ raw | group, d,
+                    main = paste("Manifest Raw Scores vs. Difference Scores by ", group),
+                    ylab = "Difference Scores",
+                    xlab = "Manifest Scores",
+                    grid = TRUE,
+                    auto.key = TRUE,
+                    panel=function(...) {
+                      panel.xyplot(...)
+                      panel.abline(h=.0, col = 2, lty = 2)
+                    }
+    )
+  }
+  }else{
+    if(type == 0){
     lattice::xyplot(fitted ~ raw, d,
                     main = paste("Manifest vs. Fitted Raw Scores\n", "r = ", round(cor(d$fitted, d$raw), digits = 4)),
                     ylab = "Fitted Scores",
@@ -55,6 +73,19 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
                     auto.key = TRUE,
                     abline = c(0, 1), lwd = 1
     )
+    }else{
+      lattice::xyplot(diff ~ raw, d,
+                      main = paste("Manifest Raw Scores vs. Difference Scores"),
+                      ylab = "Difference",
+                      xlab = "Manifest Scores",
+                      grid = TRUE,
+                      auto.key = TRUE,
+                      panel=function(...) {
+                        panel.xyplot(...)
+                        panel.abline(h=.0, col = 2, lty = 2)
+                      }
+      )
+    }
   }
 }
 
@@ -69,6 +100,8 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
 #' @param group The grouping variable, use empty string "" for no group
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
+#' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
+#' manifest against difference values
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
@@ -77,29 +110,31 @@ plotRaw <- function(data, model, group = NULL, raw = NULL) {
 #' plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
 #' }
 #' @export
-plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL) {
+plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
   if(is.null(minNorm)){
-    warning("minNorm not specified, taking absolute minimum norm score from modelling...")
+    #warning("minNorm not specified, taking absolute minimum norm score from modelling...")
     minNorm <- model$minL1
   }
 
   if(is.null(maxNorm)){
-    warning("maxNorm not specified, taking absolute maximum norm score from modelling...")
+    #warning("maxNorm not specified, taking absolute maximum norm score from modelling...")
     maxNorm <- model$maxL1
   }
 
   if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    group <- NULL
   }
 
   d <- data
   raw <- data[[model$raw]]
   age <- data[[model$age]]
-  fitted <- predictNormValue(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
-
+  fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
+  diff <- fitted - data$normValue
   if(group != "" && !is.null(group)){
     d$group <- data[[group]]
     d$group <- as.factor(d$group)
+    if(type == 0){
     lattice::xyplot(fitted ~ normValue | group, d,
                     main = paste("Manifest vs. Fitted Norm Scores by ", group),
                     ylab = "Fitted Scores",
@@ -109,14 +144,43 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL) {
                     abline = c(0, 1), lwd = 1
     )
   }else{
+    lattice::xyplot(diff ~ normValue | group, d,
+                    main = paste("Manifest Norm Scores vs. Difference Scores by ", group),
+                    ylab = "Difference",
+                    xlab = "Manifest Scores",
+                    grid = TRUE,
+                    auto.key = TRUE,
+                    abline = c(0, 1), lwd = 1,
+                    panel=function(...) {
+                      panel.xyplot(...)
+                      panel.abline(h=.0, col = 2, lty = 2)
+                    }
+    )
+  }
+  }else{
+    if(type == 0){
     lattice::xyplot(fitted ~ normValue, d,
-                    main = paste("Manifest vs. Fitted Norm Scores"),
+                    main = paste("Manifest vs. Fitted Norm Scores\nr = ", round(cor(fitted, d$normValue), digits = 4)),
                     ylab = "Fitted Scores",
                     xlab = "Manifest Scores",
                     grid = TRUE,
                     auto.key = TRUE,
                     abline = c(0, 1), lwd = 1
     )
+    }else{
+      lattice::xyplot(diff ~ normValue, d,
+                      main = paste("Manifest Norm Scores vs. Difference Scores"),
+                      ylab = "Difference",
+                      xlab = "Manifest Scores",
+                      grid = TRUE,
+                      auto.key = TRUE,
+                      abline = c(0, 1), lwd = 1,
+                      panel=function(...) {
+                        panel.xyplot(...)
+                        panel.abline(h=.0, col = 2, lty = 2)
+                      }
+      )
+    }
   }
 }
 

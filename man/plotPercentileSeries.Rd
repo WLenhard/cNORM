@@ -28,6 +28,9 @@ of the raw data (default 7)}
 \item{filename}{Prefix of the filename. If specified, the plots are saves as
 png files in the directory of the workspace, instead of displaying them}
 }
+\value{
+the complete list of plots
+}
 \description{
 This functions makes use of 'plotPercentiles' to generate a series of plots
 with different number of predictors. It draws on the information provided by the model object

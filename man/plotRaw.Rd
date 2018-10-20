@@ -4,7 +4,7 @@
 \alias{plotRaw}
 \title{Plot manifest and fitted raw scores}
 \usage{
-plotRaw(data, model, group = NULL, raw = NULL)
+plotRaw(data, model, group = NULL, raw = NULL, type = 0)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}
@@ -14,6 +14,9 @@ plotRaw(data, model, group = NULL, raw = NULL)
 \item{group}{The grouping variable}
 
 \item{raw}{The raw score variable}
+
+\item{type}{Type of display: 0 = plot manifest against fitted values, 1 = plot
+manifest against difference values}
 }
 \description{
 The function plots the raw data against the fitted scores from

@@ -1,8 +1,17 @@
 # cNORM:news and changelog
 This file documents the development of the package as well as open issues or points for further improvements.
 
-### TODO
-*   rename predictNormValue -> predictNorm
+
+
+### Version in 0.9.19
+Date: 2018.10.20
+
+Changes:
+
+*   API changed: predictNormValue renamed to predictNorm
+*   Shiny GUI enhanced
+*   Additional plotting options in plotNorm and plotRaw
+*   less strict warning messages in predictNormValue function and checkConsistency
 
 
 

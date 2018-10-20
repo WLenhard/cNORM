@@ -24,7 +24,7 @@ export(
 	plotRaw,
 	plotNorm,
 	predictNormBC,
-	predictNormValue,
+	predictNorm,
 	predictRaw,
 	predictRawBC,
 	prepareData,
