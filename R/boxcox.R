@@ -6,7 +6,7 @@
 #' parameter with a precision up to 10^E-5 with a lambda value of 1 indicating normal
 #' distribution, values between 0 and 1 representing negative skew and values above 1 positive
 #' skewness of the distribution. The function is an optional step following the non-parametric
-#' modelling in order to conduct a parametric fitting of the percentiles.
+#' modeling in order to conduct a parametric fitting of the percentiles.
 #' @param model The regression model
 #' @param age The specific age
 #' @param n Number of simulated observations, used to span a percentile range from
@@ -21,12 +21,12 @@
 #' \item{meanBC}{The mean of the box cox function}
 #' \item{sdBC}{The standard deviation of the box cox function}
 #' \item{lambdaBC}{The skewness parameter of the box cox function}
-#' \item{age}{The age for which the power function was modelled}
+#' \item{age}{The age for which the power function was modeled}
 #' \item{data}{The data frame including the generated percentiles, the according norm scores,
 #' the fitted raw scores according to the regression model, the retrieved norm scores by the box cox transformation,
 #' the according density and percentile}
 #' @references
-#' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+#' Cole, T. J., & Green, P. J. (1992). Smoothing reference percentile curves: the LMS method and penalized
 #' likelihood. Statistics in medicine, 11(10), 1305-1319.
 #' @references
 #' Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical
@@ -118,7 +118,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 }
 
 
-#' Calculate the raw score for a given percentile based on the paramteric box cox distribution
+#' Calculate the raw score for a given percentile based on the parametric box cox distribution
 #'
 #' In addition of the numeric solution to the regression function on 'predictRaw', this function
 #' can be used retrieving the raw values at a specific age via the parametric box cox power
@@ -129,7 +129,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #'
 #' @return the predicted raw value
 #' @references
-#' Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+#' Cole, T. J., & Green, P. J. (1992). Smoothing reference percentile curves: the LMS method and penalized
 #' likelihood. Statistics in medicine, 11(10), 1305-1319.
 #' @references
 #' Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical
@@ -169,7 +169,7 @@ predictRawBC <- function(boxcoxParameters, percentile) {
 }
 
 
-#' Calculate the norm value for a given raw value based on the paramteric box cox distribution
+#' Calculate the norm value for a given raw value based on the parametric box cox distribution
 #'
 #' In addition to the numeric solution of the inversion of the regression function applied in
 #' 'predictNorm', this function
@@ -229,7 +229,7 @@ predictNormBC <- function(boxcoxParameters, raw, scale = "percentile") {
 
 #' Plot regression model versus box cox for a specific age
 #'
-#' This plot can be used to compare, how well the regression data can be modelled via a
+#' This plot can be used to compare, how well the regression data can be modeled via a
 #' Box Cox power transformation.
 #'
 #' @param regressionModel The regression model from the 'bestModel' function

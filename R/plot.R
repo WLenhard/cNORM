@@ -23,7 +23,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 
 
   if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
-    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variable names and fix 'group' parameter in function call."), collapse = ""))
     group <- NULL
   }
 
@@ -112,17 +112,17 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' @export
 plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
   if(is.null(minNorm)){
-    #warning("minNorm not specified, taking absolute minimum norm score from modelling...")
+    #warning("minNorm not specified, taking absolute minimum norm score from modeling...")
     minNorm <- model$minL1
   }
 
   if(is.null(maxNorm)){
-    #warning("maxNorm not specified, taking absolute maximum norm score from modelling...")
+    #warning("maxNorm not specified, taking absolute maximum norm score from modeling...")
     maxNorm <- model$maxL1
   }
 
   if (group != ""&&!is.null(group)&&!(group %in% colnames(data))) {
-    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variabke names and fix 'group' parameter in function call."), collapse = ""))
+    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variable names and fix 'group' parameter in function call."), collapse = ""))
     group <- NULL
   }
 
@@ -418,7 +418,7 @@ plotPercentiles <- function(data,
       )
     )
   }
-  # compute percetile table
+  # compute percentile table
   colnames(percentile.actual) <- c(c(group), NAMES)
 
   # build finer grained grouping variable for prediction
@@ -453,7 +453,7 @@ plotPercentiles <- function(data,
     i <- i + 1
   }
 
-  # merge actual and predicted scores und plot them show lines
+  # Merge actual and predicted scores and plot them show lines
   # for predicted scores and dots for actual scores
   percentile <- merge(percentile.actual, percentile.fitted,
     by = group, all.y = TRUE
@@ -831,7 +831,7 @@ plotSubset <- function(model, type = 1) {
 #' @param maxNorm Upper end of the norm score range, in case of T scores, 25 might be good
 #' @param stepNorm Stepping parameter for norm scores
 #' @param descend Reverse raw score order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @seealso checkConsistency, bestModel, derive
 #' @examples
 #' # Load example data set, compute model and plot results

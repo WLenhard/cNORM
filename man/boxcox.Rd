@@ -26,7 +26,7 @@ parameters for the box cox function (mean, sd, lambda) for the specified the age
 \item{meanBC}{The mean of the box cox function}
 \item{sdBC}{The standard deviation of the box cox function}
 \item{lambdaBC}{The skewness parameter of the box cox function}
-\item{age}{The age for which the power function was modelled}
+\item{age}{The age for which the power function was modeled}
 \item{data}{The data frame including the generated percentiles, the according norm scores,
 the fitted raw scores according to the regression model, the retrieved norm scores by the box cox transformation,
 the according density and percentile}
@@ -38,7 +38,7 @@ applies the transformation. It iteratively determines the power transformation l
 parameter with a precision up to 10^E-5 with a lambda value of 1 indicating normal
 distribution, values between 0 and 1 representing negative skew and values above 1 positive
 skewness of the distribution. The function is an optional step following the non-parametric
-modelling in order to conduct a parametric fitting of the percentiles.
+modeling in order to conduct a parametric fitting of the percentiles.
 }
 \examples{
 # model sample data set
@@ -49,7 +49,7 @@ model <- bestModel(prepareData())
 bcParameters <- boxcox(model, 3)
 }
 \references{
-Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+Cole, T. J., & Green, P. J. (1992). Smoothing reference percentile curves: the LMS method and penalized
 likelihood. Statistics in medicine, 11(10), 1305-1319.
 
 Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical

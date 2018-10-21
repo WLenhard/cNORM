@@ -7,7 +7,7 @@
 calcPolyInL(raw, age, model)
 }
 \arguments{
-\item{raw}{The raw value (substracted from the intercept)}
+\item{raw}{The raw value (subtracted from the intercept)}
 
 \item{age}{The age}
 

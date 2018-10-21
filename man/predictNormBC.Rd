@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxcox.R
 \name{predictNormBC}
 \alias{predictNormBC}
-\title{Calculate the norm value for a given raw value based on the paramteric box cox distribution}
+\title{Calculate the norm value for a given raw value based on the parametric box cox distribution}
 \usage{
 predictNormBC(boxcoxParameters, raw, scale = "percentile")
 }

@@ -33,7 +33,7 @@ powers and interactions are build. These predictors can be used later on in the
 allow for modeling the norm sample closer, but might lead to over-fit. In general
 k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
 k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
-and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that
+and L2A2 (but k = 2 is usually not sufficient for the modeling). Please note, that
 you do not need to use a normal rank transformed scale like T r IQ, but you can
 as well use the percentiles for the 'normValue' as well.
 }

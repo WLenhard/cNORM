@@ -31,7 +31,7 @@ scores indicating a higher precision. The choice depends of the norm scale
 used. With T scores a stepping parameter of 1 is suitable}
 
 \item{descend}{Reverse raw scores order. If set to TRUE, lower raw scores
-indicate higher performance. Relevant f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modeling errors}
 
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
 are displayed (default = FALSE)}

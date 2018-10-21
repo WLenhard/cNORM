@@ -33,7 +33,7 @@
 #' 12 items each. Each item consists of 4 pictures. The test taker is given a word orally and he or she has to point out
 #' the picture matching the oral word. Bottom and ceiling blocks of items are determined according to age and performance. For
 #' instance, when a student knows less than 4 word from a block of 12 items, the testing stops. The sample is not identical
-#' with the norm sample and includes doublettes of cases in order to align the sample size per age group. It is
+#' with the norm sample and includes doublets of cases in order to align the sample size per age group. It is
 #' primarily intended for running the cNORM analyses. The cleaned and stratified data is available on request.
 #'
 #' @format A data frame with 5600 rows and 4 variables:
@@ -70,7 +70,7 @@
 #' BMI growth curves from age 2 to 25
 #'
 #' By the courtesy of the Center of Disease Control (CDC), cNORM includes human growth data for children and adolescents
-#' age 2 to 25 that can be used to model trajectories of the body mass index and to estimate centiles for clinical
+#' age 2 to 25 that can be used to model trajectories of the body mass index and to estimate percentiles for clinical
 #' definitions of under- and overweight. The data stems from the NHANES surveys in the US and was published in 2012
 #' as public domain. The data was cleaned by removing missing values and it includes the following variables from or
 #' based on the original dataset.
@@ -81,14 +81,14 @@
 #'   \item{group}{age group; chronological age in years at the time of examination}
 #'   \item{month}{chronological age in month at the time of examination}
 #'   \item{sex}{sex of the participant, 1 = male, 2 = female}
-#'   \item{height}{height of the participan in cm}
-#'   \item{weight}{weight of the participan in kg}
+#'   \item{height}{height of the participants in cm}
+#'   \item{weight}{weight of the participants in kg}
 #'   \item{bmi}{the body mass index, computed by (weight in kg)/(height in m)^2}
 #' }
 #' @docType data
 #' @keywords datasets
 #' @source \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
-#' @references CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related
+#' @references CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets and Related
 #' Documentation. available \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx} (date of retrieval: 25/08/2018)
 #' @keywords datasets, growth curves, bmi
 #' @name CDC
@@ -116,11 +116,11 @@
 #' @source \url{https://data.worldbank.org/indicator/sp.dyn.le00.in}
 #' @references The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
 #' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
-#' @keywords datasets, life expectany, time series
+#' @keywords datasets, life expectancy, time series
 #' @name life
 #' @examples
 #' \dontrun{
-#' # data preparatiom
+#' # data preparation
 #' data.life <- rankByGroup(life, raw="life")
 #' data.life <- computePowers(data.life, age="year")
 #'
@@ -162,7 +162,7 @@
 #' data.mortality <- rankByGroup(mortality, raw="mortality")
 #' data.mortality <- computePowers(data.mortality, age="year")
 #'
-#' # modelling
+#' # modeling
 #' model.mortality <- bestModel(data.mortality, raw="mortality")
 #' plotSubset(model.mortality, type = 0)
 #' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))

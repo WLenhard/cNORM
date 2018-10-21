@@ -30,7 +30,7 @@ percentile curves at bottom effects.
 data.mortality <- rankByGroup(mortality, raw="mortality")
 data.mortality <- computePowers(data.mortality, age="year")
 
-# modelling
+# modeling
 model.mortality <- bestModel(data.mortality, raw="mortality")
 plotSubset(model.mortality, type = 0)
 plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))

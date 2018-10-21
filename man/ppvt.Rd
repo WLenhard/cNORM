@@ -22,7 +22,7 @@ A dataset based on an unstratified sample of PPVT4 data (German adaption). The P
 12 items each. Each item consists of 4 pictures. The test taker is given a word orally and he or she has to point out
 the picture matching the oral word. Bottom and ceiling blocks of items are determined according to age and performance. For
 instance, when a student knows less than 4 word from a block of 12 items, the testing stops. The sample is not identical
-with the norm sample and includes doublettes of cases in order to align the sample size per age group. It is
+with the norm sample and includes doublets of cases in order to align the sample size per age group. It is
 primarily intended for running the cNORM analyses. The cleaned and stratified data is available on request.
 }
 \examples{

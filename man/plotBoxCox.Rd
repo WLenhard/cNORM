@@ -24,7 +24,7 @@ as function of norm scores, 2 = Density plot}
 data frame with fitted box cox and regression scores
 }
 \description{
-This plot can be used to compare, how well the regression data can be modelled via a
+This plot can be used to compare, how well the regression data can be modeled via a
 Box Cox power transformation.
 }
 \examples{

@@ -43,7 +43,7 @@ For an easy start, you can use the graphical user interface by typing \code{cNOR
 Example datasets with large cohorts are available for demonstration purposes ('elfe',
 'ppvt', 'CDC', 'life' and 'mortality' sample data from the references). Use
 \code{data <- prepareData(elfe)} or \code{data <- prepareData(ppvt)} to load and prepare
-example data for the modeling. Use  \code{vignette(cNORM-Demo)} for a walkthrough on
+example data for the modeling. Use  \code{vignette(cNORM-Demo)} for a walk through on
 conducting  the modeling and \url{https://www.psychometrica.de/cNorm_en.html} for a
 comprehensive tutorial.
 }
@@ -77,7 +77,7 @@ rawTable <- rawTable(3.75, model.elfe, minRaw = 0, maxRaw = 28, minNorm=25,
 score <- predictNorm(raw = 21, A = 3.75,
                           model = model.elfe, minNorm=25, maxNorm=75)
 
-# Semi-parametric modelling with Box Cox power transformation for grade 3.75
+# Semi-parametric modeling with Box Cox power transformation for grade 3.75
 bcParameters <- boxcox(model.elfe, 3.75)
 # Print L, M and S
 bcParameters$lambdaBC
@@ -88,7 +88,7 @@ plotBoxCox(model.elfe, bcParameters, type=2)
 }
 \references{
 \enumerate{
-  \item CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets
+  \item CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets
   and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx.
   date of retrieval: 25/08/2018
   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to

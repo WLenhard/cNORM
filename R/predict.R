@@ -175,7 +175,7 @@ predictRaw <-
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevant f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @return data.frame with norm scores and the predicted raw scores
 #' @seealso rawTable
 #' @examples
@@ -255,7 +255,7 @@ normTable <- function(A,
 #' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
 #' @param step Stepping parameter for the raw scores (default 1)
 #' @param descend Reverse raw score order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @return data.frame with raw scores and the predicted norm scores
 #' @seealso normTable
 #' @examples
@@ -448,24 +448,14 @@ predictNorm <-
 
       # iterate through cases and increase precision by factor 2 in each step
       for (i in 1:n) {
-        # startNormScore <- minNorm
-        # currentRawValue <- predictRaw(norm = minNorm, age = A[[i]], coefficients = model$coefficients)
-        #
-        # functionToMinimize <- function(norm){
-        #   currentRawValue <- predictRaw(norm = norm, age = A[[i]], coefficients = model$coefficients)
-        #   functionValue <- (currentRawValue - raw[[i]])^2
-        # }
-        #
-        # optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
         v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
         if (length(v) == 0) {
           v <- NA
         }
         values[[i]] <- v
-        # values[[i]] <- optimum$minimum
       }
       return(values)
     } else {
-      stop("Please check raw and A value.")
+      stop("Please check raw and A value. Both have to be either single values or vectors of the same length.")
     }
   }

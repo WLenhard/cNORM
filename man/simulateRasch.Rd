@@ -6,10 +6,11 @@
 \usage{
 simulateRasch(data = NULL, n = 100, minAge = 1, maxAge = 7,
   items.n = 21, items.m = 0, items.sd = 1, Theta = "random",
-  width = 1)
+  width = 1, meanCoefficients = c(0, 1.5, -0.05, 0, 1e-04),
+  sdCoefficients = c(1, 0.3, -0.01, 0, 2e-05))
 }
 \arguments{
-\item{data}{data.frame from previous simulations for recomputation (overrides n, minAge, maxAge)}
+\item{data}{data.frame from previous simulations for recomputation (overrides n, minAge, maxAge; optional)}
 
 \item{n}{The sample size per age group}
 
@@ -24,12 +25,17 @@ simulateRasch(data = NULL, n = 100, minAge = 1, maxAge = 7,
 \item{items.sd}{The standard deviation of the item difficulty}
 
 \item{Theta}{irt scales difficulty parameters, either "random" for drawing a random sample,
-"even" for evently distributed or a set auf predefined values, which then overides the item.n
+"even" for evenly distributed or a set of predefined values, which then overrides the item.n
 parameters}
 
 \item{width}{The width of the window size for the continuous age per group; +- 1/2 width around group
 center
 on items.m and item.sd; if set to FALSE, the distribution is not drawn randomly but normally nonetheless}
+
+\item{meanCoefficients}{Coefficients for simulating age progression of population mean with simValue function}
+
+\item{sdCoefficients}{Coefficients for simulating age progression of the population standard deviation
+with simValue function}
 }
 \value{
 a list containing the simulated data and thetas
@@ -42,10 +48,12 @@ a list containing the simulated data and thetas
 \description{
 The function simulates raw test scores based on a virtual Rasch based test with n results per
 age group, an evenly distributed age variable, items.n test items with a simulated difficulty and
-standard deviation. The development trajectories over age group are modelled by a curve linear
+standard deviation. The development trajectories over age group are modeled by a curve linear
 function of age, with at first fast progression, which slows down over age, and a slightly increasing
 standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
-and the raw data via $data of the returned object.
+and the raw data via $data of the returned object. The default values for mean and sd of the population
+simulate an age progression with decreasing pace with an increasing standard deviation in order to model 
+a scissor effect.
 }
 \examples{
 # simulate data for a rather easy test (m = -1.0)

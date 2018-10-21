@@ -18,7 +18,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Good morning starshine, cNORM says 'Hello!'")
+  packageStartupMessage("Good morning star-shine, cNORM says 'Hello!'")
 }
 
 
@@ -319,7 +319,7 @@ rankBySlidingWindow <- function(data,
 
 
 
-  # define Q-Q-plot alorithm, use rankit as standard
+  # define Q-Q-plot algorithm, use rankit as standard
   # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
   # 6 = Filliben (1975), 7 = Yu & Huang (2001)
   numerator <- c(-3.75, -1 / 3, 0, -0.5, -1 / 3, -0.3175, -0.326)
@@ -432,7 +432,7 @@ rankBySlidingWindow <- function(data,
 #' allow for modeling the norm sample closer, but might lead to over-fit. In general
 #' k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
 #' k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
-#' and L2A2 (but k = 2 is usually not sufficient for the modelling). Please note, that
+#' and L2A2 (but k = 2 is usually not sufficient for the modeling). Please note, that
 #' you do not need to use a normal rank transformed scale like T r IQ, but you can
 #' as well use the percentiles for the 'normValue' as well.
 #'

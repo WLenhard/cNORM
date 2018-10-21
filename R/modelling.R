@@ -12,11 +12,12 @@
 #' share of explained variance of the model (R2). If both are specified, first the method tries
 #' to select the model based on the number of terms and in case, this does not work, use R2
 #' instead. Pushing R2 by setting the number of terms, the R2 cut off and k to high values
-#' might lead to on over-fit, so be careful! These paramters depend on the distribution of
+#' might lead to on over-fit, so be careful! These parameters depend on the distribution of
 #' the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
 #' for the analyses.
 #' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
 #' and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
+#' Use \code{checkConsistency(model)} to check the model for violations.
 #'
 #' @param data The preprocessed dataset, which should include the variables 'raw'
 #'  and the powers and interactions of the norm score (L = Location; usually T scores)
@@ -36,7 +37,7 @@
 #' likely not work, but at least the regression formula can be obtained that way.
 #' @param force.in List of variable names forced into the regression function. This option
 #' can be used to force the regression to include covariates like sex or other background
-#' variables. This can be used to model seperate norm scales for different groups in order
+#' variables. This can be used to model separate norm scales for different groups in order
 #' the sample. Variables specified here, that are not part of the initial regression function
 #' resp. list of predictors, are ignored without further notice and thus do not show up in
 #' the final result. Additionally, all other functions like norm table generation and plotting
@@ -51,13 +52,13 @@
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
 #'
-#' # It is possible to specify the variables explicitely - usefull to smuggle
+#' # It is possible to specify the variables explicitly - useful to smuggle
 #' # in variables like sex
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3",
 #'                               "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
 #'
-#' # Example for modelling based on continuous age variable and raw variable,
+#' # Example for modeling based on continuous age variable and raw variable,
 #' # based on the CDC data. We use the default k=4 parameter; raw variable has
 #' # to be set to "bmi".
 #' bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
@@ -158,7 +159,6 @@ bestModel <- function(data,
 
   if (terms > 0 && terms <= length(results$adjr2)) {
     i <- terms
-    finished <- TRUE
     message(paste0(
       "\nUser specified solution: ",
       i,
@@ -308,7 +308,7 @@ printSubset <- function(model) {
 #' scores indicating a higher precision. The choice depends of the norm scale
 #' used. With T scores a stepping parameter of 1 is suitable
 #' @param descend Reverse raw scores order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modelling errors
+#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
 #' @param silent turn off messages
@@ -361,7 +361,6 @@ checkConsistency <- function(model,
   }
 
   i <- minAge
-  j <- minNorm
   minor <- 0
   major <- 0
   results <- c()
@@ -378,13 +377,15 @@ checkConsistency <- function(model,
       }
       diff <- maxR - norm$raw[[k + 1]]
       if ((!descend && diff >= 1) || (descend && diff <= -1)) {
-        message(paste0(
-          "Considerable violation of consistency at age ",
-          round(i, digits = 1), ", raw value ",
-          round(norm$raw[[k]],
-            digits = 1
-          )
-        ))
+        if (!silent) {
+          message(paste0(
+            "Considerable violation of consistency at age ",
+            round(i, digits = 1), ", raw value ",
+            round(norm$raw[[k]],
+              digits = 1
+            )
+          ))
+        }
         results <- c(results, paste0(
           "Considerable violation of consistency at
                                        age ",
@@ -397,16 +398,18 @@ checkConsistency <- function(model,
         major <- major + 1
         k <- length(norm$raw) + 1
       } else if (warn & ((!descend && diff > 0) || (descend && diff < 0))) {
-        message(paste0(
-          "Neglectible violation of consistency at age ",
-          round(i, digits = 1),
-          ", raw value ",
-          round(norm$raw[[k]],
-            digits = 1
-          )
-        ))
+        if (!silent) {
+          message(paste0(
+            "Negligible violation of consistency at age ",
+            round(i, digits = 1),
+            ", raw value ",
+            round(norm$raw[[k]],
+              digits = 1
+            )
+          ))
+        }
         results <- c(results, paste0(
-          results, "Neglectible violation of
+          results, "Negligible violation of
                                        consistency at age ",
           round(i, digits = 1), ",
                                              raw value ",
@@ -422,17 +425,23 @@ checkConsistency <- function(model,
     i <- i + stepAge
   }
   if (minor == 0 & major == 0) {
-    message("\nNo violations of model consistency found.")
+    if (!silent) {
+      message("\nNo violations of model consistency found.")
+    }
     return(FALSE)
   } else if (major == 0) {
-    message(paste0("\n", minor, " minor violations of model consistency found."))
-    message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    if (!silent) {
+      message(paste0("\n", minor, " minor violations of model consistency found."))
+      message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    }
     return(TRUE)
   } else {
-    message(paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
-    message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
-    message("Be careful with horizontal and vertical extrapolation.")
-    message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    if (!silent) {
+      message(paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
+      message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
+      message("Be careful with horizontal and vertical extrapolation.")
+      message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+    }
     return(TRUE)
   }
 }
@@ -498,11 +507,9 @@ derive <- function(model) {
   i <- 1
   name <- names(coeff)
 
-  vars <- coeff
 
   # easy, straight forward derivation of betas and variable names
   while (i <= length(coeff)) {
-    j <- 1
     nam <- strsplit(name[[i]], "")
 
     if (nam[[1]][1] == "L") {

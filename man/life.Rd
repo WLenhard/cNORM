@@ -27,7 +27,7 @@ achieved with four predictors, equaling R2=.9825.
 }
 \examples{
 \dontrun{
-# data preparatiom
+# data preparation
 data.life <- rankByGroup(life, raw="life")
 data.life <- computePowers(data.life, age="year")
 
@@ -45,7 +45,7 @@ available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of ret
 }
 \keyword{datasets}
 \keyword{datasets,}
-\keyword{expectany,}
+\keyword{expectancy,}
 \keyword{life}
 \keyword{series}
 \keyword{time}

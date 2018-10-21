@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxcox.R
 \name{predictRawBC}
 \alias{predictRawBC}
-\title{Calculate the raw score for a given percentile based on the paramteric box cox distribution}
+\title{Calculate the raw score for a given percentile based on the parametric box cox distribution}
 \usage{
 predictRawBC(boxcoxParameters, percentile)
 }
@@ -37,7 +37,7 @@ predictRawBC(bcParameters, percentile)
 predictRaw(tValue, 3, model$coefficients)
 }
 \references{
-Cole, T. J., & Green, P. J. (1992). Smoothing reference centile curves: the LMS method and penalized
+Cole, T. J., & Green, P. J. (1992). Smoothing reference percentile curves: the LMS method and penalized
 likelihood. Statistics in medicine, 11(10), 1305-1319.
 
 Box, G. E., & Cox, D. R. (1964). An analysis of transformations. Journal of the Royal Statistical

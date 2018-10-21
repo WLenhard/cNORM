@@ -3,7 +3,7 @@
 #' The function is an inline for searching zeros in the inverse regression
 #' function. It collapses the regression function at a specific age and simplifies
 #' the coefficients.
-#' @param raw The raw value (substracted from the intercept)
+#' @param raw The raw value (subtracted from the intercept)
 #' @param age The age
 #' @param model The cNORM regression model
 #'
@@ -12,7 +12,6 @@ calcPolyInL <- function(raw, age, model) {
   k <- model$k
   coeff <- model$coefficients
   nam <- names(coeff)
-  n_coeff <- length(coeff)
 
   coeff_L <- coeff[grep("L", nam)]
 
@@ -34,7 +33,7 @@ calcPolyInL <- function(raw, age, model) {
 
   currentCoeff <- 0
 
-  # For from 1 to k; for each i the i-th coefficient of the one dimensional polynom will be calculated
+  # For from 1 to k; for each i the i-th coefficient of the one dimensional polynomial will be calculated
   for (i in c(1:k)) {
     coeff_L_i <- coeff_L[grep(paste("L", i, sep = ""), names(coeff_L))]
     n_coeff_L_i <- length(coeff_L_i)
@@ -102,7 +101,7 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm) {
       return(output)
     } else if (length(output) > 1) {
       # fetch the solution closest to median
-      # warning(paste0("Multiple roots found for ", raw, " at age ", age, "; returning most plausible normscore."))
+      # warning(paste0("Multiple roots found for ", raw, " at age ", age, "; returning most plausible norm score."))
       return(output[which.min((output - model$scaleM)^2)])
     } else {
       # nothing worked, apply numerical searching strategy

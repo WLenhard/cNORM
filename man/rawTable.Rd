@@ -23,7 +23,7 @@ rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
 \item{step}{Stepping parameter for the raw scores (default 1)}
 
 \item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
-indicate higher performance. Relevant f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modeling errors}
 }
 \value{
 data.frame with raw scores and the predicted norm scores

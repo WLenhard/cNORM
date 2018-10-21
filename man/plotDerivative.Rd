@@ -24,7 +24,7 @@ values indicate higher precision / closer checks}
 \item{stepNorm}{Stepping parameter for norm scores}
 
 \item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
-indicate higher performance. Relevant f. e. in case of modelling errors}
+indicate higher performance. Relevant f. e. in case of modeling errors}
 }
 \description{
 Plots the scores obtained via the first order derivative of the regression model
