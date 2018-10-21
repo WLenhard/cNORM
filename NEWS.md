@@ -1,4 +1,4 @@
-# cNORM:news and changelog
+# cNORM:news and change-log
 This file documents the development of the package as well as open issues or points for further improvements.
 
 

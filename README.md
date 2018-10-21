@@ -34,7 +34,7 @@ library(cNORM)
 # please use cNORM on the console.
 cNORM.GUI()
 
-# Rank data within groupd and compute powers and interactions
+# Rank data within group and compute powers and interactions
 data.elfe <- prepareData(elfe)
 
 # Find best fitting regression model
