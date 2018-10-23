@@ -271,10 +271,6 @@ shinyServer(function(input, output, session) {
 
 
 
-
-
-
-
     return(currentBestModel)
   })
 
@@ -348,14 +344,54 @@ shinyServer(function(input, output, session) {
     return(cNORM::printSubset(bestModel()))
   })
 
+  chosenPercentilesForNormCurves <- reactive({
+
+
+    if(input$PercentilesForNormCurves == ""){
+      return(NULL)
+  }
+    else{
+    return(return(input$PercentilesForNormCurves))
+  }
+
+  })
+
   normCurves <- reactive({
 
     MIN_AGE <- min((currentFile())[chosenGrouping()])
     MAX_AGE <- max((currentFile())[chosenGrouping()])
 
+
+    percentileList <- chosenPercentilesForNormCurves()
+
+    if(is.null(chosenPercentilesForNormCurves())){
+      percentileList <- c(.02276, 0.1587, 0.5000, 0.8413, 0.97724)
+    }
+    else{
+      percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForNormCurves(), "\\, |\\,| ")))/100
+    }
+
+
+
+    # Set different norm lists for different scales
+      currentScale <- chosenScale()
+      if(currentScale == "T"){
+        normList <- qnorm(percentileList, 50, 10)
+      }
+      if(currentScale == "z")
+      {
+        normList <- normList <- qnorm(percentileList, 0, 1)
+      }
+      if(currentScale == "IQ"){
+        normList <- normList <- qnorm(percentileList, 100, 15)
+      }
+
+      normList <- round(normList, digits = 2)
+
     currentBestModel <- cNORM::plotNormCurves(bestModel(),
                                               minAge = MIN_AGE,
-                                              maxAge = MAX_AGE)
+                                              maxAge = MAX_AGE,
+                                              normList = normList)
     return(currentBestModel)
   })
 

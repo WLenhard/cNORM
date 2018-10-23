@@ -125,7 +125,10 @@ shinyUI(fluidPage(
 
     navbarMenu(
       "Percentiles and Norm Curves",
+
+
       tabPanel("Percentiles", sidebarLayout(sidebarPanel(tags$h3("Percentiles"), tags$h5("The charts shows how well the model generally fits the manifest data. The manifest percentiles are represented as dots, the continuous norm curves as lines. In case of intersecting norm curves the model is inconsistent. Please change the number of terms in order to find a consistent model.")), mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "600px")))),
+
       tabPanel("Series", sidebarLayout(sidebarPanel(tags$h3("Percentile Series"),
                                                     tags$h5("In oder to facilitate model selection, the chart displays percentile curves of the different models."),
                                                     tags$br(), sliderInput("terms", "Number of terms:",
@@ -134,7 +137,14 @@ shinyUI(fluidPage(
                                                     tags$h5("TODO! To be implemented yet.")),
                                        mainPanel(plotOutput("Series", width = "100%", height = "600px")))),
 
-      tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$h5("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores.")), mainPanel(plotOutput("NormCurves", width = "100%", height = "600px")))),
+
+      tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$h5("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores."),
+                                                         textInput(inputId = "PercentilesForNormCurves", label = "Choose percentiles for norm curves", value = ""),
+                                                         tags$h5("Please seperate the values by a comma. In order to get curves specific z values, you can use the following percentiles:"),
+                                                         tags$div(
+                                                           HTML("<div align=center><table width=100%><tr><td align = right><b>z</b></td><td align = right>-2</td><td align = right>-1</td><td align = right>0</td><td align = right>1</td><td align = right>2</td></tr><tr><td align = right><b>percentile</b></td><td align = right>2.276</td><td align = right>15.87</td><td align = right>50.00</td><td align = right>84.13</td><td align = right>97.724</td></tr></table></div>")
+                                                         )),
+                                            mainPanel(plotOutput("NormCurves", width = "100%", height = "600px")))),
       tabPanel("Density Plot", sidebarLayout(sidebarPanel(tags$h3("Density Plot"), tags$h5("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown.")), mainPanel(plotOutput("PlotDensity", width = "100%", height = "600px")))),
       tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$h5("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(plotOutput("PlotDerivatives", width = "100%", height = "600px"))))
     ),
