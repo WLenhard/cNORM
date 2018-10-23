@@ -18,3 +18,8 @@ return predicted value
 \description{
 Simulate value per age based on regression coefficients
 }
+\examples{
+\dontrun{
+x <- simValue(a, coefficients = c(0, 1.5, -0.05, 0, 0.0001))
+}
+}

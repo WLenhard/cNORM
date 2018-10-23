@@ -4,8 +4,8 @@
 #' @param coefficients the coefficients of the regression function with increasing power
 #' (first value intercept, second * age^1 ...)
 #' @return return predicted value
-#' @examples
 #' @export
+#' @examples
 #' \dontrun{
 #' x <- simValue(a, coefficients = c(0, 1.5, -0.05, 0, 0.0001))
 #' }
@@ -28,7 +28,7 @@ simValue <- function(age, coefficients = c(0, 1.5, -0.05, 0, 0.0001)) {
 #' function of age, with at first fast progression, which slows down over age, and a slightly increasing
 #' standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
 #' and the raw data via $data of the returned object. The default values for mean and sd of the population
-#' simulate an age progression with decreasing pace with an increasing standard deviation in order to model 
+#' simulate an age progression with decreasing pace with an increasing standard deviation in order to model
 #' a scissor effect.
 #'
 #' @param data data.frame from previous simulations for recomputation (overrides n, minAge, maxAge; optional)

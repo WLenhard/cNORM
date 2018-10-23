@@ -52,7 +52,7 @@ standard deviation. The development trajectories over age group are modeled by a
 function of age, with at first fast progression, which slows down over age, and a slightly increasing
 standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
 and the raw data via $data of the returned object. The default values for mean and sd of the population
-simulate an age progression with decreasing pace with an increasing standard deviation in order to model 
+simulate an age progression with decreasing pace with an increasing standard deviation in order to model
 a scissor effect.
 }
 \examples{
