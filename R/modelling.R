@@ -89,6 +89,8 @@ bestModel <- function(data,
 
   if (is.null(k)) {
     k <- attr(data, "k")
+  }else if(k > attr(data, "k")){
+    stop("k parameter exceeds the power degrees in the dataset. Please use computePowers with a higher degree in preparating the data. ")
   }
 
 

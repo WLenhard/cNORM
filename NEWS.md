@@ -3,6 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 0.9.20
+Date: 2018.10.24
+
+Changes:
+
+*   GUI with Shiny finished
+*   ... now working on finally releasing the package
+
+
+
 ### Version in 0.9.19
 Date: 2018.10.20
 

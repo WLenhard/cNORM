@@ -127,20 +127,25 @@ shinyUI(fluidPage(
       "Percentiles and Norm Curves",
 
 
-      tabPanel("Percentiles", sidebarLayout(sidebarPanel(tags$h3("Percentiles"), tags$h5("The charts shows how well the model generally fits the manifest data. The manifest percentiles are represented as dots, the continuous norm curves as lines. In case of intersecting norm curves the model is inconsistent. Please change the number of terms in order to find a consistent model.")), mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "600px")))),
+      tabPanel("Percentiles", sidebarLayout(sidebarPanel(tags$h3("Percentiles"), tags$h5("The chart shows how well the model generally fits the manifest data. The manifest percentiles are represented as dots, the continuous norm curves as lines. In case of intersecting norm curves the model is inconsistent. Please change the number of terms in the 'Best Model' tab in order to find a consistent model. You can use the 'Series' option to look out for suitable parameters."),
+                                                         tags$br(),
+                                                         textInput(inputId = "PercentilesForPercentiles", "Choose percentiles"),
+                                                         tags$h5("Please seperate the values by a comma or space.")
+                                                         ),
+                                            mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "600px")))),
 
       tabPanel("Series", sidebarLayout(sidebarPanel(tags$h3("Percentile Series"),
                                                     tags$h5("In oder to facilitate model selection, the chart displays percentile curves of the different models."),
                                                     tags$br(), sliderInput("terms", "Number of terms:",
                                                                            min = 1, max = 24, value = 5
                                                     ),tags$br(), tags$br(),
-                                                    tags$h5("TODO! To be implemented yet.")),
+                                                    tags$h5("Please use the slider to change the number of terms in the model. Please select a model with non-intersecting percentile curves. Avoid undulating curves, as these indicate model overfit.")),
                                        mainPanel(plotOutput("Series", width = "100%", height = "600px")))),
 
 
       tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$h5("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores."),
                                                          textInput(inputId = "PercentilesForNormCurves", label = "Choose percentiles for norm curves", value = ""),
-                                                         tags$h5("Please seperate the values by a comma. In order to get curves specific z values, you can use the following percentiles:"),
+                                                         tags$h5("Please seperate the values by a comma or space. The percentile values are automatically transformed to norm scale used in the data preparation. In order to get curves specific z values, you can use the following percentiles:"),
                                                          tags$div(
                                                            HTML("<div align=center><table width=100%><tr><td align = right><b>z</b></td><td align = right>-2</td><td align = right>-1</td><td align = right>0</td><td align = right>1</td><td align = right>2</td></tr><tr><td align = right><b>percentile</b></td><td align = right>2.276</td><td align = right>15.87</td><td align = right>50.00</td><td align = right>84.13</td><td align = right>97.724</td></tr></table></div>")
                                                          )),

@@ -344,6 +344,13 @@ shinyServer(function(input, output, session) {
     return(cNORM::printSubset(bestModel()))
   })
 
+  output$Series <- renderPlot({
+
+    return(cNORM::plotPercentileSeries(preparedData(), bestModel(), start = input$terms, end = input$terms))
+
+  })
+
+
   chosenPercentilesForNormCurves <- reactive({
 
 
@@ -351,10 +358,19 @@ shinyServer(function(input, output, session) {
       return(NULL)
   }
     else{
-    return(return(input$PercentilesForNormCurves))
+    (input$PercentilesForNormCurves)
   }
 
   })
+
+  chosenPercentilesForPercentiles <- reactive({
+    if(input$PercentilesForPercentiles == ""){
+      return(NULL)
+    }
+    else{
+      return(input$PercentilesForPercentiles)
+    }
+    })
 
   normCurves <- reactive({
 
@@ -388,11 +404,11 @@ shinyServer(function(input, output, session) {
 
       normList <- round(normList, digits = 2)
 
-    currentBestModel <- cNORM::plotNormCurves(bestModel(),
+    currentNormCurves <- cNORM::plotNormCurves(bestModel(),
                                               minAge = MIN_AGE,
                                               maxAge = MAX_AGE,
                                               normList = normList)
-    return(currentBestModel)
+    return(currentNormCurves)
   })
 
   # Generates and prints norm curves
@@ -407,10 +423,25 @@ shinyServer(function(input, output, session) {
     MIN_AGE <- min((currentFile())[chosenGrouping()])
     MAX_AGE <- max((currentFile())[chosenGrouping()])
 
-    cNORM::plotPercentiles(currentFile(), bestModel(), raw = chosenRaw(),
-                           group = chosenGrouping(),
-                           minAge = MIN_AGE,
-                           maxAge = MAX_AGE)
+
+    percentileList <- chosenPercentilesForPercentiles()
+
+    if(is.null(percentileList)){
+      cNORM::plotPercentiles(currentFile(), bestModel(), raw = chosenRaw(),
+                             group = chosenGrouping(),
+                             minAge = MIN_AGE,
+                             maxAge = MAX_AGE)
+    }
+    else{
+      percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForPercentiles(), "\\, |\\,| ")))/100
+
+      cNORM::plotPercentiles(currentFile(), bestModel(), raw = chosenRaw(),
+                             group = chosenGrouping(),
+                             minAge = MIN_AGE,
+                             maxAge = MAX_AGE,
+                             percentiles = percentileList)
+    }
+
   })
 
 

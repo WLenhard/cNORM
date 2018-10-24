@@ -1,37 +1,42 @@
-#' Simulate value per age based on regression coefficients
+#' Simulate mean per age
 #'
 #' @param age the age variable
-#' @param coefficients the coefficients of the regression function with increasing power
-#' (first value intercept, second * age^1 ...)
-#' @return return predicted value
-#' @export
+#'
+#' @return return predicted means
+#'
 #' @examples
 #' \dontrun{
-#' x <- simValue(a, coefficients = c(0, 1.5, -0.05, 0, 0.0001))
+#' x <- simMean(a)
 #' }
-simValue <- function(age, coefficients = c(0, 1.5, -0.05, 0, 0.0001)) {
-  i <- 2
-  m <- coefficients[[1]]
-  while(i <= length(coefficients)){
-    m <- m + (coefficients[[i]] * age^(i-1))
-    i <- i + 1
-  }
-  return(m)
+simMean <- function(age) {
+  return(1.5 * age - 0.05 * age^2 + 0.0001 * age^4)
 }
 
+#' Simulate sd per age
+#'
+#' @param age the age variable
+#'
+#' @return return predicted sd
+#'
+#' @examples
+#' \dontrun{
+#' x <- simSD(a)
+#' }
+simSD <- function(age) {
+  return((1.5 * age - 0.05 * age^2 + 0.0001 * age^4) * 0.2 + 1)
+}
 
 #' Simulate raw test scores based on Rasch model
 #'
+#' For testing purposes only:
 #' The function simulates raw test scores based on a virtual Rasch based test with n results per
 #' age group, an evenly distributed age variable, items.n test items with a simulated difficulty and
-#' standard deviation. The development trajectories over age group are modeled by a curve linear
+#' standard deviation. The development trajectories over age group are modelled by a curve linear
 #' function of age, with at first fast progression, which slows down over age, and a slightly increasing
 #' standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
-#' and the raw data via $data of the returned object. The default values for mean and sd of the population
-#' simulate an age progression with decreasing pace with an increasing standard deviation in order to model
-#' a scissor effect.
+#' and the raw data via $data of the returned object.
 #'
-#' @param data data.frame from previous simulations for recomputation (overrides n, minAge, maxAge; optional)
+#' @param data data.frame from previous simulations for recomputation (overrides n, minAge, maxAge)
 #' @param n The sample size per age group
 #' @param minAge The minimum age (default 1)
 #' @param maxAge The maximum age (default 7)
@@ -39,22 +44,18 @@ simValue <- function(age, coefficients = c(0, 1.5, -0.05, 0, 0.0001)) {
 #' @param items.m The mean difficulty of the items
 #' @param items.sd The standard deviation of the item difficulty
 #' @param Theta irt scales difficulty parameters, either "random" for drawing a random sample,
-#' "even" for evenly distributed or a set of predefined values, which then overrides the item.n
+#' "even" for evently distributed or a set auf predefined values, which then overides the item.n
 #' parameters
 #' @param width The width of the window size for the continuous age per group; +- 1/2 width around group
 #' center
 #' on items.m and item.sd; if set to FALSE, the distribution is not drawn randomly but normally nonetheless
-#' @param meanCoefficients Coefficients for simulating age progression of population mean with simValue function
-#' @param sdCoefficients Coefficients for simulating age progression of the population standard deviation
-#' with simValue function
-#'
+#' @export
 #' @return a list containing the simulated data and thetas
 #' \describe{
 #'   \item{data}{the data.frame with only age, group and raw}
 #'   \item{sim}{the complete simulated data with item level results}
 #'   \item{theta}{the difficulty of the items}
 #' }
-#' @export
 #'
 #' @examples
 #' # simulate data for a rather easy test (m = -1.0)
@@ -75,7 +76,7 @@ simValue <- function(age, coefficients = c(0, 1.5, -0.05, 0, 0.0001)) {
 #' model <- bestModel(data, k = 4)
 #' printSubset(model)
 #' plotSubset(model, type=0)
-simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n = 21, items.m = 0, items.sd = 1, Theta = "random", width = 1, meanCoefficients = c(0, 1.5, -0.05, 0, 0.0001), sdCoefficients = c(1, 0.3, -0.01, 0, 0.00002)) {
+simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n = 21, items.m = 0, items.sd = 1, Theta = "random", width = 1) {
   # draw sample
   if (is.null(data)) {
     groups <- seq.int(from = minAge, to = maxAge)
@@ -91,7 +92,7 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
       i <- i + 1
     }
 
-    data <- data.frame(age, group, mean = simValue(age, meanCoefficients), sd = simValue(age))
+    data <- data.frame(age, group, mean = simMean(age), sd = simSD(age))
     data$z <- rnorm(nrow(data))
     data$latent <- data$z * data$sd + data$mean
 
@@ -116,7 +117,7 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   }
 
 
-  # compute probabilities
+  # compute propabilities
   i <- 1
   while (i <= items.n) {
     # prob <- exp(data$zOverall - theta[i])/(1 + exp(data$zOverall - theta[i]))
@@ -131,7 +132,7 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   data <- transform(data, expected = rowSums(data[, 8:items.n + 7]))
 
   i <- 1
-  # compute probabilities
+  # compute propabilities
   while (i <= items.n) {
     rand <- runif(length(data$latent))
     item <- round((sign(data[, i + 7] - rand) + 1) / 2)

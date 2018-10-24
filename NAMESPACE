@@ -33,6 +33,5 @@ export(
 	rankByGroup,
 	rankBySlidingWindow,
 	rawTable,
-	regressionFunction,
-	simulateRasch, simValue
+	regressionFunction, simulateRasch
 )
