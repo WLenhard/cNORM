@@ -284,16 +284,23 @@ shinyServer(function(input, output, session) {
 
   })
 
-  modelDensity <- eventReactive(input$CalcBestModel, {
+  modelDensity <- reactive({
 
     MIN_RAW <- bestModel()$minRaw
     MAX_RAW <- bestModel()$maxRaw
     MIN_NORM <- bestModel()$minL1
     MAX_NORM <- bestModel()$maxL1
 
-    cNORM::plotDensity(bestModel())
-
+    if(input$densities == ""){
+      cNORM::plotDensity(bestModel())
+    }
+    else{
+      densityList <- as.numeric(unlist(strsplit(input$densities, "\\, |\\,| ")))
+      cNORM::plotDensity(bestModel(), group = densityList)
+    }
   })
+
+
 
   chosenTypeOfPlotSubset <- reactive({
     return(input$chosenTypePlotSubset)
@@ -370,7 +377,7 @@ shinyServer(function(input, output, session) {
     else{
       return(input$PercentilesForPercentiles)
     }
-    })
+  })
 
   normCurves <- reactive({
 
