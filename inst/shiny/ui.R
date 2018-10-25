@@ -83,7 +83,7 @@ shinyUI(fluidPage(
     # Defines panel for best model output
     # Tab returns bestModel with information function and plot of real and predicted raw values
     tabPanel(
-      "Best Model",
+      "Modeling",
       sidebarLayout(
         sidebarPanel(
           tags$h3("Model Data"),
@@ -121,9 +121,7 @@ shinyUI(fluidPage(
           tags$br(),
           tags$br(),
           tags$h4("Information Function, Subset Specifics and Fitted Values"),
-          tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart"),
-          tags$p("The information of the plot is again displayed as a table below the chart."),
-          tags$p("On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
+          tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
           plotOutput("PlotWL", width = "100%", height = "600px"),
           tags$br(),
           dataTableOutput("PrintSubset"),
