@@ -702,7 +702,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL,  group = NU
 #' elbow in the curve and choose th model where the information criterion
 #' begins to drop. Nonetheless, inspect the according model with \code{plotPercentiles(data, group)}
 #' to visually inspect the course of the percentiles.
-#' In the plot, Mallow's Cp is log, transformed and the BIC is always highly
+#' In the plot, Mallow's Cp is log transformed and the BIC is always highly
 #' negative. The R2 cutoff that was specified in the bestModel function is
 #' displayed as a dashed line.
 #' @param model The regression model from the bestModel function

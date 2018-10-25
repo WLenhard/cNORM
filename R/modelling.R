@@ -158,45 +158,30 @@ bestModel <- function(data,
   i <- 1
   rAdj <- results$adjr2[i]
 
-
-  if (terms > 0 && terms <= length(results$adjr2)) {
+   if (terms > 0 && terms <= length(results$adjr2)) {
     i <- terms
-    message(paste0(
-      "\nUser specified solution: ",
-      i,
-      "\nR-Square Adj. amounts to ",
-      results$adjr2[i]
-    ))
+    report <- paste0("User specified solution: ", i, " terms")
   } else {
     # check upper and lower bounds and cycle through R2 list
     if (terms > 0) {
       message("\n\nCould not determine best model based of number of terms, using R2 instead.")
     }
     if (R2 < results$adjr2[i]) {
-      message(paste0(
-        "\nSpecified R2 falls below the value of the most primitive model. Falling back to model 1.\nR-Square Adj. amounts to ",
-        results$adjr2[i]
-      ))
+      report <- paste0(
+        "Specified R2 falls below the value of the most primitive model. Falling back to model 1.")
     } else if (results$adjr2[length(results$adjr2)] < R2) {
       i <- length(results$adjr2)
-      message(paste0(
-        "\nSpecified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i, ".\nR-Square Adj. amounts to ",
-        results$adjr2[i]
-      ))
+      report <- (paste0(
+        "Specified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i))
     } else {
       while (rAdj < R2) {
         i <- i + 1
         rAdj <- results$adjr2[i]
       }
-      message(paste0(
-        "\nFinal solution: ",
-        i,
-        "\nR-Square Adj. amounts to ",
-        round(results$adjr2[i], digits = 5)
-      ))
+      report <- paste0("Final solution: ", i, " terms")
     }
   }
-
+  report[2] <- paste0("R-Square Adj. amounts to ", round(results$adjr2[i], digits = 6))
   text <- paste0(raw, " ~ ")
   names <- colnames(results$outmat)
 
@@ -216,15 +201,13 @@ bestModel <- function(data,
     j <- j + 1
   }
 
-  message(paste0("Final regression model: ", text))
-  message("Beta weights are accessible via 'model$coefficients':")
+  report[3] <- paste0("Final regression model: ", text)
   bestformula <- lm(text, as.data.frame(data))
 
   # Model information
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
-  print(bestformula$coefficients)
 
   # add information for horizontal and vertical extrapolation
   bestformula$minA1 <- min(data$A1)
@@ -242,10 +225,12 @@ bestModel <- function(data,
   bestformula$k <- attributes(data)$k
 
   # Print output
-  message("\nRegression formula:")
-  print(regressionFunction(bestformula, digits = 8))
-  message("\nUse 'printSubset(model)' and 'plotSubset(model)' to inspect model fit.")
+  report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
+  report[5] <- ""
+  bestformula$report <- report
+  cat(report, sep='\n')
 
+  message("Use 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit and 'summary(model)' for statistics on the regression model.")
   return(bestformula)
 }
 

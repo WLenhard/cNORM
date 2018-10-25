@@ -17,13 +17,13 @@ shinyUI(fluidPage(
     # Tab for data input
     tabPanel("Data Input", sidebarLayout(
       sidebarPanel(
-        img(src = "logo.png", align = "right"), tags$h3("Data Input"), tags$h5("Please choose a data set for your calculations. You can use an inbuilt example or load your own file:"), selectizeInput("Example",
+        img(src = "logo.png", align = "right"), tags$h3("Data Input"), tags$p("Please choose a data set for your calculations. You can use an inbuilt example or load your own file:"), selectizeInput("Example",
                                                                                                                                                                                                         label = "Example:",
                                                                                                                                                                                                         choices = c("", "elfe", "ppvt", "CDC"), selected = character(0),
                                                                                                                                                                                                         multiple = FALSE
         ), hr(),
         fileInput("file", "Choose a file", multiple = FALSE, accept = c(".csv", ".xlsx", ".xls", ".rda", ".sav")),
-        tags$h5(tags$b("HINT: If you choose a file from your own directory, the chosen example will not be used during the session anymore!"))
+        tags$p(tags$b("HINT: If you choose a file from your own directory, the chosen example will not be used during the session anymore!"))
       ),
       mainPanel(htmlOutput("introduction"), dataTableOutput("table"))
     )),
@@ -38,14 +38,14 @@ shinyUI(fluidPage(
         sidebarPanel(
           tags$h3("Choose"),
           uiOutput("GroupingVariable"),
-          tags$h5("Variable which is used to divide the observations into groups, for example variable age by rounding to a half or a full year"),
+          tags$p("Variable which is used to divide the observations into groups, for example variable age by rounding to a half or a full year"),
           tags$br(),
           uiOutput("RawValues"),
-          tags$h5("Raw values, for example test scores or physiological data "),
+          tags$p("Raw values, for example test scores or physiological data "),
           tags$br(),
           selectInput("Scale", label = "Scale", choices = c("T", "IQ", "z"), selected = "T"),
-          tags$h5("Choose the scale to which the raw values shall be transformed"),
-          tags$h5("You can choose between between T scores, IQ scores and z scores."),
+          tags$p("Choose the scale to which the raw values shall be transformed"),
+          tags$p("You can choose between between T scores, IQ scores and z scores."),
           actionButton(inputId = "DoDataPreparation", label = "Prepare Data"),
 
           tags$br(),
@@ -53,7 +53,7 @@ shinyUI(fluidPage(
           # Additional options (explanatory variable with default grouping, ranking method, number of powers)
           tags$h3("Additional options"),
           uiOutput("ExplanatoryVariable"),
-          tags$h5("As default, the explanatory variable is set to grouping variable. In case, a continuous explanatory variable like age is available, please use it."),
+          tags$p("As default, the explanatory variable is set to grouping variable. In case, a continuous explanatory variable like age is available, please use it."),
           tags$br(),
           selectInput(
             inputId = "NumberOfPowers",
@@ -61,15 +61,15 @@ shinyUI(fluidPage(
             choices = c(1:5),
             selected = 4
           ),
-          tags$h5("This variable specifies the power parameter for the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
+          tags$p("This variable specifies the power parameter for the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
           tags$br(),
           selectInput("Method", label = "Ranking method", choices = c(1:7), selected = 4),
-          tags$h5("Ranking methods"),
+          tags$p("Ranking methods"),
           tags$ol(
-            tags$li("Blom (1985"),
+            tags$li("Blom (1985)"),
             tags$li("Tukey (1949)"),
             tags$li("Van der Warden (1952)"),
-            tags$li("Rankit"),
+            tags$li("Rankit (Bliss, 1967)"),
             tags$li("Levenbach (1953)"),
             tags$li("Filliben (1975)"),
             tags$li("Yu & Huang (2001)")
@@ -87,12 +87,12 @@ shinyUI(fluidPage(
       sidebarLayout(
         sidebarPanel(
           tags$h3("Model Data"),
-          tags$h5("Button starts calculation of the best model and returns its coefficients as well as the information function"),
+          tags$p("Button starts calculation of the best model and returns its coefficients as well as the information function"),
           actionButton(
             inputId = "CalcBestModel",
 
             label = "Model Data"
-          ), tags$h5("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. The calculation might take a few seconds."),
+          ), tags$p("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. The calculation might take a few seconds."),
           tags$br(),
           tags$br(),
           # Additional options (R^2, terms, type for printSubset)
@@ -102,18 +102,28 @@ shinyUI(fluidPage(
             label = "Coefficient of determination", value = 0.99, min = 0, max = 1, step = 0.01
           ),
           uiOutput("NumberOfTerms"),
-          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c(0:2), selected = 1)
+          tags$br(),
+          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c(0:2), selected = 1),
+          tags$p("Please select the type of chart for plotting the information function, with"),
+          tags$ol(start=0,
+          tags$li("adjusted R2 by number of predictors"),
+          tags$li("log transformed Mallow's Cp by adjusted R2"),
+          tags$li("Bayesian Information Criterion (BIC) by adjusted R2"))
         ),
         mainPanel(
           tags$h4("Best model"),
-          tags$h5("cNORM determines the best fitting model for a given number of terms or R2."),
-          verbatimTextOutput("BestModel"),
+          tags$p("cNORM determines the best fitting model for a given number of terms or R2."),
+          verbatimTextOutput("BestModel1"),
+          verbatimTextOutput("BestModel2"),
+          verbatimTextOutput("BestModel3"),
+          verbatimTextOutput("BestModel4"),
+          verbatimTextOutput("BestModel5"),
           tags$br(),
           tags$br(),
           tags$h4("Information Function, Subset Specifics and Fitted Values"),
-          tags$h5("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart"),
-          tags$h5("The information of the plot is again displayed as a table below the chart."),
-          tags$h5("On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
+          tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart"),
+          tags$p("The information of the plot is again displayed as a table below the chart."),
+          tags$p("On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
           plotOutput("PlotWL", width = "100%", height = "600px"),
           tags$br(),
           dataTableOutput("PrintSubset"),
@@ -127,34 +137,34 @@ shinyUI(fluidPage(
       "Percentiles and Norm Curves",
 
 
-      tabPanel("Percentiles", sidebarLayout(sidebarPanel(tags$h3("Percentiles"), tags$h5("The chart shows how well the model generally fits the manifest data. The manifest percentiles are represented as dots, the continuous norm curves as lines. In case of intersecting norm curves the model is inconsistent. Please change the number of terms in the 'Best Model' tab in order to find a consistent model. You can use the 'Series' option to look out for suitable parameters."),
+      tabPanel("Percentiles", sidebarLayout(sidebarPanel(tags$h3("Percentiles"), tags$p("The chart shows how well the model generally fits the manifest data. The manifest percentiles are represented as dots, the continuous norm curves as lines. In case of intersecting norm curves the model is inconsistent. Please change the number of terms in the 'Best Model' tab in order to find a consistent model. You can use the 'Series' option to look out for suitable parameters."),
                                                          tags$br(),
                                                          textInput(inputId = "PercentilesForPercentiles", "Choose percentiles"),
-                                                         tags$h5("Please seperate the values by a comma or space.")
+                                                         tags$p("Please seperate the values by a comma or space.")
                                                          ),
                                             mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "600px")))),
 
       tabPanel("Series", sidebarLayout(sidebarPanel(tags$h3("Percentile Series"),
-                                                    tags$h5("In oder to facilitate model selection, the chart displays percentile curves of the different models."),
+                                                    tags$p("In oder to facilitate model selection, the chart displays percentile curves of the different models."),
                                                     tags$br(), sliderInput("terms", "Number of terms:",
                                                                            min = 1, max = 24, value = 5
                                                     ),tags$br(), tags$br(),
-                                                    tags$h5("Please use the slider to change the number of terms in the model. Please select a model with non-intersecting percentile curves. Avoid undulating curves, as these indicate model overfit.")),
+                                                    tags$p("Please use the slider to change the number of terms in the model. Please select a model with non-intersecting percentile curves. Avoid undulating curves, as these indicate model overfit.")),
                                        mainPanel(plotOutput("Series", width = "100%", height = "600px")))),
 
 
-      tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$h5("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores."),
+      tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$p("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores."),
                                                          textInput(inputId = "PercentilesForNormCurves", label = "Choose percentiles for norm curves", value = ""),
-                                                         tags$h5("Please seperate the values by a comma or space. The percentile values are automatically transformed to the norm scale used in the data preparation. In order to get curves specific z values, you can use the following percentiles:"),
+                                                         tags$p("Please seperate the values by a comma or space. The percentile values are automatically transformed to the norm scale used in the data preparation. In order to get curves specific z values, you can use the following percentiles:"),
                                                          tags$div(
                                                            HTML("<div align=center><table width=100%><tr><td align = right><b>z</b></td><td align = right>-2</td><td align = right>-1</td><td align = right>0</td><td align = right>1</td><td align = right>2</td></tr><tr><td align = right><b>percentile</b></td><td align = right> 2.276</td><td align = right> 15.87</td><td align = right> 50.00</td><td align = right> 84.13</td><td align = right> 97.724</td></tr></table></div>")
                                                          )),
                                             mainPanel(plotOutput("NormCurves", width = "100%", height = "600px")))),
-      tabPanel("Density Plot", sidebarLayout(sidebarPanel(tags$h3("Density Plot"), tags$h5("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
+      tabPanel("Density Plot", sidebarLayout(sidebarPanel(tags$h3("Density Plot"), tags$p("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
                                                           tags$br(),
                                                           textInput(inputId = "densities", "Choose groups"),
-                                                          tags$h5("Please seperate the values by a comma or space.")), mainPanel(plotOutput("PlotDensity", width = "100%", height = "600px")))),
-      tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$h5("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(plotOutput("PlotDerivatives", width = "100%", height = "600px"))))
+                                                          tags$p("Please seperate the values by a comma or space.")), mainPanel(plotOutput("PlotDensity", width = "100%", height = "600px")))),
+      tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$p("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(plotOutput("PlotDerivatives", width = "100%", height = "600px"))))
     ),
 
 

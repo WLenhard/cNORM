@@ -321,11 +321,21 @@ shinyServer(function(input, output, session) {
     cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
   })
   # Prints best model
-  output$BestModel <- renderPrint({
-
-    return(bestModel())
+  output$BestModel1 <- renderText({
+    return(bestModel()$report[1])
   })
-
+  output$BestModel2 <- renderText({
+    return(bestModel()$report[2])
+  })
+  output$BestModel3 <- renderText({
+    return(bestModel()$report[3])
+  })
+  output$BestModel4 <- renderText({
+    return(bestModel()$report[4])
+  })
+  output$BestModel5 <- renderText({
+    return(bestModel()$report[5])
+  })
 
 
 
