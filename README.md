@@ -72,14 +72,14 @@ Once it is on CRAN, cNORM can be installed via
 install.packages("cNORM", dependencies = TRUE)
 ```
 
-Until then, you can [download a precompiled version](https://www.psychometrica.de/cNorm_installation_en.html) or access the github development version via
+Additionally, you can [download a precompiled version](https://www.psychometrica.de/cNorm_installation_en.html) or access the github development version via
 ```{r example}
 install.packages("devtools")
 devtools::install_github("WLenhard/cNORM")
 library(cNORM)
 ```
 
-The package is still under development. Please report errors. Suggestions for improvement are always welcome!
+Please report errors. Suggestions for improvement are always welcome!
 
 ## Sample Data
 The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves), life expectancy at birth and mortality per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC`, `?mortality` or `?life` to display information on the data sets.
@@ -91,4 +91,4 @@ If you want to use cNORM for scientific publications, we would also ask you to q
 
 ## References
 *   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
-*   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first , 1-14. doi: 10.1177/1073191116656437
+*   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
