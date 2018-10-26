@@ -3,6 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+
+### Version in 1.0.0
+Date: 2018.10.26
+
+Changes:
+
+*   Final polishing finished; realising first major version
+
+
+
 ### Version in 0.9.20
 Date: 2018.10.24
 

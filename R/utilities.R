@@ -31,7 +31,7 @@ simSD <- function(age) {
 #' For testing purposes only:
 #' The function simulates raw test scores based on a virtual Rasch based test with n results per
 #' age group, an evenly distributed age variable, items.n test items with a simulated difficulty and
-#' standard deviation. The development trajectories over age group are modelled by a curve linear
+#' standard deviation. The development trajectories over age group are modeled by a curve linear
 #' function of age, with at first fast progression, which slows down over age, and a slightly increasing
 #' standard deviation in order to model a scissor effects. The item difficulties can be accessed via $theta
 #' and the raw data via $data of the returned object.
@@ -44,7 +44,7 @@ simSD <- function(age) {
 #' @param items.m The mean difficulty of the items
 #' @param items.sd The standard deviation of the item difficulty
 #' @param Theta irt scales difficulty parameters, either "random" for drawing a random sample,
-#' "even" for evently distributed or a set auf predefined values, which then overides the item.n
+#' "even" for evenly distributed or a set of predefined values, which then overrides the item.n
 #' parameters
 #' @param width The width of the window size for the continuous age per group; +- 1/2 width around group
 #' center
