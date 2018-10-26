@@ -2,7 +2,7 @@ Package: cNORM
 Type: Package
 Title: 'Continuous Norming in R'
 Version: 1.0.0
-Author: Wolfgang Lenhard [cre, aut], Alexandra Lenhard [aut], Sebastian Gary [ctb]
+Author: Wolfgang Lenhard [cre, aut] (<https://orcid.org/0000-0002-8184-6889>), Alexandra Lenhard [aut], Sebastian Gary [ctb]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-10-24
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de", comment=c(ORCID  = "0000-0002-8184-6889")), person("Alexandra", "Lenhard", role=c("aut")), person("Sebastian", "Gary", role=c("ctb")))
