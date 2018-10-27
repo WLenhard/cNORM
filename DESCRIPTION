@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: 'Continuous Norming in R'
-Version: 1.0.0
+Version: 1.0.1
 Author: Wolfgang Lenhard [cre, aut] (<https://orcid.org/0000-0002-8184-6889>), Alexandra Lenhard [aut], Sebastian Gary [ctb]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-10-24
@@ -14,13 +14,13 @@ Description: Conventional methods for producing standard scores in psychometrics
     variable (e.g., age). The method minimizes bias arising from sampling and measurement error, while 
     handling marked deviations from normality, addressing bottom or ceiling effects and capturing almost
     all of the variance in the original norm data sample.
-License: AGPL-3 + file LICENSE
 Depends:
     R (>= 3.1.0)
 Imports:
     lattice (>= 0.20),
     leaps (>= 3.0.0), latticeExtra (>= 0.6)
-Suggests: knitr, rmarkdown, shiny, foreign, readxl
+Suggests: knitr, rmarkdown, shiny, shinycssloaders, foreign, readxl
+License: AGPL-3
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 NeedsCompilation: no

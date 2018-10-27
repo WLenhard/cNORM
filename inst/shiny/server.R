@@ -1,4 +1,6 @@
 library(shiny)
+library(foreign)
+library(readxl)
 library(cNORM)
 
 # Define server logic required for cNORM-Application
@@ -248,7 +250,6 @@ shinyServer(function(input, output, session) {
   })
   # Calculates best model using cNORM
   bestModel <- eventReactive(input$CalcBestModel, {
-
 
     # CAUTION: The value of a non-specified numericInput-value is NA and not NULL!
     # Therefore use is.na() to check, whether a specific number of terms were chosen or not

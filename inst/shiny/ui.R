@@ -1,5 +1,5 @@
 library(shiny)
-#library(shinythemes)
+library(shinycssloaders)
 library(markdown)
 
 title <- "cNORM-Shiny"
@@ -9,8 +9,6 @@ shinyUI(fluidPage(
 
   # Set tab title
   title = "cNORM - Shiny",
-  # Shiny theme selector for testing different style themes
-  # shinythemes::themeSelector(),
 
   # Tabsetpanel for single tabs
   tabsetPanel(
@@ -76,7 +74,7 @@ shinyUI(fluidPage(
           )
         ),
         # Main panel for showing prepared data
-        mainPanel(dataTableOutput("preparedData"))
+        mainPanel(withSpinner(dataTableOutput("preparedData"), type=5))
       )
     ),
 
@@ -113,7 +111,7 @@ shinyUI(fluidPage(
         mainPanel(
           tags$h4("Best model"),
           tags$p("cNORM determines the best fitting model for a given number of terms or R2."),
-          verbatimTextOutput("BestModel1"),
+          withSpinner(verbatimTextOutput("BestModel1"), type=5),
           verbatimTextOutput("BestModel2"),
           verbatimTextOutput("BestModel3"),
           verbatimTextOutput("BestModel4"),
@@ -122,11 +120,11 @@ shinyUI(fluidPage(
           tags$br(),
           tags$h4("Information Function, Subset Specifics and Fitted Values"),
           tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
-          plotOutput("PlotWL", width = "100%", height = "600px"),
+          withSpinner(plotOutput("PlotWL", width = "100%", height = "600px"), type=5),
           tags$br(),
-          dataTableOutput("PrintSubset"),
+          withSpinner(dataTableOutput("PrintSubset"), type=5),
           tags$br(),
-          plotOutput("PlotValues", width = "100%", height = "600px")
+          withSpinner(plotOutput("PlotValues", width = "100%", height = "600px"), type=5)
         )
       )
     ),
@@ -161,8 +159,15 @@ shinyUI(fluidPage(
       tabPanel("Density Plot", sidebarLayout(sidebarPanel(tags$h3("Density Plot"), tags$p("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
                                                           tags$br(),
                                                           textInput(inputId = "densities", "Choose groups"),
-                                                          tags$p("Please seperate the values by a comma or space.")), mainPanel(plotOutput("PlotDensity", width = "100%", height = "600px")))),
-      tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$p("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(plotOutput("PlotDerivatives", width = "100%", height = "600px"))))
+                                                          tags$p("Please seperate the values by a comma or space.")), mainPanel(
+                                                            withSpinner(
+                                                            plotOutput("PlotDensity", width = "100%", height = "600px"), type=5)
+
+                                                            )
+                                             )),
+      tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$p("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(
+        withSpinner(plotOutput("PlotDerivatives", width = "100%", height = "600px"), type=5)
+        )))
     ),
 
 
