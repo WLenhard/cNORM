@@ -4,7 +4,7 @@
 \name{cNORM}
 \alias{cNORM}
 \alias{cNORM-package}
-\title{cNORM: Continuous Norming with R}
+\title{cNORM: Continuous Norming}
 \description{
 The package provides methods for generating regression based continuous standard
 scores, as f. e. for psychometric test development, biometrics (e. g. physiological

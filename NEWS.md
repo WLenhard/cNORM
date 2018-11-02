@@ -3,6 +3,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.0.1
+Date: 2018.11.02
+
+Changes:
+
+*   Minor improvements in the GUI: Waiting circle shown to indicate ongoing computation
+
+
 
 ### Version in 1.0.0
 Date: 2018.10.26

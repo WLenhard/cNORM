@@ -1,4 +1,4 @@
-#' cNORM: Continuous Norming with R
+#' cNORM: Continuous Norming
 #'
 #' The package provides methods for generating regression based continuous standard
 #' scores, as f. e. for psychometric test development, biometrics (e. g. physiological

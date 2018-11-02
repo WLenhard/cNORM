@@ -66,7 +66,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
   }else{
     if(type == 0){
     lattice::xyplot(fitted ~ raw, d,
-                    main = paste("Manifest vs. Fitted Raw Scores\n", "r = ", round(cor(d$fitted, d$raw), digits = 4)),
+                    main = paste("Manifest vs. Fitted Raw Scores\n", "r = ", round(cor(d$fitted, d$raw, use = "pairwise.complete.obs"), digits = 4)),
                     ylab = "Fitted Scores",
                     xlab = "Manifest Scores",
                     grid = TRUE,
@@ -160,7 +160,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   }else{
     if(type == 0){
     lattice::xyplot(fitted ~ normValue, d,
-                    main = paste("Manifest vs. Fitted Norm Scores\nr = ", round(cor(fitted, d$normValue), digits = 4)),
+                    main = paste("Manifest vs. Fitted Norm Scores\nr = ", round(cor(fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)),
                     ylab = "Fitted Scores",
                     xlab = "Manifest Scores",
                     grid = TRUE,
