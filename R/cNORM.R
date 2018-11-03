@@ -115,10 +115,23 @@ NULL
 #' cNORM.GUI()
 #' }
 cNORM.GUI <- function(launch.browser=TRUE){
-  if (!requireNamespace(c("shiny", "shinycssloaders", "foreign", "readxl", "rmarkdown"), quietly = TRUE)) {
-    utils::install.packages(c("shiny", "foreign", "readxl", "rmarkdown", "shinycssloaders"))
+  packageList <- c("shiny", "shinycssloaders", "foreign", "readxl", "markdown")
+
+  if (!requireNamespace(packageList, quietly = TRUE)) {
+    x <- askYesNo("Additional packages are needed to start the user interface. Would you like to try to install them now?")
+    if(is.na(x)||!x){
+      stop("Packages are missing. Unable to start the GUI")
+    }
+
+    utils::install.packages(packageList)
   }
 
-  shiny::runApp(system.file('shiny', package='cNORM'),
+  library(shiny)
+  library(shinycssloaders)
+  library(markdown)
+  library(foreign)
+  library(readxl)
+
+  runApp(system.file('shiny', package='cNORM'),
                 launch.browser=TRUE)
 }

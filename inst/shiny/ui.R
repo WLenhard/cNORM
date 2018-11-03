@@ -1,7 +1,3 @@
-library(shiny)
-library(shinycssloaders)
-library(markdown)
-
 title <- "cNORM-Shiny"
 
 # Define UI for cNORM-Application
@@ -156,7 +152,7 @@ shinyUI(fluidPage(
                                                            HTML("<div align=center><table width=100%><tr><td align = right><b>z</b></td><td align = right>-2</td><td align = right>-1</td><td align = right>0</td><td align = right>1</td><td align = right>2</td></tr><tr><td align = right><b>percentile</b></td><td align = right> 2.276</td><td align = right> 15.87</td><td align = right> 50.00</td><td align = right> 84.13</td><td align = right> 97.724</td></tr></table></div>")
                                                          )),
                                             mainPanel(plotOutput("NormCurves", width = "100%", height = "600px")))),
-      tabPanel("Density Plot", sidebarLayout(sidebarPanel(tags$h3("Density Plot"), tags$p("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
+      tabPanel("Density", sidebarLayout(sidebarPanel(tags$h3("Density"), tags$p("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
                                                           tags$br(),
                                                           textInput(inputId = "densities", "Choose groups"),
                                                           tags$p("Please seperate the values by a comma or space.")), mainPanel(
@@ -167,7 +163,27 @@ shinyUI(fluidPage(
                                              )),
       tabPanel("Derivative Plot", sidebarLayout(sidebarPanel(tags$h3("Derivative Plot"), tags$p("To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. Look out for values lower than 0. These indicate violations of the model.")), mainPanel(
         withSpinner(plotOutput("PlotDerivatives", width = "100%", height = "600px"), type=5)
-        )))
+        ))),
+
+      tabPanel("Norm Scores", sidebarLayout(sidebarPanel(tags$h3("Norm Scores Plot"), tags$p("The plot shows the manifest and predicted norm scores. You can identify, how well the model is able to predict the norm scores of the dataset."),
+                                                     tags$br(),
+                                                     checkboxInput("grouping", "Show grouped plot", FALSE)
+                                                     ), mainPanel(
+                                                       withSpinner(
+                                                         plotOutput("PlotNormScores", width = "100%", height = "600px"), type=5)
+
+                                                     )
+      )),
+
+      tabPanel("Raw Scores", sidebarLayout(sidebarPanel(tags$h3("Raw Scores Plot"), tags$p("The plot shows the manifest and predicted raw scores. You can identify, how well the model is able to predict the raw scores of the original dataset."),
+                                                         tags$br(),
+                                                         checkboxInput("grouping1", "Show grouped plot", FALSE)
+      ), mainPanel(
+        withSpinner(
+          plotOutput("PlotRawScores", width = "100%", height = "600px"), type=5)
+
+      )
+      ))
     ),
 
 

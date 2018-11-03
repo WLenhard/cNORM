@@ -1,8 +1,3 @@
-library(shiny)
-library(foreign)
-library(readxl)
-library(cNORM)
-
 # Define server logic required for cNORM-Application
 shinyServer(function(input, output, session) {
 
@@ -321,6 +316,23 @@ shinyServer(function(input, output, session) {
 
     cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
   })
+
+  normScorePlot <- eventReactive(input$grouping, {
+    if(input$grouping){
+      cNORM::plotNorm(preparedData(), bestModel(), group = bestModel()$group)
+    }else{
+      cNORM::plotNorm(preparedData(), bestModel())
+    }
+  })
+
+  rawScorePlot <- eventReactive(input$grouping1, {
+    if(input$grouping1){
+      cNORM::plotRaw(preparedData(), bestModel(), group = bestModel()$group)
+    }else{
+      cNORM::plotRaw(preparedData(), bestModel())
+    }
+  })
+
   # Prints best model
   output$BestModel1 <- renderText({
     return(bestModel()$report[1])
@@ -356,6 +368,16 @@ shinyServer(function(input, output, session) {
   output$PlotValues <- renderPlot({
 
     return(valuesPlot())
+  })
+
+  output$PlotNormScores <- renderPlot({
+
+    return(normScorePlot())
+  })
+
+  output$PlotRawScores <- renderPlot({
+
+    return(rawScorePlot())
   })
 
   output$PrintSubset <- renderDataTable({

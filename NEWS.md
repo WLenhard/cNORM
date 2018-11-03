@@ -9,6 +9,8 @@ Date: 2018.11.02
 Changes:
 
 *   Minor improvements in the GUI: Waiting circle shown to indicate ongoing computation
+*   Additional plotting options in cNORM.GUI(): Raw Score and Norm Score plots
+*   User input asking for missing suggested packages to install
 
 
 
