@@ -118,12 +118,13 @@ cNORM.GUI <- function(launch.browser=TRUE){
   packageList <- c("shiny", "shinycssloaders", "foreign", "readxl", "markdown")
 
   if (!requireNamespace(packageList, quietly = TRUE)) {
-    x <- askYesNo("Additional packages are needed to start the user interface. Would you like to try to install them now?")
-    if(is.na(x)||!x){
+    cat("Additional packages are needed to start the user interface. Would you like to try to install them now?")
+    installChoice <- menu(c("yes", "no"))
+    if(installChoice == 1){
+      utils::install.packages(packageList)
+    } else {
       stop("Packages are missing. Unable to start the GUI")
     }
-
-    utils::install.packages(packageList)
   }
 
   library(shiny)

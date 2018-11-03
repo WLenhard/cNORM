@@ -81,13 +81,13 @@ shinyUI(fluidPage(
       sidebarLayout(
         sidebarPanel(
           tags$h3("Model Data"),
-          tags$p("Button starts calculation of the best model and returns its coefficients as well as the information function"),
-          actionButton(
+          tags$p("Here, you can calculate a regression model that models the original data as close as possible, while smoothing the curves and eliminating noise. After hitting the button, the regression function for a possible model is shown. The plot displays the information criteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. To display plots of manifest vs. fitted raw and norm scores, please use the plotting options on the next tab. There, you can check the percentile curves as well and inspect the curves of the different plausible models."),
+          tags$p("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. In case of k > 4, the calculation will take a few seconds."),
+actionButton(
             inputId = "CalcBestModel",
 
             label = "Model Data"
-          ), tags$p("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. The calculation might take a few seconds."),
-          tags$br(),
+          ),
           tags$br(),
           # Additional options (R^2, terms, type for printSubset)
           tags$h3("Additional options"),
@@ -105,8 +105,6 @@ shinyUI(fluidPage(
           tags$li("Bayesian Information Criterion (BIC) by adjusted R2"))
         ),
         mainPanel(
-          tags$h4("Best model"),
-          tags$p("cNORM determines the best fitting model for a given number of terms or R2."),
           withSpinner(verbatimTextOutput("BestModel1"), type=5),
           verbatimTextOutput("BestModel2"),
           verbatimTextOutput("BestModel3"),
@@ -114,13 +112,13 @@ shinyUI(fluidPage(
           verbatimTextOutput("BestModel5"),
           tags$br(),
           tags$br(),
-          tags$h4("Information Function, Subset Specifics and Fitted Values"),
-          tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
+          #tags$h4("Information Function, Subset Specifics and Fitted Values"),
+          #tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the manifest data are fitted by the model."),
           withSpinner(plotOutput("PlotWL", width = "100%", height = "600px"), type=5),
           tags$br(),
-          withSpinner(dataTableOutput("PrintSubset"), type=5),
-          tags$br(),
-          withSpinner(plotOutput("PlotValues", width = "100%", height = "600px"), type=5)
+          withSpinner(dataTableOutput("PrintSubset"), type=5)
+          #, tags$br(),
+          #withSpinner(plotOutput("PlotValues", width = "100%", height = "600px"), type=5)
         )
       )
     ),
@@ -134,7 +132,7 @@ shinyUI(fluidPage(
                                                          textInput(inputId = "PercentilesForPercentiles", "Choose percentiles"),
                                                          tags$p("Please seperate the values by a comma or space.")
                                                          ),
-                                            mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "600px")))),
+                                            mainPanel(plotOutput("PlotPercentiles", width = "100%", height = "800px")))),
 
       tabPanel("Series", sidebarLayout(sidebarPanel(tags$h3("Percentile Series"),
                                                     tags$p("In oder to facilitate model selection, the chart displays percentile curves of the different models."),
@@ -142,7 +140,7 @@ shinyUI(fluidPage(
                                                                            min = 1, max = 24, value = 5
                                                     ),tags$br(), tags$br(),
                                                     tags$p("Please use the slider to change the number of terms in the model. Please select a model with non-intersecting percentile curves. Avoid undulating curves, as these indicate model overfit.")),
-                                       mainPanel(plotOutput("Series", width = "100%", height = "600px")))),
+                                       mainPanel(plotOutput("Series", width = "100%", height = "800px")))),
 
 
       tabPanel("Norm Curves", sidebarLayout(sidebarPanel(tags$h3("Norm Curves"), tags$p("The chart is comparable to the percentile plot. It only shows the norm curves for some selected norm scores."),
@@ -151,13 +149,13 @@ shinyUI(fluidPage(
                                                          tags$div(
                                                            HTML("<div align=center><table width=100%><tr><td align = right><b>z</b></td><td align = right>-2</td><td align = right>-1</td><td align = right>0</td><td align = right>1</td><td align = right>2</td></tr><tr><td align = right><b>percentile</b></td><td align = right> 2.276</td><td align = right> 15.87</td><td align = right> 50.00</td><td align = right> 84.13</td><td align = right> 97.724</td></tr></table></div>")
                                                          )),
-                                            mainPanel(plotOutput("NormCurves", width = "100%", height = "600px")))),
+                                            mainPanel(plotOutput("NormCurves", width = "100%", height = "800px")))),
       tabPanel("Density", sidebarLayout(sidebarPanel(tags$h3("Density"), tags$p("The plot shows the probability density function of the raw scores based on the regression model. Like the 'Derivative Plot', it can be used to identify violations of model validity or to better visualize deviations of the test results from the normal distribution. As a default, the lowest, highest and a medium group is shown."),
                                                           tags$br(),
                                                           textInput(inputId = "densities", "Choose groups"),
                                                           tags$p("Please seperate the values by a comma or space.")), mainPanel(
                                                             withSpinner(
-                                                            plotOutput("PlotDensity", width = "100%", height = "600px"), type=5)
+                                                            plotOutput("PlotDensity", width = "100%", height = "800px"), type=5)
 
                                                             )
                                              )),
@@ -170,7 +168,7 @@ shinyUI(fluidPage(
                                                      checkboxInput("grouping", "Show grouped plot", FALSE)
                                                      ), mainPanel(
                                                        withSpinner(
-                                                         plotOutput("PlotNormScores", width = "100%", height = "600px"), type=5)
+                                                         plotOutput("PlotNormScores", width = "100%", height = "800px"), type=5)
 
                                                      )
       )),
@@ -180,7 +178,7 @@ shinyUI(fluidPage(
                                                          checkboxInput("grouping1", "Show grouped plot", FALSE)
       ), mainPanel(
         withSpinner(
-          plotOutput("PlotRawScores", width = "100%", height = "600px"), type=5)
+          plotOutput("PlotRawScores", width = "100%", height = "800px"), type=5)
 
       )
       ))

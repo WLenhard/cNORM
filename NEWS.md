@@ -4,11 +4,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.0.1
-Date: 2018.11.02
+Date: 2018.11.03
 
 Changes:
 
-*   Minor improvements in the GUI: Waiting circle shown to indicate ongoing computation
+*   Improvements in the GUI: Waiting circle shown to indicate ongoing computation
+*   Additional help texts on best model in GUI
 *   Additional plotting options in cNORM.GUI(): Raw Score and Norm Score plots
 *   User input asking for missing suggested packages to install
 
