@@ -18,12 +18,12 @@
 <p>Additional options: You can set the power parameter, the type of norm scale and the algorithm for bindings in the raw data.</p>
 
 <br><br>
-<h3>2. Data Modeling</h3>
+<h3>2. Modeling and Validation</h3>
 <p>In the data modeling, the most predictive terms from the list of powers and interactions are chosen. Per default, an R<sup>2</sup> = .99 is used as a cutoff value. This means, in the modeling, we try to find a regression formula that captures almost all of the variance in the data with as few terms as possible. There is however no definite value to determine the best model and you can as well specify a number of terms. Usually, with 4 terms, a good fit is retrieved with an extremely simple model. In case of inconsistencies in the model, please increase the number of terms. In this step, you as well get an overview of the fit of the different models (R<sup>2</sup> plotted against information criteria). You can use that plot for a model selection. The same data are additionally printed as a table at the bottom of the page.</p>
 
 <br><br>
-<h3>3. Model Validation</h3>
-<p>You can now examine the percentiles of the manifest data and compare them with the modeled data, check how well the raw data are fitted and how well manifest norm scores correspond to the fitted norm scores. Please look out for intersection percentile curves in the plots, because this indicate the boundaries of the model and possible violations. In the derivative plot, the first order derivation of the model is plotted. Negative values (red areas) indicate possible problems and should be checked.</p>
+<h3>3. Visualization</h3>
+<p>You can now examine the percentiles of the observed data and compare them with the predicted data, check how well the raw data are fitted and how well observed norm scores correspond to the predicted norm scores. Please look out for intersection percentile curves in the plots, because this indicate the boundaries of the model and possible violations. In the derivative plot, the first order derivation of the model is plotted. Negative values (red areas) indicate possible problems and should be checked.</p>
 
 <br><br>
 <h3>4. Generating Norm Tables</h3>

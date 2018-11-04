@@ -127,12 +127,6 @@ cNORM.GUI <- function(launch.browser=TRUE){
     }
   }
 
-  library(shiny)
-  library(shinycssloaders)
-  library(markdown)
-  library(foreign)
-  library(readxl)
-
-  runApp(system.file('shiny', package='cNORM'),
+  shiny::runApp(system.file('shiny', package='cNORM'),
                 launch.browser=TRUE)
 }

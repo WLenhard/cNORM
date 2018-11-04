@@ -3,7 +3,7 @@ importFrom(leaps, regsubsets)
 importFrom(stats, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(latticeExtra, panel.2dsmoother)
-importFrom(utils, tail)
+importFrom(utils, tail, menu)
 export(
 	bestModel,
 	boxcox,

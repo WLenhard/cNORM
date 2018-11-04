@@ -1,3 +1,8 @@
+library(shiny)
+library(markdown)
+library(foreign)
+library(readxl)
+
 # Define server logic required for cNORM-Application
 shinyServer(function(input, output, session) {
 
@@ -349,7 +354,13 @@ shinyServer(function(input, output, session) {
   output$BestModel5 <- renderText({
     return(bestModel()$report[5])
   })
-
+  output$BestModel6 <- renderText({
+    if(checkConsistency(bestModel())){
+      return("WARNING! The model seems to be inconsistent. Please check the percentile plot for intersecting percentile curves and change the number of terms for a different solution.")
+    }else{
+      return("No violations of model consistency found within the boundaries of the original data.")
+    }
+  })
 
 
   # Plots model derivation
