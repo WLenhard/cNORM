@@ -2,6 +2,14 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### TODO
+*    derive-function: more general approach with "order" parameter
+*    derive-function: fix sequence of terms after derivation: constants have to be on
+     first place with colname (Intercept)
+*    slidingWindow & plotPercentiles: fix group variable and display of observed data per
+     group 
+
+
 
 ### Version in 1.0.1
 Date: 2018.11.03
