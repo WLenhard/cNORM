@@ -181,7 +181,7 @@ shinyUI(fluidPage(
       ))),
 
       tabPanel("Norm Scores", sidebarLayout(sidebarPanel(
-        tags$h3("Norm Scores Plot"), tags$p("The plot shows the observed and predicted norm scores. You can identify, how well the model is able to predict the norm scores of the dataset."),
+        tags$h3("Norm Scores Plot"), tags$p("The plot shows the observed and predicted norm scores. You can identify, how well the model is able to predict the norm scores of the dataset. The duration of the computation increases with the size of the dataset."),
         tags$br(),
         checkboxInput("grouping", "Show grouped plot", FALSE)
       ), mainPanel(
