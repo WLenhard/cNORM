@@ -422,11 +422,15 @@ plotPercentiles <- function(data,
   colnames(percentile.actual) <- c(c(group), NAMES)
 
   # build finer grained grouping variable for prediction
-  gr <- percentile.actual[, group]
-  leng <- length(gr)
-  FIRST <- gr[[1]]
-  LAST <- gr[[leng]]
-  AGEP <- seq(FIRST, LAST, length.out = leng * 2 - 1)
+  AGEP <- unique(data$group)
+  lines <- length(AGEP)
+
+  for(m in 1:lines-1){
+    share <- (AGEP[m+1] - AGEP[m])/5
+    additional <- c( share + AGEP[m], 2 * share + AGEP[m], 3 * share + AGEP[m], 4 * share + AGEP[m])
+    AGEP <- c(AGEP, additional)
+  }
+
 
   # fitt predicted percentiles
   percentile.fitted <- data.frame(matrix(NA,

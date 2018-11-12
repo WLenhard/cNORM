@@ -6,8 +6,16 @@ This file documents the development of the package as well as open issues or poi
 *    derive-function: more general approach with "order" parameter
 *    derive-function: fix sequence of terms after derivation: constants have to be on
      first place with colname (Intercept)
-*    slidingWindow & plotPercentiles: fix group variable and display of observed data per
-     group 
+
+
+
+### Version in 1.0.2
+Date: 2018.11.12
+
+Changes:
+
+*   Improvements in precision of plotPercentiles
+*   error corrected in ppvt dataset: groups did not represent group means
 
 
 
