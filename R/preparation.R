@@ -245,7 +245,9 @@ rankByGroup <-
 #' located far from the mean age of the group receive distorted percentiles when building
 #' discrete groups and generating percentiles with the traditional approach. The distortion
 #' increases with distance from the group mean and this effect can be avoided by the
-#' sliding window.
+#' sliding window. Nonetheless, please ensure, that the optional grouping variable in fact
+#' represents the correct mean age of the respective age groups, as this variable is
+#' later on used for displaying the manifest data in the percentile plots.
 #'
 #' In case of bindings, the function uses the medium rank and applies the algorithms
 #' already described in the \code{\link{rankByGroup}} function. At the upper and lower end of the
