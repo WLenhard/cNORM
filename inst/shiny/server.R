@@ -1,7 +1,22 @@
-library(shiny)
-library(markdown)
-library(foreign)
-library(readxl)
+if(!require(shiny)){
+  install.packages("shiny")
+  require(shiny)
+}
+
+if(!require(markdown)){
+  install.packages("markdown")
+  require(markdown)
+}
+
+if(!require(foreign)){
+  install.packages("foreign")
+  require(foreign)
+}
+
+if(!require(readxl)){
+  install.packages("readxl")
+  require(readxl)
+}
 
 # Define server logic required for cNORM-Application
 shinyServer(function(input, output, session) {

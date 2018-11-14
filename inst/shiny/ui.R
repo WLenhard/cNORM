@@ -1,5 +1,14 @@
-library(shiny)
-library(shinycssloaders)
+if(!require(shiny)){
+  install.packages("shiny")
+  require(shiny)
+}
+
+if(!require(shinycssloaders)){
+  install.packages("shinycssloaders")
+  require(shinycssloaders)
+}
+
+
 
 title <- "cNORM-Shiny"
 
