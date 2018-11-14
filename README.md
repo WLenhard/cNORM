@@ -67,7 +67,7 @@ In this example, a Taylor polynomial with power k = 4 was computed in order to m
 The predicted progression over age are displayed as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data with adjusted R2.
 
 ## Installation
-Once it is on CRAN, cNORM can be installed via
+cNORM can be installed via
 ```{r example}
 install.packages("cNORM", dependencies = TRUE)
 ```
