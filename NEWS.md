@@ -16,6 +16,9 @@ Changes:
 
 *   Improvements in precision of plotPercentiles
 *   error corrected in ppvt dataset: groups did not represent group means
+*   function description in 'ranBySlidingWindow' updated
+*   checking for missing packages in shiny GUI improved
+*   user menu asking to install missing packages added
 
 
 
