@@ -5,7 +5,8 @@
 \title{Plot first order derivative of regression model}
 \usage{
 plotDerivative(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
-  maxNorm = NULL, stepAge = 0.2, stepNorm = 1, descend = FALSE)
+  maxNorm = NULL, stepAge = 0.2, stepNorm = 1, order = 1,
+  descend = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -22,6 +23,8 @@ plotDerivative(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
 values indicate higher precision / closer checks}
 
 \item{stepNorm}{Stepping parameter for norm scores}
+
+\item{order}{Degree of the derivative (default = 1)}
 
 \item{descend}{Reverse raw score order. If set to TRUE, lower raw scores
 indicate higher performance. Relevant f. e. in case of modeling errors}

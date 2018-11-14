@@ -4,8 +4,8 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.0.2
-Date: 2018.11.14
+### Version in 1.0.2 (current)
+Date: in development
 
 Changes:
 
@@ -15,6 +15,7 @@ Changes:
 *    checking for missing packages in shiny GUI improved
 *    user menu asking to install missing packages added
 *    derive-function: more general approach with "order" parameter
+*    plotDerivative function can now plot derivatives of higher order
 
 
 

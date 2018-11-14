@@ -834,6 +834,7 @@ plotSubset <- function(model, type = 1) {
 #' @param minNorm Lower end of the norm score range, in case of T scores, 25 might be good
 #' @param maxNorm Upper end of the norm score range, in case of T scores, 25 might be good
 #' @param stepNorm Stepping parameter for norm scores
+#' @param order Degree of the derivative (default = 1)
 #' @param descend Reverse raw score order. If set to TRUE, lower raw scores
 #' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @seealso checkConsistency, bestModel, derive
@@ -850,6 +851,7 @@ plotDerivative <- function(model,
                            maxNorm = NULL,
                            stepAge = 0.2,
                            stepNorm = 1,
+                           order = 1,
                            descend = FALSE) {
   if(is.null(minAge)){
     minAge <- model$minA1
@@ -867,10 +869,12 @@ plotDerivative <- function(model,
     maxNorm <- model$maxL1
   }
 
-  print(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
   rowS <- c(seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
-  coeff <- cNORM::derive(model)
+  coeff <- cNORM::derive(model, order)
+  cat(paste0(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
+  print(coeff)
+
   devFrame <- data.frame(matrix(NA, nrow = length(rowS), ncol = length(colS)))
   dev2 <- data.frame()
 
@@ -891,21 +895,35 @@ plotDerivative <- function(model,
   colnames(dev2) <- c("X", "Y", "Z")
 
   # define range and colors
-  min <- min(dev2$Z) - .1
-  max <- max(dev2$Z) + .1
+  min <- min(dev2$Z)
+  max <- max(dev2$Z)
+  diff <- (max - min)/10
+  min <- min - diff
+  max <- max + diff
   step <- (max - min) / 1000
   regions <- rainbow(1000, end = .8)
   key <- list(at = seq(min, max, by = step))
   sequence <- seq(min, max, by = step)
 
+  desc <- "(1st Order Derivative)"
+  if(order==2){
+    desc <- "(2nd Order Derivative)"
+  }else if(order==3){
+    desc <- "(3rd Order Derivative)"
+  }else if(order>2){
+    desc <- paste0(order, "th Order Derivative)")
+  }
+
+
   if (requireNamespace("latticeExtra", quietly = TRUE)) {
     p1 <- lattice::levelplot(Z ~ Y * X,
       data = dev2,
-      at = sequence, region = T,
+      at = sequence,
       colorkey = key,
+      region = T,
       col.regions = regions,
       panel = latticeExtra::panel.2dsmoother,
-      main = "Slope of the Regression Function\n(1st Order Derivative)",
+      main = paste0("Slope of the Regression Function\n", desc),
       ylab = "First Order Derivate of Norm Score",
       xlab = "Explanatory Variable"
     )
@@ -915,7 +933,7 @@ plotDerivative <- function(model,
       at = sequence, region = T,
       colorkey = key,
       col.regions = regions,
-      main = "Slope of the Regression Function\n(1st Order Derivative)",
+      main = paste0("Slope of the Regression Function\n", desc),
       ylab = "1st Order Derivate of Norm Score",
       xlab = "Explanatory Variable"
     )

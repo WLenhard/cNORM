@@ -2,21 +2,23 @@
 % Please edit documentation in R/modelling.R
 \name{derive}
 \alias{derive}
-\title{First order derivative of regression model}
+\title{Derivative of regression model}
 \usage{
-derive(model)
+derive(model, order = 1)
 }
 \arguments{
 \item{model}{The regression model}
+
+\item{order}{The degree of the derivate, default: 1}
 }
 \value{
 The derived coefficients
 }
 \description{
-Calculates the first order derivative of the location / norm value from the regression model. This
-is useful for finding violations of model assumptions and problematic distribution features as
-f. e. bottom and ceiling effects, non-progressive norm scores within an age group or in general
-intersecting percentile curves.
+Calculates the derivative of the location / norm value from the regression model with the first
+derivative as the default. This is useful for finding violations of model assumptions and problematic
+distribution features as f. e. bottom and ceiling effects, non-progressive norm scores within an
+age group or in general #' intersecting percentile curves.
 }
 \examples{
 normData <- prepareData()
