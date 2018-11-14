@@ -2,23 +2,19 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### TODO
-*    derive-function: more general approach with "order" parameter
-*    derive-function: fix sequence of terms after derivation: constants have to be on
-     first place with colname (Intercept)
-
 
 
 ### Version in 1.0.2
-Date: 2018.11.12
+Date: 2018.11.14
 
 Changes:
 
-*   Improvements in precision of plotPercentiles
-*   error corrected in ppvt dataset: groups did not represent group means
-*   function description in 'ranBySlidingWindow' updated
-*   checking for missing packages in shiny GUI improved
-*   user menu asking to install missing packages added
+*    Improvements in precision of plotPercentiles
+*    error corrected in ppvt dataset: groups did not represent group means
+*    function description in 'ranBySlidingWindow' updated
+*    checking for missing packages in shiny GUI improved
+*    user menu asking to install missing packages added
+*    derive-function: more general approach with "order" parameter
 
 
 

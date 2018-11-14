@@ -89,7 +89,7 @@ bestModel <- function(data,
 
   if (is.null(k)) {
     k <- attr(data, "k")
-  }else if(k > attr(data, "k")){
+  } else if (k > attr(data, "k")) {
     stop("k parameter exceeds the power degrees in the dataset. Please use computePowers with a higher degree in preparating the data. ")
   }
 
@@ -158,7 +158,7 @@ bestModel <- function(data,
   i <- 1
   rAdj <- results$adjr2[i]
 
-   if (terms > 0 && terms <= length(results$adjr2)) {
+  if (terms > 0 && terms <= length(results$adjr2)) {
     i <- terms
     report <- paste0("User specified solution: ", i, " terms")
   } else {
@@ -168,11 +168,13 @@ bestModel <- function(data,
     }
     if (R2 < results$adjr2[i]) {
       report <- paste0(
-        "Specified R2 falls below the value of the most primitive model. Falling back to model 1.")
+        "Specified R2 falls below the value of the most primitive model. Falling back to model 1."
+      )
     } else if (results$adjr2[length(results$adjr2)] < R2) {
       i <- length(results$adjr2)
       report <- (paste0(
-        "Specified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i))
+        "Specified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i
+      ))
     } else {
       while (rAdj < R2) {
         i <- i + 1
@@ -228,7 +230,7 @@ bestModel <- function(data,
   report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
   report[5] <- ""
   bestformula$report <- report
-  cat(report, sep='\n')
+  cat(report, sep = "\n")
 
   message("Use 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit and 'summary(model)' for statistics on the regression model.")
   return(bestformula)
@@ -476,54 +478,59 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
   return(formulA)
 }
 
-#' First order derivative of regression model
+#' Derivative of regression model
 #'
-#' Calculates the first order derivative of the location / norm value from the regression model. This
-#' is useful for finding violations of model assumptions and problematic distribution features as
-#' f. e. bottom and ceiling effects, non-progressive norm scores within an age group or in general
-#' intersecting percentile curves.
+#' Calculates the derivative of the location / norm value from the regression model with the first
+#' derivative as the default. This is useful for finding violations of model assumptions and problematic
+#' distribution features as f. e. bottom and ceiling effects, non-progressive norm scores within an
+#' age group or in general #' intersecting percentile curves.
 #' @param model The regression model
+#' @param order The degree of the derivate, default: 1
 #' @return The derived coefficients
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(normData)
 #' derivedCoefficients <- derive(m)
 #' @export
-derive <- function(model) {
+derive <- function(model, order = 1) {
   coeff <- model$coefficients[grep("L", names(model$coefficients))]
-  i <- 1
-  name <- names(coeff)
 
 
-  # easy, straight forward derivation of betas and variable names
-  while (i <= length(coeff)) {
-    nam <- strsplit(name[[i]], "")
-
-    if (nam[[1]][1] == "L") {
-      coeff[[i]][1] <- coeff[[i]][1] * as.numeric(nam[[1]][2])
+  for (o in 1:order) {
+    if (o > 1) {
+      coeff <- coeff[grep("L", names(coeff))]
     }
-    nam[[1]][2] <- as.numeric(nam[[1]][2]) - 1
+    i <- 1
+    name <- names(coeff)
+    # easy, straight forward derivation of betas and variable names
+    while (i <= length(coeff)) {
+      nam <- strsplit(name[[i]], "")
 
-    newString <- ""
-
-    if (nchar(name[[i]]) == 2) {
-      if (nam[[1]][2] > 0) {
-        newString <- paste0(nam[[1]][1], nam[[1]][2])
+      if (nam[[1]][1] == "L") {
+        coeff[[i]][1] <- coeff[[i]][1] * as.numeric(nam[[1]][2])
       }
-    } else {
-      if (nam[[1]][2] > 0) {
-        newString <- paste0(nam[[1]][1], nam[[1]][2], nam[[1]][3], nam[[1]][4])
+      nam[[1]][2] <- as.numeric(nam[[1]][2]) - 1
+
+      newString <- ""
+
+      if (nchar(name[[i]]) == 2) {
+        if (nam[[1]][2] > 0) {
+          newString <- paste0(nam[[1]][1], nam[[1]][2])
+        }
       } else {
-        newString <- paste0(nam[[1]][3], nam[[1]][4])
+        if (nam[[1]][2] > 0) {
+          newString <- paste0(nam[[1]][1], nam[[1]][2], nam[[1]][3], nam[[1]][4])
+        } else {
+          newString <- paste0(nam[[1]][3], nam[[1]][4])
+        }
       }
+      name[[i]] <- newString
+
+      i <- i + 1
     }
-    name[[i]] <- newString
 
-    i <- i + 1
+    names(coeff) <- name
   }
-
-  names(coeff) <- name
-
   return(coeff)
 }
 
