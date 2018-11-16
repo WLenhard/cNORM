@@ -1,10 +1,10 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 1.0.2
+Version: 1.0.3
 Author: Wolfgang Lenhard [cre, aut] (<https://orcid.org/0000-0002-8184-6889>), Alexandra Lenhard [aut], Sebastian Gary [ctb]
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2018-11-14
+Date: 2018-11-16
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de", comment=c(ORCID  = "0000-0002-8184-6889")), person("Alexandra", "Lenhard", role=c("aut")), person("Sebastian", "Gary", role=c("ctb")))
 Description: Conventional methods for producing standard scores in psychometrics or biometrics 
     are often plagued with "jumps" or "gaps" (i.e., discontinuities) in norm tables and low 

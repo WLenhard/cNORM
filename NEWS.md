@@ -4,8 +4,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.0.2 (current)
+### Version in 1.0.3
 Date: in development
+
+Changes:
+
+
+
+
+### Version in 1.0.2 (current)
+Date: 2018.11.16
 
 Changes:
 
@@ -17,6 +25,8 @@ Changes:
 *    derive-function: more general approach with "order" parameter
 *    plotDerivative function can now plot derivatives of higher order
 *    exclude cases with missing values in rankByX functions
+*    percentile columns added to rawTable and normTable
+*    additional data cleansing for data objects imported from Excel file format
 
 
 

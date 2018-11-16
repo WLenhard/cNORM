@@ -237,6 +237,11 @@ normTable <- function(A,
 
   normTable <-
     do.call(rbind, Map(data.frame, norm = norm, raw = raw))
+
+  if(!is.na(m$scaleM)&&!is.na(m$scaleSD)){
+    normTable$percentile <- pnorm((normTable$norm - m$scaleM)/m$scaleSD) * 100
+  }
+
   return(normTable)
 }
 
@@ -320,6 +325,11 @@ rawTable <- function(A,
 
   table <-
     do.call(rbind, Map(data.frame, raw = raw, norm = norm))
+
+  if(!is.na(m$scaleM)&&!is.na(m$scaleSD)){
+    table$percentile <- pnorm((table$norm - m$scaleM)/m$scaleSD) * 100
+  }
+
   # checking consistency
   k <- 1
   SUCCESS <- TRUE

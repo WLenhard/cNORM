@@ -601,6 +601,8 @@ shinyServer(function(input, output, session) {
                                            minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
 
       currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
+      currentNormTable$percentile <- round(currentNormTable$percentile, digits = 2)
+
       return(currentNormTable)}
   })
 
@@ -650,6 +652,8 @@ shinyServer(function(input, output, session) {
       currentRawTable <- cNORM::rawTable(currentAgeForRawTable, currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM,
                                          minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
       currentRawTable$norm <- round(currentRawTable$norm, digits = 3)
+      currentRawTable$percentile <- round(currentRawTable$percentile, digits = 2)
+
 
       return(currentRawTable)}
   })
