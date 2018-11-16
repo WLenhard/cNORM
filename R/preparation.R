@@ -133,6 +133,12 @@ rankByGroup <-
              descriptives = TRUE) {
     d <- as.data.frame(data)
 
+    if(length(is.na(d[, group]))>0 || length(is.na(d[, raw]))>0){
+      cat("Missing values found in grouping or raw score variable... excluding from dataset")
+      d <- d[!is.na(d[, group]), ]
+      d <- d[!is.na(d[, raw]), ]
+    }
+
     # check if columns exist
     if ((typeof(group) != "logical") && !(group %in% colnames(d))) {
       stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
@@ -301,6 +307,13 @@ rankBySlidingWindow <- function(data,
 
   # copy data frame
   d <- as.data.frame(data)
+
+  if(length(is.na(d[, group]))>0 || length(is.na(d[, raw]))>0 || length(is.na(d[, age]))>0){
+    cat("Missing values found in grouping, raw score or age variable... excluding from dataset")
+    d <- d[!is.na(d[, group]), ]
+    d <- d[!is.na(d[, raw]), ]
+    d <- d[!is.na(d[, age]), ]
+  }
 
   # check if columns exist
   if (!(age %in% colnames(d))) {

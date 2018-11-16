@@ -16,6 +16,7 @@ Changes:
 *    user menu asking to install missing packages added
 *    derive-function: more general approach with "order" parameter
 *    plotDerivative function can now plot derivatives of higher order
+*    exclude cases with missing values in rankByX functions
 
 
 

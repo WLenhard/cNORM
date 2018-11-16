@@ -8,7 +8,10 @@ if(!require(shinycssloaders)){
   require(shinycssloaders)
 }
 
-
+if(!require(cNORM)){
+  install.packages("cNORM")
+  require(cNORM)
+}
 
 title <- "cNORM-Shiny"
 
