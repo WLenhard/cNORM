@@ -422,7 +422,7 @@ plotPercentiles <- function(data,
   colnames(percentile.actual) <- c(c(group), NAMES)
 
   # build finer grained grouping variable for prediction
-  AGEP <- unique(data$group)
+  AGEP <- unique(data[, group])
   lines <- length(AGEP)
 
   for(m in 1:lines-1){
