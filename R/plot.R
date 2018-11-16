@@ -413,7 +413,8 @@ plotPercentiles <- function(data,
         list(data[, group]),
         FUN = function(x) quantile(x,
             probs = percentiles,
-            type = type
+            type = type,
+            na.rm = TRUE
           )
       )
     )
