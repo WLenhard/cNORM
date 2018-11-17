@@ -161,7 +161,7 @@ shinyUI(fluidPage(
             min = 1, max = 24, value = 5
           ), tags$br(), tags$br(),
           tags$p("Please use the slider to change the number of terms in the model. Please select a model with non-intersecting percentile curves. Avoid undulating curves, as these indicate model overfit."),
-          tags$br(), tags$b("After choosing the best fitting number of terms, please rerun the model calculation before genrating norm tables.")
+          tags$br(), tags$b("After choosing the best fitting number of terms, please rerun the model calculation before generating norm tables.")
         ),
         mainPanel(plotOutput("Series", width = "100%", height = "800px"))
       )),
