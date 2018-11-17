@@ -337,19 +337,27 @@ shinyServer(function(input, output, session) {
     cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
   })
 
-  normScorePlot <- eventReactive(input$grouping, {
+  normScorePlot <- eventReactive(c(input$grouping, input$differences), {
+    type <- 0
+    if(input$differences)
+      type <- 1
+
     if(input$grouping){
-      cNORM::plotNorm(preparedData(), bestModel(), group = bestModel()$group)
+      cNORM::plotNorm(preparedData(), bestModel(), group = bestModel()$group, type = type)
     }else{
-      cNORM::plotNorm(preparedData(), bestModel())
+      cNORM::plotNorm(preparedData(), bestModel(), type = type)
     }
   })
 
-  rawScorePlot <- eventReactive(input$grouping1, {
+  rawScorePlot <- eventReactive(c(input$grouping1, input$differences1), {
+    type <- 0
+    if(input$differences1)
+      type <- 1
+
     if(input$grouping1){
-      cNORM::plotRaw(preparedData(), bestModel(), group = bestModel()$group)
+      cNORM::plotRaw(preparedData(), bestModel(), group = bestModel()$group, type = type)
     }else{
-      cNORM::plotRaw(preparedData(), bestModel())
+      cNORM::plotRaw(preparedData(), bestModel(), type = type)
     }
   })
 
