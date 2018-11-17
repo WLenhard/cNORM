@@ -25,7 +25,8 @@ manifest against difference values}
 The function plots the manifest norm score against the fitted norm score from
 the inverse regression model per group. This helps to inspect the precision
 of the modeling process. The scores should not deviate too far from
-regression line.
+regression line. The computation of the standard error is based on Ooserhuis, van der
+Ark and Sijtsma (2016).
 }
 \examples{
 # Load example data set, compute model and plot results
@@ -34,4 +35,7 @@ normData <- prepareData()
 m <- bestModel(data = normData)
 plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
 }
+}
+\references{
+Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 }

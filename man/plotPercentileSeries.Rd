@@ -36,7 +36,7 @@ This functions makes use of 'plotPercentiles' to generate a series of plots
 with different number of predictors. It draws on the information provided by the model object
 to determine the bounds of the modeling (age and standard score range). It can be used as an
 additional model check to determine the best fitting model. Please have a look at the
-'plotPercentiles' function for further information.
+' plotPercentiles' function for further information.
 }
 \examples{
 # Load example data set, compute model and plot results

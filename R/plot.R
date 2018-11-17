@@ -36,7 +36,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
   d$raw <- data[[raw]]
   d$fitted <- model$fitted.values
   d$diff <- d$fitted - d$raw
-  mse <- round(sum(sqrt(d$diff^2)) / length(d$diff), digits = 4)
+  mse <- round(model$rmse, digits=4)
   r <- round(cor(d$fitted, d$raw,
                  use = "pairwise.complete.obs"), digits = 4)
   d <- as.data.frame(d)
@@ -69,7 +69,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
   } else {
     if (type == 0) {
       lattice::xyplot(fitted ~ raw, d,
-        main = paste("Observed vs. Fitted Raw Scores\n", "\nr = ", r, " ,RMSE = ", mse),
+        main = paste("Observed vs. Fitted Raw Scores\nr = ", r, ", RMSE = ", mse),
         ylab = "Fitted Scores",
         xlab = "Observed Score",
         grid = TRUE,

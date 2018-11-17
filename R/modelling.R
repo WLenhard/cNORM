@@ -206,6 +206,11 @@ bestModel <- function(data,
   report[3] <- paste0("Final regression model: ", text)
   bestformula <- lm(text, as.data.frame(data))
 
+  # compute rmse
+  tab <- data.frame(raw = data[, raw], fitted = bestformula$fitted.values)
+  tab <- tab[complete.cases(tab), ]
+  rmse <- sqrt(sum((tab$raw - tab$fitted)^2) / length(tab$raw))
+
   # Model information
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
@@ -219,6 +224,7 @@ bestModel <- function(data,
   bestformula$minRaw <- min(data[, raw])
   bestformula$maxRaw <- max(data[, raw])
   bestformula$raw <- raw
+  bestformula$rmse <- rmse
   bestformula$scaleSD <- attributes(data)$scaleSD
   bestformula$scaleM <- attributes(data)$scaleM
   bestformula$descend <- attributes(data)$descend
@@ -228,7 +234,8 @@ bestModel <- function(data,
 
   # Print output
   report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
-  report[5] <- ""
+  report[5] <- paste0("RMSE = ", round(rmse, digits = 5))
+
   bestformula$report <- report
   cat(report, sep = "\n")
 
@@ -256,6 +263,7 @@ printSubset <- function(model) {
     do.call(rbind, Map(data.frame,
       R2 = model$subsets$rsq,
       RSS = model$subsets$rss,
+      meanRSS = model$subsets$rss / model$df.residual,
       R2adj = model$subsets$adjr2,
       Cp = model$subsets$cp,
       BIC = model$subsets$bic
