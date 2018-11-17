@@ -9,6 +9,9 @@ Date: in development
 
 Changes:
 *    Additional instruction on series section of visualization tab in Shiny GUI
+*    SE added to plotNorm based on Oosterhuis, van der Ark & Sijtsma (2016)
+*    RMSE added to plotRaw
+*    additional plotting options added to GUI: plotting of differences in raw and norm plot
 
 
 
