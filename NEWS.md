@@ -8,6 +8,7 @@ This file documents the development of the package as well as open issues or poi
 Date: in development
 
 Changes:
+*    Additional instruction on series section of visualization tab in Shiny GUI
 
 
 
