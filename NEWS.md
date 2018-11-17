@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.0.3
+### Version in 1.0.3 (current)
 Date: in development
 
 Changes:
@@ -13,7 +13,7 @@ Changes:
 
 
 
-### Version in 1.0.2 (current)
+### Version in 1.0.2
 Date: 2018.11.16
 
 Changes:
