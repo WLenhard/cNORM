@@ -183,25 +183,11 @@ bestModel <- function(data,
       report <- paste0("Final solution: ", i, " terms")
     }
   }
-  report[2] <- paste0("R-Square Adj. amounts to ", round(results$adjr2[i], digits = 6))
-  text <- paste0(raw, " ~ ")
-  names <- colnames(results$outmat)
+  report[2] <- paste0("R-Square Adj. = ", round(results$adjr2[i], digits = 6))
 
-  j <- 1
-  nr <- 0
-  while (j <= length(names)) {
-    if (results$outmat[i, j] == "*") {
-      text1 <- names[j]
-      if (nr == 0) {
-        text <- paste(text, text1, sep = "")
-      } else {
-        text <- paste(text, text1, sep = " + ")
-      }
-
-      nr <- nr + 1
-    }
-    j <- j + 1
-  }
+  variables <- names(coef(subsets, id = i))
+  variables <- variables[2:length(variables)] # remove '(Intercept)' variable
+  text <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
 
   report[3] <- paste0("Final regression model: ", text)
   bestformula <- lm(text, as.data.frame(data))
@@ -215,6 +201,7 @@ bestModel <- function(data,
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
+  bestformula$subsets$RMSE <- sqrt(bestformula$subsets$RSS / length(bestformula$fitted.values))
 
   # add information for horizontal and vertical extrapolation
   bestformula$minA1 <- min(data$A1)
@@ -262,9 +249,9 @@ printSubset <- function(model) {
   table <-
     do.call(rbind, Map(data.frame,
       R2 = model$subsets$rsq,
-      RSS = model$subsets$rss,
-      meanRSS = model$subsets$rss / model$df.residual,
       R2adj = model$subsets$adjr2,
+      RSS = model$subsets$rss,
+      RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
       Cp = model$subsets$cp,
       BIC = model$subsets$bic
     ))
