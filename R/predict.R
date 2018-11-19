@@ -451,7 +451,7 @@ predictNorm <-
       if (length(raw) != length(A)) {
         stop("'A' and 'raw' need to have the same length.")
       }
-      print("This might take some time. Please stand by ... ")
+      cat("Retrieving norm scores ...\n")
       #  initialize vectors and starting values
       n <- length(raw)
       values <- rep(NA, n)
