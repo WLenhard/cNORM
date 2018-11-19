@@ -8,10 +8,14 @@ This file documents the development of the package as well as open issues or poi
 Date: in development
 
 Changes:
+
 *    Additional instruction on series section of visualization tab in Shiny GUI
+*    Code cleanup in bestModel function
 *    SE added to plotNorm based on Oosterhuis, van der Ark & Sijtsma (2016)
-*    RMSE added to plotRaw
-*    additional plotting options added to GUI: plotting of differences in raw and norm plot
+*    RMSE added to model object (m$subsets), to plotRaw and to plotSubset
+*    additional plotting options added to GUI:
+     +    plotting of differences in raw and norm plot
+     +    RMSE in model selection information function
 
 
 

@@ -10,8 +10,9 @@ plotSubset(model, type = 1)
 \item{model}{The regression model from the bestModel function}
 
 \item{type}{Type of chart with 0 = adjusted R2 by number of predictors,
-1 = log transformed Mallow's Cp by adjusted R2 and 2 = Bayesian Information
-Criterion (BIC) by adjusted R2}
+1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
+Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
+of predictors}
 }
 \description{
 Plots the information criterion - either Cp (default) or BIC - against
