@@ -3,9 +3,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.0 (current)
+Date: 2019.11.16
 
-### Version in 1.0.3 (current)
-Date: in development
+Changes:
+
+*    Cross validation added: new function: cnorm.cv()
+
+
+
+### Version in 1.0.3
+Date: 2019.11.16
 
 Changes:
 

@@ -558,3 +558,169 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 
   return(summary)
 }
+
+#' Cross validation for term selection
+#'
+#' This function cross validates the model selection by drawing 90% of the data as
+#' training data and 10% as the validation data. The cases are stratified by norm
+#' group. Successive models are retrieved with increasing number of terms and the
+#' RMSE is plotted for the training, validation and the complete dataset. Additionally
+#' to this analysis on the raw score level, it is possible to estimate the mean norm score
+#' reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
+#' to the high computational load when computing norm scores, it takes time to finish
+#' when doing repeated cv or comparing models up to the maximum number of terms.
+#'
+#' @param d data.frame of norm sample with ranking, powers and interaction of L and A
+#' @param repetitions number of repetitions for cross validation
+#' @param norms determine norm score crossfit and R2 (if set to TRUE). The option is
+#' computationally intensive and duration increases with sample size, number of
+#' repetitions and maximum number of terms (max option).
+#' @param max Maximum number of terms in model up to 2*k + k^2
+#' @export
+#' @examples
+#' # plot cross validation RMSE by number of terms up to 9 with three repetitions
+#' data <- prepareData()
+#' cnorm.cv(data, 3, max=9, norms=FALSE)
+cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = NA) {
+  raw <- attr(d, "raw")
+  group <- attr(d, "group")
+  scaleM <- attr(d, "scaleMean")
+  scaleSD <- attr(d, "scaleSD")
+  k <- attr(d, "k")
+  n.models <- 2 * k + k * k
+  if(is.na(max) || max > n.models || max < 1){
+    max <- n.models
+  }
+
+  # set up regression formulas (from bestModel function)
+  if (k == 1) {
+    lmX <- formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
+  } else if (k == 2) {
+    lmX <-
+      formula(paste(raw, "L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2", sep = " ~ "))
+  } else if (k == 3) {
+    lmX <- formula(paste(raw, "L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3", sep = " ~ "))
+  } else if (k == 4) {
+    lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
+  } else if (k == 5) {
+    lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5", sep = " ~ "))
+  } else if (k == 6) {
+    lmX <-
+      formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6", sep = " ~ "))
+  }
+
+
+  # set up vectors to store RMSE for training, test and complete dataset models
+  val.errors <- rep(0, max)
+  train.errors <- rep(0, max)
+  complete.errors <- rep(0, max)
+
+  # set up vectors to store R2 and CORSSFIT
+  r2.train <- rep(0, max)
+  r2.test <- rep(0, max)
+  crossfit <- rep(0, max)
+
+  # draw test and training data several times ('repetitions' parameter), odel data and store MSE
+  for (a in 1:repetitions) {
+
+    # check for imbalances in data and repeat of stratification was unsatisfactory - usually never occurs
+    p.value <- .01
+    while (p.value < .2) {
+      # shuffle data and split into groups (for stratification)
+      d <- d[sample(nrow(d)), ]
+      d <- d[order(d$group), ]
+      sp <- split(d, list(d$group))
+      sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
+
+      # draw 9 tenth of data from each group for training
+      train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 9)), ])
+      train <- do.call(rbind, train)
+
+      # draw one tenth from each group for testing
+      test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 9)), ])
+      test <- do.call(rbind, test)
+
+      # test for overall significant differences between groups, restart stratification if necessary
+      p.value <- t.test(train$raw, test$raw)$p.value
+    }
+
+    # compute leaps model
+    subsets <- leaps::regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
+
+    # retrieve models coefficients for each number of terms
+    for (i in 1:max) {
+      cat(paste0("Repetition " , a, ", cycle ", i, "\n"))
+      variables <- names(coef(subsets, id = i))
+      variables <- variables[2:length(variables)] # remove '(Intercept)' variable
+      reg <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
+
+      # run linear regression for specific model
+      model <- lm(reg, train)
+      model$k <- k
+      model$minRaw <- min(train$raw)
+      model$maxRaw <- max(train$raw)
+      model$scaleM <- scaleM
+      model$scaleSD <- scaleSD
+
+
+      # predict values in test data
+      test.fitted <- predict.lm(model, test)
+
+      # store MSE for test and train data
+      train.errors[i] <- train.errors[i] + mean((model$fitted.values - train[, raw])^2)
+      val.errors[i] <- val.errors[i] + mean((test.fitted - test[, raw])^2)
+
+      # compute R2 for test and training
+      if(norms){
+        train$T <- predictNorm(train$raw, train$group, model, min(train$normValue), max(train$normValue))
+        test$T <- predictNorm(test$raw, test$group, model, min(train$normValue), max(train$normValue))
+
+        r2.train[i] <- r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs")^2)
+        r2.test[i] <- r2.test[i] + (cor(test$normValue, test$T, use = "pairwise.complete.obs")^2)
+      }
+    }
+  }
+
+  # now for the complete data the same logic
+  complete <- leaps::regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
+  for (i in 1:max) {
+    variables <- names(coef(complete, id = i))
+    variables <- variables[2:length(variables)]
+    reg <- paste0(raw, " ~ ", paste(variables, collapse = " + "))
+    model <- lm(reg, d)
+
+    # mse for the complete data based on number of terms
+    complete.errors[i] <- sqrt(mean((model$fitted.values - d[, raw])^2))
+
+    # build the average over repetitions and the root
+    train.errors[i] <- sqrt(train.errors[i] / repetitions)
+    val.errors[i] <- sqrt(val.errors[i] / repetitions)
+
+    if(norms){
+      r2.train[i] <- r2.train[i] / repetitions
+      r2.test[i] <- r2.test[i] / repetitions
+    }
+  }
+
+  if(norms){
+    par(mfrow = c(3, 1)) # set the plotting area into a 1*2 array
+  }else{
+    par(mfrow = c(1, 1))
+  }
+
+  # plot RMSE
+  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms")
+  points(complete.errors, pch = 19, type = "b", col = "black")
+  points(train.errors, pch = 19, type = "b", col = "red")
+  legend("topright", legend = c("Training", "Validation", "Complete Dataset"), col = c("red", "blue", "black"), pch = 19)
+
+  if(norms){
+    # plot R2
+    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms")
+    points(r2.test, pch = 19, type = "b", col = "blue")
+    legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
+
+    # plot CROSSFIT
+    plot(r2.train / r2.test, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms")
+  }
+}
