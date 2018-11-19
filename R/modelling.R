@@ -201,7 +201,6 @@ bestModel <- function(data,
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
-  bestformula$subsets$RMSE <- sqrt(bestformula$subsets$RSS / length(bestformula$fitted.values))
 
   # add information for horizontal and vertical extrapolation
   bestformula$minA1 <- min(data$A1)

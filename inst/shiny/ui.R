@@ -112,13 +112,14 @@ shinyUI(fluidPage(
           ),
           uiOutput("NumberOfTerms"),
           tags$br(),
-          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c(0:2), selected = 1),
+          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c(0:3), selected = 1),
           tags$p("Please select the type of chart for plotting the information function, with"),
           tags$ol(
             start = 0,
             tags$li("adjusted R2 by number of predictors"),
             tags$li("log transformed Mallow's Cp by adjusted R2"),
-            tags$li("Bayesian Information Criterion (BIC) by adjusted R2")
+            tags$li("Bayesian Information Criterion (BIC) by adjusted R2"),
+            tags$li("RMSE by number of predictors")
           )
         ),
         mainPanel(

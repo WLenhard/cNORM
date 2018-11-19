@@ -725,8 +725,9 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' displayed as a dashed line.
 #' @param model The regression model from the bestModel function
 #' @param type Type of chart with 0 = adjusted R2 by number of predictors,
-#' 1 = log transformed Mallow's Cp by adjusted R2 and 2 = Bayesian Information
-#' Criterion (BIC) by adjusted R2
+#' 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
+#' Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
+#' of predictors
 #' @seealso bestModel, plotPercentiles, printSubset
 #' @examples
 #' normData <- prepareData()
@@ -735,7 +736,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' @export
 plotSubset <- function(model, type = 1) {
   message("Hint: Select the model with the highest BIC or Cp score while simultaneously optimizing R2.")
-  dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic, cp = model$subsets$cp, nr = seq(1, length(model$subsets$adjr2), by = 1))
+  dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic, cp = model$subsets$cp, RMSE = sqrt(model$subsets$rss / length(model$fitted.values)), nr = seq(1, length(model$subsets$adjr2), by = 1))
   if (type == 1) {
     lattice::xyplot(cp ~ adjr2,
       data = dataFrameTMP, type = "b",
@@ -794,31 +795,39 @@ plotSubset <- function(model, type = 1) {
         lattice::panel.xyplot(x, y, ...)
       }
     )
+  } else if(type == 3){
+    lattice::xyplot(RMSE ~ nr,
+                    data = dataFrameTMP, type = "b",
+                    col.line = "lightblue", lwd = 1,
+                    grid = TRUE,
+                    main = "Information Function",
+                    ylab = "Root Means Square Error",
+                    xlab = "Number of Predictors" )
   } else {
     lattice::xyplot(adjr2 ~ nr,
-      data = dataFrameTMP, type = "b",
-      col.line = "lightblue", lwd = 1,
-      grid = TRUE,
-      main = "Information Function",
-      ylab = "Adjusted R2",
-      xlab = "Number of Predictors",
-      key = list(
-        corner = c(
-          0.9,
-          0.1
-        ), lines = list(
-          col = c("#9933FF"),
-          lty = c(2), lwd = 2
-        ),
-        text = list(c("Cutoff Value"))
-      ), panel = function(x, y, ...) {
-        lattice::panel.abline(
-          h = model$cutoff,
-          lwd = 2, lty = "longdash",
-          col = "#9933FF", label = model$cutoff
-        )
-        lattice::panel.xyplot(x, y, ...)
-      }
+                    data = dataFrameTMP, type = "b",
+                    col.line = "lightblue", lwd = 1,
+                    grid = TRUE,
+                    main = "Information Function",
+                    ylab = "Adjusted R2",
+                    xlab = "Number of Predictors",
+                    key = list(
+                      corner = c(
+                        0.9,
+                        0.1
+                      ), lines = list(
+                        col = c("#9933FF"),
+                        lty = c(2), lwd = 2
+                      ),
+                      text = list(c("Cutoff Value"))
+                    ), panel = function(x, y, ...) {
+                      lattice::panel.abline(
+                        h = model$cutoff,
+                        lwd = 2, lty = "longdash",
+                        col = "#9933FF", label = model$cutoff
+                      )
+                      lattice::panel.xyplot(x, y, ...)
+                    }
     )
   }
 }
