@@ -581,7 +581,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max=9, norms=FALSE)
-cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = NA) {
+cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
   raw <- attr(d, "raw")
   group <- attr(d, "group")
   scaleM <- attr(d, "scaleMean")
