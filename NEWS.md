@@ -8,7 +8,7 @@ Date: 2019.11.19
 
 Changes:
 
-*    Cross validation added: new function: cnorm.cv()
+*    Cross validation added: new function: cnorm.cv() for assessing RMSE for raw data and R2 and CROSSFIT for norm data
 
 
 

@@ -581,8 +581,10 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max=9, norms=FALSE)
-cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
+cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12) {
+  d <- data
   raw <- attr(d, "raw")
+  age <- attr(d, "age")
   group <- attr(d, "group")
   scaleM <- attr(d, "scaleMean")
   scaleSD <- attr(d, "scaleSD")
@@ -628,8 +630,8 @@ cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
     while (p.value < .2) {
       # shuffle data and split into groups (for stratification)
       d <- d[sample(nrow(d)), ]
-      d <- d[order(d$group), ]
-      sp <- split(d, list(d$group))
+      d <- d[order(d[, group]), ]
+      sp <- split(d, list(d[, group]))
       sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
 
       # draw 9 tenth of data from each group for training
@@ -641,7 +643,7 @@ cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
       test <- do.call(rbind, test)
 
       # test for overall significant differences between groups, restart stratification if necessary
-      p.value <- t.test(train$raw, test$raw)$p.value
+      p.value <- t.test(train[, raw], test[, raw])$p.value
     }
 
     # compute leaps model
@@ -657,8 +659,8 @@ cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
       # run linear regression for specific model
       model <- lm(reg, train)
       model$k <- k
-      model$minRaw <- min(train$raw)
-      model$maxRaw <- max(train$raw)
+      model$minRaw <- min(train[, raw])
+      model$maxRaw <- max(train[, raw])
       model$scaleM <- scaleM
       model$scaleSD <- scaleSD
 
@@ -672,8 +674,8 @@ cnorm.cv <- function(d, repetitions = 1, norms = TRUE, max = 12) {
 
       # compute R2 for test and training
       if(norms){
-        train$T <- predictNorm(train$raw, train$group, model, min(train$normValue), max(train$normValue))
-        test$T <- predictNorm(test$raw, test$group, model, min(train$normValue), max(train$normValue))
+        train$T <- predictNorm(train[, raw], train[, age], model, min(train$normValue), max(train$normValue))
+        test$T <- predictNorm(test[, raw], test[, age], model, min(train$normValue), max(train$normValue))
 
         r2.train[i] <- r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs")^2)
         r2.test[i] <- r2.test[i] + (cor(test$normValue, test$T, use = "pairwise.complete.obs")^2)
