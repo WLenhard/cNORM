@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.0 (current)
-Date: 2019.11.19
+Date: 2019.11.21
 
 Changes:
 
