@@ -7,6 +7,8 @@
 cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12)
 }
 \arguments{
+\item{data}{data.frame of norm sample with ranking, powers and interaction of L and A}
+
 \item{repetitions}{number of repetitions for cross validation}
 
 \item{norms}{determine norm score crossfit and R2 (if set to TRUE). The option is
@@ -14,8 +16,6 @@ computationally intensive and duration increases with sample size, number of
 repetitions and maximum number of terms (max option).}
 
 \item{max}{Maximum number of terms in model up to 2*k + k^2}
-
-\item{d}{data.frame of norm sample with ranking, powers and interaction of L and A}
 }
 \description{
 This function cross validates the model selection by drawing 90% of the data as
