@@ -725,4 +725,9 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12) {
     # plot CROSSFIT
     plot(r2.train / r2.test, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms")
   }
+  cat("\n")
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.validation = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, crossfit = r2.train / r2.test)
+  print(tab)
+
+  cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
 }
