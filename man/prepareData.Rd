@@ -5,7 +5,7 @@
 \title{Set up example dataset and compute model}
 \usage{
 prepareData(data = NULL, group = "group", raw = "raw",
-  age = "group")
+  age = "group", width = NA)
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
@@ -17,6 +17,9 @@ demonstrate the procedure.}
 \item{raw}{the raw scores}
 
 \item{age}{the continuous explanatory variable; by default set to "group"}
+
+\item{if}{a width is provided, the function switches to rankBySlidingWindow to determine the
+observed raw scores, otherwise, ranking is done by group (default)}
 }
 \value{
 data frame including the norm scores, powers and interactions of the norm score and

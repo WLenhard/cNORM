@@ -4,7 +4,8 @@
 \alias{cnorm.cv}
 \title{Cross validation for term selection}
 \usage{
-cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12)
+cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12,
+  cv = "full", width = NA, raw = NA, group = NA, age = NA)
 }
 \arguments{
 \item{data}{data.frame of norm sample with ranking, powers and interaction of L and A}
@@ -16,6 +17,18 @@ computationally intensive and duration increases with sample size, number of
 repetitions and maximum number of terms (max option).}
 
 \item{max}{Maximum number of terms in model up to 2*k + k^2}
+
+\item{cv}{If set to full (default), the data is split into training and validation data and ranked afterwards,
+otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
+only the modelling, but not the ranking is independent)}
+
+\item{width}{If provided, ranking is done via rankBySlidingWindow, otherwise by group}
+
+\item{raw}{Name of the raw variable}
+
+\item{group}{Name of the grouping variable}
+
+\item{age}{Name of the age variable}
 }
 \description{
 This function cross validates the model selection by drawing 90% of the data as

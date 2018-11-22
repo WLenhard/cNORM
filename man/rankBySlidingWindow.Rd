@@ -6,7 +6,7 @@
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width,
   method = 4, scale = "T", descend = FALSE, descriptives = TRUE,
-  nGroup = 0)
+  nGroup = 0, ...)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}

@@ -579,10 +579,10 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 #' only the modelling, but not the ranking is independent)
-#' @width If provided, ranking is done via rankBySlidingWindow, otherwise by group
-#' @raw Name of the raw variable
-#' @age Name of the age variable
-#' @group Name of the grouping variable
+#' @param width If provided, ranking is done via rankBySlidingWindow, otherwise by group
+#' @param raw Name of the raw variable
+#' @param age Name of the age variable
+#' @param group Name of the grouping variable
 #' @export
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
