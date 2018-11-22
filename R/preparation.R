@@ -35,6 +35,8 @@
 #' @param group grouping variable in the data, e. g. age groups, grades ...
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
+#' @param if a width is provided, the function switches to rankBySlidingWindow to determine the
+#' observed raw scores, otherwise, ranking is done by group (default)
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
@@ -44,7 +46,7 @@
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
 #' @export
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group") {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA) {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
@@ -79,7 +81,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   normData <- normData[!is.na(normData[, age]), ]
 
   # ranking and powers
-  normData <- rankByGroup(normData, group = group, raw = raw)
+  if(is.na(width)){
+    normData <- rankByGroup(normData, group = group, raw = raw)
+  }else{
+    normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width)
+  }
   normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
   return(normData)
 }
@@ -303,14 +309,13 @@ rankBySlidingWindow <- function(data,
                                 scale = "T",
                                 descend = FALSE,
                                 descriptives = TRUE,
-                                nGroup = 0) {
+                                nGroup = 0, ...) {
 
   # copy data frame
   d <- as.data.frame(data)
 
-  if(length(is.na(d[, group]))>0 || length(is.na(d[, raw]))>0 || length(is.na(d[, age]))>0){
+  if(length(is.na(d[, raw]))>0 || length(is.na(d[, age]))>0){
     cat("Missing values found in grouping, raw score or age variable... excluding from dataset")
-    d <- d[!is.na(d[, group]), ]
     d <- d[!is.na(d[, raw]), ]
     d <- d[!is.na(d[, age]), ]
   }

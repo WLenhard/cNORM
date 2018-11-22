@@ -4,11 +4,15 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.0 (current)
-Date: 2019.11.21
+Date: 2019.11.22
 
 Changes:
 
 *    Cross validation added: new function: cnorm.cv() for assessing RMSE for raw data and R2 and CROSSFIT for norm data
+*    Data table output fpr cnorm.cv
+*    rankBySlidingWindow now accessibe via prepareData()
+*    group, raw, age and width can now be provided in cnorm.cv
+*    parameter for full cross validation (seperate ranking for train and validation)
 
 
 

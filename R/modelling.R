@@ -576,16 +576,32 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' computationally intensive and duration increases with sample size, number of
 #' repetitions and maximum number of terms (max option).
 #' @param max Maximum number of terms in model up to 2*k + k^2
+#' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
+#' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
+#' only the modelling, but not the ranking is independent)
+#' @width If provided, ranking is done via rankBySlidingWindow, otherwise by group
+#' @raw Name of the raw variable
+#' @age Name of the age variable
+#' @group Name of the grouping variable
 #' @export
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max=9, norms=FALSE)
-cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12) {
+cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full", width = NA, raw = NA, group = NA, age = NA) {
   d <- data
-  raw <- attr(d, "raw")
-  age <- attr(d, "age")
-  group <- attr(d, "group")
+
+  if(is.na(raw)||is.na(group)||is.na(age)){
+      raw <- attr(d, "raw")
+      age <- attr(d, "age")
+      group <- attr(d, "group")
+  }
+
+  if(is.na(raw)||is.na(group)||is.na(age)){
+    stop("Variables raw, age and group neither available as function parameters nor as attributes from data object. Please provide according information.")
+  }
+
+
   scaleM <- attr(d, "scaleMean")
   scaleSD <- attr(d, "scaleSD")
   k <- attr(d, "k")
@@ -635,13 +651,17 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12) {
       sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
 
       # draw 9 tenth of data from each group for training
-      train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 9)), ])
+      train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 1)), ])
       train <- do.call(rbind, train)
 
       # draw one tenth from each group for testing
-      test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 9)), ])
+      test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 1)), ])
       test <- do.call(rbind, test)
 
+      if(cv=="full"){
+        train <- prepareData(train, raw=raw, group=group, age=age)
+        test <- prepareData(test, raw=raw, group=group, age=age)
+      }
       # test for overall significant differences between groups, restart stratification if necessary
       p.value <- t.test(train[, raw], test[, raw])$p.value
     }
@@ -730,4 +750,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12) {
   print(tab)
 
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
+  cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.validation)))
+  cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
+
 }
