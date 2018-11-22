@@ -570,7 +570,8 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' to the high computational load when computing norm scores, it takes time to finish
 #' when doing repeated cv or comparing models up to the maximum number of terms.
 #'
-#' @param data data.frame of norm sample with ranking, powers and interaction of L and A
+#'
+#' @param data data frame of norm sample with ranking, powers and interaction of L and A
 #' @param repetitions number of repetitions for cross validation
 #' @param norms determine norm score crossfit and R2 (if set to TRUE). The option is
 #' computationally intensive and duration increases with sample size, number of

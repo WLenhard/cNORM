@@ -8,7 +8,7 @@ cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12,
   cv = "full", width = NA, raw = NA, group = NA, age = NA)
 }
 \arguments{
-\item{data}{data.frame of norm sample with ranking, powers and interaction of L and A}
+\item{data}{data frame of norm sample with ranking, powers and interaction of L and A}
 
 \item{repetitions}{number of repetitions for cross validation}
 
