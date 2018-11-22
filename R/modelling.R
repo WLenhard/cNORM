@@ -588,8 +588,10 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
-#' cnorm.cv(data, 3, max=9, norms=FALSE)
+#' cnorm.cv(data, 3, max=7, norms=FALSE)
 cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full", width = NA, raw = NA, group = NA, age = NA) {
+
+
   d <- data
 
   if(is.na(raw)||is.na(group)||is.na(age)){

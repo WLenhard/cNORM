@@ -43,5 +43,5 @@ when doing repeated cv or comparing models up to the maximum number of terms.
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
 data <- prepareData()
-cnorm.cv(data, 3, max=9, norms=FALSE)
+cnorm.cv(data, 3, max=7, norms=FALSE)
 }

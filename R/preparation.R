@@ -35,7 +35,7 @@
 #' @param group grouping variable in the data, e. g. age groups, grades ...
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
-#' @param if a width is provided, the function switches to rankBySlidingWindow to determine the
+#' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
 #' observed raw scores, otherwise, ranking is done by group (default)
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
@@ -287,6 +287,8 @@ rankByGroup <-
 #' equi distant groups, named by the group mean age of each group. It creates the
 #' column 'group' in the data.frame and in case, there is already one with that name,
 #' overwrites it.
+#' @param group Optional parameter for providing the name of the grouping variable (if present; overwritten
+#' if ngroups is used)
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
@@ -309,7 +311,8 @@ rankBySlidingWindow <- function(data,
                                 scale = "T",
                                 descend = FALSE,
                                 descriptives = TRUE,
-                                nGroup = 0, ...) {
+                                nGroup = 0,
+                                group = NA) {
 
   # copy data frame
   d <- as.data.frame(data)

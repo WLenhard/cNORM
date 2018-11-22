@@ -18,7 +18,7 @@ demonstrate the procedure.}
 
 \item{age}{the continuous explanatory variable; by default set to "group"}
 
-\item{if}{a width is provided, the function switches to rankBySlidingWindow to determine the
+\item{width}{if a width is provided, the function switches to rankBySlidingWindow to determine the
 observed raw scores, otherwise, ranking is done by group (default)}
 }
 \value{

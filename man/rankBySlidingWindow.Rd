@@ -6,7 +6,7 @@
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width,
   method = 4, scale = "T", descend = FALSE, descriptives = TRUE,
-  nGroup = 0, ...)
+  nGroup = 0, group = NA)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -39,6 +39,9 @@ standard deviation per group is added to each observation}
 equi distant groups, named by the group mean age of each group. It creates the
 column 'group' in the data.frame and in case, there is already one with that name,
 overwrites it.}
+
+\item{group}{Optional parameter for providing the name of the grouping variable (if present; overwritten
+if ngroups is used)}
 }
 \value{
 the dataset with the individual percentiles and norm scores
