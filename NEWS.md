@@ -3,8 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.1.0 (current)
-Date: 2019.11.22
+
+### Version in 1.1.1 (current)
+Date: 2019.11.23
+
+Changes:
+
+
+
+### Version in 1.1.0
+Date: 2019.11.23
 
 Changes:
 
