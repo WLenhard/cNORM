@@ -695,7 +695,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
       percentiles = percentiles,
       scale = NULL,
       group = group,
-      title = paste0("Manifest and Fitted Percentile Curves\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
+      title = paste0("Observed and Predicted Percentiles\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
     )
 
     if (!is.null(filename)) {

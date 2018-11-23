@@ -139,7 +139,7 @@ rankByGroup <-
              descriptives = TRUE) {
     d <- as.data.frame(data)
 
-    if(length(is.na(d[, group]))>0 || length(is.na(d[, raw]))>0){
+    if(anyNA(d[, group]) || anyNA(d[, raw])){
       cat("Missing values found in grouping or raw score variable... excluding from dataset")
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]

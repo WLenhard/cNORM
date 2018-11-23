@@ -13,6 +13,7 @@ Changes:
 *    rankBySlidingWindow now accessibe via prepareData()
 *    group, raw, age and width can now be provided in cnorm.cv
 *    parameter for full cross validation (seperate ranking for train and validation)
+*    Additional NA checks and warning messages
 
 
 

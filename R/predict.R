@@ -450,6 +450,10 @@ predictNorm <-
     } else if (is.vector(raw) && is.vector(A)) {
       if (length(raw) != length(A)) {
         stop("'A' and 'raw' need to have the same length.")
+      }else if(anyNA(A)){
+        stop(paste0("NAs are present in 'A' vector. Please exclude missing values first."))
+      }else if(anyNA(raw)){
+        stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
       }
       cat("Retrieving norm scores ...\n")
       #  initialize vectors and starting values

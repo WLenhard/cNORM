@@ -568,7 +568,8 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' to this analysis on the raw score level, it is possible to estimate the mean norm score
 #' reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
 #' to the high computational load when computing norm scores, it takes time to finish
-#' when doing repeated cv or comparing models up to the maximum number of terms.
+#' when doing repeated cv or comparing models up to the maximum number of terms. It is
+#' advisable to use an already prepared dataset with T scores as norm values.
 #'
 #'
 #' @param data data frame of norm sample with ranking, powers and interaction of L and A
@@ -604,10 +605,21 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full",
     stop("Variables raw, age and group neither available as function parameters nor as attributes from data object. Please provide according information.")
   }
 
-
   scaleM <- attr(d, "scaleMean")
+  if(is.na(scaleM)){
+    scaleM <- 50
+  }
+
   scaleSD <- attr(d, "scaleSD")
+  if(is.na(scaleSD)){
+    scaleSD <- 10
+  }
+
   k <- attr(d, "k")
+  if(is.na(k)){
+    k <- 4
+  }
+
   n.models <- 2 * k + k * k
   if(is.na(max) || max > n.models || max < 1){
     max <- n.models
