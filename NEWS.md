@@ -14,6 +14,7 @@ Changes:
 *    group, raw, age and width can now be provided in cnorm.cv
 *    parameter for full cross validation (seperate ranking for train and validation)
 *    Additional NA checks and warning messages
+*    plotPercentiles now with R2adjr in title
 
 
 
