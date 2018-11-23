@@ -568,9 +568,12 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' to this analysis on the raw score level, it is possible to estimate the mean norm score
 #' reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
 #' to the high computational load when computing norm scores, it takes time to finish
-#' when doing repeated cv or comparing models up to the maximum number of terms. It is
-#' advisable to use an already prepared dataset with T scores as norm values.
-#'
+#' when doing repeated cv or comparing models up to the maximum number of terms. When using
+#' the cv = "full" option, the ranking is done for the test and validation dataset
+#' seperately (always based on T scores), reulting in a complete cross validation. In
+#' order to only validate the modelling, you as well can use a preranked data set
+#' (prepareData() already applied). In this case, the training and validation data is
+#' drawn from the already ranked data.
 #'
 #' @param data data frame of norm sample with ranking, powers and interaction of L and A
 #' @param repetitions number of repetitions for cross validation
@@ -606,12 +609,12 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full",
   }
 
   scaleM <- attr(d, "scaleMean")
-  if(is.na(scaleM)){
+  if(is.na(scaleM) || cv=="full"){
     scaleM <- 50
   }
 
   scaleSD <- attr(d, "scaleSD")
-  if(is.na(scaleSD)){
+  if(is.na(scaleSD) || cv=="full"){
     scaleSD <- 10
   }
 

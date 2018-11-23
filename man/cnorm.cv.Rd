@@ -38,7 +38,8 @@ RMSE is plotted for the training, validation and the complete dataset. Additiona
 to this analysis on the raw score level, it is possible to estimate the mean norm score
 reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
 to the high computational load when computing norm scores, it takes time to finish
-when doing repeated cv or comparing models up to the maximum number of terms.
+when doing repeated cv or comparing models up to the maximum number of terms. It is
+advisable to use an already prepared dataset with T scores as norm values.
 }
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
