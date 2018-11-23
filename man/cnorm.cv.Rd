@@ -4,7 +4,7 @@
 \alias{cnorm.cv}
 \title{Cross validation for term selection}
 \usage{
-cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12,
+cnorm.cv(data, repetitions = 1, norms = TRUE, min = 1, max = 12,
   cv = "full", width = NA, raw = NA, group = NA, age = NA)
 }
 \arguments{
@@ -15,6 +15,8 @@ cnorm.cv(data, repetitions = 1, norms = TRUE, max = 12,
 \item{norms}{determine norm score crossfit and R2 (if set to TRUE). The option is
 computationally intensive and duration increases with sample size, number of
 repetitions and maximum number of terms (max option).}
+
+\item{min}{Minimum number of terms to start from, default = 1}
 
 \item{max}{Maximum number of terms in model up to 2*k + k^2}
 
@@ -30,16 +32,31 @@ only the modelling, but not the ranking is independent)}
 
 \item{age}{Name of the age variable}
 }
+\value{
+table with results per term number, including RMSE for raw scores in training, validationand complete
+sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
+}
 \description{
-This function cross validates the model selection by drawing 90% of the data as
-training data and 10% as the validation data. The cases are stratified by norm
-group. Successive models are retrieved with increasing number of terms and the
-RMSE is plotted for the training, validation and the complete dataset. Additionally
-to this analysis on the raw score level, it is possible to estimate the mean norm score
+This function helps in selecting the number of terms for the model by doing repeated
+cross validation with 80% of the data as training data and 20% as the validation data.
+The cases are drawn randomly but stratified by norm group. Successive models are retrieved
+with increasing number of terms and the RMSE of raw scores (fitted by the regression model)
+is plotted for the training, validation and the complete dataset. Additionally to this
+analysis on the raw score level, it is possible (default) to estimate the mean norm score
 reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
 to the high computational load when computing norm scores, it takes time to finish
-when doing repeated cv or comparing models up to the maximum number of terms. It is
-advisable to use an already prepared dataset with T scores as norm values.
+when doing repeated cv or comparing models up to the maximum number of terms. When using
+the cv = "full" option, the ranking is done for the test and validation dataset
+separately (always based on T scores), resulting in a complete cross validation. In
+order to only validate the modeling, you as well can use a pre ranked data set with
+prepareData() already applied. In this case, the training and validation data is
+drawn from the already ranked data and the scores for the validation set should improve.
+It is however no independent test, as the ranking between both samples is interlinked.
+}
+\details{
+As a suggestion for real tests, combine visual inspection of the percentiles with a
+repeated cross validation (e. g. 10 repetitions). Fokus on norm score R2 in the
+validation dataset and avoid models with a high overfit (e. g. crossfit > 1.25).
 }
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions

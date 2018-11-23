@@ -561,25 +561,32 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 
 #' Cross validation for term selection
 #'
-#' This function cross validates the model selection by drawing 90% of the data as
-#' training data and 10% as the validation data. The cases are stratified by norm
-#' group. Successive models are retrieved with increasing number of terms and the
-#' RMSE is plotted for the training, validation and the complete dataset. Additionally
-#' to this analysis on the raw score level, it is possible to estimate the mean norm score
+#' This function helps in selecting the number of terms for the model by doing repeated
+#' cross validation with 80% of the data as training data and 20% as the validation data.
+#' The cases are drawn randomly but stratified by norm group. Successive models are retrieved
+#' with increasing number of terms and the RMSE of raw scores (fitted by the regression model)
+#' is plotted for the training, validation and the complete dataset. Additionally to this
+#' analysis on the raw score level, it is possible (default) to estimate the mean norm score
 #' reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
 #' to the high computational load when computing norm scores, it takes time to finish
 #' when doing repeated cv or comparing models up to the maximum number of terms. When using
 #' the cv = "full" option, the ranking is done for the test and validation dataset
-#' seperately (always based on T scores), reulting in a complete cross validation. In
-#' order to only validate the modelling, you as well can use a preranked data set
-#' (prepareData() already applied). In this case, the training and validation data is
-#' drawn from the already ranked data.
+#' separately (always based on T scores), resulting in a complete cross validation. In
+#' order to only validate the modeling, you as well can use a pre ranked data set with
+#' prepareData() already applied. In this case, the training and validation data is
+#' drawn from the already ranked data and the scores for the validation set should improve.
+#' It is however no independent test, as the ranking between both samples is interlinked.
+#'
+#' As a suggestion for real tests, combine visual inspection of the percentiles with a
+#' repeated cross validation (e. g. 10 repetitions). Fokus on norm score R2 in the
+#' validation dataset and avoid models with a high overfit (e. g. crossfit > 1.25).
 #'
 #' @param data data frame of norm sample with ranking, powers and interaction of L and A
 #' @param repetitions number of repetitions for cross validation
 #' @param norms determine norm score crossfit and R2 (if set to TRUE). The option is
 #' computationally intensive and duration increases with sample size, number of
 #' repetitions and maximum number of terms (max option).
+#' @param min Minimum number of terms to start from, default = 1
 #' @param max Maximum number of terms in model up to 2*k + k^2
 #' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
@@ -588,13 +595,14 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @param raw Name of the raw variable
 #' @param age Name of the age variable
 #' @param group Name of the grouping variable
+#' @return table with results per term number, including RMSE for raw scores in training, validationand complete
+#' sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
 #' @export
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max=7, norms=FALSE)
-cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full", width = NA, raw = NA, group = NA, age = NA) {
-
+cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", width = NA, raw = NA, group = NA, age = NA) {
 
   d <- data
 
@@ -669,11 +677,11 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full",
       sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
 
       # draw 9 tenth of data from each group for training
-      train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 1)), ])
+      train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 4)), ])
       train <- do.call(rbind, train)
 
       # draw one tenth from each group for testing
-      test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 1)), ])
+      test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 4)), ])
       test <- do.call(rbind, test)
 
       if(cv=="full"){
@@ -688,7 +696,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full",
     subsets <- leaps::regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
 
     # retrieve models coefficients for each number of terms
-    for (i in 1:max) {
+    for (i in min:max) {
       cat(paste0("Repetition " , a, ", cycle ", i, "\n"))
       variables <- names(coef(subsets, id = i))
       variables <- variables[2:length(variables)] # remove '(Intercept)' variable
@@ -740,35 +748,42 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, max = 12, cv = "full",
       r2.train[i] <- r2.train[i] / repetitions
       r2.test[i] <- r2.test[i] / repetitions
     }
+
+    if(i < min){
+      r2.train[i] <- NA
+      r2.test[i] <- NA
+      val.errors[i] <- NA
+      train.errors[i] <- NA
+      complete.errors[i] <- NA
+    }
   }
 
   if(norms){
-    par(mfrow = c(3, 1)) # set the plotting area into a 1*2 array
+    par(mfrow = c(2, 2)) # set the plotting area into a 1*2 array
   }else{
     par(mfrow = c(1, 1))
   }
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.validation = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, crossfit = r2.train / r2.test)
 
   # plot RMSE
-  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms")
+  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim=c(min(train.errors, na.rm = TRUE),max(val.errors, na.rm = TRUE)))
   points(complete.errors, pch = 19, type = "b", col = "black")
   points(train.errors, pch = 19, type = "b", col = "red")
   legend("topright", legend = c("Training", "Validation", "Complete Dataset"), col = c("red", "blue", "black"), pch = 19)
 
   if(norms){
     # plot R2
-    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms")
+    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms", ylim=c(min(r2.test, na.rm = TRUE),1))
     points(r2.test, pch = 19, type = "b", col = "blue")
     legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
 
     # plot CROSSFIT
-    plot(r2.train / r2.test, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms")
+    plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(tab$crossfit, na.rm = TRUE),max(tab$crossfit, na.rm = TRUE)))
   }
   cat("\n")
-  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.validation = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, crossfit = r2.train / r2.test)
-  print(tab)
-
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.validation)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
-
+  cat("\n")
+  return(tab)
 }
