@@ -591,6 +591,9 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 #' only the modelling, but not the ranking is independent)
+#' @param pCutoff The function checks the stratification for extremely unbalanced data sampling.
+#' It performs a t-test per group . pCutoff specifies the p-value per group that the test result
+#' has to reach at least. To minimize beta error, the value is set to .2 per default
 #' @param width If provided, ranking is done via rankBySlidingWindow, otherwise by group
 #' @param raw Name of the raw variable
 #' @param age Name of the age variable
@@ -602,7 +605,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max=7, norms=FALSE)
-cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", width = NA, raw = NA, group = NA, age = NA) {
+cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = .2, width = NA, raw = NA, group = NA, age = NA) {
 
   d <- data
 
@@ -662,6 +665,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   # set up vectors to store R2 and CORSSFIT
   r2.train <- rep(0, max)
   r2.test <- rep(0, max)
+  delta <- rep(NA, max)
   crossfit <- rep(0, max)
 
   # draw test and training data several times ('repetitions' parameter), odel data and store MSE
@@ -669,19 +673,29 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # check for imbalances in data and repeat of stratification was unsatisfactory - usually never occurs
     p.value <- .01
-    while (p.value < .2) {
+    while (p.value < pCutoff) {
       # shuffle data and split into groups (for stratification)
       d <- d[sample(nrow(d)), ]
       d <- d[order(d[, group]), ]
       sp <- split(d, list(d[, group]))
       sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
 
-      # draw 9 tenth of data from each group for training
+      # draw 9 tenth of data from each group for training and testing
       train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 4)), ])
-      train <- do.call(rbind, train)
-
-      # draw one tenth from each group for testing
       test <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 4)), ])
+
+      # test for significant differences to avoid extremely unbalanced data
+      p <- rep(1, length(train))
+      for(z in 1:length(train)){
+        p[z] <- t.test(train[[z]][, raw], test[[z]][, raw])$p.value
+      }
+      p.value <- min(p)
+      if(p.value < pCutoff){
+        next
+      }
+
+      # combine lists to data frames
+      train <- do.call(rbind, train)
       test <- do.call(rbind, test)
 
       if(cv=="full"){
@@ -689,7 +703,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
         test <- prepareData(test, raw=raw, group=group, age=age)
       }
       # test for overall significant differences between groups, restart stratification if necessary
-      p.value <- t.test(train[, raw], test[, raw])$p.value
+      #p.value <- t.test(train[, raw], test[, raw])$p.value
     }
 
     # compute leaps model
@@ -747,6 +761,10 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     if(norms){
       r2.train[i] <- r2.train[i] / repetitions
       r2.test[i] <- r2.test[i] / repetitions
+
+      if(i > min){
+        delta[i] <- r2.test[i] - r2.test[i - 1]
+      }
     }
 
     if(i < min){
@@ -763,13 +781,13 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   }else{
     par(mfrow = c(1, 1))
   }
-  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.validation = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, crossfit = r2.train / r2.test)
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, delta.r2.test = delta, crossfit = r2.train / r2.test)
 
   # plot RMSE
   plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim=c(min(train.errors, na.rm = TRUE),max(val.errors, na.rm = TRUE)))
   points(complete.errors, pch = 19, type = "b", col = "black")
   points(train.errors, pch = 19, type = "b", col = "red")
-  legend("topright", legend = c("Training", "Validation", "Complete Dataset"), col = c("red", "blue", "black"), pch = 19)
+  legend("topright", legend = c("Training", "Validation", "Complete"), col = c("red", "blue", "black"), pch = 19)
 
   if(norms){
     # plot R2
@@ -779,11 +797,16 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # plot CROSSFIT
     plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(tab$crossfit, na.rm = TRUE),max(tab$crossfit, na.rm = TRUE)))
+
+    # plot delta r2 test
+    plot(tab$delta.r2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$delta.r2.test, na.rm = TRUE),max(tab$delta.r2.test, na.rm = TRUE)))
   }
-  cat("\n")
+  cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.validation)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
+  cat("\nPlease investiate the plots and the summary table, as the results might vary within a narrow range.")
+  cat("\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress.")
   cat("\n")
   return(tab)
 }

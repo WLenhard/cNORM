@@ -5,7 +5,8 @@
 \title{Cross validation for term selection}
 \usage{
 cnorm.cv(data, repetitions = 1, norms = TRUE, min = 1, max = 12,
-  cv = "full", width = NA, raw = NA, group = NA, age = NA)
+  cv = "full", pCutoff = 0.2, width = NA, raw = NA, group = NA,
+  age = NA)
 }
 \arguments{
 \item{data}{data frame of norm sample with ranking, powers and interaction of L and A}
@@ -23,6 +24,10 @@ repetitions and maximum number of terms (max option).}
 \item{cv}{If set to full (default), the data is split into training and validation data and ranked afterwards,
 otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 only the modelling, but not the ranking is independent)}
+
+\item{pCutoff}{The function checks the stratification for extremely unbalanced data sampling.
+It performs a t-test per group . pCutoff specifies the p-value per group that the test result
+has to reach at least. To minimize beta error, the value is set to .2 per default}
 
 \item{width}{If provided, ranking is done via rankBySlidingWindow, otherwise by group}
 

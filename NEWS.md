@@ -5,9 +5,10 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.1 (current)
-Date: 2019.11.23
+Date: 2019.11.24
 
 Changes:
+*    Parameters added to cv.norm: Significance level for stratification process
 
 
 
