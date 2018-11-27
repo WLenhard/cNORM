@@ -803,7 +803,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   }
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
-  cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.validation)))
+  cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
   cat("\nPlease investiate the plots and the summary table, as the results might vary within a narrow range.")
   cat("\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress.")
