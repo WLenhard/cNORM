@@ -15,6 +15,21 @@ explanatory variable (e.g., age) through [Taylor polynomials](https://www.psycho
 bias arising from sampling and measurement error, while handling marked deviations from
 normality – such as are commonplace in clinical samples. Contrary to parametric approaches, it does not rely on distribution assumptions of the initial norm data and is thus a very robust approach in generating norm tables.
 
+## Installation
+cNORM can be installed via
+```{r example}
+install.packages("cNORM", dependencies = TRUE)
+```
+
+Additionally, you can [download a precompiled version](https://www.psychometrica.de/cNorm_installation_en.html) or access the github development version via
+```{r example}
+install.packages("devtools")
+devtools::install_github("WLenhard/cNORM")
+library(cNORM)
+```
+
+Please report errors. Suggestions for improvement are always welcome!
+
 ## Example
 
 Conducting the analysis consists of four steps:
@@ -34,22 +49,29 @@ library(cNORM)
 # please use cNORM on the console.
 cNORM.GUI()
 
-# Rank data within group and compute powers and interactions
+# If you prefer the console, you can use the syntax as well
+# Rank data within group and compute powers and interactions for the internal dataset 'elfe'
 data.elfe <- prepareData(elfe)
 
 # Find best fitting regression model
 model.elfe <- bestModel(data.elfe)
 
-# Plot model
-plotSubset(model.elfe)
+# Plot R2 of different model solution in dependence of the number of predictors
+plotSubset(model.elfe, type=0)        # plot R2
+plotSubset(model.elfe, type=3)        # plot MSE
 
-# Plot percentiles and series of percentile with ascending
-# number of predictors up to 14 predictors.
+#  Visual inspection of the percentile curves of the fitted model
 plotPercentiles(data.elfe, model.elfe)
+
+# In order to check, how other models perform, plot series of percentile plots with ascending
+# number of predictors up to 14 predictors.
 plotPercentileSeries(data.elfe, model.elfe, end=14)
 
-# Print norm table (for grade 3)
-normTable(3, model.elfe)
+# Print norm table (for grade 3) with T scores from T = 25 to T = 75
+normTable(3, model.elfe, minNorm = 25, maxNorm = 75, step = 1)
+
+# The other way round: Print raw table (for grade 3)
+rawTable(3, model.elfe)
 
 # start vignette for a complete walk through
 vignette(cNORM-Demo)
@@ -65,21 +87,6 @@ In this example, a Taylor polynomial with power k = 4 was computed in order to m
 ![](vignettes/plotPercentiles.png)
 
 The predicted progression over age are displayed as lines and the manifest data as dots. Only three predictors were necessary to almost perfectly model the norm sample data with adjusted R2.
-
-## Installation
-cNORM can be installed via
-```{r example}
-install.packages("cNORM", dependencies = TRUE)
-```
-
-Additionally, you can [download a precompiled version](https://www.psychometrica.de/cNorm_installation_en.html) or access the github development version via
-```{r example}
-install.packages("devtools")
-devtools::install_github("WLenhard/cNORM")
-library(cNORM)
-```
-
-Please report errors. Suggestions for improvement are always welcome!
 
 ## Sample Data
 The package includes data from two large test norming projects, namely ELFE 1-6 (Lenhard & Schneider, 2006) and German adaption of the PPVT4 (A. Lenhard, Lenhard, Suggate & Seegerer, 2015), which can be used to run the analysis. Furthermore, large samples from the Center of Disease Control (CDC) on growth curves in childhood and adolescence (for computing Body Mass Index 'BMI' curves), life expectancy at birth and mortality per country from 1960 to 2017 (available from The World Bank). Type `?elfe`, `?ppvt`, `?CDC`, `?mortality` or `?life` to display information on the data sets.

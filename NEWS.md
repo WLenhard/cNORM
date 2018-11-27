@@ -9,6 +9,7 @@ Date: 2019.11.24
 
 Changes:
 *    Parameters added to cv.norm: Significance level for stratification process
+*    Additional plot in cv.norm: delta R2 in norm score validation
 
 
 
