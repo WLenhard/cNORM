@@ -5,11 +5,13 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.1 (current)
-Date: 2019.11.24
+Date: 2019.11.29
 
 Changes:
 *    Parameters added to cv.norm: Significance level for stratification process
 *    Additional plot in cv.norm: delta R2 in norm score validation
+*    Example in readme improved
+*    CDC data: group variable set to center of interval
 
 
 

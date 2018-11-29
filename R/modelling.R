@@ -591,7 +591,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 #' only the modelling, but not the ranking is independent)
-#' @param pCutoff The function checks the stratification for extremely unbalanced data sampling.
+#' @param pCutoff The function checks the stratification for unbalanced data sampling.
 #' It performs a t-test per group . pCutoff specifies the p-value per group that the test result
 #' has to reach at least. To minimize beta error, the value is set to .2 per default
 #' @param width If provided, ranking is done via rankBySlidingWindow, otherwise by group
