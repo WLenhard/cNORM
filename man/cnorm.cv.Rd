@@ -43,7 +43,7 @@ sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfi
 }
 \description{
 This function helps in selecting the number of terms for the model by doing repeated
-cross validation with 80% of the data as training data and 20% as the validation data.
+cross validation with 80 percent of the data as training data and 20 percent as the validation data.
 The cases are drawn randomly but stratified by norm group. Successive models are retrieved
 with increasing number of terms and the RMSE of raw scores (fitted by the regression model)
 is plotted for the training, validation and the complete dataset. Additionally to this
