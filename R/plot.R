@@ -858,8 +858,7 @@ plotSubset <- function(model, type = 1) {
 #' @param maxNorm Upper end of the norm score range, in case of T scores, 25 might be good
 #' @param stepNorm Stepping parameter for norm scores
 #' @param order Degree of the derivative (default = 1)
-#' @param descend Reverse raw score order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modeling errors
+
 #' @seealso checkConsistency, bestModel, derive
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -874,8 +873,7 @@ plotDerivative <- function(model,
                            maxNorm = NULL,
                            stepAge = 0.2,
                            stepNorm = 1,
-                           order = 1,
-                           descend = FALSE) {
+                           order = 1) {
   if (is.null(minAge)) {
     minAge <- model$minA1
   }
@@ -908,7 +906,7 @@ plotDerivative <- function(model,
   while (i <= ncol(devFrame)) {
     j <- 1
     while (j <= nrow(devFrame)) {
-      devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff, descend)
+      devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff)
       colList <- c(rowS[[j]], colS[[i]], devFrame[j, i])
       dev2 <- rbind(dev2, colList)
       j <- j + 1

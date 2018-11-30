@@ -237,7 +237,7 @@ predictRaw(55, 4.5, model$coefficients, minRaw = 0, maxRaw = 28)
 The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) and a pre-specified series of normal scores. The parameter 'step' specifies the distance between two normal scores.
 ```{r}
 # Generate norm table for grade 3
-normTable(3, model, minRaw = 0, maxRaw = 28, minNorm=30.5, maxNorm=69.5, step = 1, descend = FALSE)
+normTable(3, model, minRaw = 0, maxRaw = 28, minNorm=30.5, maxNorm=69.5, step = 1)
 ```
 
 Norm tables, in which the raw score or the range of raw scores is given for a certain normal score, are usually needed if one has several test scales, all of which are to be converted into the same type of normal scale. Please note that as a test designer you cannot use this function directly to generate norm tables. Instead you have to convert the table to a suitable form first. Remember that raw scores are usually integers. Therefore, the normal score series should not start at an integer value, but e.g. at 30.5. If a step size of 1 is selected, normal score intervals with integers as interval centers are generated. In the example shown, the T-score interval [30.5; 31.5] contains only one single integer raw score, namely 4, which would therefore be assigned to the T-score 31. A whole range of raw scores (or no raw score at all) can thus be assigned to a particular integer normal score.
@@ -246,7 +246,7 @@ Norm tables, in which the raw score or the range of raw scores is given for a ce
 The function 'rawTable' is similar to 'normTable', but reverses the assignment: The normal scores are assigned to a pre-specified series of raw scores at a certain age. This requires an inversion of the regression function, which is determined numerically.
 ```{r}
 # Generate raw table for grade 3.5
-rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1, descend = FALSE)
+rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1)
 ```
 You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores. With higher precision and smaller increments, this function becomes computationally intensive.
 

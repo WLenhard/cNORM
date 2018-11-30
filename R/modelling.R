@@ -290,8 +290,6 @@ printSubset <- function(model) {
 #' @param stepNorm Stepping parameter for the norm table check within age with lower
 #' scores indicating a higher precision. The choice depends of the norm scale
 #' used. With T scores a stepping parameter of 1 is suitable
-#' @param descend Reverse raw scores order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
 #' @param silent turn off messages
@@ -312,7 +310,6 @@ checkConsistency <- function(model,
                              maxRaw = NULL,
                              stepAge = 1,
                              stepNorm = 1,
-                             descend = FALSE,
                              warn = FALSE,
                              silent = FALSE) {
   if (is.null(minAge)) {
@@ -338,20 +335,14 @@ checkConsistency <- function(model,
   if (is.null(maxRaw)) {
     maxRaw <- model$maxRaw
   }
-
-  if (is.null(descend)) {
-    descend <- model$descend
-  }
+  descend <- model$descend
 
   i <- minAge
   minor <- 0
   major <- 0
   results <- c()
   while (i <= maxAge) {
-    norm <- normTable(i, model,
-      minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw,
-      step = stepNorm, descend = descend
-    )
+    norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm)
     k <- 1
     maxR <- 0
     while (k < length(norm$raw)) {

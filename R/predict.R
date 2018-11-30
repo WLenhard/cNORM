@@ -174,8 +174,6 @@ predictRaw <-
 #' @param minRaw clipping parameter for the lower bound of raw scores
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
-#' @param descend Reverse raw value order. If set to TRUE, lower raw values
-#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @return data.frame with norm scores and the predicted raw scores
 #' @seealso rawTable
 #' @examples
@@ -189,15 +187,12 @@ normTable <- function(A,
                       maxNorm = NULL,
                       minRaw = NULL,
                       maxRaw = NULL,
-                      step = 0.1,
-                      descend = NULL) {
+                      step = 0.1) {
   if (is.null(minNorm) || is.null(maxNorm)) {
     stop("ERROR: Please specify minimum and maximum norm score")
   }
+  descend <- model$descend
 
-  if (is.null(descend)) {
-    descend <- model$descend
-  }
 
   if (is.null(minRaw)) {
     warning("Minimum raw score not specified. Taking value from original dataset.")
@@ -259,8 +254,6 @@ normTable <- function(A,
 #' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
 #' @param step Stepping parameter for the raw scores (default 1)
-#' @param descend Reverse raw score order. If set to TRUE, lower raw scores
-#' indicate higher performance. Relevant f. e. in case of modeling errors
 #' @return data.frame with raw scores and the predicted norm scores
 #' @seealso normTable
 #' @examples
@@ -276,15 +269,12 @@ rawTable <- function(A,
                      maxRaw = NULL,
                      minNorm = NULL,
                      maxNorm = NULL,
-                     step = 1,
-                     descend = NULL) {
+                     step = 1) {
   if (is.null(minNorm)) {
     minNorm <- model$minL1
   }
 
-  if (is.null(descend)) {
-    descend <- model$descend
-  }
+  descend <- model$descend
 
   if (is.null(maxNorm)) {
     maxNorm <- model$maxL1

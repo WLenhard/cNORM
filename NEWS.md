@@ -12,6 +12,8 @@ Changes:
 *    Additional plot in cv.norm: delta R2 in norm score validation
 *    Example in readme improved
 *    CDC data: group variable set to center of interval
+*    descend parameter removed from plotPercentileSeries, plotPercentiles, checkConsistency, rawTable &
+     normTable; instead take default from model; vigniette updated accordingly
 
 
 

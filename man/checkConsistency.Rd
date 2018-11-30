@@ -6,7 +6,7 @@
 \usage{
 checkConsistency(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
   maxNorm = NULL, minRaw = NULL, maxRaw = NULL, stepAge = 1,
-  stepNorm = 1, descend = FALSE, warn = FALSE, silent = FALSE)
+  stepNorm = 1, warn = FALSE, silent = FALSE)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -29,9 +29,6 @@ values indicate higher precision / closer checks}
 \item{stepNorm}{Stepping parameter for the norm table check within age with lower
 scores indicating a higher precision. The choice depends of the norm scale
 used. With T scores a stepping parameter of 1 is suitable}
-
-\item{descend}{Reverse raw scores order. If set to TRUE, lower raw scores
-indicate higher performance. Relevant f. e. in case of modeling errors}
 
 \item{warn}{If set to TRUE, already minor violations of the model assumptions
 are displayed (default = FALSE)}

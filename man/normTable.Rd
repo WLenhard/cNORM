@@ -5,7 +5,7 @@
 \title{Create a norm table based on model for specific age}
 \usage{
 normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
-  maxRaw = NULL, step = 0.1, descend = NULL)
+  maxRaw = NULL, step = 0.1)
 }
 \arguments{
 \item{A}{the age}
@@ -21,9 +21,6 @@ normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
 \item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
-
-\item{descend}{Reverse raw value order. If set to TRUE, lower raw values
-indicate higher performance. Relevant f. e. in case of modeling errors}
 }
 \value{
 data.frame with norm scores and the predicted raw scores
