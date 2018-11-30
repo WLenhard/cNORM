@@ -653,16 +653,16 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   train.errors <- rep(0, max)
   complete.errors <- rep(0, max)
 
-  # set up vectors to store R2 and CORSSFIT
+  # set up vectors to store norm score R2 and CROSSFIT
   r2.train <- rep(0, max)
   r2.test <- rep(0, max)
   delta <- rep(NA, max)
   crossfit <- rep(0, max)
 
-  # draw test and training data several times ('repetitions' parameter), odel data and store MSE
+  # draw test and training data several times ('repetitions' parameter), model data and store MSE
   for (a in 1:repetitions) {
 
-    # check for imbalances in data and repeat of stratification was unsatisfactory - usually never occurs
+    # check for imbalances in data and repeat if stratification was unsatisfactory - usually never occurs
     p.value <- .01
     while (p.value < pCutoff) {
       # shuffle data and split into groups (for stratification)

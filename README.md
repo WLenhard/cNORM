@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/WLenhard/cNORM.svg?branch=master)](https://travis-ci.org/WLenhard/cNORM)
 <img src="vignettes/logo.png" align=right style="border:0;">
 
 # cNorm
