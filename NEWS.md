@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.1 (current)
-Date: 2019.11.29
+Date: 2019.12.01
 
 Changes:
 *    Parameters added to cv.norm: Significance level for stratification process
@@ -14,6 +14,7 @@ Changes:
 *    CDC data: group variable set to center of interval
 *    descend parameter removed from plotPercentileSeries, plotPercentiles, checkConsistency,
      rawTable & normTable; instead take default from model; vigniette updated accordingly
+*    stop criterion added to data sampling in cnorm.cv  
 
 
 
