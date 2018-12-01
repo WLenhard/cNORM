@@ -15,6 +15,8 @@ Changes:
 *    descend parameter removed from plotPercentileSeries, plotPercentiles, checkConsistency,
      rawTable & normTable; instead take default from model; vigniette updated accordingly
 *    stop criterion added to data sampling in cnorm.cv  
+*    cv.norm: lines added to R2 delta plot
+*    normTable and rawTable can now produce list of tables
 
 
 
@@ -45,7 +47,6 @@ Changes:
 *    additional plotting options added to GUI:
      +    plotting of differences in raw and norm plot
      +    RMSE in model selection information function
-
 
 
 

@@ -167,19 +167,28 @@ predictRaw <-
 #' the population. Please be careful when extrapolating vertically (at the lower and
 #' upper end of the age specific distribution). Depending on the size of your standardization
 #' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
-#' @param A the age
+#' @param A the age as single value or a vector of age values
 #' @param model The regression model
 #' @param minNorm The lower bound of the norm score range
 #' @param maxNorm The upper bound of the norm score range
 #' @param minRaw clipping parameter for the lower bound of raw scores
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
-#' @return data.frame with norm scores and the predicted raw scores
+#' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
+#' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
 #' @examples
 #' normData <- prepareData()
-#' m <- bestModel(data=normData)
-#' norms <- normTable(3.5, m, minNorm=25, maxNorm=75, step=0.5)
+#' m <- bestModel(data = normData)
+#'
+#' # create single norm table
+#' norms <- normTable(3.5, m, minNorm = 25, maxNorm = 75, step = 0.5)
+#'
+#' # create list of norm tables
+#' norms <- normTable(c(2.5, 3.5, 4.5), m,
+#'   minNorm = 25, maxNorm = 75,
+#'   step = 1, minRaw = 0, maxRaw = 26
+#' )
 #' @export
 normTable <- function(A,
                       model,
@@ -204,40 +213,54 @@ normTable <- function(A,
     maxRaw <- model$maxRaw
   }
 
-  norm <- vector("list", (maxNorm - minNorm) / step + 1)
-  raw <- vector("list", (maxNorm - minNorm) / step + 1)
-  i <- 1
-  l <- length(norm)
-  if (!descend) {
-    while (i <= l) {
-      r <- predictRaw(minNorm, A, model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+  tables <- vector("list", length(A))
 
-      norm[[i]] <- minNorm
-      raw[[i]] <- r
+  for (x in 1:length(A)) {
+    maxn <- maxNorm
+    minn <- minNorm
+    norm <- vector("list", (maxn - minn) / step + 1)
+    raw <- vector("list", (maxn - minn) / step + 1)
+    i <- 1
+    l <- length(norm)
+    if (!descend) {
+      while (i <= l) {
+        r <- predictRaw(minn, A[[x]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
 
-      minNorm <- minNorm + step
-      i <- i + 1
+        norm[[i]] <- minn
+        raw[[i]] <- r
+
+        minn <- minn + step
+        i <- i + 1
+      }
+    } else {
+      while (maxn >= minn) {
+        r <- predictRaw(maxn, A[[x]], model$coefficients)
+
+        norm[[i]] <- maxn
+        raw[[i]] <- r
+
+        maxn <- maxn - step
+        i <- i + 1
+      }
     }
+
+    normTable <-
+      do.call(rbind, Map(data.frame, norm = norm, raw = raw))
+
+    if (!is.na(model$scaleM) && !is.na(model$scaleSD)) {
+      normTable$percentile <- pnorm((normTable$norm - model$scaleM) / model$scaleSD) * 100
+    }
+
+    tables[[x]] <- normTable
+  }
+
+  names(tables) <- A
+
+  if (length(A) == 1) {
+    return(tables[[1]])
   } else {
-    while (maxNorm >= minNorm) {
-      r <- predictRaw(maxNorm, A, model$coefficients)
-
-      norm[[i]] <- maxNorm
-      raw[[i]] <- r
-
-      maxNorm <- maxNorm - step
-      i <- i + 1
-    }
+    return(tables)
   }
-
-  normTable <-
-    do.call(rbind, Map(data.frame, norm = norm, raw = raw))
-
-  if(!is.na(model$scaleM)&&!is.na(model$scaleSD)){
-    normTable$percentile <- pnorm((normTable$norm - model$scaleM)/model$scaleSD) * 100
-  }
-
-  return(normTable)
 }
 
 #' Create a table with norm scores assigned to raw scores for a specific age based on the regression model
@@ -247,21 +270,24 @@ normTable <- function(A,
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
 #' and smaller stepping, this function becomes computational intensive.
-#' @param A the age
+#' @param A the age, either single value or vector with age values
 #' @param model The regression model
 #' @param minRaw The lower bound of the raw score range
 #' @param maxRaw The upper bound of the raw score range
 #' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
 #' @param step Stepping parameter for the raw scores (default 1)
-#' @return data.frame with raw scores and the predicted norm scores
+#' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
+#' of norm tables if vector of A values was provided
 #' @seealso normTable
 #' @examples
-#' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 #' normData <- prepareData()
-#' m <- bestModel(data=normData)
-#' table <- rawTable(3 + 7/12, m, minRaw = 0, maxRaw = 28,
-#'                   minNorm = 25, maxNorm = 75)
+#' m <- bestModel(data = normData)
+#' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
+#' table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)
+#'
+#' # generate several raw tables
+#' table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28)
 #' @export
 rawTable <- function(A,
                      model,
@@ -287,58 +313,73 @@ rawTable <- function(A,
   if (is.null(maxRaw)) {
     maxRaw <- model$maxRaw
   }
+  tables <- vector("list", length(A))
 
-  norm <- vector("list", (maxRaw - minRaw) / step)
-  raw <- vector("list", (maxRaw - minRaw) / step)
-  i <- 1
-  if (!descend) {
-    while (minRaw <= maxRaw) {
-      i <- i + 1
-      n <-
-        predictNorm(minRaw, A, model, minNorm, maxNorm)
-      norm[[i]] <- n
-      raw[[i]] <- minRaw
+  for (x in 1:length(A)) {
+    maxn <- maxNorm
+    minn <- minNorm
+    maxr <- maxRaw
+    minr <- minRaw
+    norm <- vector("list", (maxr - minr) / step)
+    raw <- vector("list", (maxr - minr) / step)
+    i <- 1
+    if (!descend) {
+      while (minr <= maxr) {
+        i <- i + 1
+        n <-
+          predictNorm(minr, A[[x]], model, minNorm, maxNorm)
+        norm[[i]] <- n
+        raw[[i]] <- minr
 
-      minRaw <- minRaw + step
+        minr <- minr + step
+      }
+    } else {
+      while (maxr >= minr) {
+        i <- i + 1
+        n <-
+          predictNorm(minr, A[[x]], model, minNorm, maxNorm)
+        norm[[i]] <- n
+        raw[[i]] <- maxr
+
+        maxr <- maxr - step
+      }
     }
+
+    table <-
+      do.call(rbind, Map(data.frame, raw = raw, norm = norm))
+
+    if (!is.na(model$scaleM) && !is.na(model$scaleSD)) {
+      table$percentile <- pnorm((table$norm - model$scaleM) / model$scaleSD) * 100
+    }
+
+    # checking consistency
+    k <- 1
+    SUCCESS <- TRUE
+    while (k < nrow(table)) {
+      if (table$norm[k] > table$norm[k + 1]) {
+        # inconsistent results -> warning
+        SUCCESS <- FALSE
+        message(paste("Raw ", table$raw[k], " value with inconsistent norm value", sep = ""))
+      }
+
+      k <- k + 1
+    }
+
+    if (!SUCCESS) {
+      message("The raw table generation yielded inconsistent entries. Please check model consistency.")
+      print(rangeCheck(model, A, A, minNorm, maxNorm))
+    }
+
+    tables[[x]] <- table
+  }
+
+  names(tables) <- A
+
+  if (length(A) == 1) {
+    return(tables[[1]])
   } else {
-    while (maxRaw >= minRaw) {
-      i <- i + 1
-      n <-
-        predictNorm(minRaw, A, model, minNorm, maxNorm)
-      norm[[i]] <- n
-      raw[[i]] <- maxRaw
-
-      maxRaw <- maxRaw - step
-    }
+    return(tables)
   }
-
-  table <-
-    do.call(rbind, Map(data.frame, raw = raw, norm = norm))
-
-  if(!is.na(model$scaleM)&&!is.na(model$scaleSD)){
-    table$percentile <- pnorm((table$norm - model$scaleM)/model$scaleSD) * 100
-  }
-
-  # checking consistency
-  k <- 1
-  SUCCESS <- TRUE
-  while (k < nrow(table)) {
-    if (table$norm[k] > table$norm[k + 1]) {
-      # inconsistent results -> warning
-      SUCCESS <- FALSE
-      message(paste("Raw ", table$raw[k], " value with inconsistent norm value", sep = ""))
-    }
-
-    k <- k + 1
-  }
-
-  if (!SUCCESS) {
-    message("The raw table generation yielded inconsistent entries. Please check model consistency.")
-    print(rangeCheck(model, A, A, minNorm, maxNorm))
-  }
-
-  return(table)
 }
 
 
@@ -357,8 +398,8 @@ rawTable <- function(A,
 #' @seealso plotDerivative, derive
 #' @examples
 #' normData <- prepareData()
-#' m <- bestModel(data=normData)
-#' d <- derivationTable(6, m, step=0.5)
+#' m <- bestModel(data = normData)
+#' d <- derivationTable(6, m, step = 0.5)
 #' @export
 derivationTable <-
   function(A,
@@ -406,13 +447,12 @@ derivationTable <-
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
-#' m <- bestModel(data=normData)
+#' m <- bestModel(data = normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
 #' # Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw scores
 #' # and age to calculate predicted norm values for original data.
-#' specificNormValue <- predictNorm(raw = 21, A = 2.75, model = m, minNorm=25, maxNorm=75)
-#'
+#' specificNormValue <- predictNorm(raw = 21, A = 2.75, model = m, minNorm = 25, maxNorm = 75)
 #' @export
 predictNorm <-
   function(raw,
@@ -440,9 +480,9 @@ predictNorm <-
     } else if (is.vector(raw) && is.vector(A)) {
       if (length(raw) != length(A)) {
         stop("'A' and 'raw' need to have the same length.")
-      }else if(anyNA(A)){
+      } else if (anyNA(A)) {
         stop(paste0("NAs are present in 'A' vector. Please exclude missing values first."))
-      }else if(anyNA(raw)){
+      } else if (anyNA(raw)) {
         stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
       }
       cat("Retrieving norm scores ...\n")

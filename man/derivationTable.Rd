@@ -27,8 +27,8 @@ coefficients is created.
 }
 \examples{
 normData <- prepareData()
-m <- bestModel(data=normData)
-d <- derivationTable(6, m, step=0.5)
+m <- bestModel(data = normData)
+d <- derivationTable(6, m, step = 0.5)
 }
 \seealso{
 plotDerivative, derive

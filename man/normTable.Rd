@@ -8,7 +8,7 @@ normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
   maxRaw = NULL, step = 0.1)
 }
 \arguments{
-\item{A}{the age}
+\item{A}{the age as single value or a vector of age values}
 
 \item{model}{The regression model}
 
@@ -23,7 +23,8 @@ normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
 \item{step}{Stepping parameter with lower values indicating higher precision}
 }
 \value{
-data.frame with norm scores and the predicted raw scores
+either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
+value or a list #' of norm tables if vector of A values was provided
 }
 \description{
 This function generates a norm table for a specific age based on the regression
@@ -36,8 +37,16 @@ sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 }
 \examples{
 normData <- prepareData()
-m <- bestModel(data=normData)
-norms <- normTable(3.5, m, minNorm=25, maxNorm=75, step=0.5)
+m <- bestModel(data = normData)
+
+# create single norm table
+norms <- normTable(3.5, m, minNorm = 25, maxNorm = 75, step = 0.5)
+
+# create list of norm tables
+norms <- normTable(c(2.5, 3.5, 4.5), m,
+  minNorm = 25, maxNorm = 75,
+  step = 1, minRaw = 0, maxRaw = 26
+)
 }
 \seealso{
 rawTable

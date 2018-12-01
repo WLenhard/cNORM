@@ -8,7 +8,7 @@ rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
   maxNorm = NULL, step = 1)
 }
 \arguments{
-\item{A}{the age}
+\item{A}{the age, either single value or vector with age values}
 
 \item{model}{The regression model}
 
@@ -23,7 +23,8 @@ rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
 \item{step}{Stepping parameter for the raw scores (default 1)}
 }
 \value{
-data.frame with raw scores and the predicted norm scores
+either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
+of norm tables if vector of A values was provided
 }
 \description{
 This function is comparable to 'normTable', despite it reverses the assignment:
@@ -33,11 +34,13 @@ brute force. Please specify the range of raw values, you want to cover. With hig
 and smaller stepping, this function becomes computational intensive.
 }
 \examples{
-# generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 normData <- prepareData()
-m <- bestModel(data=normData)
-table <- rawTable(3 + 7/12, m, minRaw = 0, maxRaw = 28,
-                  minNorm = 25, maxNorm = 75)
+m <- bestModel(data = normData)
+# generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
+table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)
+
+# generate several raw tables
+table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28)
 }
 \seealso{
 normTable
