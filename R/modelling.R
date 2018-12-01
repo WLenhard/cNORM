@@ -664,7 +664,14 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # check for imbalances in data and repeat if stratification was unsatisfactory - usually never occurs
     p.value <- .01
+    n <- 1  # to avoid a deadlock, define stop criterion
+
     while (p.value < pCutoff) {
+      if(n > 100){
+        stop("Could not establish balanced data sets. Try to decrease pCutoff parameter.")
+      }
+      n <- n + 1
+
       # shuffle data and split into groups (for stratification)
       d <- d[sample(nrow(d)), ]
       d <- d[order(d[, group]), ]
@@ -788,9 +795,11 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # plot CROSSFIT
     plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(tab$crossfit, na.rm = TRUE),max(tab$crossfit, na.rm = TRUE)))
+    abline(h = 1, col = 3, lty = 2)
 
     # plot delta r2 test
     plot(tab$delta.r2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$delta.r2.test, na.rm = TRUE),max(tab$delta.r2.test, na.rm = TRUE)))
+    abline(h = 0, col = 3, lty = 2)
   }
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
