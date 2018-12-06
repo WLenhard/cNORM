@@ -317,8 +317,8 @@ rankBySlidingWindow <- function(data,
   # copy data frame
   d <- as.data.frame(data)
 
-  if(length(is.na(d[, raw]))>0 || length(is.na(d[, age]))>0){
-    cat("Missing values found in grouping, raw score or age variable... excluding from dataset")
+  if(anyNA(d[, raw]) || anyNA(d[, age])){
+    cat("Missing values found in raw score or age variable... excluding from dataset")
     d <- d[!is.na(d[, raw]), ]
     d <- d[!is.na(d[, age]), ]
   }
