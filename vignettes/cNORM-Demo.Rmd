@@ -141,7 +141,7 @@ Furthermore, information about the change of Radjusted and other information cri
 plotSubset(model, type = 0) 
 ```
 
-The figure displays Radjusted2 as a function of the number of predictors by default. Alternatively, you can also plot log-transformed Mallow's $C_p$ (type = 1) or $BIC$ (type = 2) as a function of $R_{adjusted}^{2}$.
+The figure displays Radjusted2 as a function of the number of predictors by default. Alternatively, you can also plot log-transformed Mallow's $C_p$ (type = 1) and $BIC$ (type = 2) as a function of $R_{adjusted}^{2}$ or RMSE (type = 3) as a function of the number of terms.
 
 ```{r fig2, fig.height = 4, fig.width = 7}
 plotSubset(model, type = 1) 
@@ -149,7 +149,15 @@ plotSubset(model, type = 1)
 
 The figure shows that the default value of $R_{adjusted}^{2}$ = .99 is already achieved with only three predictors. The inclusion of further predictors only leads to small increases of Radjusted or to small decreases of Mallow's $C_p$. Where the dots are close together, the inclusion of further predictors is of little use. To avoid over-fitting, a model with as few predictors as possible should therefore be selected from this area.
 
-The model with three predictors seems to be suitable. Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k should be chosen differently.
+The model with three predictors seems to be suitable. Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k should be chosen differently. What is more, you can use the cnorm.cv cross validation function to get an impression on the quality of the norm sample and modeling process. The function determines RMSE for the raw score of the training and validation data (80% and 20% drawn from the data set), $R^{2}$ for the norm scores, crossfit and norm score $R^{2}$. Corssfit values below indicate an underfit and values greater 1 an overfit, with values between .9 and 1.1 beeing optimal:
+
+```{r fig2b, fig.height = 4, fig.width = 7}
+# use the original elfe data
+d <- prepareData(elfe)
+
+# do a cross validation with 3 repetitions, restrict number of max terms to 8
+cnorm.cv(d, max=8, repetitions = 1)
+```
 
 
 ## 3. Model Validation
@@ -234,10 +242,14 @@ predictRaw(55, 4.5, model$coefficients, minRaw = 0, maxRaw = 28)
 
 ### normTable
 
-The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) and a pre-specified series of normal scores. The parameter 'step' specifies the distance between two normal scores.
+The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) or vector of ages and a pre-specified series of normal scores. The parameter 'step' specifies the distance between two normal scores.
 ```{r}
 # Generate norm table for grade 3
 normTable(3, model, minRaw = 0, maxRaw = 28, minNorm=30.5, maxNorm=69.5, step = 1)
+
+# Generate norm table for grade 3, 3.5, 4 and 4.5
+normTable(c(3, 3.5, 4, 4.5), model, minRaw = 0, maxRaw = 28, minNorm=30.5, maxNorm=69.5, step = 1)
+
 ```
 
 Norm tables, in which the raw score or the range of raw scores is given for a certain normal score, are usually needed if one has several test scales, all of which are to be converted into the same type of normal scale. Please note that as a test designer you cannot use this function directly to generate norm tables. Instead you have to convert the table to a suitable form first. Remember that raw scores are usually integers. Therefore, the normal score series should not start at an integer value, but e.g. at 30.5. If a step size of 1 is selected, normal score intervals with integers as interval centers are generated. In the example shown, the T-score interval [30.5; 31.5] contains only one single integer raw score, namely 4, which would therefore be assigned to the T-score 31. A whole range of raw scores (or no raw score at all) can thus be assigned to a particular integer normal score.
@@ -247,6 +259,9 @@ The function 'rawTable' is similar to 'normTable', but reverses the assignment: 
 ```{r}
 # Generate raw table for grade 3.5
 rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1)
+
+# Generate raw table for grade 3.5, 3.6, 3.7
+rawTable(c(3.5, 3.6, 3.7), model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1)
 ```
 You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores. With higher precision and smaller increments, this function becomes computationally intensive.
 
