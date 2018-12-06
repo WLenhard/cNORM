@@ -75,7 +75,7 @@ normTable(3, model.elfe, minNorm = 25, maxNorm = 75, step = 1)
 rawTable(3, model.elfe)
 
 # start vignette for a complete walk through
-vignette(cNORM-Demo)
+vignette("cNORM-Demo", package = "cNORM")
 ```
 cNORM offers functions to choose the optimal model, both from a visual inspection of the 
 percentiles, as well as by information criteria and model tests:
