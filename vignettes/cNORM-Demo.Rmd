@@ -49,7 +49,7 @@ data$group <- c(3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
 Of course, it is also possible to use a data set for which standard scores already exist for individual age groups. Please pay attention, that the grouping variable corresponds to the group mean in case, you use a continuous age variable later on.
 
 ### Sample Data
-A continuously distributed age variable is not necessary in this case. For demostration purposes, cNORM includes a cleaned data set from a German test standardization (ELFE 1-6, W. Lenhard & Schneider, 2006, subtest sentence comprehension) that will be used for demonstrating the method. Another large (but unrepresentative) data set for demonstration purposes stems from the adaption of a vocabulary test to the German language (PPVT-4, A. Lenhard, Lenhard, Segerer & Suggate, 2015). For biometric modeling, it includes a large CDC dataset (N > 45,000) for growth curves from age 2 to 25 (weight, height, BMI; CDC, 2012) and for macro economical and sociological data the data on mortality and life expectancy at birth from 1960 to 2017 from the World Bank. You can retrieve information on the data by typing ?elfe, ?ppvt, ?CDC, ?life or ?mortality on the R console. To load the data sets, please use the following code:
+A continuously distributed age variable is not necessary in this case. For demonstration purposes, cNORM includes a cleaned data set from a German test standardization (ELFE 1-6, W. Lenhard & Schneider, 2006, subtest sentence comprehension) that will be used for demonstrating the method. Another large (but unrepresentative) data set for demonstration purposes stems from the adaption of a vocabulary test to the German language (PPVT-4, A. Lenhard, Lenhard, Segerer & Suggate, 2015). For biometric modeling, it includes a large CDC dataset (N > 45,000) for growth curves from age 2 to 25 (weight, height, BMI; CDC, 2012) and for macro economical and sociological data the data on mortality and life expectancy at birth from 1960 to 2017 from the World Bank. You can retrieve information on the data by typing ?elfe, ?ppvt, ?CDC, ?life or ?mortality on the R console. To load the data sets, please use the following code:
 
 ```
 # Loads the package cNorm
@@ -70,7 +70,7 @@ head(normData)
 ```
 
 ### Data Exploration
-As you can see, there is no age variable in the data set 'elfe', only a person ID, a raw score and a grouping variable. In this case, the grouping variable also serves as a continuous explanatory variable, since children were only examined at the very beginning and in the exact middle of the school year during the test standardization. For example, the value 2.0 means that the children were at the beginning of the second school year, the value 2.5 means that the children were examined in the middle of the second school year. Another possibility would have been to examine children throughout the entire school year. In this case, the duration of schooling would have to be entered as a continuous explanatory variable. To build the grouping variable, the first and second half of each school year could, for exampe, be aggregated into one group respectively. In the 'elfe' data set there are seven groups with 200 cases each, i.e. a total of 1400 cases. With the help of the psych package, descriptive data can be displayed in groups if desired (optional):
+As you can see, there is no age variable in the data set 'elfe', only a person ID, a raw score and a grouping variable. In this case, the grouping variable also serves as a continuous explanatory variable, since children were only examined at the very beginning and in the exact middle of the school year during the test standardization. For example, the value 2.0 means that the children were at the beginning of the second school year, the value 2.5 means that the children were examined in the middle of the second school year. Another possibility would have been to examine children throughout the entire school year. In this case, the duration of schooling would have to be entered as a continuous explanatory variable. To build the grouping variable, the first and second half of each school year could, for example, be aggregated into one group respectively. In the 'elfe' data set there are seven groups with 200 cases each, i.e. a total of 1400 cases. With the help of the psych package, descriptive data can be displayed in groups if desired (optional):
 
 ```
 # Install psych package
@@ -99,7 +99,7 @@ Please note that there is another function for determining the rank, which works
 normData2 <- rankBySlidingWindow(data = elfe, age = "group", raw = "raw", width = 0.5)
 ```
 
-Please note that the 'rankBySlidingWindow' function only makes sense if the age variable is actually continuous. In the 'elfe' data set the variable 'group' serves as continuous explanatory variable as well as diskrete grouping variable. Therefore, with the function 'rankBySlidingWindow' we obtain the same standard scores as with the function 'rankByGroup' in this specific case.
+Please note that the 'rankBySlidingWindow' function only makes sense if the age variable is actually continuous. In the 'elfe' data set the variable 'group' serves as continuous explanatory variable as well as discrete grouping variable. Therefore, with the function 'rankBySlidingWindow' we obtain the same standard scores as with the function 'rankByGroup' in this specific case.
 
 Both ranking functions ('rankBySlidingWindow' and'rankByGroup') add two additional columns, namely 'percentile' and 'normValue'. In addition, descriptive information about each group is added, namely n, m, md and sd. Descriptive results are only necessary under certain circumstances. The creation of these variables can be deactivated via the parameter 'descriptives'.
 
@@ -149,7 +149,7 @@ plotSubset(model, type = 1)
 
 The figure shows that the default value of $R_{adjusted}^{2}$ = .99 is already achieved with only three predictors. The inclusion of further predictors only leads to small increases of Radjusted or to small decreases of Mallow's $C_p$. Where the dots are close together, the inclusion of further predictors is of little use. To avoid over-fitting, a model with as few predictors as possible should therefore be selected from this area.
 
-The model with three predictors seems to be suitable. Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k should be chosen differently. What is more, you can use the cnorm.cv cross validation function to get an impression on the quality of the norm sample and modeling process. The function determines RMSE for the raw score of the training and validation data (80% and 20% drawn from the data set), $R^{2}$ for the norm scores, crossfit and norm score $R^{2}$. Corssfit values below indicate an underfit and values greater 1 an overfit, with values between .9 and 1.1 beeing optimal:
+The model with three predictors seems to be suitable. Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k should be chosen differently. What is more, you can use the cnorm.cv cross validation function to get an impression on the quality of the norm sample and modeling process. The function determines RMSE for the raw score of the training and validation data (80% and 20% drawn from the data set), $R^{2}$ for the norm scores, crossfit and norm score $R^{2}$. Crossfit values below indicate an underfit and values greater 1 an overfit, with values between .9 and 1.1 being optimal:
 
 ```
 # use the original elfe data
@@ -160,7 +160,7 @@ cnorm.cv(d, max=10, repetitions = 5)
 ```
 <img src="cnorm.cv.png" align=center style="border:0;">
 
-In this specific case, it might not be wortwhile to use more terms than 4, because $R^{2}$ in the cross validated data set does not increase anymore.You should however as well inspect to percentile curves visually or use the 'checkConsistency' function on the final model to avoid intersecting percentile curves and use a model with more terms in that case.
+In this specific case, it might not be worthwhile to use more terms than 4, because $R^{2}$ in the cross validated data set does not increase anymore.You should however as well inspect to percentile curves visually or use the 'checkConsistency' function on the final model to avoid intersecting percentile curves and use a model with more terms in that case.
 
 
 ## 3. Model Validation
@@ -286,7 +286,7 @@ Please visit https://www.psychometrica.de/cNorm_examples_en.html for further exa
 *   CDC (2012). National Health and Nutrition Examination Survey: Questionaires, Datasets and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx. date of retrieval: 25/08/2018
 *   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M.: Pearson Assessment.
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
-*   Lenhard, W., Lenhard, A. & Schneider, W. (2017). ELFE II - Ein Leseverständnistest für Erst- bis Siebtklässler. Göttingen: Hogrefe.
-*   Lenhard, W. & Schneider, W. (2006). ELFE 1-6 - Ein Leseverständnistest für Erst- bis Sechstklässler. Göttingen: Hogrefe.
+*   Lenhard, W., Lenhard, A. & Schneider, W. (2017). ELFE II - Ein Leseverstaendnistest für Erst- bis Siebtklaessler. Goettingen: Hogrefe.
+*   Lenhard, W. & Schneider, W. (2006). ELFE 1-6 - Ein Leseverstaendnistest für Erst- bis Sechstklässler. Goettingen: Hogrefe.
 *   The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source available https://data.worldbank.org/indicator/SP.DYN.IMRT.IN (date of retrieval: 02/09/2018)
 *   The World Bank (2018). Life expectancy at birth, total (years). Data Source World Development Indicators available https://data.worldbank.org/indicator/sp.dyn.le00.in (date of retrieval: 01/09/2018)
