@@ -46,6 +46,7 @@
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
 #' @examples
+#' \dontrun{
 #' # Standard example with sample data
 #' normData <- prepareData()
 #' model <- bestModel(normData)
@@ -54,8 +55,7 @@
 #'
 #' # It is possible to specify the variables explicitly - useful to smuggle
 #' # in variables like sex
-#' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3",
-#'                               "A2", "A3"))
+#' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
 #'
 #' # Example for modeling based on continuous age variable and raw variable,
@@ -71,7 +71,7 @@
 #' bmi.sex <- bestModel(bmi.data, raw="bmi", predictors = c("L1", "L2", "L3",
 #'                      "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
 #'                      "L2A3", "L3A1", "L3A2", "L3A3", "sex"), force.in = c("sex"))
-#'
+#'}
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
 bestModel <- function(data,

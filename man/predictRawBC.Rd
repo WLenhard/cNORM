@@ -21,6 +21,7 @@ transformation. Please provide the box cox parameters retrieved via the 'boxcox'
 a percentile.
 }
 \examples{
+\dontrun{
 # model sample data set
 model <- bestModel(prepareData())
 
@@ -35,6 +36,7 @@ tValue <- qnorm(percentile)*10 + 50
 # predict raw value based on the regression model and via box cox
 predictRawBC(bcParameters, percentile)
 predictRaw(tValue, 3, model$coefficients)
+}
 }
 \references{
 Cole, T. J., & Green, P. J. (1992). Smoothing reference percentile curves: the LMS method and penalized

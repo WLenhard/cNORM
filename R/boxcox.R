@@ -138,6 +138,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #' @seealso boxcox, predictRaw
 #'
 #' @examples
+#' \dontrun{
 #' # model sample data set
 #' model <- bestModel(prepareData())
 #'
@@ -152,6 +153,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #' # predict raw value based on the regression model and via box cox
 #' predictRawBC(bcParameters, percentile)
 #' predictRaw(tValue, 3, model$coefficients)
+#' }
 predictRawBC <- function(boxcoxParameters, percentile) {
   if (percentile <= 0 || percentile >= 1) {
     stop("Percentile out of range. Use values between 0 and 1.")
