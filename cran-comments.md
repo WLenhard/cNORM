@@ -25,3 +25,4 @@ In the resubmission, the following changes have been applied:
 * removed UTF-8 attributes from ppvt dataset and cleared all datasets from non ASCII signs
 * deleted code in vignette needing to much build time
 * additional tests run on R-hub
+* added rmarkdown to imports
