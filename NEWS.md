@@ -4,7 +4,27 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.1.1 (current)
+### Version in 1.1.3 - Second release on CRAN
+Date: 2018.12.09
+
+Changes:
+*   rmarkdown moved from imports to suggests
+
+
+
+### Version in 1.1.2 - Second release on CRAN
+Date: 2018.12.08
+
+Changes:
+*   deleted code in vignette needing to much build time
+*   removed UTF-8 attributes from ppvt dataset and cleared all datasets from non ASCII signs
+*   deleted code in vignette needing to much build time
+*   additional tests run on R-hub
+*   added rmarkdown to imports
+
+
+
+### Version in 1.1.1
 Date: 2018.12.01
 
 Changes:
@@ -68,7 +88,7 @@ Changes:
 
 
 
-### Version in 1.0.1
+### Version in 1.0.1  - First release on CRAN
 Date: 2018.11.03
 
 Changes:

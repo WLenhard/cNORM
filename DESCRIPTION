@@ -1,10 +1,10 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 1.1.2
+Version: 1.1.3
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2018-12-08
-Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de", comment=c(ORCID  = "0000-0002-8184-6889")), person("Alexandra", "Lenhard", role=c("aut")), person("Sebastian", "Gary", role=c("ctb")))
+Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de", comment=c("<https://orcid.org/0000-0002-8184-6889>")), person("Alexandra", "Lenhard", role=c("aut")), person("Sebastian", "Gary", role=c("ctb")))
 Description: Conventional methods for producing standard scores in psychometrics or biometrics 
     are often plagued with "jumps" or "gaps" (i.e., discontinuities) in norm tables and low 
     confidence for assessing extreme scores. The continuous norming method introduced by A. 
@@ -20,8 +20,8 @@ Depends:
     R (>= 3.1.0)
 Imports:
     lattice (>= 0.20),
-    leaps (>= 3.0.0), latticeExtra (>= 0.6), rmarkdown
-Suggests: knitr, markdown, shiny, shinycssloaders, foreign, readxl
+    leaps (>= 3.0.0), latticeExtra (>= 0.6)
+Suggests: shiny, shinycssloaders, foreign, readxl, rmarkdown
 License: AGPL-3
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
