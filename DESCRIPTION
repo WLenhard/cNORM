@@ -21,7 +21,7 @@ Depends:
 Imports:
     lattice (>= 0.20),
     leaps (>= 3.0.0), latticeExtra (>= 0.6)
-Suggests: shiny, shinycssloaders, foreign, readxl, rmarkdown
+Suggests: knitr, shiny, shinycssloaders, foreign, readxl, rmarkdown
 License: AGPL-3
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
