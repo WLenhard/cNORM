@@ -690,7 +690,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
     bestformula$k <- attributes(d)$k
 
 
-    l[[length(l) + 1]] <- cNORM::plotPercentiles(d, bestformula,
+    l[[length(l) + 1]] <- plotPercentiles(d, bestformula,
       minAge = model$minA1, maxAge = model$maxA1,
       minRaw = minR,
       maxRaw = maxR,

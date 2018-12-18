@@ -37,6 +37,9 @@
 #' @param age the continuous explanatory variable; by default set to "group"
 #' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
 #' observed raw scores, otherwise, ranking is done by group (default)
+#' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
+#' transformation); a double vector with the mean and standard deviation can as well,
+#' be provided f. e. c(10, 3) for Wechsler scale index point
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
@@ -46,7 +49,7 @@
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
 #' @export
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA) {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T") {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
@@ -82,9 +85,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
   # ranking and powers
   if(is.na(width)){
-    normData <- rankByGroup(normData, group = group, raw = raw)
+    normData <- rankByGroup(normData, group = group, raw = raw, scale = scale)
   }else{
-    normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width)
+    normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width, scale = scale)
   }
   normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
   return(normData)

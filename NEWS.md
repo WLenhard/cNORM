@@ -4,11 +4,21 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.4
+Date: 2018.12.18 (current development)
+
+Changes:
+*   scale parameter added to prepareData function
+
+
+
+
 ### Version in 1.1.3 - Second release on CRAN
 Date: 2018.12.09
 
 Changes:
 *   rmarkdown moved from imports to suggests
+*   cnorm.cv info added to README
 
 
 
