@@ -143,7 +143,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
 
   if (group != "" && !is.null(group)) {
-    d$group <- data[[group]]
+    d$group <- d[[group]]
     d$group <- as.factor(d$group)
     if (type == 0) {
       lattice::xyplot(fitted ~ normValue | group, d,
