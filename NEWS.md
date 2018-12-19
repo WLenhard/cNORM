@@ -9,7 +9,7 @@ Date: 2018.12.18 (current development)
 
 Changes:
 *   scale parameter added to prepareData function
-
+*   fix for plotNorm by group with missing values
 
 
 
