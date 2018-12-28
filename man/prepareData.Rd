@@ -5,7 +5,7 @@
 \title{Set up example dataset and compute model}
 \usage{
 prepareData(data = NULL, group = "group", raw = "raw",
-  age = "group", width = NA)
+  age = "group", width = NA, scale = "T")
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
@@ -20,6 +20,10 @@ demonstrate the procedure.}
 
 \item{width}{if a width is provided, the function switches to rankBySlidingWindow to determine the
 observed raw scores, otherwise, ranking is done by group (default)}
+
+\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
+transformation); a double vector with the mean and standard deviation can as well,
+be provided f. e. c(10, 3) for Wechsler scale index point}
 }
 \value{
 data frame including the norm scores, powers and interactions of the norm score and
