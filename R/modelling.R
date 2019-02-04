@@ -570,7 +570,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #'
 #' As a suggestion for real tests, combine visual inspection of the percentiles with a
 #' repeated cross validation (e. g. 10 repetitions). Fokus on norm score R2 in the
-#' validation dataset and avoid models with a high overfit (e. g. crossfit > 1.25).
+#' validation dataset and avoid models with a high overfit (e. g. crossfit > 1.1).
 #'
 #' @param data data frame of norm sample with ranking, powers and interaction of L and A
 #' @param repetitions number of repetitions for cross validation
@@ -794,8 +794,12 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
 
     # plot CROSSFIT
-    plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(tab$crossfit, na.rm = TRUE),max(tab$crossfit, na.rm = TRUE)))
+    plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(c(tab$crossfit, .88), na.rm = TRUE),max(c(tab$crossfit, 1.12), na.rm = TRUE)))
     abline(h = 1, col = 3, lty = 2)
+    abline(h = .9, col = 2, lty = 3)
+    text(max, .89, adj = c(1,1), "underfit", col=2, cex = .75)
+    abline(h = 1.1, col = 2, lty = 3)
+    text(max, 1.11, adj = c(1,0), "overfit", col=2, cex = .75)
 
     # plot delta r2 test
     plot(tab$delta.r2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$delta.r2.test, na.rm = TRUE),max(tab$delta.r2.test, na.rm = TRUE)))
