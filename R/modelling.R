@@ -220,7 +220,7 @@ bestModel <- function(data,
 
   # Print output
   report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
-  report[5] <- paste0("RMSE = ", round(rmse, digits = 5))
+  report[5] <- paste0("Raw Score RMSE = ", round(rmse, digits = 5))
 
   bestformula$report <- report
   cat(report, sep = "\n")

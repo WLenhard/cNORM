@@ -326,6 +326,7 @@ shinyServer(function(input, output, session) {
     paste(input$CalcBestModel, input$chosenTypePlotSubset)
   })
 
+
   wlPlot <- eventReactive(changeObject(), {
 
     cNORM::plotSubset(bestModel(), type = chosenTypeOfPlotSubset())
@@ -348,6 +349,19 @@ shinyServer(function(input, output, session) {
       cNORM::plotNorm(preparedData(), bestModel(), type = type)
     }
   })
+
+
+  crossValidation <- eventReactive(input$CrossValidation, {
+    rep <- input$RepetitionsCV
+    norm <- input$NormsCV
+    maxT <- input$MaxTermsCV
+    g <- chosenGrouping()
+    r <- chosenRaw()
+    e <- chosenExplanatory()
+
+        cNORM::cnorm.cv(preparedData(), repetitions = rep, norms = norm, min = 1, max = maxT, group = g, raw = r, age = e)
+  })
+
 
   rawScorePlot <- eventReactive(c(input$grouping1, input$differences1), {
     type <- 0
@@ -393,6 +407,10 @@ shinyServer(function(input, output, session) {
 
   output$PlotDensity <- renderPlot({
     return(modelDensity())
+  })
+
+  output$PlotCV <- renderPlot({
+    return(crossValidation())
   })
 
   output$PlotWL <- renderPlot({

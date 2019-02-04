@@ -91,8 +91,10 @@ shinyUI(fluidPage(
 
     # Defines panel for best model output
     # Tab returns bestModel with information function and plot of real and predicted raw values
-    tabPanel(
+    navbarMenu(
       "Modeling & Validation",
+      tabPanel(
+      "Model",
       sidebarLayout(
         sidebarPanel(
           tags$h3("Model Data"),
@@ -140,6 +142,37 @@ shinyUI(fluidPage(
           # withSpinner(plotOutput("PlotValues", width = "100%", height = "600px"), type=5)
         )
       )
+    ),
+
+    tabPanel(
+      "Cross-Validation",
+      sidebarLayout(
+        sidebarPanel(
+          tags$h3("Cross Validation"),
+          tags$p("This function helps in selecting the number of terms for the model by doing repeated cross validation with 80 percent of the data as training data and 20 percent as the validation data. The cases are drawn randomly but stratified by norm group. Successive models are retrieved with increasing number of terms and the RMSE of raw scores (fitted by the regression model) is plotted for the training, validation and the complete dataset. Additionally to this analysis on the raw score level, it is possible (default) to estimate the mean norm score reliability and crossfit measures. "),
+          tags$p("HINT: The function has a high computational load when computing norm scores and takes some time to finish. Time increases with number of maximum terms, sample size and number of repetitions."),
+          actionButton(
+            inputId = "CrossValidation",
+
+            label = "Cross Validation"
+          ),
+          tags$br(),
+          tags$h3("Additional options"),
+          sliderInput("MaxTermsCV", "Maximum number of terms:",
+                      min = 1, max = 24, value = 10
+          ),
+          tags$br(),
+          checkboxInput("NormsCV", "Check norm scores:", TRUE),
+          tags$br(),
+          sliderInput("RepetitionsCV", "Repetitions:",
+                      min = 1, max = 20, value = 1
+          )
+        ),
+        mainPanel(
+          withSpinner(plotOutput("PlotCV", width = "100%", height = "800px"), type = 5)
+        )
+      )
+    )
     ),
 
     navbarMenu(

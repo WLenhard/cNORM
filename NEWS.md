@@ -3,9 +3,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.5
+Date: 2019.02.04 (current development)
+
+Changes:
+*   Cross Validation added to shiny GUI
+*   added information to BestModel output
+
+
 
 ### Version in 1.1.4
-Date: 2018.12.18 (current development)
+Date: 2018.12.18
 
 Changes:
 *   scale parameter added to prepareData function
@@ -22,7 +30,7 @@ Changes:
 
 
 
-### Version in 1.1.2 - Second release on CRAN
+### Version in 1.1.2
 Date: 2018.12.08
 
 Changes:
