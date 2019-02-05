@@ -568,9 +568,20 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' drawn from the already ranked data and the scores for the validation set should improve.
 #' It is however no independent test, as the ranking between both samples is interlinked.
 #'
-#' As a suggestion for real tests, combine visual inspection of the percentiles with a
-#' repeated cross validation (e. g. 10 repetitions). Fokus on norm score R2 in the
-#' validation dataset and avoid models with a high overfit (e. g. crossfit > 1.1).
+#' In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.
+#' For assessing, if a model overfits the data and to what extent, we need cross-validation. We assumed
+#' that an overfitting occurred when a model captures more variance of the observed norm scores of the
+#' training sample compared to the captured variance of the norm scores of the validation sample. The
+#' overfit can therefore be described as:
+#'
+#' CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2
+#'
+#' A CROSSFIT higher than 1 is a sign of overfitting. Value lower than 1 indicate an underfit due to a
+#' suboptimal modelling procedure, i. e. the method may not have captured all the variance of the observed
+#' data it could possibly capture. Values around 1 are ideal, as long as the raw score RMSE is low and the
+#' norm score validation R2 reaches high levels. As a suggestion for real tests: Combine visual inspection
+#' of the percentiles with a repeated cross validation (e. g. 10 repetitions). Fokus on low raw score RMSE,
+#' high norm score R2 in the validation dataset and avoid models with a high overfit (e. g. crossfit > 1.1).
 #'
 #' @param data data frame of norm sample with ranking, powers and interaction of L and A
 #' @param repetitions number of repetitions for cross validation
