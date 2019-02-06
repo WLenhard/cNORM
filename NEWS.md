@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.5
-Date: 2019.02.06 (current development)
+Date: 2019.02.06, preparing for CRAN release
 
 Changes:
 *   Cross Validation added to shiny GUI

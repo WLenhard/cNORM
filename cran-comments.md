@@ -4,8 +4,8 @@
 * OS X (macOS High Sierra, Version 10.13.6), R 3.5.1
 * Ubuntu 14.04.5 LTS via Travis-CI for release and development
 * OS X 10.13.3 via Travis-CI for release and development
-* R-hub Fedora Linux, R-devel, GCC 
-* R-hub macOS 10.11 El Capitan, R-release (experimental) 
+* R-hub Ubuntu Linux 16.04 LTS, R-release, GCC
+* R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
 There were no ERRORs, WARNINGs or NOTEs
@@ -14,15 +14,10 @@ There were no ERRORs, WARNINGs or NOTEs
 There are currently no downstream dependencies for this package.
 
 ## Update and resubmission
-This is an update to the prior release (1.0.1). In this version I have:
+This is a minor release to the prior official version (1.1.2). In this version I have:
 
-* included lot's of minor impovements (dealing with missings ...)
-* added extra plotting functions
-* added cross validation
-
-In the resubmission, the following changes have been applied:
-
-* removed UTF-8 attributes from ppvt dataset and cleared all datasets from non ASCII signs
-* deleted code in vignette needing to much build time
-* additional tests run on R-hub
-* added rmarkdown to imports
+* improved and extendend cross validation functionality
+* extend the GUI
+* improved documentation
+* improved method output messages
+* fixed minor errors in case of missing values and added a scale parameter to prepareData()
