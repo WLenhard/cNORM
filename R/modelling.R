@@ -572,7 +572,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' that an overfitting occurred when a model captures more variance of the observed norm scores of the
 #' training sample compared to the captured variance of the norm scores of the validation sample. The
 #' overfit can therefore be described as:
-#' \deqn{CROSSFIT = fraq{R(Training; Model)^2 / R(Validation; Model)^2}
+#' \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
 #' A CROSSFIT higher than 1 is a sign of overfitting. Value lower than 1 indicate an underfit due to a
 #' suboptimal modeling procedure, i. e. the method may not have captured all the variance of the observed
 #' data it could possibly capture. Values around 1 are ideal, as long as the raw score RMSE is low and the
