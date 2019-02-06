@@ -169,7 +169,9 @@ shinyUI(fluidPage(
           )
         ),
         mainPanel(
-          withSpinner(plotOutput("PlotCV", width = "100%", height = "800px"), type = 5)
+          withSpinner(plotOutput("PlotCV", width = "100%", height = "800px"), type = 5),
+          tags$br(),
+          withSpinner(dataTableOutput("TableCV"), type = 5)
         )
       )
     )

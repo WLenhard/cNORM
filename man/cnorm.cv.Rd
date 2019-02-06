@@ -53,15 +53,26 @@ to the high computational load when computing norm scores, it takes time to fini
 when doing repeated cv or comparing models up to the maximum number of terms. When using
 the cv = "full" option, the ranking is done for the test and validation dataset
 separately (always based on T scores), resulting in a complete cross validation. In
-order to only validate the modeling, you as well can use a pre ranked data set with
+order to only validate the modeling, you as well can use a pre-ranked data set with
 prepareData() already applied. In this case, the training and validation data is
 drawn from the already ranked data and the scores for the validation set should improve.
 It is however no independent test, as the ranking between both samples is interlinked.
+In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.
+For assessing, if a model over-fits the data and to what extent, we need cross-validation. We assumed
+that an overfitting occurred when a model captures more variance of the observed norm scores of the
+training sample compared to the captured variance of the norm scores of the validation sample. The
+overfit can therefore be described as:
+\eqn{CROSSFIT = \fraq{R(Training; Model)^2}{R(Validation; Model)^2}}
+A CROSSFIT higher than 1 is a sign of overfitting. Value lower than 1 indicate an underfit due to a
+suboptimal modeling procedure, i. e. the method may not have captured all the variance of the observed
+data it could possibly capture. Values around 1 are ideal, as long as the raw score RMSE is low and the
+norm score validation R2 reaches high levels. As a suggestion for real tests:
+\itemize{
+  \item Use visual inspection of the percentiles with plotPercentiles or plotPercentileSeries
+  \item Combine the visual inspection of the percentiles with a repeated cross validation (e. g. 10 repetitions)
+  \item Focus on low raw score RMSE, high norm score R2 in the validation dataset and
+avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
 }
-\details{
-As a suggestion for real tests, combine visual inspection of the percentiles with a
-repeated cross validation (e. g. 10 repetitions). Fokus on norm score R2 in the
-validation dataset and avoid models with a high overfit (e. g. crossfit > 1.25).
 }
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
