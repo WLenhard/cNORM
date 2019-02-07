@@ -791,7 +791,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   }else{
     par(mfrow = c(1, 1))
   }
-  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, r2.train = r2.train, r2.test = r2.test, delta.r2.test = delta, crossfit = r2.train / r2.test)
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test)
 
   # plot RMSE
   plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim=c(min(train.errors, na.rm = TRUE),max(val.errors, na.rm = TRUE)))
@@ -806,7 +806,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
 
     # plot CROSSFIT
-    plot(tab$crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(c(tab$crossfit, .88), na.rm = TRUE),max(c(tab$crossfit, 1.12), na.rm = TRUE)))
+    plot(tab$Crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(c(tab$Crossfit, .88), na.rm = TRUE),max(c(tab$Crossfit, 1.12), na.rm = TRUE)))
     abline(h = 1, col = 3, lty = 2)
     abline(h = .9, col = 2, lty = 3)
     text(max, .89, adj = c(1,1), "underfit", col=2, cex = .75)
@@ -814,15 +814,16 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     text(max, 1.11, adj = c(1,0), "overfit", col=2, cex = .75)
 
     # plot delta r2 test
-    plot(tab$delta.r2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$delta.r2.test, na.rm = TRUE),max(tab$delta.r2.test, na.rm = TRUE)))
+    plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$Delta.R2.test, na.rm = TRUE),max(tab$Delta.R2.test, na.rm = TRUE)))
     abline(h = 0, col = 3, lty = 2)
   }
   cat("The simulation yielded the following optimal settings:\n")
-  cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$crossfit)^2)))
+  cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$Crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
   cat("\nPlease investigate the plots and the summary table, as the results might vary within a narrow range.")
   cat("\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress.")
+  cat("\n")
   cat("\n")
   return(tab)
 }
