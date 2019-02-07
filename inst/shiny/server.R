@@ -359,7 +359,8 @@ shinyServer(function(input, output, session) {
     r <- chosenRaw()
     e <- chosenExplanatory()
 
-        cNORM::cnorm.cv(preparedData(), repetitions = rep, norms = norm, min = 1, max = maxT, group = g, raw = r, age = e)
+        table <- cNORM::cnorm.cv(preparedData(), repetitions = rep, norms = norm, min = 1, max = maxT, group = g, raw = r, age = e)
+        output$TableCV <- renderDataTable({table})
   })
 
 
