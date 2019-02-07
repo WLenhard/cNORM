@@ -3,8 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.6
+Date: 2019.02.07, third release on CRAN
+
+Changes:
+*   Improvement to cv function in GUI and in package
+
+
+
 ### Version in 1.1.5
-Date: 2019.02.06, preparing for CRAN release
+Date: 2019.02.06, third release on CRAN
 
 Changes:
 *   Cross Validation added to shiny GUI
