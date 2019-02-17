@@ -23,9 +23,13 @@ but have the danger of over-fit (default = 4, max = 6)}
 \item{predictors}{List of the names of predictor to use for the model selection.
 The parameter overrides the 'k' parameter and it can be used to preselect the
 variables entering the regression, or even to add variables like sex, that are
-not part of the original model building. Please not, that adding other variables
+not part of the original model building. Please note, that adding other variables
 than those based on L and A, plotting, prediction and normTable function will most
-likely not work, but at least the regression formula can be obtained that way.}
+likely not work, but at least the regression formula can be obtained that way.
+The parameter as well accepts a formula object, f. e. when applying a pre computed
+model to a new dataset. In this case, k is as well overridden. In order to include all
+predictors in the regression, you might want to adjust the terms parameter to the number
+of predictors as well.}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
@@ -59,7 +63,8 @@ the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good sta
 for the analyses.
 \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
 and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
-Use \code{checkConsistency(model)} to check the model for violations.
+Use \code{checkConsistency(model)} to check the model for violations. \code{cnorm.cv} can help
+in identifiying the ideal number of predictors.
 }
 \examples{
 \dontrun{
@@ -80,6 +85,12 @@ print(regressionFunction(preselectedModel))
 bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
 bmi.model <- bestModel(bmi.data, raw="bmi")
 printSubset(bmi.model)
+
+# Use the formula of the pre calculated bmi data to compute models for girls and
+# boys seperately
+bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
+bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
+
 
 # Custom list of predictors (based on k = 3) and forcing in the sex variable
 # While calculating the regression model works well, all other functions like

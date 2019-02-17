@@ -17,7 +17,8 @@
 #' for the analyses.
 #' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
 #' and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
-#' Use \code{checkConsistency(model)} to check the model for violations.
+#' Use \code{checkConsistency(model)} to check the model for violations. \code{cnorm.cv} can help
+#' in identifiying the ideal number of predictors.
 #'
 #' @param data The preprocessed dataset, which should include the variables 'raw'
 #'  and the powers and interactions of the norm score (L = Location; usually T scores)
@@ -32,9 +33,13 @@
 #' @param predictors List of the names of predictor to use for the model selection.
 #' The parameter overrides the 'k' parameter and it can be used to preselect the
 #' variables entering the regression, or even to add variables like sex, that are
-#' not part of the original model building. Please not, that adding other variables
+#' not part of the original model building. Please note, that adding other variables
 #' than those based on L and A, plotting, prediction and normTable function will most
 #' likely not work, but at least the regression formula can be obtained that way.
+#' The parameter as well accepts a formula object, f. e. when applying a pre computed
+#' model to a new dataset. In this case, k is as well overridden. In order to include all
+#' predictors in the regression, you might want to adjust the terms parameter to the number
+#' of predictors as well.
 #' @param force.in List of variable names forced into the regression function. This option
 #' can be used to force the regression to include covariates like sex or other background
 #' variables. This can be used to model separate norm scales for different groups in order
@@ -64,6 +69,12 @@
 #' bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
 #' bmi.model <- bestModel(bmi.data, raw="bmi")
 #' printSubset(bmi.model)
+#'
+#' # Use the formula of the pre calculated bmi data to compute models for girls and
+#' # boys seperately
+#' bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
+#' bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
+#'
 #'
 #' # Custom list of predictors (based on k = 3) and forcing in the sex variable
 #' # While calculating the regression model works well, all other functions like
@@ -107,16 +118,20 @@ bestModel <- function(data,
     stop("k parameter out of bounds. Please specify a value between 1 and 6 (default = 4).")
   }
 
-  if (!(raw %in% colnames(data))) {
+  if (!(raw %in% colnames(data))&& (!inherits(predictors,"formula"))) {
     stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if ((!is.null(predictors)) && (!(predictors %in% colnames(data)))) {
+  if ((!is.null(predictors)) && (!inherits(predictors,"formula")) && (!(predictors %in% colnames(data)))) {
     stop("ERROR: Missing variables from predictors variable. Please check variable list.")
   }
 
   if (!is.null(predictors)) {
-    lmX <- formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
+    if(inherits(predictors,"formula")){
+      lmX <- predictors
+    }else {
+      lmX <- formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
+    }
   } else if (k == 1) {
     lmX <- formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
   } else if (k == 2) {
