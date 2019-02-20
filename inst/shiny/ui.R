@@ -50,11 +50,7 @@ shinyUI(fluidPage(
           tags$p("Variable which is used to divide the observations into groups, for example variable age by rounding to a half or a full year"),
           tags$br(),
           uiOutput("RawValues"),
-          tags$p("Raw values, for example test scores or physiological data "),
-          tags$br(),
-          selectInput("Scale", label = "Scale", choices = c("T", "IQ", "z"), selected = "T"),
-          tags$p("Choose the scale to which the raw values shall be transformed"),
-          tags$p("You can choose between between T scores, IQ scores and z scores."),
+          selectInput("Scale", label = "Norm Scale", choices = c("T", "IQ", "z"), selected = "T"),
           actionButton(inputId = "DoDataPreparation", label = "Prepare Data"),
 
           tags$br(),
@@ -62,7 +58,7 @@ shinyUI(fluidPage(
           # Additional options (explanatory variable with default grouping, ranking method, number of powers)
           tags$h3("Additional options"),
           uiOutput("ExplanatoryVariable"),
-          tags$p("As default, the explanatory variable is set to grouping variable. In case, a continuous explanatory variable like age is available, please use it."),
+          tags$p("As default, the explanatory variable is set to grouping variable. If available, use a continuous explanatory variable like age. The values of this variable have to correpsond with the values of the grouping variable."),
           tags$br(),
           selectInput(
             inputId = "NumberOfPowers",
@@ -72,16 +68,12 @@ shinyUI(fluidPage(
           ),
           tags$p("This variable specifies the power parameter for the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
           tags$br(),
-          selectInput("Method", label = "Ranking method", choices = c(1:7), selected = 4),
-          tags$p("Ranking methods"),
-          tags$ol(
-            tags$li("Blom (1985)"),
-            tags$li("Tukey (1949)"),
-            tags$li("Van der Warden (1952)"),
-            tags$li("Rankit (Bliss, 1967)"),
-            tags$li("Levenbach (1953)"),
-            tags$li("Filliben (1975)"),
-            tags$li("Yu & Huang (2001)")
+          selectInput("Method", label = "Ranking method", choices = c("Blom (1985)", "Tukey (1949)", "Van der Warden (1952)", "Rankit (Bliss, 1967)", "Levenbach (1953)", "Filliben (1975)", "Yu & Huang (2001)"), selected = "Rankit (Bliss, 1967)"),
+          selectInput(
+            inputId = "RankingOrder",
+            label = "Ranking order of the raw score",
+            choices = c("Ascending", "Descending"),
+            selected = 1
           )
         ),
         # Main panel for showing prepared data
@@ -110,19 +102,10 @@ shinyUI(fluidPage(
           tags$h3("Additional options"),
           numericInput(
             inputId = "ChosenDetCoeff",
-            label = "Coefficient of determination", value = 0.99, min = 0, max = 1, step = 0.01
+            label = "Coefficient of Determination", value = 0.99, min = 0, max = 1, step = 0.01
           ),
           uiOutput("NumberOfTerms"),
-          tags$br(),
-          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c(0:3), selected = 1),
-          tags$p("Please select the type of chart for plotting the information function, with"),
-          tags$ol(
-            start = 0,
-            tags$li("adjusted R2 by number of predictors"),
-            tags$li("log transformed Mallow's Cp by adjusted R2"),
-            tags$li("Bayesian Information Criterion (BIC) by adjusted R2"),
-            tags$li("RMSE by number of predictors")
-          )
+          selectInput(inputId = "chosenTypePlotSubset", "Type of plot", choices = c("Adjusted R2 by Number of Predictors", "Log Transformed Mallow's Cp by Adjusted R2", "Bayesian Information Criterion (BIC) by Adjusted R2", "RMSE by Number of Predictors"), selected = "RMSE by Number of Predictors")
         ),
         mainPanel(
           withSpinner(verbatimTextOutput("BestModel1"), type = 5),
@@ -131,6 +114,7 @@ shinyUI(fluidPage(
           verbatimTextOutput("BestModel4"),
           verbatimTextOutput("BestModel5"),
           verbatimTextOutput("BestModel6"),
+          verbatimTextOutput("BestModel7"),
           tags$br(),
           tags$br(),
           # tags$h4("Information Function, Subset Specifics and Fitted Values"),
