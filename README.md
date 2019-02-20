@@ -99,7 +99,7 @@ The package includes data from two large test norming projects, namely ELFE 1-6 
 cNORM is licensed under GNU Affero General Public License v3 (AGPL-3.0). This means that copyrighted parts of cNORM can be used free of charge for commercial and non-commercial purposes that run under this same license, retain the copyright notice, provide their source code and correctly cite cNORM. Copyright protection includes, for example, the reproduction and distribution of source code or parts of the source code of cNORM or of graphics created with cNORM. The integration of the package into a server environment in order to access the functionality of the software (e.g. for online delivery of norm scores) is also subject to this license. However, a regression function determined with cNORM is not subject to copyright protection and may be used freely without preconditions. If you want to apply cNORM in a way that is not compatible with the terms of the AGPL 3.0 license, please do not hesitate to contact us to negotiate individual conditions.
 
 If you want to use cNORM for scientific publications, we would also ask you to quote the source:
-*   Lenhard, W. & Lenhard, A. & Gary, S. (2018). cNORM: Continuous Norming with R. Vienna: The Comprehensive R Network. available: https://cran.r-project.org/web/packages/cNORM/index.html. doi:10.1177/1073191116656437
+*   Lenhard, A., Lenhard, W. & Gary, S. (2018). cNORM - Generating Continuous Test Norms. Retrieved from: https://www.psychometrica.de/cNorm_en.html. Dettelbach (Germany): Psychometrica. DOI: 10.13140/RG.2.2.25821.26082
 
 ## References
 *   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
