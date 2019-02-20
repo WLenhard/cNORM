@@ -390,6 +390,8 @@ plotPercentiles <- function(data,
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   }
 
+
+
   # compute norm scores from percentile vector
   if (is.null(scale)) {
     # fetch scale information from model
@@ -432,6 +434,11 @@ plotPercentiles <- function(data,
       )
     )
   }
+
+  if(model$descend){
+    NAMES <- rev(NAMES)
+  }
+
   # compute percentile table
   colnames(percentile.actual) <- c(c(group), NAMES)
 

@@ -74,12 +74,18 @@ calcPolyInL <- function(raw, age, model) {
   return(coefficientPolynom)
 }
 
-predictNormByRoots <- function(raw, age, model, minNorm, maxNorm) {
-  polynomForPrediction <- calcPolyInL(
-    raw = raw,
-    age = age,
-    model = model
-  )
+predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL) {
+  if (is.null(polynom)) {
+    polynomForPrediction <- calcPolyInL(
+      raw = raw,
+      age = age,
+      model = model
+    )
+  } else {
+    polynomForPrediction <- polynom
+    polynomForPrediction[1] <- polynomForPrediction[1] - raw
+  }
+
   roots <- polyroot(polynomForPrediction)
   output <- Re(roots[abs(Im(roots)) < 10^(-7)])
 

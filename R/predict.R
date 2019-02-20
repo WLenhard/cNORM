@@ -222,7 +222,7 @@ normTable <- function(A,
     raw <- vector("list", (maxn - minn) / step + 1)
     i <- 1
     l <- length(norm)
-    if (!descend) {
+
       while (i <= l) {
         r <- predictRaw(minn, A[[x]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
 
@@ -232,17 +232,7 @@ normTable <- function(A,
         minn <- minn + step
         i <- i + 1
       }
-    } else {
-      while (maxn >= minn) {
-        r <- predictRaw(maxn, A[[x]], model$coefficients)
 
-        norm[[i]] <- maxn
-        raw[[i]] <- r
-
-        maxn <- maxn - step
-        i <- i + 1
-      }
-    }
 
     normTable <-
       do.call(rbind, Map(data.frame, norm = norm, raw = raw))
@@ -300,8 +290,6 @@ rawTable <- function(A,
     minNorm <- model$minL1
   }
 
-  descend <- model$descend
-
   if (is.null(maxNorm)) {
     maxNorm <- model$maxL1
   }
@@ -323,7 +311,6 @@ rawTable <- function(A,
     norm <- vector("list", (maxr - minr) / step)
     raw <- vector("list", (maxr - minr) / step)
     i <- 1
-    if (!descend) {
       while (minr <= maxr) {
         i <- i + 1
         n <-
@@ -333,17 +320,7 @@ rawTable <- function(A,
 
         minr <- minr + step
       }
-    } else {
-      while (maxr >= minr) {
-        i <- i + 1
-        n <-
-          predictNorm(minr, A[[x]], model, minNorm, maxNorm)
-        norm[[i]] <- n
-        raw[[i]] <- maxr
 
-        maxr <- maxr - step
-      }
-    }
 
     table <-
       do.call(rbind, Map(data.frame, raw = raw, norm = norm))
@@ -352,11 +329,14 @@ rawTable <- function(A,
       table$percentile <- pnorm((table$norm - model$scaleM) / model$scaleSD) * 100
     }
 
+    if(model$descend){
+      table <- table[order(table$norm),]
+    }
     # checking consistency
     k <- 1
     SUCCESS <- TRUE
     while (k < nrow(table)) {
-      if (table$norm[k] > table$norm[k + 1]) {
+      if ((table$norm[k] >= table$norm[k + 1])) {
         # inconsistent results -> warning
         SUCCESS <- FALSE
         message(paste("Raw ", table$raw[k], " value with inconsistent norm value", sep = ""))
@@ -490,7 +470,7 @@ predictNorm <-
       n <- length(raw)
       values <- rep(NA, n)
 
-      # iterate through cases and increase precision by factor 2 in each step
+      # iterate through cases
       for (i in 1:n) {
         v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
         if (length(v) == 0) {
@@ -498,6 +478,22 @@ predictNorm <-
         }
         values[[i]] <- v
       }
+
+      # Alternative approach with optimization; not yet working
+      # uniqueAge <- unique(A)
+      # for(i in 1:length(uniqueAge)){
+      #   indices <- which(A == uniqueAge[[i]])
+      #   polynom <- calcPolyInL(0, uniqueAge[[i]], m)
+      #
+      #   for (j in 1:length(indices)) {
+      #     v <- predictNormByRoots(raw[[indices[[j]]]], A[[indices[[j]]]], model, minNorm, maxNorm, polynom)
+      #     if (length(v) == 0) {
+      #       v <- NA
+      #     }
+      #     values[[indices[[j]]]] <- v
+      #   }
+      # }
+
       return(values)
     } else {
       stop("Please check raw and A value. Both have to be either single values or vectors of the same length.")

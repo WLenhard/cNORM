@@ -552,7 +552,10 @@ derive <- function(model, order = 1) {
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
 rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
-  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ".")
+  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ". The raw scores range from ", model$minRaw, " to ", model$maxRaw, ".")
+  if(model$descend){
+    summary <- paste0(summary, " The ranking was done in descending order.")
+  }
   reportOnly <- (is.null(minAge) || is.null(maxAge) || is.null(minNorm) || is.null(maxNorm))
   if (!reportOnly && (minAge < model$minA1 || maxAge > model$maxA1) && (minNorm < model$minL1 || maxNorm > model$maxL1)) {
     summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep = "\n")
