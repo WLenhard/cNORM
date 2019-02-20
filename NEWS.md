@@ -4,13 +4,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.7
-Date: 2019.02.17 (current development)
+Date: 2019.02.20 (current development)
 
 Changes:
 *   bestModel function noew accepts a formula as a predictors object
 *   plotPercentile now accepts descending ranking
 *   rawTable and normTable adapted for descending values
 *   rangeCheck prints additional information
+*   Leaner GUI with more options
 
 
 
