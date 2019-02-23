@@ -38,7 +38,7 @@ Conducting the analysis consists of four steps:
 1.  Validating the model
 1.  Generating norm tables and plotting the results
 
-cNORM offers function for all of these steps, helps in selecting the best fitting models and in generating the norm tables.
+cNORM offers functions for all of these steps, helps in selecting the best fitting models and in generating the norm tables.
 
 ```{r example}
 ## Basic example code for modeling the sample dataset
