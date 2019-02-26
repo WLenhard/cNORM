@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.7
-Date: 2019.02.20 (current development)
+Date: 2019.02.26 (current development)
 
 Changes:
 *   bestModel function now accepts a formula as a predictors object
@@ -12,6 +12,7 @@ Changes:
 *   rawTable and normTable adapted for descending values
 *   rangeCheck prints additional information
 *   Leaner GUI with more options
+*   predictNorm now much faster through using lookup tables, large speed gains as well for depending functions
 
 
 

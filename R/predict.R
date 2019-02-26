@@ -466,32 +466,50 @@ predictNorm <-
         stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
       }
       cat("Retrieving norm scores ...\n")
+
       #  initialize vectors and starting values
-      n <- length(raw)
+      # create simple hash based on cantor pairing
+      r <- raw
+      a <- A
+
+      if(min(raw) < 0){
+        r <- r - min(raw)
+      }
+
+      if(min(A) < 0){
+        a <- a - min(A)
+      }
+      hash <- (r + a) * (r + a + 1) / 2 + a
+
+      normTable <- data.frame(A = A, raw = raw, hash = hash)
+      normTable <- normTable[!duplicated(normTable[,c('hash')]),]
+
+      raw2 <- normTable$raw
+      A2 <- normTable$A
+      n <- length(raw2)
       values <- rep(NA, n)
 
       # iterate through cases
       for (i in 1:n) {
-        v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
+        v <- predictNormByRoots(raw2[[i]], A2[[i]], model, minNorm, maxNorm)
         if (length(v) == 0) {
           v <- NA
         }
         values[[i]] <- v
       }
 
-      # Alternative approach with optimization; not yet working
-      # uniqueAge <- unique(A)
-      # for(i in 1:length(uniqueAge)){
-      #   indices <- which(A == uniqueAge[[i]])
-      #   polynom <- calcPolyInL(0, uniqueAge[[i]], m)
+      values <- values[match(hash, normTable$hash)]
+
+      # n <- length(raw)
+      # values <- rep(NA, n)
       #
-      #   for (j in 1:length(indices)) {
-      #     v <- predictNormByRoots(raw[[indices[[j]]]], A[[indices[[j]]]], model, minNorm, maxNorm, polynom)
-      #     if (length(v) == 0) {
-      #       v <- NA
-      #     }
-      #     values[[indices[[j]]]] <- v
+      # # iterate through cases
+      # for (i in 1:n) {
+      #   v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
+      #   if (length(v) == 0) {
+      #     v <- NA
       #   }
+      #   values[[i]] <- v
       # }
 
       return(values)
