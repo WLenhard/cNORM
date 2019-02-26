@@ -56,7 +56,7 @@ data.elfe <- prepareData(elfe)
 # Find best fitting regression model
 model.elfe <- bestModel(data.elfe)
 
-# Plot R2 of different model solution in dependence of the number of predictors
+# Plot R2 of different model solutions in dependence of the number of predictors
 plotSubset(model.elfe, type=0)        # plot R2
 plotSubset(model.elfe, type=3)        # plot MSE
 
@@ -69,7 +69,7 @@ plotPercentileSeries(data.elfe, model.elfe, end=14)
 
 # Cross validation of number of terms with 20% of the data for validation and 80% training.
 # Due to the time intensity, max terms is restricted to 10; 3 repetitions
-cnorm.cv(data.elfe, max=7, repetitions=10)
+cnorm.cv(data.elfe, max=10, repetitions=3)
 
 # Print norm table (for grade 3, 3.2, 3.4, 3.6) with T scores from T = 25 to T = 75
 normTable(c(3, 3.2, 3.4, 3.6), model.elfe, minNorm = 25, maxNorm = 75, step = 1)
