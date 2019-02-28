@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.7
-Date: 2019.02.26 (current development)
+Date: 2019.02.28 (current development)
 
 Changes:
 *   bestModel function now accepts a formula as a predictors object
@@ -13,6 +13,8 @@ Changes:
 *   rangeCheck prints additional information
 *   Leaner GUI with more options
 *   predictNorm now much faster through using lookup tables, large speed gains as well for depending functions
+*   Setting age = FALSE in computePowers prevents computation of powers of age and interactions. All plotting and modelling functions changed accordingly. cNORM in this case models norm score tables simply based on regression without computing different groups
+*    normTable automatically chooses default values for minNorm, maxNorm and step
 
 
 

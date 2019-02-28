@@ -155,8 +155,8 @@ The model with three predictors seems to be suitable. Nevertheless, the model fo
 # use the original elfe data
 d <- prepareData(elfe)
 
-# do a cross validation with 5 repetition, restrict number of max terms to 10
-cnorm.cv(d, max=10, repetitions = 5)
+# do a cross validation with 2 repetitions, restrict number of max terms to 10
+cnorm.cv(d, max=10, repetitions = 2)
 ```
 <img src="cnorm.cv.png" align=center style="border:0;">
 

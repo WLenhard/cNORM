@@ -66,8 +66,8 @@
 #' # Example for modeling based on continuous age variable and raw variable,
 #' # based on the CDC data. We use the default k=4 parameter; raw variable has
 #' # to be set to "bmi".
-#' bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
-#' bmi.model <- bestModel(bmi.data, raw="bmi")
+#' bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
+#' bmi.model <- bestModel(bmi.data, raw = "bmi")
 #' printSubset(bmi.model)
 #'
 #' # Use the formula of the pre calculated bmi data to compute models for girls and
@@ -79,10 +79,12 @@
 #' # Custom list of predictors (based on k = 3) and forcing in the sex variable
 #' # While calculating the regression model works well, all other functions like
 #' # plotting and norm table generation are not yet prepared to use covariates
-#' bmi.sex <- bestModel(bmi.data, raw="bmi", predictors = c("L1", "L2", "L3",
-#'                      "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-#'                      "L2A3", "L3A1", "L3A2", "L3A3", "sex"), force.in = c("sex"))
-#'}
+#' bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
+#'   "L1", "L2", "L3",
+#'   "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+#'   "L2A3", "L3A1", "L3A2", "L3A3", "sex"
+#' ), force.in = c("sex"))
+#' }
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
 bestModel <- function(data,
@@ -118,37 +120,57 @@ bestModel <- function(data,
     stop("k parameter out of bounds. Please specify a value between 1 and 6 (default = 4).")
   }
 
-  if (!(raw %in% colnames(data))&& (!inherits(predictors,"formula"))) {
+  if (!(raw %in% colnames(data)) && (!inherits(predictors, "formula"))) {
     stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if ((!is.null(predictors)) && (!inherits(predictors,"formula")) && (!(predictors %in% colnames(data)))) {
+  if ((!is.null(predictors)) && (!inherits(predictors, "formula")) && (!(predictors %in% colnames(data)))) {
     stop("ERROR: Missing variables from predictors variable. Please check variable list.")
   }
 
   if (!is.null(predictors)) {
-    if(inherits(predictors,"formula")){
+    if (inherits(predictors, "formula")) {
       lmX <- predictors
-    }else {
+    } else {
       lmX <- formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
     }
-  } else if (k == 1) {
-    lmX <- formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
-  } else if (k == 2) {
-    lmX <-
-      formula(paste(raw, "L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2", sep = " ~ "))
-  } else if (k == 3) {
-    lmX <- formula(paste(raw, "L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3", sep = " ~ "))
-  } else if (k == 4) {
-    lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
-  } else if (k == 5) {
-    lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5", sep = " ~ "))
-  } else if (k == 6) {
-    lmX <-
-      formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6", sep = " ~ "))
+  } else if (attr(data, "useAge")) {
+    if (k == 1) {
+      lmX <- formula(paste(raw, "L1 + A1 + L1A1", sep = " ~ "))
+    } else if (k == 2) {
+      lmX <-
+        formula(paste(raw, "L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2", sep = " ~ "))
+    } else if (k == 3) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3", sep = " ~ "))
+    } else if (k == 4) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
+    } else if (k == 5) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5", sep = " ~ "))
+    } else if (k == 6) {
+      lmX <-
+        formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6", sep = " ~ "))
+    } else {
+      message("Power parameter unknown, setting to k = 4")
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
+    }
   } else {
-    message("Power parameter unknown, setting to k = 4")
-    lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", sep = " ~ "))
+    # in case, age is missing
+    if (k == 1) {
+      lmX <- formula(paste(raw, "L1", sep = " ~ "))
+    } else if (k == 2) {
+      lmX <- formula(paste(raw, "L1 + L2", sep = " ~ "))
+    } else if (k == 3) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3", sep = " ~ "))
+    } else if (k == 4) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4", sep = " ~ "))
+    } else if (k == 5) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + L5", sep = " ~ "))
+    } else if (k == 6) {
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4 + L5 + L6", sep = " ~ "))
+    } else {
+      message("Power parameter unknown, setting to k = 4")
+      lmX <- formula(paste(raw, "L1 + L2 + L3 + L4", sep = " ~ "))
+    }
   }
 
   big <- FALSE
@@ -218,8 +240,15 @@ bestModel <- function(data,
   bestformula$subsets <- results
 
   # add information for horizontal and vertical extrapolation
-  bestformula$minA1 <- min(data$A1)
-  bestformula$maxA1 <- max(data$A1)
+  if (attr(data, "useAge")){
+    bestformula$minA1 <- min(data$A1)
+    bestformula$maxA1 <- max(data$A1)
+    bestformula$useAge <- TRUE
+  }else{
+    bestformula$minA1 <- 1
+    bestformula$maxA1 <- 1
+    bestformula$useAge <- FALSE
+  }
   bestformula$minL1 <- min(data$L1)
   bestformula$maxL1 <- max(data$L1)
   bestformula$minRaw <- min(data[, raw])
@@ -258,7 +287,6 @@ bestModel <- function(data,
 #' @examples
 #' model <- bestModel(prepareData())
 #' printSubset(model)
-#'
 printSubset <- function(model) {
   table <-
     do.call(rbind, Map(data.frame,
@@ -312,9 +340,11 @@ printSubset <- function(model) {
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(normData)
-#' modelViolations <- checkConsistency(m, minAge=2, maxAge=5, stepAge=0.1,
-#'                    minNorm=25, maxNorm=75, minRaw=0, maxRaw= 28, stepNorm=1)
-#' plotDerivative(m, , minAge=2, maxAge=5, minNorm=25, maxNorm=75)
+#' modelViolations <- checkConsistency(m,
+#'   minAge = 2, maxAge = 5, stepAge = 0.1,
+#'   minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw = 28, stepNorm = 1
+#' )
+#' plotDerivative(m, , minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
 #' @export
 checkConsistency <- function(model,
                              minAge = NULL,
@@ -553,7 +583,7 @@ derive <- function(model, order = 1) {
 #' print(rangeCheck(m))
 rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
   summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ". The raw scores range from ", model$minRaw, " to ", model$maxRaw, ".")
-  if(model$descend){
+  if (model$descend) {
     summary <- paste0(summary, " The ranking was done in descending order.")
   }
   reportOnly <- (is.null(minAge) || is.null(maxAge) || is.null(minNorm) || is.null(maxNorm))
@@ -625,38 +655,40 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
-#' cnorm.cv(data, 3, max=7, norms=FALSE)
+#' cnorm.cv(data, 3, max = 7, norms = FALSE)
 cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = .2, width = NA, raw = NA, group = NA, age = NA) {
-
+  if (!attr(data, "useAge")){
+    stop("Age variable set to FALSE in dataset. No cross validation possible.")
+  }
   d <- data
 
-  if(is.na(raw)||is.na(group)||is.na(age)){
-      raw <- attr(d, "raw")
-      age <- attr(d, "age")
-      group <- attr(d, "group")
+  if (is.na(raw) || is.na(group) || is.na(age)) {
+    raw <- attr(d, "raw")
+    age <- attr(d, "age")
+    group <- attr(d, "group")
   }
 
-  if(is.na(raw)||is.na(group)||is.na(age)){
+  if (is.na(raw) || is.na(group) || is.na(age)) {
     stop("Variables raw, age and group neither available as function parameters nor as attributes from data object. Please provide according information.")
   }
 
   scaleM <- attr(d, "scaleMean")
-  if(is.na(scaleM) || cv=="full"){
+  if (is.na(scaleM) || cv == "full") {
     scaleM <- 50
   }
 
   scaleSD <- attr(d, "scaleSD")
-  if(is.na(scaleSD) || cv=="full"){
+  if (is.na(scaleSD) || cv == "full") {
     scaleSD <- 10
   }
 
   k <- attr(d, "k")
-  if(is.na(k)){
+  if (is.na(k)) {
     k <- 4
   }
 
   n.models <- 2 * k + k * k
-  if(is.na(max) || max > n.models || max < 1){
+  if (is.na(max) || max > n.models || max < 1) {
     max <- n.models
   }
 
@@ -694,10 +726,10 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # check for imbalances in data and repeat if stratification was unsatisfactory - usually never occurs
     p.value <- .01
-    n <- 1  # to avoid a deadlock, define stop criterion
+    n <- 1 # to avoid a deadlock, define stop criterion
 
     while (p.value < pCutoff) {
-      if(n > 100){
+      if (n > 100) {
         stop("Could not establish balanced data sets. Try to decrease pCutoff parameter.")
       }
       n <- n + 1
@@ -714,11 +746,11 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
       # test for significant differences to avoid extremely unbalanced data
       p <- rep(1, length(train))
-      for(z in 1:length(train)){
+      for (z in 1:length(train)) {
         p[z] <- t.test(train[[z]][, raw], test[[z]][, raw])$p.value
       }
       p.value <- min(p)
-      if(p.value < pCutoff){
+      if (p.value < pCutoff) {
         next
       }
 
@@ -726,12 +758,12 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
       train <- do.call(rbind, train)
       test <- do.call(rbind, test)
 
-      if(cv=="full"){
-        train <- prepareData(train, raw=raw, group=group, age=age)
-        test <- prepareData(test, raw=raw, group=group, age=age)
+      if (cv == "full") {
+        train <- prepareData(train, raw = raw, group = group, age = age)
+        test <- prepareData(test, raw = raw, group = group, age = age)
       }
       # test for overall significant differences between groups, restart stratification if necessary
-      #p.value <- t.test(train[, raw], test[, raw])$p.value
+      # p.value <- t.test(train[, raw], test[, raw])$p.value
     }
 
     # compute leaps model
@@ -739,7 +771,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
     # retrieve models coefficients for each number of terms
     for (i in min:max) {
-      cat(paste0("Repetition " , a, ", cycle ", i, "\n"))
+      cat(paste0("Repetition ", a, ", cycle ", i, "\n"))
       variables <- names(coef(subsets, id = i))
       variables <- variables[2:length(variables)] # remove '(Intercept)' variable
       reg <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
@@ -761,7 +793,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
       val.errors[i] <- val.errors[i] + mean((test.fitted - test[, raw])^2)
 
       # compute R2 for test and training
-      if(norms){
+      if (norms) {
         train$T <- predictNorm(train[, raw], train[, age], model, min(train$normValue), max(train$normValue))
         test$T <- predictNorm(test[, raw], test[, age], model, min(train$normValue), max(train$normValue))
 
@@ -786,16 +818,16 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     train.errors[i] <- sqrt(train.errors[i] / repetitions)
     val.errors[i] <- sqrt(val.errors[i] / repetitions)
 
-    if(norms){
+    if (norms) {
       r2.train[i] <- r2.train[i] / repetitions
       r2.test[i] <- r2.test[i] / repetitions
 
-      if(i > min){
+      if (i > min) {
         delta[i] <- r2.test[i] - r2.test[i - 1]
       }
     }
 
-    if(i < min){
+    if (i < min) {
       r2.train[i] <- NA
       r2.test[i] <- NA
       val.errors[i] <- NA
@@ -804,39 +836,39 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     }
   }
 
-  if(norms){
+  if (norms) {
     par(mfrow = c(2, 2)) # set the plotting area into a 1*2 array
-  }else{
+  } else {
     par(mfrow = c(1, 1))
   }
   tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test)
 
   # plot RMSE
-  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim=c(min(train.errors, na.rm = TRUE),max(val.errors, na.rm = TRUE)))
+  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim = c(min(train.errors, na.rm = TRUE), max(val.errors, na.rm = TRUE)))
   points(complete.errors, pch = 19, type = "b", col = "black")
   points(train.errors, pch = 19, type = "b", col = "red")
   legend("topright", legend = c("Training", "Validation", "Complete"), col = c("red", "blue", "black"), pch = 19)
 
-  if(norms){
+  if (norms) {
     # plot R2
-    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms", ylim=c(min(r2.test, na.rm = TRUE),1))
+    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms", ylim = c(min(r2.test, na.rm = TRUE), 1))
     points(r2.test, pch = 19, type = "b", col = "blue")
     legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
 
     # plot CROSSFIT
-    plot(tab$Crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim=c(min(c(tab$Crossfit, .88), na.rm = TRUE),max(c(tab$Crossfit, 1.12), na.rm = TRUE)))
+    plot(tab$Crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim = c(min(c(tab$Crossfit, .88), na.rm = TRUE), max(c(tab$Crossfit, 1.12), na.rm = TRUE)))
     abline(h = 1, col = 3, lty = 2)
     abline(h = .9, col = 2, lty = 3)
-    text(max, .89, adj = c(1,1), "underfit", col=2, cex = .75)
+    text(max, .89, adj = c(1, 1), "underfit", col = 2, cex = .75)
     abline(h = 1.1, col = 2, lty = 3)
-    text(max, 1.11, adj = c(1,0), "overfit", col=2, cex = .75)
+    text(max, 1.11, adj = c(1, 0), "overfit", col = 2, cex = .75)
 
     # plot delta r2 test
-    plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim=c(min(tab$Delta.R2.test, na.rm = TRUE),max(tab$Delta.R2.test, na.rm = TRUE)))
+    plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim = c(min(tab$Delta.R2.test, na.rm = TRUE), max(tab$Delta.R2.test, na.rm = TRUE)))
     abline(h = 0, col = 3, lty = 2)
   }
   cat("The simulation yielded the following optimal settings:\n")
-  cat(paste0("\nNumber of terms with best crossfit: ", which.min((1-tab$Crossfit)^2)))
+  cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
   cat("\nPlease investigate the plots and the summary table, as the results might vary within a narrow range.")

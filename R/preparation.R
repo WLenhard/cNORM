@@ -157,7 +157,7 @@ rankByGroup <-
       stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
     }
 
-    if (!is.numeric(d[, group])) {
+    if ((typeof(group) != "logical") && !is.numeric(d[, group])) {
       warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
     }
 
@@ -269,8 +269,8 @@ rankByGroup <-
 #' data sample, the sliding stops and the sample is drawn from the interval min + width and
 #' max - width, respectively.
 #' @param data data.frame with norm sample data
-#' @param age the continuous age variable
-#' group to FALSE cancels grouping (data is treated as one group)
+#' @param age the continuous age variable. Setting 'age' to FALSE inhibits computation of
+#' powers of age and the interactions
 #' @param raw name of the raw value variable (default 'raw')
 #' @param width the width of the sliding window
 #' @param method Ranking method in case of bindings, please provide an index,
@@ -494,8 +494,14 @@ computePowers <-
       norm <- attr(d, "normValue")
     }
 
+    useAge <- TRUE
+
     if (is.null(age)) {
       age <- attr(d, "age")
+    }
+
+    if((typeof(age) == "logical") && !age){
+      useAge <- FALSE
     }
 
     # check if columns exist
@@ -503,16 +509,16 @@ computePowers <-
       stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""))
     }
 
-    if (!(age %in% colnames(d))) {
-      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""))
-    }
-
     if (!is.numeric(d[, norm])) {
       warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""))
     }
 
-    if (!is.numeric(d[, age])) {
+    if (useAge && !is.numeric(d[, age])) {
       warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
+    }
+
+    if (useAge && !(age %in% colnames(d))) {
+      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""))
     }
 
     if ((k < 1) | (k > 6)) {
@@ -522,12 +528,13 @@ computePowers <-
 
 
     L1 <- as.numeric(d[[norm]])
-    A1 <- as.numeric(d[[age]])
-    L1A1 <- L1 * A1
-
     d$L1 <- L1
-    d$A1 <- A1
-    d$L1A1 <- L1A1
+
+    if(useAge){
+      A1 <- as.numeric(d[[age]])
+      L1A1 <- L1 * A1
+      d$A1 <- A1
+      d$L1A1 <- L1A1
 
     if (k > 1) {
       d$L2 <- d$L1 * d$L1
@@ -590,11 +597,24 @@ computePowers <-
       d$L6A5 <- d$L6 * d$A5
       d$L6A6 <- d$L6 * d$A6
     }
+    }else{
+      if (k > 1)
+        d$L2 <- d$L1 * d$L1
+      if (k > 2)
+        d$L3 <- d$L2 * d$L1
+      if (k > 3)
+        d$L4 <- d$L3 * d$L1
+      if (k > 4)
+        d$L5 <- d$L4 * d$L1
+      if (k > 5)
+        d$L6 <- d$L5 * d$L1
+    }
 
     # attributes
     attr(d, "age") <- age
     attr(d, "normValue") <- norm
     attr(d, "k") <- k
+    attr(d, "useAge") <- useAge
 
     return(d)
   }

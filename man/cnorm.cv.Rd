@@ -77,5 +77,5 @@ avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
 data <- prepareData()
-cnorm.cv(data, 3, max=7, norms=FALSE)
+cnorm.cv(data, 3, max = 7, norms = FALSE)
 }

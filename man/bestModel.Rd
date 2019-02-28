@@ -82,8 +82,8 @@ print(regressionFunction(preselectedModel))
 # Example for modeling based on continuous age variable and raw variable,
 # based on the CDC data. We use the default k=4 parameter; raw variable has
 # to be set to "bmi".
-bmi.data <- prepareData(CDC, raw="bmi", group="group", age="age")
-bmi.model <- bestModel(bmi.data, raw="bmi")
+bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
+bmi.model <- bestModel(bmi.data, raw = "bmi")
 printSubset(bmi.model)
 
 # Use the formula of the pre calculated bmi data to compute models for girls and
@@ -95,9 +95,11 @@ bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.mod
 # Custom list of predictors (based on k = 3) and forcing in the sex variable
 # While calculating the regression model works well, all other functions like
 # plotting and norm table generation are not yet prepared to use covariates
-bmi.sex <- bestModel(bmi.data, raw="bmi", predictors = c("L1", "L2", "L3",
-                     "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-                     "L2A3", "L3A1", "L3A2", "L3A3", "sex"), force.in = c("sex"))
+bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
+  "L1", "L2", "L3",
+  "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+  "L2A3", "L3A1", "L3A2", "L3A3", "sex"
+), force.in = c("sex"))
 }
 }
 \seealso{

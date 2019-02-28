@@ -196,20 +196,27 @@ normTable <- function(A,
                       maxNorm = NULL,
                       minRaw = NULL,
                       maxRaw = NULL,
-                      step = 0.1) {
-  if (is.null(minNorm) || is.null(maxNorm)) {
-    stop("ERROR: Please specify minimum and maximum norm score")
+                      step = NULL) {
+  if (is.null(minNorm)){
+    minNorm <- model$scaleM - 2 * model$scaleSD
   }
+
+  if (is.null(maxNorm)){
+    maxNorm <- model$scaleM + 2 * model$scaleSD
+  }
+
+  if(is.null(step)){
+    step <- model$scaleSD / 10
+  }
+
   descend <- model$descend
 
 
   if (is.null(minRaw)) {
-    warning("Minimum raw score not specified. Taking value from original dataset.")
     minRaw <- model$minRaw
   }
 
   if (is.null(maxRaw)) {
-    warning("Maximum raw score not specified. Taking value from original dataset.")
     maxRaw <- model$maxRaw
   }
 
@@ -481,6 +488,8 @@ predictNorm <-
       }
       hash <- (r + a) * (r + a + 1) / 2 + a
 
+      # build norm table and use this as a lookup table
+      # delete duplicates
       normTable <- data.frame(A = A, raw = raw, hash = hash)
       normTable <- normTable[!duplicated(normTable[,c('hash')]),]
 
@@ -498,6 +507,7 @@ predictNorm <-
         values[[i]] <- v
       }
 
+      # project values on original data
       values <- values[match(hash, normTable$hash)]
 
       # n <- length(raw)

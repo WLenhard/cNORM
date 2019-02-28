@@ -5,7 +5,7 @@
 \title{Create a norm table based on model for specific age}
 \usage{
 normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
-  maxRaw = NULL, step = 0.1)
+  maxRaw = NULL, step = NULL)
 }
 \arguments{
 \item{A}{the age as single value or a vector of age values}

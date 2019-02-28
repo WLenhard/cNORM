@@ -20,5 +20,4 @@ on the different best fitting models with increasing number of predictors.
 \examples{
 model <- bestModel(prepareData())
 printSubset(model)
-
 }

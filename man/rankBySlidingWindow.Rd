@@ -11,8 +11,8 @@ rankBySlidingWindow(data, age = "age", raw = "raw", width,
 \arguments{
 \item{data}{data.frame with norm sample data}
 
-\item{age}{the continuous age variable
-group to FALSE cancels grouping (data is treated as one group)}
+\item{age}{the continuous age variable. Setting 'age' to FALSE inhibits computation of
+powers of age and the interactions}
 
 \item{raw}{name of the raw value variable (default 'raw')}
 
