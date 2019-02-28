@@ -342,19 +342,19 @@ rawTable <- function(A,
     # checking consistency
     k <- 1
     SUCCESS <- TRUE
+    errorText <- ""
     while (k < nrow(table)) {
       if ((table$norm[k] >= table$norm[k + 1])) {
         # inconsistent results -> warning
         SUCCESS <- FALSE
-        message(paste("Raw ", table$raw[k], " value with inconsistent norm value", sep = ""))
+        errorText <- paste0(errorText, table$raw[k], ",")
       }
 
       k <- k + 1
     }
 
     if (!SUCCESS) {
-      message("The raw table generation yielded inconsistent entries. Please check model consistency.")
-      print(rangeCheck(model, A, A, minNorm, maxNorm))
+      message(paste0("The raw table generation yielded indications of inconsistent raw score results: ", errorText, " please check! Additionally, check overall model consistency."))
     }
 
     tables[[x]] <- table
