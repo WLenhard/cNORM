@@ -198,7 +198,7 @@ normTable <- function(A,
                       maxRaw = NULL,
                       step = NULL) {
 
-  if (model$useAge&&(is.null(A)||is.na(A))){
+  if (model$useAge&&!is.numeric(A)){
     stop("Please specify age.")
   }
 
@@ -212,6 +212,11 @@ normTable <- function(A,
 
   if (is.null(maxNorm)||is.na(maxNorm)){
     maxNorm <- model$scaleM + 2 * model$scaleSD
+  }
+
+  # in case it still fails
+  if (is.null(minNorm)||is.null(maxNorm)){
+    stop("Please specify minNorm and maxNorm.")
   }
 
   if(is.null(step)||is.na(step)){
@@ -303,7 +308,7 @@ rawTable <- function(A,
                      maxNorm = NULL,
                      step = 1) {
 
-  if (model$useAge&&(is.null(A)||is.na(A))){
+  if (model$useAge&&!is.numeric(A)){
     stop("Please specify age.")
   }
 
