@@ -197,26 +197,35 @@ normTable <- function(A,
                       minRaw = NULL,
                       maxRaw = NULL,
                       step = NULL) {
-  if (is.null(minNorm)){
+
+  if (model$useAge&&(is.null(A)||is.na(A))){
+    stop("Please specify age.")
+  }
+
+  if (is.null(model)){
+    stop("No model specified")
+  }
+
+  if (is.null(minNorm)||is.na(minNorm)){
     minNorm <- model$scaleM - 2 * model$scaleSD
   }
 
-  if (is.null(maxNorm)){
+  if (is.null(maxNorm)||is.na(maxNorm)){
     maxNorm <- model$scaleM + 2 * model$scaleSD
   }
 
-  if(is.null(step)){
+  if(is.null(step)||is.na(step)){
     step <- model$scaleSD / 10
   }
 
   descend <- model$descend
 
 
-  if (is.null(minRaw)) {
+  if (is.null(minRaw)||is.na(minRaw)) {
     minRaw <- model$minRaw
   }
 
-  if (is.null(maxRaw)) {
+  if (is.null(maxRaw)||is.na(maxRaw)) {
     maxRaw <- model$maxRaw
   }
 
@@ -293,19 +302,32 @@ rawTable <- function(A,
                      minNorm = NULL,
                      maxNorm = NULL,
                      step = 1) {
-  if (is.null(minNorm)) {
+
+  if (model$useAge&&(is.null(A)||is.na(A))){
+    stop("Please specify age.")
+  }
+
+  if (is.null(step)||is.na(step)){
+    step <- 1
+  }
+
+  if (is.null(model)){
+    stop("No model specified")
+  }
+
+  if (is.null(minNorm)||is.na(minNorm)) {
     minNorm <- model$minL1
   }
 
-  if (is.null(maxNorm)) {
+  if (is.null(maxNorm)||is.na(maxNorm)) {
     maxNorm <- model$maxL1
   }
 
-  if (is.null(minRaw)) {
+  if (is.null(minRaw)||is.na(minRaw)) {
     minRaw <- model$minRaw
   }
 
-  if (is.null(maxRaw)) {
+  if (is.null(maxRaw)||is.na(maxRaw)) {
     maxRaw <- model$maxRaw
   }
   tables <- vector("list", length(A))

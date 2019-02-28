@@ -553,7 +553,7 @@ shinyServer(function(input, output, session) {
   output$InputNormValue <- renderUI({
     tagList(numericInput(inputId = "NormValueInputAge", label = "Choose age", value = NULL, min = bestModel()$minA1, max = bestModel()$maxA1),
             numericInput(inputId = "NormValueInputRaw", label = "Choose raw value", value = NULL, min = bestModel()$minRaw, max = bestModel()$maxRaw),
-            actionButton(inputId = "CalcNormValue",label = "Calc norm value"))
+            actionButton(inputId = "CalcNormValue",label = "Norm Score"))
   })
 
   normValue <- eventReactive(input$CalcNormValue,{
@@ -583,7 +583,7 @@ shinyServer(function(input, output, session) {
   output$InputRawValue <- renderUI({
     tagList(numericInput(inputId = "RawValueInputAge", label = "Choose age", value = NULL, min = bestModel()$minA1, max = bestModel()$maxA1),
             numericInput(inputId = "RawValueInputNorm", label = "Choose norm value", value = NULL, min = bestModel()$minL1, max = bestModel()$maxL1),
-            actionButton(inputId = "CalcRawValue",label = "Calc raw value"))
+            actionButton(inputId = "CalcRawValue",label = "Raw Score"))
   })
 
   rawValue <- eventReactive(input$CalcRawValue,{

@@ -373,7 +373,7 @@ plotPercentiles <- function(data,
                             type = 7,
                             title = NULL) {
 
-  if (!attr(data, "useAge")){
+  if (!model$useAge){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
   }
 
@@ -706,7 +706,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
     bestformula$ideal.model <- model$ideal.model
     bestformula$cutoff <- model$cutoff
     bestformula$subsets <- model$subsets
-
+    bestformula$useAge <- model$useAge
     bestformula$maxA1 <- model$maxA1
     bestformula$minA1 <- model$minA1
     bestformula$minL1 <- model$minL1
