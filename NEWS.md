@@ -3,8 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.8
+Date: 2019.02.28 (current development; mainly testing and cleaning minor errors)
+
+Changes:
+*   fixing exceptions
+
+
+
 ### Version in 1.1.7
-Date: 2019.02.28 (current development)
+Date: 2019.02.28
 
 Changes:
 *   bestModel function now accepts a formula as a predictors object
