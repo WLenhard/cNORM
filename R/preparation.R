@@ -33,7 +33,8 @@
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 #' demonstrate the procedure.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
-#' Set to group = FALSE in case you do not want to model over different groups
+#' Setting group = FALSE deactivates modelling in dependence of age. Use this in case you do want
+#' conventional norm tables.
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
 #' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
@@ -49,6 +50,11 @@
 #'
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
+#'
+#' # modelling with only one group with the 'elfe' dataset as an example
+#' # this results in conventional norming
+#' data.elfe2 <- prepareData(data = elfe, group = FALSE)
+#' m <- bestModel(data.elfe2)
 #' @export
 prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T") {
   if (is.null(data)) {
@@ -58,7 +64,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   # checks
-  if (!(group %in% colnames(normData))) {
+  if ((typeof(group) != "logical") && !(group %in% colnames(normData))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   } else if (!(raw %in% colnames(normData))) {
     stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""))
@@ -92,7 +98,12 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }else{
     normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width, scale = scale)
   }
-  normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
+
+  if(typeof(group) != "logical"||group)
+    normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
+  else
+    normData <- computePowers(normData, k = 4, norm = "normValue")
+
   return(normData)
 }
 

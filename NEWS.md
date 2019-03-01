@@ -4,10 +4,11 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.8
-Date: 2019.02.28 (current development; mainly testing and cleaning minor errors)
+Date: 2019.03.01 (current development; mainly testing and cleaning minor errors)
 
 Changes:
 *   fixing exceptions
+*   group and age can now be deactivated, resulting in conventional norming procedure, based in ranking + regression over powers of L
 
 
 
