@@ -46,12 +46,18 @@ inverse cumulative normal distribution. In case of bindings, we use the medium r
 and there are different methods for estimating the percentiles (default RankIt).
 }
 \examples{
-#Transformation with default parameters: RandIt and converting to T scores
+# Transformation with default parameters: RandIt and converting to T scores
 data.elfe <- rankByGroup(elfe, group = "group")
 
-#Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
+# Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
 data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 
+# cNORM can as well be used for conventional norming
+# The group variable has to be set to NULL when ranking the group in this case
+d <- rankByGroup(elfe, raw="raw", group=FALSE)
+d <- computePowers(d)
+m <- bestModel(d)
+rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
 }
 \seealso{
 rankBySlidingWindow, computePowers

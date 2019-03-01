@@ -12,7 +12,8 @@ prepareData(data = NULL, group = "group", raw = "raw",
 named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 demonstrate the procedure.}
 
-\item{group}{grouping variable in the data, e. g. age groups, grades ...}
+\item{group}{grouping variable in the data, e. g. age groups, grades ...
+Set to group = FALSE in case you do not want to model over different groups}
 
 \item{raw}{the raw scores}
 

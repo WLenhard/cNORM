@@ -33,6 +33,7 @@
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 #' demonstrate the procedure.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
+#' Set to group = FALSE in case you do not want to model over different groups
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
 #' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
@@ -65,7 +66,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
     stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""))
   }
 
-  if (!is.numeric(normData[, group])) {
+  if ((typeof(group) != "logical") && !is.numeric(normData[, group])) {
     warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
   }
 
@@ -79,9 +80,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
   # exclude missings
   normData <- as.data.frame(normData)
-  normData <- normData[!is.na(normData[, group]), ]
+  if(typeof(group) != "logical"){
+    normData <- normData[!is.na(normData[, group]), ]
+    normData <- normData[!is.na(normData[, age]), ]
+  }
   normData <- normData[!is.na(normData[, raw]), ]
-  normData <- normData[!is.na(normData[, age]), ]
 
   # ranking and powers
   if(is.na(width)){
@@ -124,12 +127,18 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
-#' #Transformation with default parameters: RandIt and converting to T scores
+#' # Transformation with default parameters: RandIt and converting to T scores
 #' data.elfe <- rankByGroup(elfe, group = "group")
 #'
-#' #Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
+#' # Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
 #' data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
 #'
+#' # cNORM can as well be used for conventional norming
+#' # The group variable has to be set to NULL when ranking the group in this case
+#' d <- rankByGroup(elfe, raw="raw", group=FALSE)
+#' d <- computePowers(d)
+#' m <- bestModel(d)
+#' rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
 #' @seealso rankBySlidingWindow, computePowers
 #' @export
 rankByGroup <-
