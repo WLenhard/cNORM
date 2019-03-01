@@ -578,8 +578,10 @@ plotDensity <- function(model,
     maxRaw <- model$maxRaw
   }
 
-  if (is.null(group)) {
+  if (is.null(group)&&model$useAge) {
     group <- c(model$minA1, (model$maxA1 + model$minA1) / 2, model$maxA1)
+  }else if(!model$useAge){
+    group <- c(1)
   }
 
   step <- (maxNorm - minNorm) / 100
