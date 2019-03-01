@@ -78,7 +78,7 @@ normTable(c(3, 3.2, 3.4, 3.6), model.elfe, minNorm = 25, maxNorm = 75, step = 1)
 rawTable(3, model.elfe)
 
 # cNORM can as well be used for conventional norming
-# The group variable has to be set to NULL when ranking the group in this case
+# In this case, the group variable has to be set to FALSE when ranking the data.
 d <- rankByGroup(elfe, raw="raw", group=FALSE)
 d <- computePowers(d)
 m <- bestModel(d)
