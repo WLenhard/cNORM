@@ -13,7 +13,8 @@ named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data t
 demonstrate the procedure.}
 
 \item{group}{grouping variable in the data, e. g. age groups, grades ...
-Set to group = FALSE in case you do not want to model over different groups}
+Setting group = FALSE deactivates modelling in dependence of age. Use this in case you do want
+conventional norm tables.}
 
 \item{raw}{the raw scores}
 
@@ -43,4 +44,9 @@ data.elfe <- prepareData()
 
 # variable names can be specified as well, here with the BMI data included in the package
 data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
+
+# modelling with only one group with the 'elfe' dataset as an example
+# this results in conventional norming
+data.elfe2 <- prepareData(data = elfe, group = FALSE)
+m <- bestModel(data.elfe2)
 }
