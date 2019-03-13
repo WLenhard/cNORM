@@ -499,10 +499,12 @@ predictNorm <-
       } else if (anyNA(raw)) {
         stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
       }
-      cat("Retrieving norm scores ...\n")
 
-      #  initialize vectors and starting values
+
+      # initialize vectors and starting values
+      # of retrieved norm scores to specific cases; needed for later matching
       # create simple hash based on cantor pairing
+      # (values need to be shifted to positive values)
       r <- raw
       a <- A
 
@@ -520,6 +522,9 @@ predictNorm <-
       normTable <- data.frame(A = A, raw = raw, hash = hash)
       normTable <- normTable[!duplicated(normTable[,c('hash')]),]
 
+      if(nrow(normTable)>500){
+        cat("Retrieving norm scores, please stand by ...\n")
+      }
       raw2 <- normTable$raw
       A2 <- normTable$A
       n <- length(raw2)

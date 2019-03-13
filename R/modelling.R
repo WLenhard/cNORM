@@ -867,6 +867,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim = c(min(tab$Delta.R2.test, na.rm = TRUE), max(tab$Delta.R2.test, na.rm = TRUE)))
     abline(h = 0, col = 3, lty = 2)
   }
+  cat("\n")
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
