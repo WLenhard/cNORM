@@ -101,7 +101,7 @@ normData2 <- rankBySlidingWindow(data = elfe, age = "group", raw = "raw", width 
 
 Please note that the 'rankBySlidingWindow' function only makes sense if the age variable is actually continuous. In the 'elfe' data set the variable 'group' serves as continuous explanatory variable as well as discrete grouping variable. Therefore, with the function 'rankBySlidingWindow' we obtain the same standard scores as with the function 'rankByGroup' in this specific case.
 
-Both ranking functions ('rankBySlidingWindow' and'rankByGroup') add two additional columns, namely 'percentile' and 'normValue'. In addition, descriptive information about each group is added, namely n, m, md and sd. Descriptive results are only necessary under certain circumstances. The creation of these variables can be deactivated via the parameter 'descriptives'.
+Both ranking functions ('rankBySlidingWindow' and 'rankByGroup') add two additional columns, namely 'percentile' and 'normValue'. In addition, descriptive information about each group is added, namely n, m, md and sd. Descriptive results are only necessary under certain circumstances. The creation of these variables can be deactivated via the parameter 'descriptives'.
 
 
 ### Computing powers and interactions

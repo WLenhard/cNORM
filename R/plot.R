@@ -106,7 +106,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' Ark and Sijtsma (2016).
 #' @param data The raw data within a data.frame
 #' @param model The regression model
-#' @param group The grouping variable, use empty string "" for no group
+#' @param group The grouping variable, use empty string for no group
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot

@@ -14,10 +14,10 @@ There were no ERRORs, WARNINGs or NOTEs
 There are currently no downstream dependencies for this package.
 
 ## Update and resubmission
-This is a minor release to the prior official version (1.1.2). In this version I have:
+This is the third release to CRAN  (v1.1.8). In this version I have:
 
 * improved and extendend cross validation functionality
-* extend the GUI
+* optimization with respect th norm prediction
+* extension of the GUI
 * improved documentation
 * improved method output messages
-* fixed minor errors in case of missing values and added a scale parameter to prepareData()
