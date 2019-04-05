@@ -74,7 +74,7 @@ calcPolyInL <- function(raw, age, model) {
   return(coefficientPolynom)
 }
 
-predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL) {
+predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL, force = FALSE) {
   if (is.null(polynom)) {
     polynomForPrediction <- calcPolyInL(
       raw = raw,
@@ -121,14 +121,20 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
 
       optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
 
-      if (optimum$minimum < minNorm || optimum$minimum > maxNorm) {
+      if(optimum$minimum >= minNorm && optimum$minimum <= maxNorm){
+        return(optimum$minimum)
+      }else if (!force&&(optimum$minimum < minNorm || optimum$minimum > maxNorm)) {
         # everything failed, return NA
         warning(paste0("No plausible norm score available for ", raw, " at age ", age, "; returning NA"))
 
         return(NA)
+      }else if(force && optimum$minimum < minNorm){
+        warning(paste0("No plausible norm score available for ", raw, " at age ", age, "; returning lower boundary of the norms."))
+        return(minNorm)
+      }else if(force && optimum$minimum > maxNorm){
+        warning(paste0("No plausible norm score available for ", raw, " at age ", age, "; returning upper boundary of the norms."))
+        return(maxNorm)
       }
-
-      return(optimum$minimum)
     }
   }
 }

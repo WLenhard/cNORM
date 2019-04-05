@@ -12,7 +12,7 @@ plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL,
 
 \item{model}{The regression model}
 
-\item{group}{The grouping variable, use empty string "" for no group}
+\item{group}{The grouping variable, use empty string for no group}
 
 \item{minNorm}{lower bound of fitted norm scores}
 

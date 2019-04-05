@@ -47,6 +47,8 @@
 #' resp. list of predictors, are ignored without further notice and thus do not show up in
 #' the final result. Additionally, all other functions like norm table generation and plotting
 #' are so far not yet prepared to handle covariates.
+#' @param weights Optional vector with weights for the single cases. All weights have to be positive.
+#' This is currently an experimental feature.
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
@@ -93,6 +95,7 @@ bestModel <- function(data,
                       k = NULL,
                       predictors = NULL,
                       terms = 0,
+                      weights = NULL,
                       force.in = NULL) {
 
   # retrieve attributes
@@ -189,7 +192,7 @@ bestModel <- function(data,
     index <- NULL
   }
 
-  subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big)
+  subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
   results <- summary(subsets)
 
   i <- 1
@@ -227,7 +230,14 @@ bestModel <- function(data,
   text <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
 
   report[3] <- paste0("Final regression model: ", text)
-  bestformula <- lm(text, as.data.frame(data))
+
+  if(is.null(weights)){
+    bestformula <- lm(text, as.data.frame(data))
+  }else{
+    d <- as.data.frame(data)
+    d$weights <- weights
+    bestformula <- lm(text, d, weights = d$weights)
+  }
 
   # compute rmse
   tab <- data.frame(raw = data[, raw], fitted = bestformula$fitted.values)

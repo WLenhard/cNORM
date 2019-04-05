@@ -5,7 +5,7 @@
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
 bestModel(data, raw = NULL, R2 = 0.99, k = NULL, predictors = NULL,
-  terms = 0, force.in = NULL)
+  terms = 0, weights = NULL, force.in = NULL)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
@@ -33,6 +33,9 @@ of predictors as well.}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
+
+\item{weights}{Optional vector with weights for the single cases. All weights have to be positive.
+This is currently an experimental feature.}
 
 \item{force.in}{List of variable names forced into the regression function. This option
 can be used to force the regression to include covariates like sex or other background

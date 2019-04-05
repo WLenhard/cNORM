@@ -3,6 +3,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.1.9 (current development)
+Date: 2019.04.05
+
+Changes:
+*   weighting added to bestModel-function
+
+
+
 ### Version in 1.1.8 (Third release to CRAN)
 Date: 2019.03.15 (mainly testing and cleaning minor errors)
 

@@ -4,7 +4,8 @@
 \alias{predictNorm}
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
-predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL)
+predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL,
+  force = FALSE)
 }
 \arguments{
 \item{raw}{The raw value, either single numeric or list of values}
@@ -16,6 +17,8 @@ predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL)
 \item{minNorm}{The lower bound of the norm score range}
 
 \item{maxNorm}{The upper bound of the norm score range}
+
+\item{force}{Try to resolve missing norm scores in case of inconsistent models}
 }
 \value{
 The predicted norm score for a raw score, either single value or list of results

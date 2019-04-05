@@ -458,6 +458,7 @@ derivationTable <-
 #' @param model The regression model
 #' @param minNorm The lower bound of the norm score range
 #' @param maxNorm The upper bound of the norm score range
+#' @param force Try to resolve missing norm scores in case of inconsistent models
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
@@ -473,7 +474,7 @@ predictNorm <-
              A,
              model,
              minNorm = NULL,
-             maxNorm = NULL) {
+             maxNorm = NULL, force = FALSE) {
     if (is.null(minNorm) || is.null(maxNorm)) {
       stop("ERROR: Please specify minimum and maximum norm score")
     }
@@ -532,7 +533,7 @@ predictNorm <-
 
       # iterate through cases
       for (i in 1:n) {
-        v <- predictNormByRoots(raw2[[i]], A2[[i]], model, minNorm, maxNorm)
+        v <- predictNormByRoots(raw2[[i]], A2[[i]], model, minNorm, maxNorm, force = force)
         if (length(v) == 0) {
           v <- NA
         }
