@@ -4,10 +4,11 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.9 (current development)
-Date: 2019.04.05
+Date: 2019.04.09
 
 Changes:
 *   weighting added to bestModel-function
+*   cast to data.frame in prepareData method to prevent SPSS import failing
 
 
 
