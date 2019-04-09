@@ -60,7 +60,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
-    normData <- data
+    normData <- as.data.frame(data)
   }
 
   # checks
@@ -85,7 +85,6 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   # exclude missings
-  normData <- as.data.frame(normData)
   if(typeof(group) != "logical"){
     normData <- normData[!is.na(normData[, group]), ]
     normData <- normData[!is.na(normData[, age]), ]
