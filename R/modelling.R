@@ -132,7 +132,7 @@ bestModel <- function(data,
   }
 
   linearR2 <- cor(data[,raw], data$A1)^2
-  if(linearR2<.05){
+  if(linearR2<.1){
     warning(paste0("R2 between the explanatory variable and the raw score is low with R2 = ", linearR2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
   }
 
