@@ -635,5 +635,20 @@ computePowers <-
     attr(d, "k") <- k
     attr(d, "useAge") <- useAge
 
+    # check, if it is worthwhile to continue with continuous norming
+    if (useAge) {
+      if(k == 1){form <- formula(paste(attr(d, "raw"), "A1", sep = " ~ "))}
+      else if(k == 2){form <- formula(paste(attr(d, "raw"), "A1 + A2", sep = " ~ "))}
+      else if(k == 3){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3", sep = " ~ "))}
+      else if(k == 4){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4", sep = " ~ "))}
+      else if(k == 5){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5", sep = " ~ "))}
+      else if(k == 6){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5 + A6", sep = " ~ "))}
+
+      r2 <- summary(lm(form, data = d))$r.squared
+      if (r2 < .05) {
+        warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
+      }
+    }
+
     return(d)
   }
