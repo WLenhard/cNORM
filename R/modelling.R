@@ -131,6 +131,11 @@ bestModel <- function(data,
     stop("ERROR: Missing variables from predictors variable. Please check variable list.")
   }
 
+  linearR2 <- cor(data[,raw], data$A1)^2
+  if(linearR2<.05){
+    warning(paste0("R2 between the explanatory variable and the raw score is low with R2 = ", linearR2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
+  }
+
   if (!is.null(predictors)) {
     if (inherits(predictors, "formula")) {
       lmX <- predictors

@@ -364,7 +364,7 @@ rawTable <- function(A,
     }
 
     if(model$descend){
-      table <- table[order(table$norm),]
+      table <- table[order(table$raw, decreasing = TRUE),]
     }
     # checking consistency
     k <- 1
