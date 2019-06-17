@@ -4,14 +4,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.9 (current development)
-Date: 2019.05.06
+Date: 2019.06.17
 
 Changes:
 *   weighting added to bestModel-function
 *   cast to data.frame in prepareData method to prevent SPSS import failing
 *   Ordering of raw table when using descending values
-*   Warning message added to bestModel function in case the linear R2 between the explanatory variable
-    and the raw score is below .1
+*   Warning message added to computePoewers function in case the multiple R2 between the explanatory variable
+    and the raw score is below .05; modelling norm scores in dependence of age is questionable in that case
 
 
 
