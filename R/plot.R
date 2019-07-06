@@ -836,7 +836,7 @@ plotSubset <- function(model, type = 1) {
                     col.line = "lightblue", lwd = 1,
                     grid = TRUE,
                     main = "Information Function",
-                    ylab = "Root Means Square Error",
+                    ylab = "Root Means Square Error (Raw Score)",
                     xlab = "Number of Predictors" )
   } else {
     lattice::xyplot(adjr2 ~ nr,
