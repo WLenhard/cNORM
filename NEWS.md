@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.1.9 (current development)
-Date: 2019.06.17
+Date: 2019.07.07
 
 Changes:
 *   weighting added to bestModel-function
@@ -12,6 +12,7 @@ Changes:
 *   Ordering of raw table when using descending values
 *   Warning message added to computePoewers function in case the multiple R2 between the explanatory variable
     and the raw score is below .05; modelling norm scores in dependence of age is questionable in that case
+*   prepareData, rankByGroup and rankBySlidingWindow now accept variables instead of variable names as well
 
 
 
