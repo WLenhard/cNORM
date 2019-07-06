@@ -64,6 +64,21 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   # checks
+  if(class(group)=="numeric" && (length(group)==nrow(normData))){
+    normData$group <- group
+    group <- "group"
+  }
+
+  if(class(raw)=="numeric" && (length(raw)==nrow(normData))){
+    normData$raw <- raw
+    raw <- "raw"
+  }
+
+  if(class(age)=="numeric" && (length(age)==nrow(normData))){
+    normData$age <- age
+    age <- "age"
+  }
+
   if ((typeof(group) != "logical") && !(group %in% colnames(normData))) {
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   } else if (!(raw %in% colnames(normData))) {
@@ -165,6 +180,17 @@ rankByGroup <-
       cat("Missing values found in grouping or raw score variable... excluding from dataset")
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]
+    }
+
+    # check data types
+    if(class(group)=="numeric" && (length(group)==nrow(d))){
+      d$group <- group
+      group <- "group"
+    }
+
+    if(class(raw)=="numeric" && (length(raw)==nrow(d))){
+      d$raw <- raw
+      raw <- "raw"
     }
 
     # check if columns exist
@@ -338,6 +364,17 @@ rankBySlidingWindow <- function(data,
 
   # copy data frame
   d <- as.data.frame(data)
+
+  # check data types
+  if(class(raw)=="numeric" && (length(raw)==nrow(d))){
+    d$raw <- raw
+    raw <- "raw"
+  }
+
+  if(class(age)=="numeric" && (length(age)==nrow(d))){
+    d$age <- age
+    age <- "age"
+  }
 
   if(anyNA(d[, raw]) || anyNA(d[, age])){
     cat("Missing values found in raw score or age variable... excluding from dataset")
