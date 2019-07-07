@@ -13,6 +13,7 @@ Changes:
 *   Warning message added to computePoewers function in case the multiple R2 between the explanatory variable
     and the raw score is below .05; modelling norm scores in dependence of age is questionable in that case
 *   prepareData, rankByGroup and rankBySlidingWindow now accept variables instead of variable names as well
+*   rankByGroup and rankBySlidingWindow display warning in case of small groups
 
 
 
