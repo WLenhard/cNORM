@@ -175,6 +175,16 @@ rankByGroup <-
              descend = FALSE,
              descriptives = TRUE) {
     d <- as.data.frame(data)
+    # check data types
+    if(is.numeric(group) && (length(group)==nrow(d))){
+      d$group <- group
+      group <- "group"
+    }
+
+    if(is.numeric(raw) && (length(raw)==nrow(d))){
+      d$raw <- raw
+      raw <- "raw"
+    }
 
     if(anyNA(d[, group]) || anyNA(d[, raw])){
       cat("Missing values found in grouping or raw score variable... excluding from dataset")
@@ -182,16 +192,7 @@ rankByGroup <-
       d <- d[!is.na(d[, raw]), ]
     }
 
-    # check data types
-    if(class(group)=="numeric" && (length(group)==nrow(d))){
-      d$group <- group
-      group <- "group"
-    }
 
-    if(class(raw)=="numeric" && (length(raw)==nrow(d))){
-      d$raw <- raw
-      raw <- "raw"
-    }
 
     # check if columns exist
     if ((typeof(group) != "logical") && !(group %in% colnames(d))) {
@@ -292,6 +293,10 @@ rankByGroup <-
     attr(d, "descend") <- descend
     attr(d, "normValue") <- "normValue"
 
+    if(descriptives&&min(d$n)<30){
+      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable."))
+    }
+
     return(d)
   }
 
@@ -366,12 +371,12 @@ rankBySlidingWindow <- function(data,
   d <- as.data.frame(data)
 
   # check data types
-  if(class(raw)=="numeric" && (length(raw)==nrow(d))){
+  if(is.numeric(raw) && (length(raw)==nrow(d))){
     d$raw <- raw
     raw <- "raw"
   }
 
-  if(class(age)=="numeric" && (length(age)==nrow(d))){
+  if(is.numeric(age) && (length(age)==nrow(d))){
     d$age <- age
     age <- "age"
   }
@@ -415,6 +420,7 @@ rankBySlidingWindow <- function(data,
     d$md <- NA
     d$sd <- NA
   }
+
   # upper and lower bounds
   i <- 1
   n <- nrow(d)
@@ -499,6 +505,9 @@ rankBySlidingWindow <- function(data,
   attr(d, "normValue") <- "normValue"
   attr(d, "group") <- "group"
 
+  if(descriptives&&min(d$n)<30){
+    warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."))
+  }
   return(d)
 }
 
