@@ -6,7 +6,7 @@
 \usage{
 rankBySlidingWindow(data, age = "age", raw = "raw", width,
   method = 4, scale = "T", descend = FALSE, descriptives = TRUE,
-  nGroup = 0, group = NA)
+  nGroup = 0, group = NA, covariate = NULL)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -42,6 +42,10 @@ overwrites it.}
 
 \item{group}{Optional parameter for providing the name of the grouping variable (if present; overwritten
 if ngroups is used)}
+
+\item{covariate}{Include a binary covariate into the preparation and subsequently modelling,
+either by specifying the variable name or including the variable itself. BEWARE!
+Not all subsequent functions are already prepared for it.  It is an experimental feature.}
 }
 \value{
 the dataset with the individual percentiles and norm scores
@@ -64,10 +68,23 @@ already described in the \code{\link{rankByGroup}} function. At the upper and lo
 data sample, the sliding stops and the sample is drawn from the interval min + width and
 max - width, respectively.
 }
+\section{Remarks on using covariates}{
+
+So far the inclusion of a binary covariate is experimental and far from optimized.
+Currently, the according variable name has to be specified in the ranking procedure
+and the modelling includes this in the further process. At the moment, during ranking
+the data are split into the according degrees of the covariate and the ranking is done
+seperately. This may lead to small sample sizes. Please take care to have enoght cases in each combination. Additionally,
+covariates can lead to unstable modelling solutions. The question, if it is really
+reasonable to include covariates when norming a test is a decision beyond the pure data
+modelling. Please use with care or alternatively split the dataset into the two groups
+beforehand and modell them seperately.
+}
+
 \examples{
 \dontrun{
 # Transformation using a sliding window
-data.elfe2 <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
+data.elfe2 <- rankBySlidingWindow(elfe, raw = "raw", age = "group", width = 0.5)
 
 # Comparing this to the traditional approach should give us exactly the same
 # values, since the sample dataset only has a grouping variable for age

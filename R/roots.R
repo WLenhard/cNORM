@@ -74,7 +74,15 @@ calcPolyInL <- function(raw, age, model) {
   return(coefficientPolynom)
 }
 
-predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL, force = FALSE) {
+predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL, force = FALSE, covariate = NULL) {
+
+  if(!is.null(covariate)){
+    if(is.null(model$coefficients)){
+      stop("Covariate specified, but model does not include covariate")
+    }
+    model$coefficients <- simplifyCoefficients(model$coefficients, covariate)
+  }
+
   if (is.null(polynom)) {
     polynomForPrediction <- calcPolyInL(
       raw = raw,
@@ -137,4 +145,61 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
       }
     }
   }
+}
+
+simplifyCoefficients <- function(coefficients = coefficients, covariate = covariate){
+
+  #simplify coefficients in case of covariates
+  names <- names(coefficients)
+  indexCOV <- NA
+  indexL1COV <- NA
+  indexA1COV <- NA
+  indexL1A1COV <- NA
+
+  if("COV" %in% names){
+    indexCOV <- which(names == "COV")
+    coefficients[[1]] <- coefficients[[1]] + (coefficients[[indexCOV]]*covariate)
+  }
+
+  if("L1COV" %in% names){
+    indexL1COV <- which(names == "L1COV")
+    tmp <- coefficients[[indexL1COV]]*covariate
+
+    if(!("L1" %in% names)){
+      names <- append(names, "L1")
+      coefficients <- append(coefficients, tmp)
+    }else{
+      coefficients[[which(names == "L1")]] <- coefficients[[which(names == "L1")]] + tmp
+    }
+  }
+
+
+  if("A1COV" %in% names){
+    indexA1COV <- which(names == "A1COV")
+    tmp <- coefficients[[indexA1COV]]*covariate
+
+    if(!("A1" %in% names)){
+      names <- append(names, "A1")
+      coefficients <- append(coefficients, tmp)
+    }else{
+      coefficients[[which(names == "A1")]] <- coefficients[[which(names == "A1")]] + tmp
+    }
+  }
+
+  if("L1A1COV" %in% names){
+    indexL1A1COV <- which(names == "L1A1COV")
+    tmp <- coefficients[[indexL1A1COV]]*covariate
+
+    if(!("L1A1" %in% names)){
+      names <- append(names, "L1A1")
+      coefficients <- append(coefficients, tmp)
+    }else{
+      coefficients[[which(names == "L1A1")]] <- coefficients[[which(names == "L1A1")]] + tmp
+    }
+  }
+
+  names(coefficients) <- names
+  coefficients <- na.omit(coefficients[-na.omit(c(indexCOV, indexL1COV, indexA1COV, indexL1A1COV))])
+
+  return(coefficients)
 }

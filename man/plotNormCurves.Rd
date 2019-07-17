@@ -5,7 +5,8 @@
 \title{Plot norm curves}
 \usage{
 plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = NULL,
-  maxAge = NULL, step = 0.1, minRaw = NULL, maxRaw = NULL)
+  maxAge = NULL, step = 0.1, minRaw = NULL, maxRaw = NULL,
+  covariate = NULL)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -23,6 +24,9 @@ scores indicate higher precision / closer checks}
 (default = 0)}
 
 \item{maxRaw}{Upper end of the raw score range, used for clipping implausible results}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \description{
 The function plots the norm curves based on the regression model.

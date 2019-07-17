@@ -5,7 +5,8 @@
 \title{Determine the norm scores of the participants in each subsample}
 \usage{
 rankByGroup(data, group = "group", raw = "raw", method = 4,
-  scale = "T", descend = FALSE, descriptives = TRUE)
+  scale = "T", descend = FALSE, descriptives = TRUE,
+  covariate = NULL)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}
@@ -31,6 +32,10 @@ performance}
 
 \item{descriptives}{If set to TRUE (default), information in n, mean, median and
 standard deviation per group is added to each observation}
+
+\item{covariate}{Include a binary covariate into the preparation and subsequently modelling,
+either by specifying the variable name or including the variable itself. BEWARE!
+Not all subsequent functions are already prepared for it.  It is an experimental feature.}
 }
 \value{
 the dataset with the percentiles and norm scales per group
@@ -45,16 +50,29 @@ T, IQ or z scores can be computed via a normal rank procedure based on the
 inverse cumulative normal distribution. In case of bindings, we use the medium rank
 and there are different methods for estimating the percentiles (default RankIt).
 }
+\section{Remarks on using covariates}{
+
+So far the inclusion of a binary covariate is experimental and far from optimized.
+Currently, the according variable name has to be specified in the ranking procedure
+and the modelling includes this in the further process. At the moment, during ranking
+the data are split into the according cells group x covariate, which leads to small
+sample sizes. Please take care to have enoght cases in each combination. Additionally,
+covariates can lead to unstable modelling solutions. The question, if it is really
+reasonable to include covariates when norming a test is a decision beyond the pure data
+modelling. Please use with care or alternatively split the dataset into the two groups
+beforehand and modell them seperately.
+}
+
 \examples{
 # Transformation with default parameters: RandIt and converting to T scores
 data.elfe <- rankByGroup(elfe, group = "group")
 
 # Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
-data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale = c(10, 3))
 
 # cNORM can as well be used for conventional norming
 # The group variable has to be set to NULL when ranking the group in this case
-d <- rankByGroup(elfe, raw="raw", group=FALSE)
+d <- rankByGroup(elfe, raw = "raw", group = FALSE)
 d <- computePowers(d)
 m <- bestModel(d)
 rawTable(0, model = m) # please use an arbitrary value for age when generating the tables

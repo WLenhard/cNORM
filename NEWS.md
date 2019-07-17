@@ -3,6 +3,15 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.2.0 (current development)
+Date: 2019.07.17
+
+Changes:
+*   Preparing for the inclusion of a binary covariate. The package is been rewritten by larger parts
+*   Entering systematic testing
+
+
+
 ### Version in 1.1.9 (current development)
 Date: 2019.07.07
 

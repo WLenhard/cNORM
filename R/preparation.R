@@ -22,13 +22,13 @@
 }
 
 
-#' Set up example dataset and compute model
+#' Prepare data for modelling in one step (convenience method)
 #'
 #' This is a convenience method to either load the inbuilt sample dataset, or
 #' to provide a data frame with the variables "raw" (for the raw scores) and "group"
 #' The function ranks the data within groups, computes norm values, powers of the norm
-#' scores and interactions. Afterwards the best fitting model is determined, based on
-#' all default parameters.
+#' scores and interactions. Afterwards, you can use these preprocessed data to
+#' determine the best fitting model.
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 #' demonstrate the procedure.
@@ -49,7 +49,7 @@
 #' data.elfe <- prepareData()
 #'
 #' # variable names can be specified as well, here with the BMI data included in the package
-#' data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
+#' data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
 #'
 #' # modelling with only one group with the 'elfe' dataset as an example
 #' # this results in conventional norming
@@ -64,17 +64,17 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   # checks
-  if(class(group)=="numeric" && (length(group)==nrow(normData))){
+  if (is.numeric(group) && (length(group) == nrow(normData))) {
     normData$group <- group
     group <- "group"
   }
 
-  if(class(raw)=="numeric" && (length(raw)==nrow(normData))){
+  if (is.numeric(raw) && (length(raw) == nrow(normData))) {
     normData$raw <- raw
     raw <- "raw"
   }
 
-  if(class(age)=="numeric" && (length(age)==nrow(normData))){
+  if (is.numeric(age) && (length(age) == nrow(normData))) {
     normData$age <- age
     age <- "age"
   }
@@ -100,23 +100,24 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   # exclude missings
-  if(typeof(group) != "logical"){
+  if (typeof(group) != "logical") {
     normData <- normData[!is.na(normData[, group]), ]
     normData <- normData[!is.na(normData[, age]), ]
   }
   normData <- normData[!is.na(normData[, raw]), ]
 
   # ranking and powers
-  if(is.na(width)){
+  if (is.na(width)) {
     normData <- rankByGroup(normData, group = group, raw = raw, scale = scale)
-  }else{
+  } else {
     normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width, scale = scale)
   }
 
-  if(typeof(group) != "logical"||group)
+  if (typeof(group) != "logical" || group) {
     normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
-  else
+  } else {
     normData <- computePowers(normData, k = 4, norm = "normValue")
+  }
 
   return(normData)
 }
@@ -131,6 +132,17 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' T, IQ or z scores can be computed via a normal rank procedure based on the
 #' inverse cumulative normal distribution. In case of bindings, we use the medium rank
 #' and there are different methods for estimating the percentiles (default RankIt).
+#'
+#' @section Remarks on using covariates:
+#' So far the inclusion of a binary covariate is experimental and far from optimized.
+#' Currently, the according variable name has to be specified in the ranking procedure
+#' and the modelling includes this in the further process. At the moment, during ranking
+#' the data are split into the according cells group x covariate, which leads to small
+#' sample sizes. Please take care to have enoght cases in each combination. Additionally,
+#' covariates can lead to unstable modelling solutions. The question, if it is really
+#' reasonable to include covariates when norming a test is a decision beyond the pure data
+#' modelling. Please use with care or alternatively split the dataset into the two groups
+#' beforehand and modell them seperately.
 #'
 #' @param data data.frame with norm sample data
 #' @param group name of the grouping variable (default 'group'), e. g. grade, setting
@@ -149,6 +161,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
+#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' either by specifying the variable name or including the variable itself. BEWARE!
+#' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -156,11 +171,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' data.elfe <- rankByGroup(elfe, group = "group")
 #'
 #' # Transformation into Wechsler scores with Yu & Huang (2001) ranking procedure
-#' data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale=c(10, 3))
+#' data.elfe <- rankByGroup(elfe, group = "group", method = 7, scale = c(10, 3))
 #'
 #' # cNORM can as well be used for conventional norming
 #' # The group variable has to be set to NULL when ranking the group in this case
-#' d <- rankByGroup(elfe, raw="raw", group=FALSE)
+#' d <- rankByGroup(elfe, raw = "raw", group = FALSE)
 #' d <- computePowers(d)
 #' m <- bestModel(d)
 #' rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
@@ -173,26 +188,41 @@ rankByGroup <-
              method = 4,
              scale = "T",
              descend = FALSE,
-             descriptives = TRUE) {
+             descriptives = TRUE, covariate = NULL) {
+
+    # experimental code to include covariates
+    # covariate <- NULL
+
     d <- as.data.frame(data)
     # check data types
-    if(is.numeric(group) && (length(group)==nrow(d))){
+    if (is.numeric(group) && (length(group) == nrow(d))) {
       d$group <- group
       group <- "group"
     }
 
-    if(is.numeric(raw) && (length(raw)==nrow(d))){
+    if (is.numeric(raw) && (length(raw) == nrow(d))) {
       d$raw <- raw
       raw <- "raw"
     }
 
-    if(anyNA(d[, group]) || anyNA(d[, raw])){
+    if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
+      d$COV <- covariate
+      covariate <- "COV"
+    }
+
+    if (anyNA(d[, group]) || anyNA(d[, raw])) {
       cat("Missing values found in grouping or raw score variable... excluding from dataset")
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]
     }
 
-
+    if (!is.null(covariate)) {
+      attr(d, "covariate") <- covariate
+      degrees <- length(unique(d[, covariate]))
+      if (degrees > 2) {
+        stop(paste0("Covariate has to be binary. Currently, there are ", degrees, " degrees."))
+      }
+    }
 
     # check if columns exist
     if ((typeof(group) != "logical") && !(group %in% colnames(d))) {
@@ -221,42 +251,96 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-    if (typeof(group) == "logical" && !group) {
-      if (descend) {
-        d$percentile <- (rank(-1 * (d[, raw])) + numerator[method]) / (length(d[, raw]) + denominator[method])
-      } else {
-        d$percentile <- (rank(d[, raw]) + numerator[method]) / (length(d[, raw]) + denominator[method])
-      }
+    if (is.null(covariate)) {
+      if (typeof(group) == "logical" && !group) {
+        if (descend) {
+          d$percentile <- (rank(-1 * (d[, raw])) + numerator[method]) / (length(d[, raw]) + denominator[method])
+        } else {
+          d$percentile <- (rank(d[, raw]) + numerator[method]) / (length(d[, raw]) + denominator[method])
+        }
 
-      if (descriptives) {
-        d$n <- length(d[, raw])
-        d$m <- mean(d[, raw])
-        d$md <- median(d[, raw])
-        d$sd <- sd(d[, raw])
+        if (descriptives) {
+          d$n <- length(d[, raw])
+          d$m <- mean(d[, raw])
+          d$md <- median(d[, raw])
+          d$sd <- sd(d[, raw])
+        }
+      } else {
+        if (descend) {
+          d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
+            (rank(-x) + numerator[method]) / (length(x) + denominator[method])
+          })
+        } else {
+          d$percentile <- ave(d[, raw], d[, group], d[, group], FUN = function(x) {
+            (rank(x) + numerator[method]) / (length(x) + denominator[method])
+          })
+        }
+        if (descriptives) {
+          d$n <- ave(d[, raw], d[, group], FUN = function(x) {
+            length(x)
+          })
+          d$m <- ave(d[, raw], d[, group], FUN = function(x) {
+            mean(x)
+          })
+          d$md <- ave(d[, raw], d[, group], FUN = function(x) {
+            median(x)
+          })
+          d$sd <- ave(d[, raw], d[, group], FUN = function(x) {
+            sd(x)
+          })
+        }
       }
     } else {
-      if (descend) {
-        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-          (rank(-x) + numerator[method]) / (length(x) + denominator[method])
-        })
+      if (typeof(group) == "logical" && !group) {
+        if (descend) {
+          if (descend) {
+            d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
+              (rank(-x) + numerator[method]) / (length(x) + denominator[method])
+            })
+          } else {
+            d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+              (rank(x) + numerator[method]) / (length(x) + denominator[method])
+            })
+          }
+          if (descriptives) {
+            d$n <- ave(d[, raw], d[, covariate], FUN = function(x) {
+              length(x)
+            })
+            d$m <- ave(d[, raw], d[, covariate], FUN = function(x) {
+              mean(x)
+            })
+            d$md <- ave(d[, raw], d[, covariate], FUN = function(x) {
+              median(x)
+            })
+            d$sd <- ave(d[, raw], d[, covariate], FUN = function(x) {
+              sd(x)
+            })
+          }
+        }
       } else {
-        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-          (rank(x) + numerator[method]) / (length(x) + denominator[method])
-        })
-      }
-      if (descriptives) {
-        d$n <- ave(d[, raw], d[, group], FUN = function(x) {
-          length(x)
-        })
-        d$m <- ave(d[, raw], d[, group], FUN = function(x) {
-          mean(x)
-        })
-        d$md <- ave(d[, raw], d[, group], FUN = function(x) {
-          median(x)
-        })
-        d$sd <- ave(d[, raw], d[, group], FUN = function(x) {
-          sd(x)
-        })
+        if (descend) {
+          d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+            (rank(-x) + numerator[method]) / (length(x) + denominator[method])
+          })
+        } else {
+          d$percentile <- ave(d[, raw], d[, group], d[, group], d[, covariate], FUN = function(x) {
+            (rank(x) + numerator[method]) / (length(x) + denominator[method])
+          })
+        }
+        if (descriptives) {
+          d$n <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+            length(x)
+          })
+          d$m <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+            mean(x)
+          })
+          d$md <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+            median(x)
+          })
+          d$sd <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+            sd(x)
+          })
+        }
       }
     }
 
@@ -293,7 +377,7 @@ rankByGroup <-
     attr(d, "descend") <- descend
     attr(d, "normValue") <- "normValue"
 
-    if(descriptives&&min(d$n)<30){
+    if (descriptives && min(d$n) < 30) {
       warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable."))
     }
 
@@ -318,6 +402,18 @@ rankByGroup <-
 #' already described in the \code{\link{rankByGroup}} function. At the upper and lower end of the
 #' data sample, the sliding stops and the sample is drawn from the interval min + width and
 #' max - width, respectively.
+#'
+#' @section Remarks on using covariates:
+#' So far the inclusion of a binary covariate is experimental and far from optimized.
+#' Currently, the according variable name has to be specified in the ranking procedure
+#' and the modelling includes this in the further process. At the moment, during ranking
+#' the data are split into the according degrees of the covariate and the ranking is done
+#' seperately. This may lead to small sample sizes. Please take care to have enoght cases in each combination. Additionally,
+#' covariates can lead to unstable modelling solutions. The question, if it is really
+#' reasonable to include covariates when norming a test is a decision beyond the pure data
+#' modelling. Please use with care or alternatively split the dataset into the two groups
+#' beforehand and modell them seperately.
+#'
 #' @param data data.frame with norm sample data
 #' @param age the continuous age variable. Setting 'age' to FALSE inhibits computation of
 #' powers of age and the interactions
@@ -342,12 +438,15 @@ rankByGroup <-
 #' overwrites it.
 #' @param group Optional parameter for providing the name of the grouping variable (if present; overwritten
 #' if ngroups is used)
+#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' either by specifying the variable name or including the variable itself. BEWARE!
+#' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
 #' \dontrun{
 #' # Transformation using a sliding window
-#' data.elfe2 <- rankBySlidingWindow(elfe, raw="raw", age="group", width=0.5)
+#' data.elfe2 <- rankBySlidingWindow(elfe, raw = "raw", age = "group", width = 0.5)
 #'
 #' # Comparing this to the traditional approach should give us exactly the same
 #' # values, since the sample dataset only has a grouping variable for age
@@ -365,23 +464,31 @@ rankBySlidingWindow <- function(data,
                                 descend = FALSE,
                                 descriptives = TRUE,
                                 nGroup = 0,
-                                group = NA) {
+                                group = NA, covariate = NULL) {
+
+  # experimental code to include covariates
+  # covariate <- NULL
 
   # copy data frame
   d <- as.data.frame(data)
 
   # check data types
-  if(is.numeric(raw) && (length(raw)==nrow(d))){
+  if (is.numeric(raw) && (length(raw) == nrow(d))) {
     d$raw <- raw
     raw <- "raw"
   }
 
-  if(is.numeric(age) && (length(age)==nrow(d))){
+  if (is.numeric(age) && (length(age) == nrow(d))) {
     d$age <- age
     age <- "age"
   }
 
-  if(anyNA(d[, raw]) || anyNA(d[, age])){
+  if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
+    d$COV <- covariate
+    covariate <- "COV"
+  }
+
+  if (anyNA(d[, raw]) || anyNA(d[, age])) {
     cat("Missing values found in raw score or age variable... excluding from dataset")
     d <- d[!is.na(d[, raw]), ]
     d <- d[!is.na(d[, age]), ]
@@ -404,7 +511,14 @@ rankBySlidingWindow <- function(data,
     warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
   }
 
-
+  useCov <- !is.null(covariate)
+  if (useCov) {
+    attr(d, "covariate") <- covariate
+    degrees <- unique(d[, covariate])
+    if (length(degrees) > 2) {
+      stop(paste0("Covariate has to be binary. Currently, there are ", length(degrees), " degrees."))
+    }
+  }
 
   # define Q-Q-plot algorithm, use rankit as standard
   # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
@@ -427,10 +541,11 @@ rankBySlidingWindow <- function(data,
   MIN.AGE <- min(d[, age])
   MAX.AGE <- max(d[, age])
 
-
   while (i <= n) {
     a <- d[i, age]
     r <- d[i, raw]
+
+
     minAge <- a - (width / 2)
     maxAge <- a + (width / 2)
 
@@ -443,7 +558,11 @@ rankBySlidingWindow <- function(data,
       maxAge <- MAX.AGE
     }
 
+  if(useCov){
+    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge & d[, covariate] == d[i, covariate]), ]
+  }else{
     observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
+  }
     nObs <- nrow(observations)
 
     # print((rank(observations[, raw]) + numerator[method]) / (n + denominator[method]))
@@ -462,6 +581,10 @@ rankBySlidingWindow <- function(data,
     }
     i <- i + 1
   }
+
+
+
+
 
   # norm scale definition
   scaleM <- NA
@@ -505,7 +628,7 @@ rankBySlidingWindow <- function(data,
   attr(d, "normValue") <- "normValue"
   attr(d, "group") <- "group"
 
-  if(descriptives&&min(d$n)<30){
+  if (descriptives && min(d$n) < 30) {
     warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."))
   }
   return(d)
@@ -536,6 +659,11 @@ rankBySlidingWindow <- function(data,
 #' explanatory variables can be used here instead an age variable as well, as long as the variable is
 #' at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 #' most common field of application.
+#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' either by specifying the variable name or including the variable itself. If this has already
+#' been done in the ranking, the function uses the according variable. BEWARE!
+#' Not all subsequent functions are already prepared for it. It is an experimental feature and
+#' may lead to unstable models subsequently.
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
 #' @examples
@@ -551,7 +679,8 @@ computePowers <-
   function(data,
              k = 4,
              norm = NULL,
-             age = NULL) {
+             age = NULL,
+             covariate = NULL) {
     d <- as.data.frame(data)
 
     # check variables, if NULL take attributes from d
@@ -565,7 +694,7 @@ computePowers <-
       age <- attr(d, "age")
     }
 
-    if((typeof(age) == "logical") && !age){
+    if ((typeof(age) == "logical") && !age) {
       useAge <- FALSE
     }
 
@@ -595,84 +724,102 @@ computePowers <-
     L1 <- as.numeric(d[[norm]])
     d$L1 <- L1
 
-    if(useAge){
+    if (useAge) {
       A1 <- as.numeric(d[[age]])
       L1A1 <- L1 * A1
       d$A1 <- A1
       d$L1A1 <- L1A1
 
-    if (k > 1) {
-      d$L2 <- d$L1 * d$L1
-      d$A2 <- d$A1 * d$A1
-      d$L1A2 <- d$L1 * d$A2
-      d$L2A1 <- d$L2 * d$A1
-      d$L2A2 <- d$L2 * d$A2
-    }
-
-    if (k > 2) {
-      d$L3 <- d$L2 * d$L1
-      d$A3 <- d$A2 * d$A1
-
-      d$L1A3 <- d$L1 * d$A3
-      d$L2A3 <- d$L2 * d$A3
-
-      d$L3A1 <- d$L3 * d$A1
-      d$L3A2 <- d$L3 * d$A2
-      d$L3A3 <- d$L3 * d$A3
-    }
-
-    if (k > 3) {
-      d$L4 <- d$L3 * d$L1
-      d$A4 <- d$A3 * d$A1
-      d$L1A4 <- d$L1 * d$A4
-      d$L2A4 <- d$L2 * d$A4
-      d$L3A4 <- d$L3 * d$A4
-      d$L4A1 <- d$L4 * d$A1
-      d$L4A2 <- d$L4 * d$A2
-      d$L4A3 <- d$L4 * d$A3
-      d$L4A4 <- d$L4 * d$A4
-    }
-
-    if (k > 4) {
-      d$L5 <- d$L4 * d$L1
-      d$A5 <- d$A4 * d$A1
-      d$L1A5 <- d$L1 * d$A5
-      d$L2A5 <- d$L2 * d$A5
-      d$L3A5 <- d$L3 * d$A5
-      d$L4A5 <- d$L4 * d$A5
-      d$L5A1 <- d$L5 * d$A1
-      d$L5A2 <- d$L5 * d$A2
-      d$L5A3 <- d$L5 * d$A3
-      d$L5A4 <- d$L5 * d$A4
-      d$L5A5 <- d$L5 * d$A5
-    }
-
-    if (k > 5) {
-      d$L6 <- d$L5 * d$L1
-      d$A6 <- d$A5 * d$A1
-      d$L1A6 <- d$L1 * d$A6
-      d$L2A6 <- d$L2 * d$A6
-      d$L3A6 <- d$L3 * d$A6
-      d$L4A6 <- d$L4 * d$A6
-      d$L5A6 <- d$L5 * d$A6
-      d$L6A1 <- d$L6 * d$A1
-      d$L6A2 <- d$L6 * d$A2
-      d$L6A3 <- d$L6 * d$A3
-      d$L6A4 <- d$L6 * d$A4
-      d$L6A5 <- d$L6 * d$A5
-      d$L6A6 <- d$L6 * d$A6
-    }
-    }else{
-      if (k > 1)
+      if (k > 1) {
         d$L2 <- d$L1 * d$L1
-      if (k > 2)
+        d$A2 <- d$A1 * d$A1
+        d$L1A2 <- d$L1 * d$A2
+        d$L2A1 <- d$L2 * d$A1
+        d$L2A2 <- d$L2 * d$A2
+      }
+
+      if (k > 2) {
         d$L3 <- d$L2 * d$L1
-      if (k > 3)
+        d$A3 <- d$A2 * d$A1
+
+        d$L1A3 <- d$L1 * d$A3
+        d$L2A3 <- d$L2 * d$A3
+
+        d$L3A1 <- d$L3 * d$A1
+        d$L3A2 <- d$L3 * d$A2
+        d$L3A3 <- d$L3 * d$A3
+      }
+
+      if (k > 3) {
         d$L4 <- d$L3 * d$L1
-      if (k > 4)
+        d$A4 <- d$A3 * d$A1
+        d$L1A4 <- d$L1 * d$A4
+        d$L2A4 <- d$L2 * d$A4
+        d$L3A4 <- d$L3 * d$A4
+        d$L4A1 <- d$L4 * d$A1
+        d$L4A2 <- d$L4 * d$A2
+        d$L4A3 <- d$L4 * d$A3
+        d$L4A4 <- d$L4 * d$A4
+      }
+
+      if (k > 4) {
         d$L5 <- d$L4 * d$L1
-      if (k > 5)
+        d$A5 <- d$A4 * d$A1
+        d$L1A5 <- d$L1 * d$A5
+        d$L2A5 <- d$L2 * d$A5
+        d$L3A5 <- d$L3 * d$A5
+        d$L4A5 <- d$L4 * d$A5
+        d$L5A1 <- d$L5 * d$A1
+        d$L5A2 <- d$L5 * d$A2
+        d$L5A3 <- d$L5 * d$A3
+        d$L5A4 <- d$L5 * d$A4
+        d$L5A5 <- d$L5 * d$A5
+      }
+
+      if (k > 5) {
         d$L6 <- d$L5 * d$L1
+        d$A6 <- d$A5 * d$A1
+        d$L1A6 <- d$L1 * d$A6
+        d$L2A6 <- d$L2 * d$A6
+        d$L3A6 <- d$L3 * d$A6
+        d$L4A6 <- d$L4 * d$A6
+        d$L5A6 <- d$L5 * d$A6
+        d$L6A1 <- d$L6 * d$A1
+        d$L6A2 <- d$L6 * d$A2
+        d$L6A3 <- d$L6 * d$A3
+        d$L6A4 <- d$L6 * d$A4
+        d$L6A5 <- d$L6 * d$A5
+        d$L6A6 <- d$L6 * d$A6
+      }
+    } else {
+      if (k > 1) {
+        d$L2 <- d$L1 * d$L1
+      }
+      if (k > 2) {
+        d$L3 <- d$L2 * d$L1
+      }
+      if (k > 3) {
+        d$L4 <- d$L3 * d$L1
+      }
+      if (k > 4) {
+        d$L5 <- d$L4 * d$L1
+      }
+      if (k > 5) {
+        d$L6 <- d$L5 * d$L1
+      }
+    }
+
+    # add linear effects of covariate
+    if (is.null(covariate)) {
+      covariate <- attr(d, "covariate")
+    }
+
+    if (!is.null(covariate)) {
+      COV <- as.numeric(d[[covariate]])
+      d$COV <- COV
+      d$L1COV <- d$L1 * COV
+      d$A1COV <- d$A1 * COV
+      d$L1A1COV <- d$L1 * d$A1 * COV
     }
 
     # attributes
@@ -683,12 +830,24 @@ computePowers <-
 
     # check, if it is worthwhile to continue with continuous norming
     if (useAge) {
-      if(k == 1){form <- formula(paste(attr(d, "raw"), "A1", sep = " ~ "))}
-      else if(k == 2){form <- formula(paste(attr(d, "raw"), "A1 + A2", sep = " ~ "))}
-      else if(k == 3){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3", sep = " ~ "))}
-      else if(k == 4){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4", sep = " ~ "))}
-      else if(k == 5){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5", sep = " ~ "))}
-      else if(k == 6){form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5 + A6", sep = " ~ "))}
+      if (k == 1) {
+        form <- formula(paste(attr(d, "raw"), "A1", sep = " ~ "))
+      }
+      else if (k == 2) {
+        form <- formula(paste(attr(d, "raw"), "A1 + A2", sep = " ~ "))
+      }
+      else if (k == 3) {
+        form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3", sep = " ~ "))
+      }
+      else if (k == 4) {
+        form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4", sep = " ~ "))
+      }
+      else if (k == 5) {
+        form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5", sep = " ~ "))
+      }
+      else if (k == 6) {
+        form <- formula(paste(attr(d, "raw"), "A1 + A2 + A3 + A4 + A5 + A6", sep = " ~ "))
+      }
 
       r2 <- summary(lm(form, data = d))$r.squared
       if (r2 < .05) {

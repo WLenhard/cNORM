@@ -5,7 +5,7 @@
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
 predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL,
-  force = FALSE)
+  force = FALSE, covariate = NULL)
 }
 \arguments{
 \item{raw}{The raw value, either single numeric or list of values}
@@ -19,6 +19,9 @@ predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL,
 \item{maxNorm}{The upper bound of the norm score range}
 
 \item{force}{Try to resolve missing norm scores in case of inconsistent models}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 The predicted norm score for a raw score, either single value or list of results

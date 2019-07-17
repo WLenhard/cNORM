@@ -7,7 +7,7 @@
 plotPercentiles(data, model, minRaw = NULL, maxRaw = NULL,
   minAge = NULL, maxAge = NULL, raw = NULL, group = NULL,
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  scale = NULL, type = 7, title = NULL)
+  scale = NULL, type = 7, title = NULL, covariate = NULL)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm scores}
@@ -38,6 +38,9 @@ data preparation is used (default)}
 of the raw data (default 7)}
 
 \item{title}{custom title for plot}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \description{
 The function plots the norm curves based on the regression model against

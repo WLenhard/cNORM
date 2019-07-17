@@ -36,7 +36,10 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
     stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-
+  if(is.null(model$covariate))
+    cov <- NULL
+  else
+    cov <- data[[attr(data, "covariate")]]
   d <- data
   d$raw <- data[[raw]]
   d$fitted <- model$fitted.values
@@ -56,6 +59,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         xlab = "Observed Score",
         grid = TRUE,
         auto.key = TRUE,
+        group = cov,
         abline = c(0, 1), lwd = 1
       )
     } else {
@@ -65,6 +69,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         xlab = "Observed Score",
         grid = TRUE,
         auto.key = TRUE,
+        group = cov,
         panel = function(...) {
           panel.xyplot(...)
           panel.abline(h = .0, col = 2, lty = 2)
@@ -79,6 +84,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         xlab = "Observed Score",
         grid = TRUE,
         auto.key = TRUE,
+        group = cov,
         abline = c(0, 1), lwd = 1
       )
     } else {
@@ -88,6 +94,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         xlab = "Observed Score",
         grid = TRUE,
         auto.key = TRUE,
+        group = cov,
         panel = function(...) {
           panel.xyplot(...)
           panel.abline(h = .0, col = 2, lty = 2)
@@ -143,7 +150,13 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   d <- data
   raw <- data[[model$raw]]
   age <- data[[model$age]]
-  d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
+  if(!is.null(model$covariate))
+    covariate <- data[[attr(data, "covariate")]]
+  else
+    covariate <- NULL
+
+  d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
+
   d$diff <- d$fitted - data$normValue
   d <- d[!is.na(d$fitted), ]
   d <- d[!is.na(d$diff), ]
@@ -162,6 +175,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         xlab = "Observed Scores",
         grid = TRUE,
         auto.key = TRUE,
+        group = covariate,
         abline = c(0, 1), lwd = 1
       )
     } else {
@@ -172,6 +186,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         xlab = "Observed Scores",
         grid = TRUE,
         auto.key = TRUE,
+        group = covariate,
         abline = c(0, 1), lwd = 1,
         panel = function(...) {
           panel.xyplot(...)
@@ -188,6 +203,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         xlab = "Observed Scores",
         grid = TRUE,
         auto.key = TRUE,
+        group = covariate,
         abline = c(0, 1), lwd = 1
       )
     } else {
@@ -198,6 +214,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         xlab = "Observed Scores",
         grid = TRUE,
         auto.key = TRUE,
+        group = covariate,
         abline = c(0, 1), lwd = 1,
         panel = function(...) {
           panel.xyplot(...)
@@ -239,6 +256,8 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' @param minRaw Lower end of the raw score range, used for clipping implausible results
 #' (default = 0)
 #' @param maxRaw Upper end of the raw score range, used for clipping implausible results
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @seealso checkConsistency, derivationPlot, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -251,7 +270,17 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
                            maxAge = NULL,
                            step = 0.1,
                            minRaw = NULL,
-                           maxRaw = NULL) {
+                           maxRaw = NULL,
+                           covariate = NULL) {
+
+  if(!is.null(covariate)&&is.null(model$covariate)){
+    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+    covariate = NULL
+  }else if(is.null(covariate)&&!is.null(model$covariate)){
+    stop("Covariate specified in the model, but no function parameter available.")
+  }
+
+  ## TODO plot all degrees of the covariate when providing a list
 
   if (!model$useAge){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
@@ -286,7 +315,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
         maxAge = maxAge,
         step = step,
         minRaw = minRaw,
-        maxRaw = maxRaw
+        maxRaw = maxRaw,
+        covariate = covariate
       )
 
     currentDataFrame <- data.frame(n = normCurve$norm, raw = normCurve$raw, age = normCurve$age)
@@ -353,6 +383,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @param type The type parameter of the quantile function to estimate the percentiles
 #' of the raw data (default 7)
 #' @param title custom title for plot
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -371,7 +403,20 @@ plotPercentiles <- function(data,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = NULL,
                             type = 7,
-                            title = NULL) {
+                            title = NULL, covariate = NULL) {
+
+  if(!is.null(covariate)&&is.null(model$covariate)){
+    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+    covariate = NULL
+  }else if(is.null(covariate)&&!is.null(model$covariate)){
+    stop("Covariate specified in the model, but no function parameter available.")
+  }
+
+  if(!is.null(model$covariate)){
+    d <- data[data[[model$covariate]] == covariate, ]
+    model$fitted.values <- model$fitted.values[data[[model$covariate]] == covariate]
+    data <- d
+  }
 
   if (!model$useAge){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
@@ -549,6 +594,8 @@ plotPercentiles <- function(data,
 #' @param minNorm Lower bound of the norm score
 #' @param maxNorm Upper bound of the norm score
 #' @param group Column of groups to plot
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @seealso plotNormCurves, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results for age values 2, 4 and 6
@@ -561,7 +608,14 @@ plotDensity <- function(model,
                         maxRaw = NULL,
                         minNorm = NULL,
                         maxNorm = NULL,
-                        group = NULL) {
+                        group = NULL, covariate = NULL) {
+  if(!is.null(covariate)&&is.null(model$covariate)){
+    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+    covariate = NULL
+  }else if(is.null(covariate)&&!is.null(model$covariate)){
+    stop("Covariate specified in the model, but no function parameter available.")
+  }
+
   if (is.null(minNorm)) {
     minNorm <- model$minL1
   }
@@ -588,7 +642,7 @@ plotDensity <- function(model,
 
   i <- 1
   while (i <= length(group)) {
-    norm <- normTable(group[[i]], model, minNorm, maxNorm, minRaw, maxRaw, step = step)
+    norm <- normTable(group[[i]], model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, covariate = covariate)
     norm$group <- rep(group[[i]], length.out = nrow(norm))
 
     if (i == 1) {
@@ -659,7 +713,9 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  type = 7,
                                  filename = NULL) {
-
+  if(!is.null(model$covariate)){
+    stop("This function us currently not able to handle models with covariates.")
+  }
   d <- as.data.frame(data)
 
   if (!attr(d, "useAge")){

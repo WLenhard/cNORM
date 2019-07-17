@@ -5,7 +5,8 @@
 \title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
-computePowers(data, k = 4, norm = NULL, age = NULL)
+computePowers(data, k = 4, norm = NULL, age = NULL,
+  covariate = NULL)
 }
 \arguments{
 \item{data}{data.frame with the norm data}
@@ -20,6 +21,12 @@ Can be either the grouping variable itself or a finer grained variable like the 
 explanatory variables can be used here instead an age variable as well, as long as the variable is
 at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 most common field of application.}
+
+\item{covariate}{Include a binary covariate into the preparation and subsequently modelling,
+either by specifying the variable name or including the variable itself. If this has already
+been done in the ranking, the function uses the according variable. BEWARE!
+Not all subsequent functions are already prepared for it. It is an experimental feature and
+may lead to unstable models subsequently.}
 }
 \value{
 data.frame with the powers and interactions of location and explanatory variable / age

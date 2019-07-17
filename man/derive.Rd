@@ -4,12 +4,15 @@
 \alias{derive}
 \title{Derivative of regression model}
 \usage{
-derive(model, order = 1)
+derive(model, order = 1, covariate = NULL)
 }
 \arguments{
 \item{model}{The regression model}
 
 \item{order}{The degree of the derivate, default: 1}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 The derived coefficients

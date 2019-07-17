@@ -5,7 +5,7 @@
 \title{Computes the curve for a specific T value}
 \usage{
 getNormCurve(norm, model, minAge = NULL, maxAge = NULL, step = 0.1,
-  minRaw = NULL, maxRaw = NULL)
+  minRaw = NULL, maxRaw = NULL, covariate = NULL)
 }
 \arguments{
 \item{norm}{The specific norm score, e. g. T value}
@@ -22,6 +22,9 @@ values indicate higher precision (default 0.1).}
 \item{minRaw}{lower bound of the range of raw scores (default = 0)}
 
 \item{maxRaw}{upper bound of raw scores}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 data.frame of the variables raw, age and norm

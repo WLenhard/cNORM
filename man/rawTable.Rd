@@ -5,7 +5,7 @@
 \title{Create a table with norm scores assigned to raw scores for a specific age based on the regression model}
 \usage{
 rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
-  maxNorm = NULL, step = 1)
+  maxNorm = NULL, step = 1, covariate = NULL)
 }
 \arguments{
 \item{A}{the age, either single value or vector with age values}
@@ -21,6 +21,9 @@ rawTable(A, model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
 \item{maxNorm}{Clipping parameter for the upper bound of norm scores (default 25)}
 
 \item{step}{Stepping parameter for the raw scores (default 1)}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 either data.frame with raw scores and the predicted norm scores in case of simple A value or a list

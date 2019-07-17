@@ -4,7 +4,7 @@
 \alias{bestModel}
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
-bestModel(data, raw = NULL, R2 = 0.99, k = NULL, predictors = NULL,
+bestModel(data, raw = NULL, R2 = NULL, k = NULL, predictors = NULL,
   terms = 0, weights = NULL, force.in = NULL)
 }
 \arguments{

@@ -12,6 +12,8 @@
 #' values indicate higher precision (default 0.1).
 #' @param minRaw lower bound of the range of raw scores (default = 0)
 #' @param maxRaw upper bound of raw scores
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return data.frame of the variables raw, age and norm
 #' @examples
 #' normData <- prepareData()
@@ -25,7 +27,15 @@ getNormCurve <-
              maxAge = NULL,
              step = 0.1,
              minRaw = NULL,
-             maxRaw = NULL) {
+             maxRaw = NULL,
+           covariate = NULL) {
+    if(!is.null(covariate)&&is.null(model$covariate)){
+      warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+      covariate = NULL
+    }else if(is.null(covariate)&&!is.null(model$covariate)){
+      stop("Covariate specified in the model, but no function parameter available.")
+    }
+
     if (is.null(minAge)) {
       minAge <- model$minA1
     }
@@ -48,7 +58,7 @@ getNormCurve <-
     i <- 1
     while (minAge <= maxAge) {
       r <-
-        predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw)
+        predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw, covariate)
 
       raw[[i]] <- r
       age[[i]] <- minAge
@@ -86,6 +96,8 @@ getNormCurve <-
 #' usually set to the lower bound of the range of values of the test (default: 0)
 #' @param maxRaw Maximum score for the results; can be used for clipping unrealistic outcomes
 #' usually set to the upper bound of the range of values of the test
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return the predicted raw score
 #' @examples
 #' # Prediction of single scores
@@ -104,10 +116,14 @@ predictRaw <-
              age,
              coefficients,
              minRaw = -Inf,
-             maxRaw = Inf) {
+             maxRaw = Inf,
+           covariate = NULL) {
 
     # first intercept
     coef <- coefficients
+    if(!is.null(covariate)){
+      coef <- simplifyCoefficients(coef, covariate)
+    }
     predict <- 0
 
     i <- 1
@@ -174,6 +190,8 @@ predictRaw <-
 #' @param minRaw clipping parameter for the lower bound of raw scores
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
@@ -196,7 +214,14 @@ normTable <- function(A,
                       maxNorm = NULL,
                       minRaw = NULL,
                       maxRaw = NULL,
-                      step = NULL) {
+                      step = NULL, covariate = NULL) {
+
+  if(!is.null(covariate)&&is.null(model$covariate)){
+    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+    covariate = NULL
+  }else if(is.null(covariate)&&!is.null(model$covariate)){
+    stop("Covariate specified in the model, but no function parameter available.")
+  }
 
   if (model$useAge&&!is.numeric(A)){
     stop("Please specify age.")
@@ -245,7 +270,7 @@ normTable <- function(A,
     l <- length(norm)
 
       while (i <= l) {
-        r <- predictRaw(minn, A[[x]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+        r <- predictRaw(minn, A[[x]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw, covariate = covariate)
 
         norm[[i]] <- minn
         raw[[i]] <- r
@@ -288,6 +313,8 @@ normTable <- function(A,
 #' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
 #' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
 #' @param step Stepping parameter for the raw scores (default 1)
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
@@ -306,7 +333,14 @@ rawTable <- function(A,
                      maxRaw = NULL,
                      minNorm = NULL,
                      maxNorm = NULL,
-                     step = 1) {
+                     step = 1, covariate = NULL) {
+
+  if(!is.null(covariate)&&is.null(model$covariate)){
+    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+    covariate = NULL
+  }else if(is.null(covariate)&&!is.null(model$covariate)){
+    stop("Covariate specified in the model, but no function parameter available.")
+  }
 
   if (model$useAge&&!is.numeric(A)){
     stop("Please specify age.")
@@ -348,7 +382,7 @@ rawTable <- function(A,
       while (minr <= maxr) {
         i <- i + 1
         n <-
-          predictNorm(minr, A[[x]], model, minNorm, maxNorm)
+          predictNorm(minr, A[[x]], model, minNorm, maxNorm, covariate = covariate)
         norm[[i]] <- n
         raw[[i]] <- minr
 
@@ -407,6 +441,8 @@ rawTable <- function(A,
 #' @param minNorm The lower bound of the norm value range
 #' @param maxNorm The upper bound of the norm value range
 #' @param step Stepping parameter with lower values indicating higher precision
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return data.frame with norm scores and the predicted scores based on the
 #' derived regression function
 #' @seealso plotDerivative, derive
@@ -420,7 +456,15 @@ derivationTable <-
              model,
              minNorm = NULL,
              maxNorm = NULL,
-             step = 0.1) {
+             step = 0.1, covariate = NULL) {
+
+    if(!is.null(covariate)&&is.null(model$covariate)){
+      warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+      covariate = NULL
+    }else if(is.null(covariate)&&!is.null(model$covariate)){
+      stop("Covariate specified in the model, but no function parameter available.")
+    }
+
     if (is.null(minNorm)) {
       minNorm <- model$minL1
     }
@@ -432,10 +476,10 @@ derivationTable <-
     norm <- vector("list", 1 + (maxNorm - minNorm) / step)
     raw <- vector("list", 1 + (maxNorm - minNorm) / step)
     i <- 1
-    coeff <- derive(model)
+    coeff <- derive(model, covariate = covariate)
     while (minNorm <= maxNorm) {
       i <- i + 1
-      r <- predictRaw(minNorm, A, coeff)
+      r <- predictRaw(minNorm, A, coeff, covariate = covariate)
 
       norm[[i]] <- minNorm
       raw[[i]] <- r
@@ -459,6 +503,8 @@ derivationTable <-
 #' @param minNorm The lower bound of the norm score range
 #' @param maxNorm The upper bound of the norm score range
 #' @param force Try to resolve missing norm scores in case of inconsistent models
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' the specific value here.
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
 #' normData <- prepareData()
@@ -474,19 +520,30 @@ predictNorm <-
              A,
              model,
              minNorm = NULL,
-             maxNorm = NULL, force = FALSE) {
+             maxNorm = NULL, force = FALSE, covariate = NULL) {
     if (is.null(minNorm) || is.null(maxNorm)) {
       stop("ERROR: Please specify minimum and maximum norm score")
+    }
+
+    if(!is.null(covariate)&&is.null(model$covariate)){
+      warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+      covariate = NULL
+    }else if(is.null(covariate)&&!is.null(model$covariate)){
+      stop("Covariate specified in the model, but no function parameter available.")
     }
 
 
     # determine single norm value by optimization
     if (length(raw) == 1 && length(A) == 1 && is.numeric(raw) && is.numeric(A)) {
+      coef <- model$coefficients
+      if(!is.null(covariate)){
+        coef <- simplifyCoefficients(coef, covariate)
+      }
       startNormScore <- minNorm
-      currentRawValue <- predictRaw(norm = minNorm, age = A, coefficients = model$coefficients)
+      currentRawValue <- predictRaw(norm = minNorm, age = A, coefficients = coef)
 
       functionToMinimize <- function(norm) {
-        currentRawValue <- predictRaw(norm = norm, age = A, coefficients = model$coefficients)
+        currentRawValue <- predictRaw(norm = norm, age = A, coefficients = coef)
         functionValue <- (currentRawValue - raw)^2
       }
 
@@ -501,6 +558,10 @@ predictNorm <-
         stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
       }
 
+      if(!is.vector(covariate))
+        cov <- rep(covariate, times = length(raw))
+      else
+        cov <- covariate
 
       # initialize vectors and starting values
       # of retrieved norm scores to specific cases; needed for later matching
@@ -533,7 +594,7 @@ predictNorm <-
 
       # iterate through cases
       for (i in 1:n) {
-        v <- predictNormByRoots(raw2[[i]], A2[[i]], model, minNorm, maxNorm, force = force)
+        v <- predictNormByRoots(raw2[[i]], A2[[i]], model, minNorm, maxNorm, force = force, covariate = cov[[i]])
         if (length(v) == 0) {
           v <- NA
         }

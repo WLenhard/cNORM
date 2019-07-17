@@ -5,7 +5,7 @@
 \title{Create a norm table based on model for specific age}
 \usage{
 normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
-  maxRaw = NULL, step = NULL)
+  maxRaw = NULL, step = NULL, covariate = NULL)
 }
 \arguments{
 \item{A}{the age as single value or a vector of age values}
@@ -21,6 +21,9 @@ normTable(A, model, minNorm = NULL, maxNorm = NULL, minRaw = NULL,
 \item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 either data.frame with norm scores, predicted raw scores and percentiles in case of simple A

@@ -2,7 +2,7 @@
 % Please edit documentation in R/preparation.R
 \name{prepareData}
 \alias{prepareData}
-\title{Set up example dataset and compute model}
+\title{Prepare data for modelling in one step (convenience method)}
 \usage{
 prepareData(data = NULL, group = "group", raw = "raw",
   age = "group", width = NA, scale = "T")
@@ -35,15 +35,15 @@ grouping variable
 This is a convenience method to either load the inbuilt sample dataset, or
 to provide a data frame with the variables "raw" (for the raw scores) and "group"
 The function ranks the data within groups, computes norm values, powers of the norm
-scores and interactions. Afterwards the best fitting model is determined, based on
-all default parameters.
+scores and interactions. Afterwards, you can use these preprocessed data to
+determine the best fitting model.
 }
 \examples{
 # conducts ranking and computation of powers and interactions with the 'elfe' dataset
 data.elfe <- prepareData()
 
 # variable names can be specified as well, here with the BMI data included in the package
-data.bmi <- prepareData(CDC, group="group", raw="bmi", age="age")
+data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
 
 # modelling with only one group with the 'elfe' dataset as an example
 # this results in conventional norming

@@ -4,7 +4,8 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf)
+predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf,
+  covariate = NULL)
 }
 \arguments{
 \item{norm}{The norm score, e. g. a specific T score}
@@ -18,6 +19,9 @@ usually set to the lower bound of the range of values of the test (default: 0)}
 
 \item{maxRaw}{Maximum score for the results; can be used for clipping unrealistic outcomes
 usually set to the upper bound of the range of values of the test}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \value{
 the predicted raw score

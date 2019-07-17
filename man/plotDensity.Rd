@@ -5,7 +5,7 @@
 \title{Plot the density function per group by raw score}
 \usage{
 plotDensity(model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
-  maxNorm = NULL, group = NULL)
+  maxNorm = NULL, group = NULL, covariate = NULL)
 }
 \arguments{
 \item{model}{The model from the bestModel function}
@@ -19,6 +19,9 @@ plotDensity(model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
 \item{maxNorm}{Upper bound of the norm score}
 
 \item{group}{Column of groups to plot}
+
+\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
+the specific value here.}
 }
 \description{
 The function plots the density  curves based on the regression model against
