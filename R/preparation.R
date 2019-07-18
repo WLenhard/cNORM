@@ -135,10 +135,10 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #'
 #' @section Remarks on using covariates:
 #' So far the inclusion of a binary covariate is experimental and far from optimized.
-#' Currently, the according variable name has to be specified in the ranking procedure
+#' The according variable name has to be specified in the ranking procedure
 #' and the modelling includes this in the further process. At the moment, during ranking
 #' the data are split into the according cells group x covariate, which leads to small
-#' sample sizes. Please take care to have enoght cases in each combination. Additionally,
+#' sample sizes. Please take care to have enough cases in each combination. Additionally,
 #' covariates can lead to unstable modelling solutions. The question, if it is really
 #' reasonable to include covariates when norming a test is a decision beyond the pure data
 #' modelling. Please use with care or alternatively split the dataset into the two groups
@@ -208,6 +208,7 @@ rankByGroup <-
     if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
       d$COV <- covariate
       covariate <- "COV"
+      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
@@ -405,10 +406,10 @@ rankByGroup <-
 #'
 #' @section Remarks on using covariates:
 #' So far the inclusion of a binary covariate is experimental and far from optimized.
-#' Currently, the according variable name has to be specified in the ranking procedure
+#' The according variable name has to be specified in the ranking procedure
 #' and the modelling includes this in the further process. At the moment, during ranking
 #' the data are split into the according degrees of the covariate and the ranking is done
-#' seperately. This may lead to small sample sizes. Please take care to have enoght cases in each combination. Additionally,
+#' seperately. This may lead to small sample sizes. Please take care to have enough cases in each combination. Additionally,
 #' covariates can lead to unstable modelling solutions. The question, if it is really
 #' reasonable to include covariates when norming a test is a decision beyond the pure data
 #' modelling. Please use with care or alternatively split the dataset into the two groups
@@ -486,6 +487,7 @@ rankBySlidingWindow <- function(data,
   if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
     d$COV <- covariate
     covariate <- "COV"
+    warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
   }
 
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
