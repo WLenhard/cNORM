@@ -8,7 +8,10 @@ Date: 2019.07.17
 
 Changes:
 *   Preparing for the inclusion of a binary covariate. The package is been rewritten by larger parts
+    NOTE: The inclusion of a covariate is currently still experimental and not optimized. Please use carefully!
+    If covariates are central for your research question, consider packages like GAMLSS or quantreg
 *   Entering systematic testing
+
 
 
 

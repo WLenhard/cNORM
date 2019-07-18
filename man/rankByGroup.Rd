@@ -53,10 +53,10 @@ and there are different methods for estimating the percentiles (default RankIt).
 \section{Remarks on using covariates}{
 
 So far the inclusion of a binary covariate is experimental and far from optimized.
-Currently, the according variable name has to be specified in the ranking procedure
+The according variable name has to be specified in the ranking procedure
 and the modelling includes this in the further process. At the moment, during ranking
 the data are split into the according cells group x covariate, which leads to small
-sample sizes. Please take care to have enoght cases in each combination. Additionally,
+sample sizes. Please take care to have enough cases in each combination. Additionally,
 covariates can lead to unstable modelling solutions. The question, if it is really
 reasonable to include covariates when norming a test is a decision beyond the pure data
 modelling. Please use with care or alternatively split the dataset into the two groups
