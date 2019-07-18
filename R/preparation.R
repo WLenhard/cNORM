@@ -208,7 +208,6 @@ rankByGroup <-
     if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
       d$COV <- covariate
       covariate <- "COV"
-      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
@@ -223,6 +222,8 @@ rankByGroup <-
       if (degrees > 2) {
         stop(paste0("Covariate has to be binary. Currently, there are ", degrees, " degrees."))
       }
+    }else{
+      attr(d, "covariate") <- NULL
     }
 
     # check if columns exist
@@ -292,6 +293,17 @@ rankByGroup <-
         }
       }
     } else {
+      variance <- cor(d$raw, d$COV, method="kendall")^2
+      if(variance < .1){
+        question <- askYesNo(paste0("The covariate explains only a share of ", variance ," of the raw score variable. This share is likely not relevant enough to be included in the modelling. Do you want to remove the covariate from the ranking process?"), default = TRUE,
+                 prompts = getOption("askYesNo", gettext(c("Yes", "No", "Cancel"))))
+        if(question){
+          return(rankByGroup(d, scale = scale, raw = raw, group = group, descriptives = descriptives, method = method, descend = descend, covariate = NULL))
+        }
+      }
+
+      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
+
       if (typeof(group) == "logical" && !group) {
         if (descend) {
           if (descend) {
@@ -343,6 +355,8 @@ rankByGroup <-
           })
         }
       }
+
+
     }
 
     scaleM <- NA
@@ -368,6 +382,8 @@ rankByGroup <-
     } else if (scale == "percentile") {
       d$normValue <- d$percentile
     }
+
+
 
     # add attributes to d
     attr(d, "group") <- group
