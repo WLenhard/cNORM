@@ -4,7 +4,7 @@ importFrom(stats, na.omit, complete.cases, predict.lm, t.test, formula, ave, agg
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text)
 importFrom(latticeExtra, panel.2dsmoother)
-importFrom(utils, tail, menu)
+importFrom(utils, tail, menu, askYesNo)
 export(
 	bestModel,
 	boxcox,
