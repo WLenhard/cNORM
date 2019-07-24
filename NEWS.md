@@ -4,18 +4,22 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.0 (current development)
-Date: 2019.07.17
+Date: 2019.07.24
 
 Changes:
-*   Preparing for the inclusion of a binary covariate. The package is been rewritten by larger parts
-    NOTE: The inclusion of a covariate is currently still experimental and not optimized. Please use carefully!
-    If covariates are central for your research question, consider packages like GAMLSS or quantreg
+*   Preparing for the inclusion of a binary covariate. The package is been
+    rewritten by larger parts
+    NOTE: The inclusion of a covariate is currently still experimental and not
+    optimized. Please use carefully! If covariates are central for your research
+    question, consider packages like GAMLSS or quantreg
 *   Entering systematic testing
+*   BUG fixed: retrieving normtables and norm scores in large datasets could
+    produce outlier (hashing function to remove duplicates was flawed)
 
 
 
 
-### Version in 1.1.9 (current development)
+### Version in 1.1.9
 Date: 2019.07.07
 
 Changes:

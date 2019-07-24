@@ -565,19 +565,8 @@ predictNorm <-
 
       # initialize vectors and starting values
       # of retrieved norm scores to specific cases; needed for later matching
-      # create simple hash based on cantor pairing
-      # (values need to be shifted to positive values)
-      r <- raw
-      a <- A
-
-      if(min(raw) < 0){
-        r <- r - min(raw)
-      }
-
-      if(min(A) < 0){
-        a <- a - min(A)
-      }
-      hash <- (r + a) * (r + a + 1) / 2 + a
+      # create simple identifier based on combining string of raw and age
+      hash <- paste0(raw, "_", A)
 
       # build norm table and use this as a lookup table
       # delete duplicates
