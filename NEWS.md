@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.2.0 (current development)
+### Version in 1.2.0 (fourth release)
 Date: 2019.07.24
 
 Changes:
@@ -26,7 +26,7 @@ Changes:
 *   weighting added to bestModel-function
 *   cast to data.frame in prepareData method to prevent SPSS import failing
 *   Ordering of raw table when using descending values
-*   Warning message added to computePoewers function in case the multiple R2 between the explanatory variable
+*   Warning message added to computePowers function in case the multiple R2 between the explanatory variable
     and the raw score is below .05; modelling norm scores in dependence of age is questionable in that case
 *   prepareData, rankByGroup and rankBySlidingWindow now accept variables instead of variable names as well
 *   rankByGroup and rankBySlidingWindow display warning in case of small groups
@@ -131,7 +131,7 @@ Changes:
 *    Data table output for cnorm.cv
 *    rankBySlidingWindow now accessible via prepareData()
 *    group, raw, age and width can now be provided in cnorm.cv
-*    parameter for full cross validation (seperate ranking for train and validation)
+*    parameter for full cross validation (separate ranking for train and validation)
 *    Additional NA checks and warning messages
 *    plotPercentiles now with R2adjr in title
 
@@ -292,7 +292,7 @@ Changes:
 
 *   Life expectancy dataset of the World Bank added
 *   Mortality of infants per 1000 life birth from 1960 to 2017 added
-*   Minor chanes in functions to check data integrity and exceptions
+*   Minor changes in functions to check data integrity and exceptions
 *   Vignette updated
 
 

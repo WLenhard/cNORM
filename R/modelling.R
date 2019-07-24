@@ -18,7 +18,7 @@
 #' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
 #' and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
 #' Use \code{checkConsistency(model)} to check the model for violations. \code{cnorm.cv} can help
-#' in identifiying the ideal number of predictors.
+#' in identifying the ideal number of predictors.
 #'
 #' @param data The preprocessed dataset, which should include the variables 'raw'
 #'  and the powers and interactions of the norm score (L = Location; usually T scores)

@@ -109,7 +109,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' The function plots the manifest norm score against the fitted norm score from
 #' the inverse regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
-#' regression line. The computation of the standard error is based on Ooserhuis, van der
+#' regression line. The computation of the standard error is based on Oosterhuis, van der
 #' Ark and Sijtsma (2016).
 #' @param data The raw data within a data.frame
 #' @param model The regression model
