@@ -44,8 +44,3 @@ The World Bank (2018). Life expectancy at birth, total (years). Data Source	Worl
 available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
 }
 \keyword{datasets}
-\keyword{datasets,}
-\keyword{expectancy,}
-\keyword{life}
-\keyword{series}
-\keyword{time}

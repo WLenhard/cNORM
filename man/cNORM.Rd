@@ -112,9 +112,9 @@ cNORM.GUI
 Wolfgang Lenhard, Alexandra Lenhard and Sebastian Gary
 }
 \keyword{Based}
-\keyword{Biometrics,}
-\keyword{Development,}
+\keyword{Biometrics}
+\keyword{Development}
 \keyword{Norming}
-\keyword{Psychometrics,}
+\keyword{Psychometrics}
 \keyword{Regression}
 \keyword{Test}

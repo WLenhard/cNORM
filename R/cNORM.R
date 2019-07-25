@@ -59,7 +59,7 @@
 #'   (date of retrieval: 01/09/2018)
 #' }
 #' @author Wolfgang Lenhard, Alexandra Lenhard and Sebastian Gary
-#' @keywords Psychometrics, Biometrics, Test Development, Regression Based Norming
+#' @keywords Psychometrics Biometrics Test Development Regression Based Norming
 #' @docType package
 #' @name cNORM
 #' @seealso cNORM.GUI

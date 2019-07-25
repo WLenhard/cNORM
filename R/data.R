@@ -90,7 +90,6 @@
 #' @source \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
 #' @references CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets and Related
 #' Documentation. available \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx} (date of retrieval: 25/08/2018)
-#' @keywords datasets, growth curves, bmi
 #' @name CDC
 #' @format A data frame with 45035 rows and 7 columns
 "CDC"
@@ -116,7 +115,6 @@
 #' @source \url{https://data.worldbank.org/indicator/sp.dyn.le00.in}
 #' @references The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
 #' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
-#' @keywords datasets, life expectancy, time series
 #' @name life
 #' @examples
 #' \dontrun{
@@ -150,11 +148,9 @@
 #'   \item{group}{grouping variable based on 'year' with a lower resolution; spans intervals of 4 years each}
 #' }
 #' @docType data
-#' @keywords datasets
 #' @source \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN}
 #' @references The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available
 #' \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
-#' @keywords datasets, child mortality, time series
 #' @name mortality
 #' @examples
 #' \dontrun{
