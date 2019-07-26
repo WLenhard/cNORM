@@ -91,8 +91,9 @@ shinyUI(fluidPage(
         sidebarPanel(
           tags$h3("Model Data"),
           tags$p("Here, you can calculate a regression model that models the original data as close as possible, while smoothing the curves and eliminating noise. After hitting the button, the regression function for a possible model is shown. The plot displays the information criteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. To display plots of observed vs. fitted raw and norm scores, please use the plotting options on the next tab. There, you can check the percentile curves as well and inspect the curves of the different plausible models."),
-          tags$p("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. In case of k > 4, the calculation will take a few seconds."),
-          actionButton(
+          tags$br(), tags$b("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. In case of k > 4, the calculation will take a few seconds."),
+          tags$br(), tags$br(), tags$b("HINT: Look out for an 'elbow' in the chart and try that number of terms for your model. Afterwards, plot the percentiles to check the curves."),
+          tags$br(), tags$br(), actionButton(
             inputId = "CalcBestModel",
 
             label = "Model Data"
