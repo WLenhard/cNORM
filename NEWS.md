@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.0 (fourth release)
-Date: 2019.07.24
+Date: 2019.07.26
 
 Changes:
 *   Preparing for the inclusion of a binary covariate. The package is been
@@ -15,6 +15,7 @@ Changes:
 *   Entering systematic testing
 *   BUG fixed: retrieving normtables and norm scores in large datasets could
     produce outlier (hashing function to remove duplicates was flawed)
+*   Corrected keywords for datasets
 
 
 
