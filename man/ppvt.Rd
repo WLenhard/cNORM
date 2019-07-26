@@ -45,4 +45,5 @@ plotPercentiles(data.ppvt, model.ppvt)
 \references{
 Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
 }
+\concept{vocabulary acquisition development receptive}
 \keyword{datasets}

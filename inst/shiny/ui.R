@@ -97,6 +97,7 @@ shinyUI(fluidPage(
 
             label = "Model Data"
           ),
+
           tags$br(),
           # Additional options (R^2, terms, type for printSubset)
           tags$h3("Additional options"),
@@ -121,10 +122,9 @@ shinyUI(fluidPage(
           # tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the observed data are fitted by the model."),
           withSpinner(plotOutput("PlotWL", width = "100%", height = "600px"), type = 5),
           tags$br(),
-          withSpinner(dataTableOutput("PrintSubset"), type = 5)
-          # , tags$br(),
-          # withSpinner(plotOutput("PlotValues", width = "100%", height = "600px"), type=5)
-        )
+          withSpinner(dataTableOutput("PrintSubset"), type = 5),
+          tags$br()
+          )
       )
     ),
 

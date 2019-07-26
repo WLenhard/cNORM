@@ -34,4 +34,5 @@ plotPercentiles(data.elfe, model.elfe)
 \references{
 Lenhard, W. & Schneider, W.(2006). Ein Leseverstaendnistest fuer Erst- bis Sechstklaesser. Goettingen/Germany: Hogrefe.
 }
+\concept{reading comprehension}
 \keyword{datasets}

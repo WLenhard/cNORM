@@ -272,6 +272,7 @@ shinyServer(function(input, output, session) {
       return(0)
     }
   })
+
   # Calculates best model using cNORM
   bestModel <- eventReactive(input$CalcBestModel, {
 
@@ -308,6 +309,7 @@ shinyServer(function(input, output, session) {
                           maxAge = MAX_AGE)
 
   })
+
 
   modelDensity <- reactive({
 
@@ -710,6 +712,15 @@ shinyServer(function(input, output, session) {
     content = function(file){
       output <- as.data.frame(rawTable())
       write.csv(output, file)
+    }
+  )
+
+  output$exportData <- downloadHandler(
+    filename = function() {
+      paste("model.RData", sep = "")
+    },
+    content = function(file) {
+      save(preparedData(), filename = file)
     }
   )
 

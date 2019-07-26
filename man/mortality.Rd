@@ -40,4 +40,5 @@ plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1,
 The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available
 \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
 }
+\concept{mortality at birth}
 \keyword{datasets}

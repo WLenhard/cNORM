@@ -43,4 +43,5 @@ model2.life <- bestModel(data.life, raw="life", terms=4)
 The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
 available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
 }
+\concept{life expectancy}
 \keyword{datasets}

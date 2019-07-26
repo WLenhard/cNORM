@@ -18,6 +18,7 @@
 #' @references Lenhard, W. & Schneider, W.(2006). Ein Leseverstaendnistest fuer Erst- bis Sechstklaesser. Goettingen/Germany: Hogrefe.
 #' @docType data
 #' @keywords datasets
+#' @concept reading comprehension
 #' @name elfe
 #' @examples
 #' # prepare data, retrieve model and plot percentiles
@@ -47,6 +48,7 @@
 #' @references Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
 #' @docType data
 #' @keywords datasets
+#' @concept vocabulary acquisition development receptive
 #' @name ppvt
 #' @examples
 #' \dontrun{
@@ -87,6 +89,7 @@
 #' }
 #' @docType data
 #' @keywords datasets
+#' @concept Body Mass Index growth curves weight height
 #' @source \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
 #' @references CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets and Related
 #' Documentation. available \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx} (date of retrieval: 25/08/2018)
@@ -112,6 +115,7 @@
 #' }
 #' @docType data
 #' @keywords datasets
+#' @concept life expectancy
 #' @source \url{https://data.worldbank.org/indicator/sp.dyn.le00.in}
 #' @references The World Bank (2018). Life expectancy at birth, total (years). Data Source	World Development Indicators
 #' available \url{https://data.worldbank.org/indicator/sp.dyn.le00.in} (date of retrieval: 01/09/2018)
@@ -148,6 +152,8 @@
 #'   \item{group}{grouping variable based on 'year' with a lower resolution; spans intervals of 4 years each}
 #' }
 #' @docType data
+#' @keywords datasets
+#' @concept mortality at birth
 #' @source \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN}
 #' @references The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source	available
 #' \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
@@ -163,5 +169,4 @@
 #' plotSubset(model.mortality, type = 0)
 #' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
 #' }
-#' @format A data frame with 9547 rows and 4 columns
 "mortality"

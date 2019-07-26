@@ -8,7 +8,7 @@
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs, WARNINGs. On R-devel, 32/64 bit and Fedora Linux rhub produced notes to include additional keywords.
+There were no ERRORs, WARNINGs or NOTES
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
