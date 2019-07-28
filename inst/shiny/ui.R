@@ -58,7 +58,10 @@ shinyUI(fluidPage(
           # Additional options (explanatory variable with default grouping, ranking method, number of powers)
           tags$h3("Additional options"),
           uiOutput("ExplanatoryVariable"),
-          tags$p("As default, the explanatory variable is set to grouping variable. If available, use a continuous explanatory variable like age. The values of this variable have to correpsond with the values of the grouping variable."),
+          tags$p("As default, the explanatory variable is set to grouping variable. If available, use a continuous explanatory variable like age."),
+          tags$b("HINT! The range of values of the explanatory variable have to correpsond with the values of the grouping variable, i. e. specify the group means."),
+          tags$br(),
+          tags$br(),
           tags$br(),
           selectInput(
             inputId = "NumberOfPowers",
