@@ -3,6 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+
+### Version in 1.2.1 (in proress)
+Date: 2019.07.28
+
+Changes:
+*    prepareDate issues warnings of age and group values do not relate
+
+
+
+
 ### Version in 1.2.0 (fourth release)
 Date: 2019.07.26
 

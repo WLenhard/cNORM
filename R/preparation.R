@@ -103,6 +103,10 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   if (typeof(group) != "logical") {
     normData <- normData[!is.na(normData[, group]), ]
     normData <- normData[!is.na(normData[, age]), ]
+
+    if(max(normData[, age])<min(normData[, group])||min(normData[, age])>max(normData[, group])){
+      warning("The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter.")
+    }
   }
   normData <- normData[!is.na(normData[, raw]), ]
 
