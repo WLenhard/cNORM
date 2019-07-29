@@ -433,80 +433,36 @@ checkConsistency <- function(model,
   descend <- model$descend
 
   i <- minAge
-  minor <- 0
   major <- 0
   results <- c()
   while (i <= maxAge) {
     norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm, covariate = covariate)
-    k <- 1
-    maxR <- 0
-    while (k < length(norm$raw)) {
-      if (norm$raw[[k]] > maxR) {
-        maxR <- norm$raw[[k]]
-      }
-      diff <- maxR - norm$raw[[k + 1]]
-      if ((!descend && diff >= 1) || (descend && diff <= -1)) {
-        if (!silent) {
-          message(paste0(
-            "Considerable violation of consistency at age ",
-            round(i, digits = 1), ", raw value ",
-            round(norm$raw[[k]],
-              digits = 1
-            )
-          ))
-        }
-        results <- c(results, paste0(
-          "Considerable violation of consistency at
-                                       age ",
-          round(i, digits = 1), ",
-                                             raw value ",
-          round(norm$raw[[k]],
-            digits = 1
-          )
-        ))
-        major <- major + 1
-        k <- length(norm$raw) + 1
-      } else if (warn & ((!descend && diff > 0) || (descend && diff < 0))) {
-        if (!silent) {
-          message(paste0(
-            "Negligible violation of consistency at age ",
-            round(i, digits = 1),
-            ", raw value ",
-            round(norm$raw[[k]],
-              digits = 1
-            )
-          ))
-        }
-        results <- c(results, paste0(
-          results, "Negligible violation of
-                                       consistency at age ",
-          round(i, digits = 1), ",
-                                             raw value ",
-          round(norm$raw[[k]],
-            digits = 1
-          )
-        ))
-        minor <- minor + 1
-      }
-      k <- k + 1
+    correct <- TRUE
+    if(descend)
+      correct <- all(norm$raw == cummin(norm$raw))
+    else
+      correct <- all(norm$raw == cummax(norm$raw))
+
+    if(!correct){
+    if (!silent) {
+      message(paste0(
+        "Violation of monotonicity at age ", round(i, digits = 1), "."))
+    }
+      results <- c(results, paste0("Violation of monotonicity at age ", round(i, digits = 1), "."))
+      major <- major + 1
     }
 
     i <- i + stepAge
   }
-  if (minor == 0 & major == 0) {
+
+  if (major == 0) {
     if (!silent) {
       message("\nNo violations of model consistency found.")
     }
     return(FALSE)
-  } else if (major == 0) {
-    if (!silent) {
-      message(paste0("\n", minor, " minor violations of model consistency found."))
-      message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
-    }
-    return(TRUE)
   } else {
     if (!silent) {
-      message(paste0("\nAt least ", major, " major and ", minor, " minor violations of model consistency found."))
+      message(paste0("\nAt least ", major, " violations of monotonicity found within the specified range of age and norm scores."))
       message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
       message("Be careful with horizontal and vertical extrapolation.")
       message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))

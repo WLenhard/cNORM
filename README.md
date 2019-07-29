@@ -60,8 +60,16 @@ model.elfe <- bestModel(data.elfe)
 plotSubset(model.elfe, type=0)        # plot R2
 plotSubset(model.elfe, type=3)        # plot MSE
 
+# NOTE! At this point, you usually select a good fitting model and rerun the bestModel function
+# with a fixed number of terms, e. g. four. Try avoid models with a high number of terms:
+model.elfe <- bestModel(data.elfe, terms = 4)
+
 #  Visual inspection of the percentile curves of the fitted model
 plotPercentiles(data.elfe, model.elfe)
+
+# Visual inspection of the observed and fitted raw and norm scores
+plotRaw(data.elfe, model.elfe)
+plotNorm(data.elfe, model.elfe)
 
 # In order to check, how other models perform, plot series of percentile plots with ascending
 # number of predictors up to 14 predictors.
