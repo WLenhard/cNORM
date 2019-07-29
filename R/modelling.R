@@ -109,13 +109,8 @@ bestModel <- function(data,
     stop("k parameter exceeds the power degrees in the dataset. Please use computePowers with a higher degree in preparating the data. ")
   }
 
-
   # check variable range
-  if(is.null(R2)&&is.null(attr(data, "covariate"))){
-    R2 <- .99
-  }else if(is.null(R2)&&!is.null(attr(data, "covariate"))){
-    R2 <- .98
-  }else if (R2 <= 0 || R2 >= 1) {
+  if (!is.null(R2)&&(R2 <= 0 || R2 >= 1)) {
     stop("R2 parameter out of bounds.")
   }
 
@@ -211,6 +206,16 @@ bestModel <- function(data,
   i <- 1
   rAdj <- results$adjr2[i]
 
+  if(is.null(R2)&&(terms==0)){
+    if(results$adjr[[length(results$adjr2)]]>.99){
+      R2 <- .99
+    }else if(nvmax > 4){
+      R2 <- results$adjr[[5]]
+    }else {
+      R2 <- results$adjr[[nvmax]]
+    }
+  }
+
   if (terms > 0 && terms <= length(results$adjr2)) {
     i <- terms
     report <- paste0("User specified solution: ", i, " terms")
@@ -303,7 +308,7 @@ bestModel <- function(data,
   if(anyNA(bestformula$coefficients)){
     warning("The regression contains missing coefficients. No fitting model could be found. Please try a different number of terms.")
   }
-  message("Use 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit and 'summary(model)' for statistics on the regression model.")
+  message("Use 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit, 'plotPercentiles(data, model)' to visualize percentile curves and 'summary(model)' for statistics on the regression model.")
   return(bestformula)
 }
 
