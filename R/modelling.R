@@ -226,7 +226,7 @@ bestModel <- function(data,
     } else if (results$adjr2[length(results$adjr2)] < R2) {
       i <- length(results$adjr2)
       report <- (paste0(
-        "Specified R2 exceeds the R2 of the model with the highest fit. Consider rerunning the analysis with higher k value. Falling back to model ", i
+        "Specified R2 exceeds the R2 of the model with the highest fit. Consider reducing the R2 or fixing the number of terms (e.g. 4 to 10). You can use the plotSubset function to find a good balance between number of terms and R2. Look out for an 'elbow' in the information function or use the cnorm.cv function to determine the optimal number of terms. Falling back to model ", i
       ))
     } else {
       while (rAdj < R2) {
