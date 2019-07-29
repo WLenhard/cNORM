@@ -439,9 +439,9 @@ checkConsistency <- function(model,
     norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm, covariate = covariate)
     correct <- TRUE
     if(descend)
-      correct <- all(norm$raw == cummin(norm$raw))
+      correct <- !is.unsorted(-norm$raw)
     else
-      correct <- all(norm$raw == cummax(norm$raw))
+      correct <- !is.unsorted(norm$raw)
 
     if(!correct){
     if (!silent) {
@@ -462,7 +462,7 @@ checkConsistency <- function(model,
     return(FALSE)
   } else {
     if (!silent) {
-      message(paste0("\nAt least ", major, " violations of monotonicity found within the specified range of age and norm scores."))
+      message(paste0("\nAt least ", major, " violations of monotonicity found within the specified range of age and norm score."))
       message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
       message("Be careful with horizontal and vertical extrapolation.")
       message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
