@@ -8,9 +8,9 @@ This file documents the development of the package as well as open issues or poi
 Date: 2019.07.29
 
 Changes:
-*    prepareDate issues warnings of age and group values do not relate
+*    prepareDate issues warnings if age and group values do not relate
 *    modified message in bestModel function if R2 is not reached
-*    if no R2 and terms are specified in bestModel function, fall back to model 5
+*    if R2 and terms are not specified in bestModel function, fall back to model 5
      in case R2 does not reach .99 in most complex model
 *    Code simplification in computePowers by using 'poly' function
 *    Performance improvement and code cleaning in checkConsistency
