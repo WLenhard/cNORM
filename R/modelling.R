@@ -308,7 +308,13 @@ bestModel <- function(data,
   if(anyNA(bestformula$coefficients)){
     warning("The regression contains missing coefficients. No fitting model could be found. Please try a different number of terms.")
   }
-  message("Use 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit, 'plotPercentiles(data, model)' to visualize percentile curves and 'summary(model)' for statistics on the regression model.")
+
+  if (terms > 15) {
+    message("\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cnorm.cv' or an inspection of information functions with 'plotSubset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number.")
+  }
+
+  message("\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit, 'plotPercentiles(data, model)' to visualize percentile curves and 'summary(model)' for statistics on the regression model.")
+
   return(bestformula)
 }
 
