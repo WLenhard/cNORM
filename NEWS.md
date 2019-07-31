@@ -12,6 +12,7 @@ Changes:
 *    modified message in bestModel function if R2 is not reached
 *    if R2 and terms are not specified in bestModel function, fall back to model 5
      in case R2 does not reach .99 in most complex model
+*    Additional message in bestModel in case of high number of terms     
 *    Code simplification in computePowers by using 'poly' function
 *    Performance improvement and code cleaning in checkConsistency
 
