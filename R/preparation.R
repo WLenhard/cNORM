@@ -856,6 +856,8 @@ computePowers <-
 
       if (r2 < .05) {
         warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
+      }else{
+        cat(paste0("Multiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4)))
       }
     }
 
