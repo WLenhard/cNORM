@@ -820,14 +820,17 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
 #' Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
 #' of predictors
+#' @param index add index labels to data points
 #' @seealso bestModel, plotPercentiles, printSubset
 #' @examples
 #' normData <- prepareData()
 #' m <- bestModel(data = normData)
 #' plotSubset(m)
 #' @export
-plotSubset <- function(model, type = 1) {
+plotSubset <- function(model, type = 1, index = FALSE) {
   dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic, cp = model$subsets$cp, RMSE = sqrt(model$subsets$rss / length(model$fitted.values)), nr = seq(1, length(model$subsets$adjr2), by = 1))
+  indexLabel <- seq(from = 1, to = nrow(dataFrameTMP))
+
   if (type == 1) {
     lattice::xyplot(cp ~ adjr2,
       data = dataFrameTMP, type = "b",
@@ -855,6 +858,9 @@ plotSubset <- function(model, type = 1) {
           col = "#9933FF", label = model$cutoff
         )
         lattice::panel.xyplot(x, y, ...)
+        # add index value to data points
+        if(index)
+          lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
       }
     )
   } else if (type == 2) {
@@ -884,6 +890,9 @@ plotSubset <- function(model, type = 1) {
           col = "#9933FF", label = model$cutoff
         )
         lattice::panel.xyplot(x, y, ...)
+        # add index value to data points
+        if(index)
+          lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
       }
     )
   } else if(type == 3){
@@ -893,7 +902,12 @@ plotSubset <- function(model, type = 1) {
                     grid = TRUE,
                     main = "Information Function",
                     ylab = "Root Means Square Error (Raw Score)",
-                    xlab = "Number of Predictors" )
+                    xlab = "Number of Predictors", panel = function(x, y, ...) {
+                      lattice::panel.xyplot(x, y, ...)
+                      # add index value to data points
+                      if(index)
+                        lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
+                    } )
   } else {
     lattice::xyplot(adjr2 ~ nr,
                     data = dataFrameTMP, type = "b",
@@ -918,6 +932,9 @@ plotSubset <- function(model, type = 1) {
                         col = "#9933FF", label = model$cutoff
                       )
                       lattice::panel.xyplot(x, y, ...)
+                      # add index value to data points
+                      if(index)
+                        lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
                     }
     )
   }
