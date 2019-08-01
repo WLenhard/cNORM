@@ -243,6 +243,7 @@ bestModel <- function(data,
   }
   report[2] <- paste0("R-Square Adj. = ", round(results$adjr2[i], digits = 6))
 
+
   variables <- names(coef(subsets, id = i))
   variables <- variables[2:length(variables)] # remove '(Intercept)' variable
   text <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula

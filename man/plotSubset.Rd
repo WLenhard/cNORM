@@ -4,7 +4,7 @@
 \alias{plotSubset}
 \title{Evaluate information criteria for regression model}
 \usage{
-plotSubset(model, type = 1)
+plotSubset(model, type = 1, index = FALSE)
 }
 \arguments{
 \item{model}{The regression model from the bestModel function}
@@ -13,6 +13,8 @@ plotSubset(model, type = 1)
 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
 Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
 of predictors}
+
+\item{index}{add index labels to data points}
 }
 \description{
 Plots the information criterion - either Cp (default) or BIC - against
