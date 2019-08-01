@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.1 (in proress)
-Date: 2019.07.29
+Date: 2019.08.01
 
 Changes:
 *    prepareDate issues warnings if age and group values do not relate
@@ -15,6 +15,7 @@ Changes:
 *    Additional message in bestModel in case of high number of terms     
 *    Code simplification in computePowers by using 'poly' function
 *    Performance improvement and code cleaning in checkConsistency
+*    Multiple R2 output added to computePowers
 
 
 
