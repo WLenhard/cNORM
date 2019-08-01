@@ -16,7 +16,7 @@ Changes:
 *    Code simplification in computePowers by using 'poly' function
 *    Performance improvement and code cleaning in checkConsistency
 *    Multiple R2 output added to computePowers
-
+*    new option to add index labels to data points in plotSubset
 
 
 
