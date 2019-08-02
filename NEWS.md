@@ -4,7 +4,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.2.1 (in proress)
+### Version in 1.2.2 (in process)
+Date: 2019.08.02
+
+Changes:
+
+
+
+
+
+### Version in 1.2.1
 Date: 2019.08.01
 
 Changes:
