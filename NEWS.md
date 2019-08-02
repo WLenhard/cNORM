@@ -8,6 +8,7 @@ This file documents the development of the package as well as open issues or poi
 Date: 2019.08.01
 
 Changes:
+
 *    prepareDate issues warnings if age and group values do not relate
 *    modified message in bestModel function if R2 is not reached
 *    if R2 and terms are not specified in bestModel function, fall back to model 5
@@ -17,6 +18,10 @@ Changes:
 *    Performance improvement and code cleaning in checkConsistency
 *    Multiple R2 output added to computePowers
 *    new option to add index labels to data points in plotSubset
+*    cnorm.cv now respects sliding window ranking
+*    silent parameter added to prepareData and computePowers
+*    rankBySlidingWindo and rankByGroup add width parameter to data preparation
+*    pCutoff in cnorm.cv now adjusts for sample size
 
 
 
@@ -24,6 +29,7 @@ Changes:
 Date: 2019.07.26
 
 Changes:
+
 *   Preparing for the inclusion of a binary covariate. The package is been
     rewritten by larger parts
     NOTE: The inclusion of a covariate is currently still experimental and not
@@ -41,6 +47,7 @@ Changes:
 Date: 2019.07.07
 
 Changes:
+
 *   weighting added to bestModel-function
 *   cast to data.frame in prepareData method to prevent SPSS import failing
 *   Ordering of raw table when using descending values
@@ -55,6 +62,7 @@ Changes:
 Date: 2019.03.15 (mainly testing and cleaning minor errors)
 
 Changes:
+
 *   fixing exceptions
 *   group and age can now be deactivated, resulting in conventional norming procedure, based in ranking + regression over powers of L
 
@@ -64,6 +72,7 @@ Changes:
 Date: 2019.02.28
 
 Changes:
+
 *   bestModel function now accepts a formula as a predictors object
 *   plotPercentile now accepts descending ranking
 *   rawTable and normTable adapted for descending values
@@ -79,6 +88,7 @@ Changes:
 Date: 2019.02.07, third release on CRAN
 
 Changes:
+
 *   Improvement to cv function in GUI and in package
 
 
@@ -87,6 +97,7 @@ Changes:
 Date: 2019.02.06, third release on CRAN
 
 Changes:
+
 *   Cross Validation added to shiny GUI
 *   cnorm.cv documentation improved
 *   added information to BestModel output
@@ -98,6 +109,7 @@ Changes:
 Date: 2018.12.18
 
 Changes:
+
 *   scale parameter added to prepareData function
 *   fix for plotNorm by group with missing values
 
@@ -107,6 +119,7 @@ Changes:
 Date: 2018.12.09
 
 Changes:
+
 *   rmarkdown moved from imports to suggests
 *   cnorm.cv info added to README
 
@@ -116,6 +129,7 @@ Changes:
 Date: 2018.12.08
 
 Changes:
+
 *   deleted code in vignette needing to much build time
 *   removed UTF-8 attributes from ppvt dataset and cleared all datasets from non ASCII signs
 *   deleted code in vignette needing to much build time
@@ -128,6 +142,7 @@ Changes:
 Date: 2018.12.01
 
 Changes:
+
 *    Parameters added to cv.norm: Significance level for stratification process
 *    Additional plot in cv.norm: delta R2 in norm score validation
 *    Example in readme improved
