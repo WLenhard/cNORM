@@ -56,7 +56,7 @@
 #' data.elfe2 <- prepareData(data = elfe, group = FALSE)
 #' m <- bestModel(data.elfe2)
 #' @export
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T") {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T", silent = FALSE) {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
@@ -118,9 +118,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = 4, norm = "normValue", age = age)
+    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent)
   } else {
-    normData <- computePowers(normData, k = 4, norm = "normValue")
+    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent)
   }
 
   return(normData)
@@ -397,6 +397,7 @@ rankByGroup <-
     attr(d, "scaleSD") <- scaleSD
     attr(d, "descend") <- descend
     attr(d, "normValue") <- "normValue"
+    attr(d, "width") <- NA
 
     if (descriptives && min(d$n) < 30) {
       warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable."))
@@ -647,6 +648,7 @@ rankBySlidingWindow <- function(data,
   attr(d, "scaleMean") <- scaleM
   attr(d, "scaleSD") <- scaleSD
   attr(d, "descend") <- descend
+  attr(d, "width") <- width
   attr(d, "normValue") <- "normValue"
   attr(d, "group") <- "group"
 
@@ -686,6 +688,7 @@ rankBySlidingWindow <- function(data,
 #' been done in the ranking, the function uses the according variable. BEWARE!
 #' Not all subsequent functions are already prepared for it. It is an experimental feature and
 #' may lead to unstable models subsequently.
+#' @param silent set to TRUE to suppress messages
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
 #' @examples
@@ -702,7 +705,7 @@ computePowers <-
              k = 4,
              norm = NULL,
              age = NULL,
-             covariate = NULL) {
+             covariate = NULL, silent = FALSE) {
     d <- as.data.frame(data)
 
     # check variables, if NULL take attributes from d
@@ -851,13 +854,13 @@ computePowers <-
     attr(d, "useAge") <- useAge
 
     # check, if it is worthwhile to continue with continuous norming
-    if (useAge) {
+    if (useAge&&!silent) {
       r2 <- summary(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, k, raw=TRUE)))$r.squared
 
       if (r2 < .05) {
         warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
       }else{
-        cat(paste0("Multiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4)))
+        cat(paste0("Multiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4), "\n"))
       }
     }
 
