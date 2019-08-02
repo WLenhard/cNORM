@@ -669,7 +669,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 #' only the modelling, but not the ranking is independent)
 #' @param pCutoff The function checks the stratification for unbalanced data sampling.
-#' It performs a t-test per group . pCutoff specifies the p-value per group that the test result
+#' It performs a t-test per group. pCutoff specifies the p-value per group that the test result
 #' has to reach at least. To minimize beta error, the value is set to .2 per default
 #' @param width If provided, ranking is done via rankBySlidingWindow, otherwise by group
 #' @param raw Name of the raw variable
@@ -682,7 +682,15 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
 #' data <- prepareData()
 #' cnorm.cv(data, 3, max = 7, norms = FALSE)
-cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = .2, width = NA, raw = NA, group = NA, age = NA) {
+cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA, age = NA) {
+
+  if(is.na(pCutoff)){
+    if(nrow(data)<10000)
+      pCutoff = .2
+    else
+      pCutoff = .1
+  }
+
   if (!attr(data, "useAge")){
     stop("Age variable set to FALSE in dataset. No cross validation possible.")
   }
@@ -713,6 +721,8 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   if (is.na(scaleSD) || cv == "full") {
     scaleSD <- 10
   }
+
+  width <- attr(d, "width")
 
   k <- attr(d, "k")
   if (is.na(k)) {
@@ -791,8 +801,8 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
       test <- do.call(rbind, test)
 
       if (cv == "full") {
-        train <- prepareData(train, raw = raw, group = group, age = age)
-        test <- prepareData(test, raw = raw, group = group, age = age)
+        train <- prepareData(train, raw = raw, group = group, age = age, width = width, silent = TRUE)
+        test <- prepareData(test, raw = raw, group = group, age = age, width = width, silent = TRUE)
       }
       # test for overall significant differences between groups, restart stratification if necessary
       # p.value <- t.test(train[, raw], test[, raw])$p.value
@@ -899,6 +909,8 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim = c(min(tab$Delta.R2.test, na.rm = TRUE), max(tab$Delta.R2.test, na.rm = TRUE)))
     abline(h = 0, col = 3, lty = 2)
   }
+
+
   cat("\n")
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
