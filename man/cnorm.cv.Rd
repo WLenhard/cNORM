@@ -5,7 +5,7 @@
 \title{Cross validation for term selection}
 \usage{
 cnorm.cv(data, repetitions = 1, norms = TRUE, min = 1, max = 12,
-  cv = "full", pCutoff = 0.2, width = NA, raw = NA, group = NA,
+  cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA,
   age = NA)
 }
 \arguments{
@@ -26,7 +26,7 @@ otherwise, a pre ranked dataset has to be provided, which is then split into tra
 only the modelling, but not the ranking is independent)}
 
 \item{pCutoff}{The function checks the stratification for unbalanced data sampling.
-It performs a t-test per group . pCutoff specifies the p-value per group that the test result
+It performs a t-test per group. pCutoff specifies the p-value per group that the test result
 has to reach at least. To minimize beta error, the value is set to .2 per default}
 
 \item{width}{If provided, ranking is done via rankBySlidingWindow, otherwise by group}

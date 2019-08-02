@@ -6,7 +6,7 @@
 location l (data preparation)}
 \usage{
 computePowers(data, k = 4, norm = NULL, age = NULL,
-  covariate = NULL)
+  covariate = NULL, silent = FALSE)
 }
 \arguments{
 \item{data}{data.frame with the norm data}
@@ -27,6 +27,8 @@ either by specifying the variable name or including the variable itself. If this
 been done in the ranking, the function uses the according variable. BEWARE!
 Not all subsequent functions are already prepared for it. It is an experimental feature and
 may lead to unstable models subsequently.}
+
+\item{silent}{set to TRUE to suppress messages}
 }
 \value{
 data.frame with the powers and interactions of location and explanatory variable / age

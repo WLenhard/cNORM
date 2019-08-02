@@ -42,6 +42,7 @@
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index point
+#' @param silent set to TRUE to suppress messages
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
