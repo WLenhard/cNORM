@@ -213,6 +213,9 @@ rankByGroup <-
     if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
       d$COV <- covariate
       covariate <- "COV"
+    }else if (!is.null(covariate)&&!is.numeric(covariate)) {
+      d$COV <- d[, covariate]
+      covariate <- "COV"
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
@@ -300,11 +303,7 @@ rankByGroup <-
     } else {
       variance <- cor(d$raw, d$COV, method="kendall")^2
       if(variance < .1){
-        question <- askYesNo(paste0("The covariate explains only a share of ", variance ," of the raw score variable. This share is likely not relevant enough to be included in the modelling. Do you want to remove the covariate from the ranking process?"), default = TRUE,
-                 prompts = getOption("askYesNo", gettext(c("Yes", "No", "Cancel"))))
-        if(question){
-          return(rankByGroup(d, scale = scale, raw = raw, group = group, descriptives = descriptives, method = method, descend = descend, covariate = NULL))
-        }
+        warning(paste0("The covariate explains only a share of ", round(variance, digits = 4) ," of the variance of the raw score variable. This share is likely not relevant enough to be included in the modeling."))
       }
 
       warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
