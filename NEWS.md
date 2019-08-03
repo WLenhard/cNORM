@@ -9,6 +9,8 @@ Date: 2019.08.02
 
 Changes:
 
+*    Error in rankByGroup and rankBySlidingWindow when covariate variable name was used
+
 
 
 
