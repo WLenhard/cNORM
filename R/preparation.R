@@ -509,6 +509,9 @@ rankBySlidingWindow <- function(data,
     d$COV <- covariate
     covariate <- "COV"
     warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
+  }else if (!is.null(covariate)&&!is.numeric(covariate)) {
+    d$COV <- d[, covariate]
+    covariate <- "COV"
   }
 
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
