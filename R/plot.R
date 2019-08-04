@@ -579,8 +579,6 @@ plotPercentiles <- function(data,
   }
 
   if (is.null(title)) {
-    r <- round(cor(data[, raw], model$fitted.values,
-                   use = "pairwise.complete.obs"), digits = 4)
     title <- paste0("Observed and Predicted Percentile Curves\nModel: ", model$ideal.model, ", R2 = ", round(model$subsets$adjr2[[model$ideal.model]], digits = 4))
   }
 
