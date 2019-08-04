@@ -107,6 +107,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
     if(max(normData[, age])<min(normData[, group])||min(normData[, age])>max(normData[, group])){
       warning("The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter.")
+      plot(normData[, age], normData[, group])
     }
   }
   normData <- normData[!is.na(normData[, raw]), ]
@@ -733,6 +734,11 @@ computePowers <-
 
     if (!is.numeric(d[, norm])) {
       warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""))
+    }
+
+    if (is.numeric(age) && (length(age) == nrow(d))) {
+      d$age <- age
+      age <- "age"
     }
 
     if (useAge && !is.numeric(d[, age])) {

@@ -40,7 +40,7 @@ of the raw data (default 7)}
 \item{title}{custom title for plot}
 
 \item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
+the specific value here. If no covariate is specified, both degrees will be plotted.}
 }
 \description{
 The function plots the norm curves based on the regression model against

@@ -10,6 +10,9 @@ Date: 2019.08.02
 Changes:
 
 *    Error in rankByGroup and rankBySlidingWindow when covariate variable name was used
+*    plot added to rankBySlidingWindow in case, age and group do not correspond
+*    rankBySlidingWindow accepts age variable in addition to age variable name
+*    plotPercentiles no allows plotting both degrees of binary covariate
 
 
 

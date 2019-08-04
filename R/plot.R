@@ -384,7 +384,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' of the raw data (default 7)
 #' @param title custom title for plot
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
-#' the specific value here.
+#' the specific value here. If no covariate is specified, both degrees will be plotted.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -409,7 +409,25 @@ plotPercentiles <- function(data,
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
     covariate = NULL
   }else if(is.null(covariate)&&!is.null(model$covariate)){
-    stop("Covariate specified in the model, but no function parameter available.")
+    #stop("Covariate specified in the model, but no function parameter available.")
+    require(latticeExtra)
+    degree <- unique(data[, attr(data, "covariate")])
+
+    if (is.null(title)) {
+      title <- paste0("Observed and Predicted Percentile Curves\nModel: ", model$ideal.model, ", R2 = ", round(model$subsets$adjr2[[model$ideal.model]], digits = 4), ", Covariates: ", degree[[1]], " versus ", degree[[2]])
+    }
+
+    trel <- c(plotPercentiles(data, model, covariate = degree[[1]],
+                              minRaw = minRaw, maxRaw = maxRaw,
+                              minAge = minAge, maxAge = maxAge,
+                              raw = raw, group = group, percentiles = percentiles,
+                              scale = scale, title = title),
+              plotPercentiles(data, model, covariate = degree[[2]],
+              minRaw = minRaw, maxRaw = maxRaw,
+              minAge = minAge, maxAge = maxAge,
+              raw = raw, group = group, percentiles = percentiles,
+              scale = scale, title = title))
+    return(print(trel))
   }
 
   if(!is.null(model$covariate)){
@@ -565,6 +583,7 @@ plotPercentiles <- function(data,
                    use = "pairwise.complete.obs"), digits = 4)
     title <- paste0("Observed and Predicted Percentile Curves\nModel: ", model$ideal.model, ", R2 = ", round(model$subsets$adjr2[[model$ideal.model]], digits = 4))
   }
+
   plot <- lattice::xyplot(formula(xyFunction), percentile,
     panel = function(...)
       lattice::panel.superpose(..., panel.groups = panelfun),
