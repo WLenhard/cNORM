@@ -13,6 +13,7 @@ Changes:
 *    plot added to rankBySlidingWindow in case, age and group do not correspond
 *    rankBySlidingWindow accepts age variable in addition to age variable name
 *    plotPercentiles no allows plotting both degrees of binary covariate
+*    code cleaning in plotPercentiles
 
 
 
