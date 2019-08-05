@@ -168,7 +168,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     d$group <- d[[group]]
     d$group <- as.factor(d$group)
     if (type == 0) {
-      lattice::xyplot(fitted ~ normValue | group, d,
+      xyplot(fitted ~ normValue | group, d,
         main = paste("Observed vs. Fitted Norm Scores by ", group, "\nr = ",
                      r, ", SE = ", se),
         ylab = "Fitted Scores",
@@ -179,7 +179,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         abline = c(0, 1), lwd = 1
       )
     } else {
-      lattice::xyplot(diff ~ normValue | group, d,
+      xyplot(diff ~ normValue | group, d,
         main = paste("Observed Norm Scores vs. Difference Scores by ", group, "\nr = ",
                      r, ", SE = ", se),
         ylab = "Difference",
@@ -196,7 +196,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     }
   } else {
     if (type == 0) {
-      lattice::xyplot(fitted ~ normValue, d,
+      xyplot(fitted ~ normValue, d,
         main = paste("Observed vs. Fitted Norm Scores\nr = ",
                      r, ", SE = ", se),
         ylab = "Fitted Scores",
@@ -207,7 +207,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
         abline = c(0, 1), lwd = 1
       )
     } else {
-      lattice::xyplot(diff ~ normValue, d,
+      xyplot(diff ~ normValue, d,
         main = paste("Observed Norm Scores vs. Difference Scores\nr = ",
                      r, ", SE = ", se),
         ylab = "Difference",
@@ -409,8 +409,6 @@ plotPercentiles <- function(data,
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
     covariate = NULL
   }else if(is.null(covariate)&&!is.null(model$covariate)){
-    #stop("Covariate specified in the model, but no function parameter available.")
-    require(latticeExtra)
     degree <- unique(data[, attr(data, "covariate")])
 
     if (is.null(title)) {
