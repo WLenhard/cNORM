@@ -284,7 +284,8 @@ shinyServer(function(input, output, session) {
                                            raw = chosenRaw(),
                                            k = chosenNumberOfPowers(),
                                            predictors = NULL,
-                                           terms = chosenNumberOfTerms())
+                                           terms = chosenNumberOfTerms(),
+                                           plot = FALSE)
     }
     else{
       currentBestModel <- cNORM::bestModel(data = preparedData(),
@@ -292,7 +293,8 @@ shinyServer(function(input, output, session) {
                                            k = chosenNumberOfPowers(),
                                            predictors = NULL,
                                            R2 = chosenCoeffOfDet(),
-                                           terms = 0)
+                                           terms = 0,
+                                           plot = FALSE)
     }
 
 
