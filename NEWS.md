@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.2 (in process)
-Date: 2019.08.02
+Date: 2019.08.16
 
 Changes:
 
@@ -14,6 +14,7 @@ Changes:
 *    rankBySlidingWindow accepts age variable in addition to age variable name
 *    plotPercentiles no allows plotting both degrees of binary covariate
 *    code cleaning in plotPercentiles
+*    bestModel automatically does plotPercentiles if parameter plot set to TRUE
 
 
 
