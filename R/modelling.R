@@ -49,6 +49,7 @@
 #' are so far not yet prepared to handle covariates.
 #' @param weights Optional vector with weights for the single cases. All weights have to be positive.
 #' This is currently an experimental feature.
+#' @param plot If set to TRUE (default), the percentile plot of the model is schown
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
@@ -96,7 +97,8 @@ bestModel <- function(data,
                       predictors = NULL,
                       terms = 0,
                       weights = NULL,
-                      force.in = NULL) {
+                      force.in = NULL,
+                      plot = TRUE) {
 
   # retrieve attributes
   if (is.null(raw)) {
@@ -315,6 +317,9 @@ bestModel <- function(data,
   }
 
   message("\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit, 'plotPercentiles(data, model)' to visualize percentile curves and 'summary(model)' for statistics on the regression model.")
+
+  if(plot&&attr(data, "useAge"))
+    plotPercentiles(data, bestformula)
 
   return(bestformula)
 }

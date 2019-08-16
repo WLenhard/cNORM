@@ -5,7 +5,7 @@
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
 bestModel(data, raw = NULL, R2 = NULL, k = NULL, predictors = NULL,
-  terms = 0, weights = NULL, force.in = NULL)
+  terms = 0, weights = NULL, force.in = NULL, plot = TRUE)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'
@@ -44,6 +44,8 @@ the sample. Variables specified here, that are not part of the initial regressio
 resp. list of predictors, are ignored without further notice and thus do not show up in
 the final result. Additionally, all other functions like norm table generation and plotting
 are so far not yet prepared to handle covariates.}
+
+\item{plot}{If set to TRUE (default), the percentile plot of the model is schown}
 }
 \value{
 The model meeting the R2 criteria with coefficients and variable selection

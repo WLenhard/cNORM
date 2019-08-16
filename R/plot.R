@@ -53,7 +53,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
     d$group <- as.factor(d$group)
 
     if (type == 0) {
-      lattice::xyplot(fitted ~ raw | group, d,
+      xyplot(fitted ~ raw | group, d,
         main = paste("Observed vs. Fitted Raw Scores by ", group, "\nr = ", r, ", RMSE = ", mse),
         ylab = "Fitted Scores",
         xlab = "Observed Score",
@@ -63,7 +63,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         abline = c(0, 1), lwd = 1
       )
     } else {
-      lattice::xyplot(diff ~ raw | group, d,
+      xyplot(diff ~ raw | group, d,
         main = paste("Observed Raw Scores vs. Difference Scores by ", group, "\nr = ", r, ", RMSE = ", mse),
         ylab = "Difference Scores",
         xlab = "Observed Score",
@@ -78,7 +78,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
     }
   } else {
     if (type == 0) {
-      lattice::xyplot(fitted ~ raw, d,
+      xyplot(fitted ~ raw, d,
         main = paste("Observed vs. Fitted Raw Scores\nr = ", r, ", RMSE = ", mse),
         ylab = "Fitted Scores",
         xlab = "Observed Score",
@@ -88,7 +88,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
         abline = c(0, 1), lwd = 1
       )
     } else {
-      lattice::xyplot(diff ~ raw, d,
+      xyplot(diff ~ raw, d,
         main = paste("Observed Raw Scores vs. Difference Scores\nr = ", r, ", RMSE = ", mse),
         ylab = "Difference",
         xlab = "Observed Score",
