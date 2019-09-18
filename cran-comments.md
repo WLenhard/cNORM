@@ -14,8 +14,10 @@ There were no ERRORs, WARNINGs or NOTES
 There are currently no downstream dependencies for this package.
 
 ## Update and resubmission
-This is the forth release to CRAN  (v1.2.0). In this version I have:
+This is the fifth release to CRAN  (v1.2.2). In this version I have:
 
-* added support for modelling with a binary covariate
-* fixed bugs
+* improved handling of covariates
+* adjusted parameters in bestModel function, when R2 > .99 is not reached
+* fixed bugs, especially with regards to predicting norm scores in large samples
 * added checks and warning messages
+* improved usability
