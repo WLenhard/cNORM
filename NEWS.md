@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.2 (in process)
-Date: 2019.09.16
+Date: 2019.09.18
 
 Changes:
 
@@ -15,6 +15,7 @@ Changes:
 *    plotPercentiles now allows plotting both degrees of binary covariate
 *    code cleaning in plotPercentiles
 *    bestModel automatically does plotPercentiles if parameter plot set to TRUE
+*    Citation file added
 
 
 

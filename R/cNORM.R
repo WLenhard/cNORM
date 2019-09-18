@@ -8,13 +8,14 @@
 #'
 #' Conventional methods for producing test norm score tables are often plagued with
 #' "jumps" or "gaps" (i.e., discontinuities) in norm tables and low confidence for
-#' assessing extreme scores.  The continuous norming method introduced by A.
-#' Lenhard et al. (2016), <doi:10.1177/1073191116656437> addresses these problems
-#' and also has the added advantage of not requiring assumptions about the distribution
-#' of the raw data: The norm scores are established from raw data by modeling the latter
-#' ones as a function  of both percentile scores and an explanatory variable (e.g., age).
-#' The method minimizes bias arising from sampling and measurement error, while handling
-#' marked deviations from normality - such as are commonplace in clinical samples.
+#' assessing extreme scores.  The continuous norming method introduced by A. Lenhard et
+#' al. (2016, <doi:10.1177/1073191116656437>; 2019, <doi:10.1371/journal.pone.0222279>)
+#' addresses these problems and also has the added advantage of not requiring assumptions
+#' about the distribution of the raw data: The norm scores are established from raw data
+#' by modeling the latter ones as a function  of both percentile scores and an explanatory
+#' variable (e.g., age). The method minimizes bias arising from sampling and measurement
+#' error, while handling marked deviations from normality - such as are commonplace in
+#' clinical samples.
 #'
 #' Conducting the analysis consists of four steps and cNORM offers all according functions
 #' for preparing data, conducting the  regression, selecting the best model and generating

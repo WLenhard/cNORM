@@ -2,7 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating continuous standard scores, as f. e. for psychometric test development, biometrics (e. g. biological and physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016). For an in-depth tutorial please consult the project homepage https://www.psychometrica.de/cNorm_en.html
+The package cNorm provides methods for generating continuous standard scores, as f. e. for psychometric test development, biometrics (e. g. biological and physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016, <doi:10.1177/1073191116656437>; 2019, <doi:10.1371/journal.pone.0222279>). For an in-depth tutorial please consult the project homepage https://www.psychometrica.de/cNorm_en.html
 
 ## Approach
 
@@ -119,3 +119,5 @@ If you want to use cNORM for scientific publications, we would also ask you to q
 ## References
 *   Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
 *   Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
+*   Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://cran.r-project.org/web/packages/cNORM/
+*   Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279
