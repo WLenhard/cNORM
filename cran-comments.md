@@ -9,8 +9,8 @@
 
 ## R CMD check results
 There were no ERRORs or WARNINGs.
-There was one NOTES on spelling in DESCRIPTION, which are all false
-positive, however.
+There was one NOTE on misspellings in DESCRIPTION through devtools::check_rhub(), 
+which are all false positives.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
