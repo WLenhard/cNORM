@@ -8,16 +8,14 @@
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTES
+There were no ERRORs or WARNINGs.
+There was one NOTES on spelling in DESCRIPTION, which are all false
+positive, however.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
 
 ## Update and resubmission
-This is the fifth release to CRAN  (v1.2.2). In this version I have:
+This is the resubmission of v1.2.2. In this version I have:
 
-* improved handling of covariates
-* adjusted parameters in bestModel function, when R2 > .99 is not reached
-* fixed bugs, especially with regards to predicting norm scores in large samples
-* added checks and warning messages
-* improved usability
+* enclosed doi in README.md in angle brackets as specified by https://cran.r-project.org/web/packages/submission_checklist.html
