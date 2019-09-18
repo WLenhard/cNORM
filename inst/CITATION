@@ -46,7 +46,7 @@ citEntry(entry = "Manual",
   volume       = "",
   number       = "",
   pages        = "",
-  url          = "https://cran.r-project.org/web/packages/cNORM/",
+  url          = "https://CRAN.R-project.org/package=cNORM",
 
   textVersion  =
   paste("Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM")
