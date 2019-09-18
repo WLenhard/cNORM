@@ -15,7 +15,7 @@ explanatory variable (e.g., age) through [Taylor polynomials](https://www.psycho
 bias arising from sampling and measurement error, while handling marked deviations from
 normality – such as are commonplace in clinical samples. Contrary to parametric approaches, it does not rely on distribution assumptions of the initial norm data and is thus a very robust approach in generating norm tables.
 
-The rationale of the approach is to rank the results in the different age cohorts (or use a sliding window in case the data is distributed over a large age intervall) and thus to determine the observed norm scores (= location). Afterwards, powers of the age specific location and of the age are computed, as well as all linear interactions. Finally, the data is fitted by a hyperplane via multiple regression and the most relevant terms are identified:
+The rationale of the approach is model the relationship between location / norm score, age and raw score via multiple regression and to fit a 3-dimensional hyperplane. This hyperplane is used to close all gaps and to compute continuous norm scores:
 
 <img src="vignettes/plos.png" style="border:0;">
 
