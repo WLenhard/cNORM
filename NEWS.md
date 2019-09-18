@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.2.2 (in process)
+### Version in 1.2.2 (fifth release)
 Date: 2019.09.18
 
 Changes:
