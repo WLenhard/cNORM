@@ -1,0 +1,53 @@
+citHeader("To cite cNORM in publications please refer to one or several of the primary sources:")
+
+citEntry(entry = "Article",
+  title        = "Continuous Norming {cNORM}",
+  author       = personList(as.person("Alexandra Lenhard"),
+                   as.person("Wolfgang Lenhard"),
+				   as.person("Sebastian Suggate"),
+				   as.person("Robin Segerer")),
+  journal      = "Assessment",
+  year         = "2018",
+  volume       = "25",
+  number       = "1",
+  pages        = "112--125",
+  url          = "https://journals.sagepub.com/doi/10.1177/1073191116656437",
+
+  textVersion  =
+  paste("Lenhard, A., Lenhard, W., Suggate, S., & Segerer, R. (2018).",
+		"A Continuous Solution to the Norming Problem.",
+		"Assessment, 25(1), 112–125.",
+		"https://doi.org/10.1177/1073191116656437")
+)
+
+citEntry(entry = "Article",
+  title        = "Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches",
+  author       = personList(as.person("Alexandra Lenhard"),
+                   as.person("Wolfgang Lenhard"),
+				   as.person("Sebastian Gary")),
+  journal      = "PloS One",
+  year         = "2019",
+  volume       = "14",
+  number       = "9",
+  pages        = "",
+  url          = "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0222279",
+
+  textVersion  =
+  paste("Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279")
+)
+
+citEntry(entry = "Manual",
+  title        = "Continuous Norming (cNORM)",
+  author       = personList(as.person("Alexandra Lenhard"),
+                   as.person("Wolfgang Lenhard"),
+				   as.person("Sebastian Gary")),
+  journal      = "The Comprehensive R Archive Network",
+  year         = "2018",
+  volume       = "",
+  number       = "",
+  pages        = "",
+  url          = "https://cran.r-project.org/web/packages/cNORM/",
+
+  textVersion  =
+  paste("Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://cran.r-project.org/web/packages/cNORM/")
+)
