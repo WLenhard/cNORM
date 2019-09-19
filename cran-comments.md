@@ -8,9 +8,9 @@
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs or WARNINGs.
-There was one NOTE on misspellings in DESCRIPTION through devtools::check_rhub(), 
-which are all false positives.
+There were no ERRORs, WARNINGs or NOTES on RHUB and R CMD Check under Windows.
+
+There were no ERRORs or WARNINGs, but NOTES on misspellings in DESCRIPTION through devtools::check_rhub() on Fedora Linux. These are all false positives.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

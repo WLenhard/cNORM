@@ -22,7 +22,7 @@
 }
 
 
-#' Prepare data for modelling in one step (convenience method)
+#' Prepare data for modeling in one step (convenience method)
 #'
 #' This is a convenience method to either load the inbuilt sample dataset, or
 #' to provide a data frame with the variables "raw" (for the raw scores) and "group"
@@ -33,7 +33,7 @@
 #' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
 #' demonstrate the procedure.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
-#' Setting group = FALSE deactivates modelling in dependence of age. Use this in case you do want
+#' Setting group = FALSE deactivates modeling in dependence of age. Use this in case you do want
 #' conventional norm tables.
 #' @param raw the raw scores
 #' @param age the continuous explanatory variable; by default set to "group"
@@ -52,7 +52,7 @@
 #' # variable names can be specified as well, here with the BMI data included in the package
 #' data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
 #'
-#' # modelling with only one group with the 'elfe' dataset as an example
+#' # modeling with only one group with the 'elfe' dataset as an example
 #' # this results in conventional norming
 #' data.elfe2 <- prepareData(data = elfe, group = FALSE)
 #' m <- bestModel(data.elfe2)
@@ -142,13 +142,13 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @section Remarks on using covariates:
 #' So far the inclusion of a binary covariate is experimental and far from optimized.
 #' The according variable name has to be specified in the ranking procedure
-#' and the modelling includes this in the further process. At the moment, during ranking
+#' and the modeling includes this in the further process. At the moment, during ranking
 #' the data are split into the according cells group x covariate, which leads to small
 #' sample sizes. Please take care to have enough cases in each combination. Additionally,
-#' covariates can lead to unstable modelling solutions. The question, if it is really
+#' covariates can lead to unstable modeling solutions. The question, if it is really
 #' reasonable to include covariates when norming a test is a decision beyond the pure data
-#' modelling. Please use with care or alternatively split the dataset into the two groups
-#' beforehand and modell them seperately.
+#' modeling. Please use with care or alternatively split the dataset into the two groups
+#' beforehand and model them separately.
 #'
 #' @param data data.frame with norm sample data
 #' @param group name of the grouping variable (default 'group'), e. g. grade, setting
@@ -167,7 +167,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
-#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. BEWARE!
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @return the dataset with the percentiles and norm scales per group
@@ -429,13 +429,13 @@ rankByGroup <-
 #' @section Remarks on using covariates:
 #' So far the inclusion of a binary covariate is experimental and far from optimized.
 #' The according variable name has to be specified in the ranking procedure
-#' and the modelling includes this in the further process. At the moment, during ranking
+#' and the modeling includes this in the further process. At the moment, during ranking
 #' the data are split into the according degrees of the covariate and the ranking is done
 #' separately. This may lead to small sample sizes. Please take care to have enough cases in each combination. Additionally,
-#' covariates can lead to unstable modelling solutions. The question, if it is really
+#' covariates can lead to unstable modeling solutions. The question, if it is really
 #' reasonable to include covariates when norming a test is a decision beyond the pure data
-#' modelling. Please use with care or alternatively split the dataset into the two groups
-#' beforehand and modell them seperately.
+#' modeling. Please use with care or alternatively split the dataset into the two groups
+#' beforehand and model them separately.
 #'
 #' @param data data.frame with norm sample data
 #' @param age the continuous age variable. Setting 'age' to FALSE inhibits computation of
@@ -461,7 +461,7 @@ rankByGroup <-
 #' overwrites it.
 #' @param group Optional parameter for providing the name of the grouping variable (if present; overwritten
 #' if ngroups is used)
-#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. BEWARE!
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @return the dataset with the individual percentiles and norm scores
@@ -687,7 +687,7 @@ rankBySlidingWindow <- function(data,
 #' explanatory variables can be used here instead an age variable as well, as long as the variable is
 #' at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 #' most common field of application.
-#' @param covariate Include a binary covariate into the preparation and subsequently modelling,
+#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. If this has already
 #' been done in the ranking, the function uses the according variable. BEWARE!
 #' Not all subsequent functions are already prepared for it. It is an experimental feature and

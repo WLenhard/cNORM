@@ -49,7 +49,7 @@
 #' are so far not yet prepared to handle covariates.
 #' @param weights Optional vector with weights for the single cases. All weights have to be positive.
 #' This is currently an experimental feature.
-#' @param plot If set to TRUE (default), the percentile plot of the model is schown
+#' @param plot If set to TRUE (default), the percentile plot of the model is shown
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
 #' \code{plotPercentiles(data, model)} to inspect model
