@@ -1,3 +1,12 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* deletet the DOI links, since there was a display problem with the \doi{} tag
+on github and instead include the dois as regular text in the references at the bottom
+of the page
+* checked spelling
+* repeated all tests on R CMD Check, winbuilder (dev and release), rhub
+
 ## Test environments
 * local WIN10, 64Bit install, R 3.6.1
 * winbuilder release and development
@@ -8,16 +17,9 @@
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTES on RHUB and R CMD Check under Windows.
+There were no ERRORs, WARNINGs or NOTES on winbuilder and R CMD Check under Windows.
 
 There were no ERRORs or WARNINGs, but NOTES on misspellings in DESCRIPTION through devtools::check_rhub() on Fedora Linux. These are all false positives.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
-
-## Update and resubmission
-This is the resubmission of v1.2.2. In this version I have:
-
-* deletet the DOI links, since there was a display problem with the \doi{} tag
-on github and instead include the dois as regular text in the references at the bottom
-of the page
