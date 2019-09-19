@@ -18,4 +18,6 @@ There are currently no downstream dependencies for this package.
 ## Update and resubmission
 This is the resubmission of v1.2.2. In this version I have:
 
-* enclosed doi in README.md in angle brackets as specified by https://cran.r-project.org/web/packages/submission_checklist.html
+* deletet the DOI links, since there was a display problem with the \doi{} tag
+on github and instead include the dois as regular text in the references at the bottom
+of the page
