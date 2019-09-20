@@ -4,6 +4,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.2.3 (in progress)
+Date: 2019.09.19
+
+Changes:
+
+*    Error in citation fixed
+
+
+
+
 ### Version in 1.2.2 (fifth release)
 Date: 2019.09.18
 
