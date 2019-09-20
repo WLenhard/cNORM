@@ -1,7 +1,7 @@
 citHeader("To cite cNORM in publications please refer to one or several of the primary sources:")
 
 citEntry(entry = "Article",
-  title        = "Continuous Norming {cNORM}",
+  title        = "A continuous solution to the norming problem",
   author       = personList(as.person("Alexandra Lenhard"),
                    as.person("Wolfgang Lenhard"),
 				   as.person("Sebastian Suggate"),
