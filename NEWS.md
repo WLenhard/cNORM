@@ -5,11 +5,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.3 (in progress)
-Date: 2019.09.19
+Date: 2019.09.27
 
 Changes:
 
 *    Error in citation fixed
+*    Improved explanations in the Shiny GUI
 
 
 
