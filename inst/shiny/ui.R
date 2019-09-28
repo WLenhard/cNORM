@@ -225,7 +225,12 @@ shinyUI(fluidPage(
         tags$h3("Norm Scores Plot"), tags$p("The plot shows the observed and predicted norm scores. You can identify, how well the model is able to predict the norm scores of the dataset. The duration of the computation increases with the size of the dataset."),
         tags$br(),
         checkboxInput("grouping", "Plot by group", FALSE),
-        checkboxInput("differences", "Plot differences", FALSE)
+        checkboxInput("differences", "Plot differences", FALSE), tags$br(),
+        actionButton(
+          inputId = "normScoreButton",
+
+          label = "Update"
+        )
       ), mainPanel(
         withSpinner(
           plotOutput("PlotNormScores", width = "100%", height = "800px"),
@@ -237,8 +242,12 @@ shinyUI(fluidPage(
         tags$h3("Raw Scores Plot"), tags$p("The plot shows the observed and predicted raw scores. You can identify, how well the model is able to predict the raw scores of the original dataset."),
         tags$br(),
         checkboxInput("grouping1", "Plot by group", FALSE),
-        checkboxInput("differences1", "Plot differences", FALSE)
-      ), mainPanel(
+        checkboxInput("differences1", "Plot differences", FALSE), tags$br(),
+        actionButton(
+          inputId = "rawScoreButton",
+
+          label = "Update"
+      )), mainPanel(
         withSpinner(
           plotOutput("PlotRawScores", width = "100%", height = "800px"),
           type = 5

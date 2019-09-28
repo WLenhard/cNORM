@@ -350,7 +350,7 @@ shinyServer(function(input, output, session) {
     cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
   })
 
-  normScorePlot <- eventReactive(c(input$grouping, input$differences), {
+  normScorePlot <- eventReactive(c(input$grouping, input$differences, input$normScoreButton), {
     type <- 0
     if(input$differences)
       type <- 1
@@ -376,7 +376,7 @@ shinyServer(function(input, output, session) {
   })
 
 
-  rawScorePlot <- eventReactive(c(input$grouping1, input$differences1), {
+  rawScorePlot <- eventReactive(c(input$grouping1, input$differences1, input$rawScoreButton), {
     type <- 0
     if(input$differences1)
       type <- 1
