@@ -2,7 +2,7 @@
 
 # cNorm
 
-The package cNorm provides methods for generating continuous standard scores, as f. e. for psychometric test development, biometrics (e. g. biological and physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016, 2019). For an in-depth tutorial please consult the project homepage https://www.psychometrica.de/cNorm_en.html
+The package cNorm provides methods for generating continuous standard scores, as f. e. for psychometric test development, biometrics (e. g. biological and physiological growth curves), and screenings in the medical domain. It is based on the approach suggested by A. Lenhard et al. (2016, 2019). For an in-depth tutorial please consult the project homepage https://www.psychometrica.de/cNorm_en.html and https://cnorm.shinyapps.io/cNORM/ for an online demonstration.
 
 ## Approach
 

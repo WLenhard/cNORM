@@ -15,7 +15,7 @@ Description: Conventional methods for producing standard scores in psychometrics
     explanatory variable (e.g., age). The method minimizes bias arising from sampling and 
     measurement error, while handling marked deviations from normality, addressing bottom 
     or ceiling effects and capturing almost all of the variance in the original norm data 
-    sample.
+    sample. An online demonstration is available via <https://cnorm.shinyapps.io/cNORM/>.
 Depends:
     R (>= 3.1.0)
 Imports:
