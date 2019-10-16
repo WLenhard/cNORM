@@ -5,13 +5,15 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.3 (in progress)
-Date: 2019.09.28
+Date: 2019.10.16
 
 Changes:
 
 *    Error in citation fixed
 *    Improved explanations in the Shiny GUI
 *    Additional 'Update'-Buttons in norm and raw scores plot in visualization tab of shiny gui
+*    removed unnecessary import askYesNo
+*    spell checking in diverse function descriptions
 
 
 
