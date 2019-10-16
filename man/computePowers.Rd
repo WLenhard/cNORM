@@ -22,7 +22,7 @@ explanatory variables can be used here instead an age variable as well, as long 
 at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 most common field of application.}
 
-\item{covariate}{Include a binary covariate into the preparation and subsequently modelling,
+\item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
 either by specifying the variable name or including the variable itself. If this has already
 been done in the ranking, the function uses the according variable. BEWARE!
 Not all subsequent functions are already prepared for it. It is an experimental feature and

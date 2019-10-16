@@ -45,7 +45,7 @@ resp. list of predictors, are ignored without further notice and thus do not sho
 the final result. Additionally, all other functions like norm table generation and plotting
 are so far not yet prepared to handle covariates.}
 
-\item{plot}{If set to TRUE (default), the percentile plot of the model is schown}
+\item{plot}{If set to TRUE (default), the percentile plot of the model is shown}
 }
 \value{
 The model meeting the R2 criteria with coefficients and variable selection
