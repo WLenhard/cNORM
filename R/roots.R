@@ -99,10 +99,11 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
   }
 
   if (is.null(polynom)) {
-    polynomForPrediction <- calcPolyInL(
+    polynomForPrediction <- calcPolyInLBase(
       raw = raw,
       age = age,
-      model = model
+      coef = model$coefficients,
+      k = model$k
     )
   } else {
     polynomForPrediction <- polynom
