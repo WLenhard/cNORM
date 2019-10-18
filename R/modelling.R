@@ -447,6 +447,7 @@ checkConsistency <- function(model,
   i <- minAge
   major <- 0
   results <- c()
+
   while (i <= maxAge) {
     norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm, covariate = covariate)
     correct <- TRUE
@@ -474,14 +475,19 @@ checkConsistency <- function(model,
     return(FALSE)
   } else {
     if (!silent) {
-      message(paste0("\nAt least ", major, " violations of monotonicity found within the specified range of age and norm score."))
-      message("Use 'plotNormCurves' to visually inspect the norm curve and restrict the valid value range accordingly.")
-      message("Be careful with horizontal and vertical extrapolation.")
+      message(paste0("\nAt least ", major,
+                     " violations of monotonicity found within the specified range of age and norm score.",
+                     "Use 'plotNormCurves' to visually inspect the norm curve or 'plotDerivative' to ",
+                     "identify regions violating the consistency. ",
+                     "Rerun the modeling with adjusted parameters or restrict the valid value range accordingly. ",
+                     "Be careful with horizontal and vertical extrapolation."))
       message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
     }
     return(TRUE)
   }
 }
+
+
 
 #' Regression function
 #'

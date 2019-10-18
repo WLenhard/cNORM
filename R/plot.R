@@ -1017,8 +1017,8 @@ plotDerivative <- function(model,
 
   rowS <- c(seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
   colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
-  coeff <- cNORM::derive(model, order)
-  cat(paste0(cNORM::rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
+  coeff <- derive(model, order)
+  cat(paste0(rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
   print(coeff)
 
   devFrame <- data.frame(matrix(NA, nrow = length(rowS), ncol = length(colS)))
@@ -1031,7 +1031,7 @@ plotDerivative <- function(model,
   while (i <= ncol(devFrame)) {
     j <- 1
     while (j <= nrow(devFrame)) {
-      devFrame[j, i] <- cNORM::predictRaw(rowS[[j]], colS[[i]], coeff)
+      devFrame[j, i] <- predictRaw(rowS[[j]], colS[[i]], coeff)
       colList <- c(rowS[[j]], colS[[i]], devFrame[j, i])
       dev2 <- rbind(dev2, colList)
       j <- j + 1
