@@ -11,7 +11,7 @@
 calcPolyInL <- function(raw, age, model) {
   k <- model$k
   coeff <- model$coefficients
-  return(calcPolyInLBase(raw, age, model, coeff, k))
+  return(calcPolyInLBase(raw, age, coeff, k))
 }
 
 #' Internal function for retrieving regression function coefficients at specific age
@@ -21,7 +21,8 @@ calcPolyInL <- function(raw, age, model) {
 #' the coefficients.
 #' @param raw The raw value (subtracted from the intercept)
 #' @param age The age
-#' @param model The cNORM regression model
+#' @param coeff The cNORM regression model coefficients
+#' @param k The cNORM regression model power parameter
 #'
 #' @return The coefficients
 calcPolyInLBase <- function(raw, age, coeff, k) {
