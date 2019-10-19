@@ -329,13 +329,13 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
   # lattice display options
   COL <- rainbow(length(normList))
   panelfun <- function(..., type, group.number) {
-    lattice::panel.lines(...)
+    panel.lines(...)
   }
 
-  lattice::xyplot(raw ~ age,
+  xyplot(raw ~ age,
     data = valueList, groups = n,
     panel = function(...)
-      lattice::panel.superpose(..., panel.groups = panelfun),
+      panel.superpose(..., panel.groups = panelfun),
     main = "Norm Curves",
     ylab = "Raw Score", xlab = "Explanatory Variable",
     col = COL, lwd = 1.5, grid = TRUE,
@@ -570,9 +570,9 @@ plotPercentiles <- function(data,
 
   panelfun <- function(..., type, group.number) {
     if (group.number > length(T)) {
-      lattice::panel.lines(...)
+      panel.lines(...)
     } else {
-      lattice::panel.points(..., type = "p")
+      panel.points(..., type = "p")
     }
   }
 
@@ -580,9 +580,9 @@ plotPercentiles <- function(data,
     title <- paste0("Observed and Predicted Percentile Curves\nModel: ", model$ideal.model, ", R2 = ", round(model$subsets$adjr2[[model$ideal.model]], digits = 4))
   }
 
-  plot <- lattice::xyplot(formula(xyFunction), percentile,
+  plot <- xyplot(formula(xyFunction), percentile,
     panel = function(...)
-      lattice::panel.superpose(..., panel.groups = panelfun),
+      panel.superpose(..., panel.groups = panelfun),
     main = title,
     ylab = paste0("Raw Score (", raw, ")"), xlab = paste0("Explanatory Variable (", group, ")"),
     col = COL2, lwd = 1.5, grid = TRUE,
@@ -676,13 +676,13 @@ plotDensity <- function(model,
   COL <- rainbow(length(group))
   NAMES <- paste("Group ", group, sep = "")
   panelfun <- function(..., type, group.number) {
-    lattice::panel.lines(...)
+    panel.lines(...)
   }
 
-  plot <- lattice::xyplot(density ~ raw,
+  plot <- xyplot(density ~ raw,
     data = matrix, groups = group,
     panel = function(...)
-      lattice::panel.superpose(..., panel.groups = panelfun),
+      panel.superpose(..., panel.groups = panelfun),
     main = "Density function",
     ylab = "Density", xlab = "Raw Score",
     col = COL, lwd = 1.5, grid = TRUE,
@@ -802,11 +802,11 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
       percentiles = percentiles,
       scale = NULL,
       group = group,
-      title = paste0("Observed and Predicted Percentiles\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
+      title = paste0("Observed and Predicted Percentiles\nModel with ", bestformula$subsets$numberOfTerms[[start]], " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
     )
 
     if (!is.null(filename)) {
-      lattice::trellis.device(device = "png", filename = paste0(filename, start, ".png"))
+      trellis.device(device = "png", filename = paste0(filename, start, ".png"))
       print(l[[length(l)]])
       dev.off()
     }
@@ -847,7 +847,7 @@ plotSubset <- function(model, type = 1, index = FALSE) {
   indexLabel <- seq(from = 1, to = nrow(dataFrameTMP))
 
   if (type == 1) {
-    lattice::xyplot(cp ~ adjr2,
+    xyplot(cp ~ adjr2,
       data = dataFrameTMP, type = "b",
       col.line = "lightblue", lwd = 1,
       grid = TRUE, scales = list(y = list(log = 10)),
@@ -867,19 +867,19 @@ plotSubset <- function(model, type = 1, index = FALSE) {
           "Cutoff Value"
         ))
       ), panel = function(x, y, ...) {
-        lattice::panel.abline(
+        panel.abline(
           v = model$cutoff,
           lwd = 2, lty = "longdash",
           col = "#9933FF", label = model$cutoff
         )
-        lattice::panel.xyplot(x, y, ...)
+        panel.xyplot(x, y, ...)
         # add index value to data points
         if(index)
-          lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
+          ltext(x = x, y = y, labels = indexLabel, cex=.7)
       }
     )
   } else if (type == 2) {
-    lattice::xyplot(bic ~ adjr2,
+    xyplot(bic ~ adjr2,
       data = dataFrameTMP, type = "b",
       col.line = "lightblue", lwd = 1,
       grid = TRUE,
@@ -899,32 +899,32 @@ plotSubset <- function(model, type = 1, index = FALSE) {
           "cutoff Value"
         ))
       ), panel = function(x, y, ...) {
-        lattice::panel.abline(
+        panel.abline(
           v = model$cutoff,
           lwd = 2, lty = "longdash",
           col = "#9933FF", label = model$cutoff
         )
-        lattice::panel.xyplot(x, y, ...)
+        panel.xyplot(x, y, ...)
         # add index value to data points
         if(index)
-          lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
+          ltext(x = x, y = y, labels = indexLabel, cex=.7)
       }
     )
   } else if(type == 3){
-    lattice::xyplot(RMSE ~ nr,
+    xyplot(RMSE ~ nr,
                     data = dataFrameTMP, type = "b",
                     col.line = "lightblue", lwd = 1,
                     grid = TRUE,
                     main = "Information Function",
                     ylab = "Root Means Square Error (Raw Score)",
                     xlab = "Number of Predictors", panel = function(x, y, ...) {
-                      lattice::panel.xyplot(x, y, ...)
+                      panel.xyplot(x, y, ...)
                       # add index value to data points
                       if(index)
-                        lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
+                        ltext(x = x, y = y, labels = indexLabel, cex=.7)
                     } )
   } else {
-    lattice::xyplot(adjr2 ~ nr,
+    xyplot(adjr2 ~ nr,
                     data = dataFrameTMP, type = "b",
                     col.line = "lightblue", lwd = 1,
                     grid = TRUE,
@@ -941,15 +941,15 @@ plotSubset <- function(model, type = 1, index = FALSE) {
                       ),
                       text = list(c("Cutoff Value"))
                     ), panel = function(x, y, ...) {
-                      lattice::panel.abline(
+                      panel.abline(
                         h = model$cutoff,
                         lwd = 2, lty = "longdash",
                         col = "#9933FF", label = model$cutoff
                       )
-                      lattice::panel.xyplot(x, y, ...)
+                      panel.xyplot(x, y, ...)
                       # add index value to data points
                       if(index)
-                        lattice::ltext(x = x, y = y, labels = indexLabel, cex=.7)
+                        ltext(x = x, y = y, labels = indexLabel, cex=.7)
                     }
     )
   }
@@ -1062,19 +1062,19 @@ plotDerivative <- function(model,
 
 
   if (requireNamespace("latticeExtra", quietly = TRUE)) {
-    p1 <- lattice::levelplot(Z ~ Y * X,
+    p1 <- levelplot(Z ~ Y * X,
       data = dev2,
       at = sequence,
       colorkey = key,
       region = T,
       col.regions = regions,
-      panel = latticeExtra::panel.2dsmoother,
+      panel = panel.2dsmoother,
       main = paste0("Slope of the Regression Function\n", desc),
       ylab = "First Order Derivate of Norm Score",
       xlab = "Explanatory Variable"
     )
   } else {
-    p1 <- lattice::levelplot(Z ~ Y * X,
+    p1 <- levelplot(Z ~ Y * X,
       data = dev2,
       at = sequence, region = T,
       colorkey = key,
@@ -1084,7 +1084,7 @@ plotDerivative <- function(model,
       xlab = "Explanatory Variable"
     )
   }
-  p2 <- lattice::contourplot(Z ~ Y * X, data = dev2)
+  p2 <- contourplot(Z ~ Y * X, data = dev2)
 
   p3 <- p1 + p2
   p3

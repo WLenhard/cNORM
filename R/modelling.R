@@ -202,8 +202,9 @@ bestModel <- function(data,
     index <- NULL
   }
 
-  subsets <- leaps::regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
+  subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
   results <- summary(subsets)
+  results$numberOfTerms <- as.numeric(rowSums(results$which)-1)
 
   i <- 1
   rAdj <- results$adjr2[i]
@@ -346,7 +347,8 @@ printSubset <- function(model) {
       RSS = model$subsets$rss,
       RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
       Cp = model$subsets$cp,
-      BIC = model$subsets$bic
+      BIC = model$subsets$bic,
+      Terms = model$subsets$numberOfTerms
     ))
   return(table)
 }
@@ -820,7 +822,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     }
 
     # compute leaps model
-    subsets <- leaps::regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
+    subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
 
     # retrieve models coefficients for each number of terms
     for (i in min:max) {
@@ -857,7 +859,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   }
 
   # now for the complete data the same logic
-  complete <- leaps::regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
+  complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
   for (i in 1:max) {
     variables <- names(coef(complete, id = i))
     variables <- variables[2:length(variables)]
