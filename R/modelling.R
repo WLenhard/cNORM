@@ -923,12 +923,16 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     abline(h = 0, col = 3, lty = 2)
   }
 
+  FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
+  suggest <- FirstNegative - 1
 
   cat("\n")
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
-  cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test)))
+  cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test), "\n"))
+  cat(paste0("The first model with a negative Delta R2 in norm score cross validation is model ", FirstNegative, "\n"))
+  cat(paste0("Thus, choosing a model with ", suggest, " terms might be the best choice. For this, use the parameter 'terms = ", suggest, "' in the bestModel-function.\n"))
   cat("\nPlease investigate the plots and the summary table, as the results might vary within a narrow range.")
   cat("\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress.")
   cat("\n")
