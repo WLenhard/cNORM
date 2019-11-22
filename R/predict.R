@@ -12,7 +12,7 @@
 #' values indicate higher precision (default 0.1).
 #' @param minRaw lower bound of the range of raw scores (default = 0)
 #' @param maxRaw upper bound of raw scores
-#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
+#' @param covariate In case, a covariate has been used, please specify the degree of the covariate or
 #' the specific value here.
 #' @return data.frame of the variables raw, age and norm
 #' @examples
