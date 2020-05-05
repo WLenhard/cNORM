@@ -451,7 +451,7 @@ checkConsistency <- function(model,
   results <- c()
 
   while (i <= maxAge) {
-    norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm, covariate = covariate)
+    norm <- normTable(i, model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = stepNorm, covariate = covariate, monotonuous = FALSE)
     correct <- TRUE
     if(descend)
       correct <- !is.unsorted(-norm$raw)

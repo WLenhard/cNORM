@@ -4,7 +4,8 @@
 \name{CDC}
 \alias{CDC}
 \title{BMI growth curves from age 2 to 25}
-\format{A data frame with 45053 rows and 7 variables:
+\format{
+A data frame with 45053 rows and 7 variables:
 \describe{
   \item{age}{continuous age in years, based on the month variable}
   \item{group}{age group; chronological age in years at the time of examination}
@@ -13,7 +14,10 @@
   \item{height}{height of the participants in cm}
   \item{weight}{weight of the participants in kg}
   \item{bmi}{the body mass index, computed by (weight in kg)/(height in m)^2}
-}}
+}
+
+A data frame with 45035 rows and 7 columns
+}
 \source{
 \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
 }

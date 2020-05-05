@@ -4,8 +4,15 @@
 \alias{predictNorm}
 \title{Retrieve norm value for raw score at a specific age}
 \usage{
-predictNorm(raw, A, model, minNorm = NULL, maxNorm = NULL,
-  force = FALSE, covariate = NULL)
+predictNorm(
+  raw,
+  A,
+  model,
+  minNorm = NULL,
+  maxNorm = NULL,
+  force = FALSE,
+  covariate = NULL
+)
 }
 \arguments{
 \item{raw}{The raw value, either single numeric or list of values}

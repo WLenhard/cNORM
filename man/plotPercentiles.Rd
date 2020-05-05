@@ -4,10 +4,21 @@
 \alias{plotPercentiles}
 \title{Plot norm curves against actual percentiles}
 \usage{
-plotPercentiles(data, model, minRaw = NULL, maxRaw = NULL,
-  minAge = NULL, maxAge = NULL, raw = NULL, group = NULL,
+plotPercentiles(
+  data,
+  model,
+  minRaw = NULL,
+  maxRaw = NULL,
+  minAge = NULL,
+  maxAge = NULL,
+  raw = NULL,
+  group = NULL,
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  scale = NULL, type = 7, title = NULL, covariate = NULL)
+  scale = NULL,
+  type = 7,
+  title = NULL,
+  covariate = NULL
+)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm scores}

@@ -4,9 +4,16 @@
 \alias{plotPercentileSeries}
 \title{Generates a series of plots with number curves by percentile for different models}
 \usage{
-plotPercentileSeries(data, model, start = 1, end = NULL,
-  group = NULL, percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9,
-  0.975), type = 7, filename = NULL)
+plotPercentileSeries(
+  data,
+  model,
+  start = 1,
+  end = NULL,
+  group = NULL,
+  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+  type = 7,
+  filename = NULL
+)
 }
 \arguments{
 \item{data}{The raw data including the percentiles and norm scores}

@@ -1,0 +1,7 @@
+TODO
+
+- add pretty print option to normTable and rawTable to collapse intervals
+- add simulated dataset based on the EPM manuscript
+- add reference to the EPM paper
+- revise/extend simulation function for other scissor effects, decreasing and non-monotonuous trajectories
+

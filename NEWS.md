@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.3 (in progress)
-Date: 2019.10.16
+Date: 2020.05.05
 
 Changes:
 
@@ -14,6 +14,8 @@ Changes:
 *    Additional 'Update'-Buttons in norm and raw scores plot in visualization tab of shiny gui
 *    removed unnecessary import askYesNo
 *    spell checking in diverse function descriptions
+*    correction for monotonicity in rawTable and normTable (now default)
+*    predictRaw can now return matrices for list of norm x age
 
 
 

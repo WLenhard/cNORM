@@ -4,8 +4,15 @@
 \alias{plotDensity}
 \title{Plot the density function per group by raw score}
 \usage{
-plotDensity(model, minRaw = NULL, maxRaw = NULL, minNorm = NULL,
-  maxNorm = NULL, group = NULL, covariate = NULL)
+plotDensity(
+  model,
+  minRaw = NULL,
+  maxRaw = NULL,
+  minNorm = NULL,
+  maxNorm = NULL,
+  group = NULL,
+  covariate = NULL
+)
 }
 \arguments{
 \item{model}{The model from the bestModel function}

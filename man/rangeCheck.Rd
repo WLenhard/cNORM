@@ -4,8 +4,14 @@
 \alias{rangeCheck}
 \title{Check for horizontal and vertical extrapolation}
 \usage{
-rangeCheck(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
-  maxNorm = NULL, digits = 3)
+rangeCheck(
+  model,
+  minAge = NULL,
+  maxAge = NULL,
+  minNorm = NULL,
+  maxNorm = NULL,
+  digits = 3
+)
 }
 \arguments{
 \item{model}{The regression model}

@@ -4,13 +4,15 @@
 \name{mortality}
 \alias{mortality}
 \title{Mortality of infants per 1000 life birth from 1960 to 2017}
-\format{A data frame with 9547 rows and 4 variables:
+\format{
+A data frame with 9547 rows and 4 variables:
 \describe{
   \item{Country}{The name of the country}
   \item{year}{reference year of data collection}
   \item{mortality}{the mortality per 1000 life born children}
   \item{group}{grouping variable based on 'year' with a lower resolution; spans intervals of 4 years each}
-}}
+}
+}
 \source{
 \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN}
 }

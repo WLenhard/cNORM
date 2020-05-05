@@ -4,13 +4,17 @@
 \name{ppvt}
 \alias{ppvt}
 \title{Vocabulary development from 4 to 16}
-\format{A data frame with 5600 rows and 4 variables:
+\format{
+A data frame with 5600 rows and 4 variables:
 \describe{
   \item{age}{the chronological age of the child}
   \item{group}{the according age group, e.g. age group 4 consists of children age 3.5 to 4.5}
   \item{sex}{the sex of the test taker, 1=male, 2=female}
   \item{raw}{the raw score of the student, spanning values from 0 to 228}
-}}
+}
+
+A data frame with 5600 rows and 9 columns
+}
 \source{
 \url{https://www.psychometrica.de/ppvt4.html}
 }

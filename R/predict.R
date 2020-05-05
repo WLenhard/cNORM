@@ -89,8 +89,8 @@ getNormCurve <-
 #' In that case, and if you are primarily interested on fitting a complete data set,
 #' rather user the predict function of the stats:lm package on the ideal model solution.
 #' You than have to provide a prepared data frame with the according input variables.
-#' @param norm The norm score, e. g. a specific T score
-#' @param age The age value
+#' @param norm The norm score, e. g. a specific T score or a vector of scores
+#' @param age The age value or a vector of scores
 #' @param coefficients The coefficients from the regression model
 #' @param minRaw Minimum score for the results; can be used for clipping unrealistic outcomes,
 #' usually set to the lower bound of the range of values of the test (default: 0)
@@ -98,7 +98,7 @@ getNormCurve <-
 #' usually set to the upper bound of the range of values of the test
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
-#' @return the predicted raw score
+#' @return the predicted raw score or a data.frame of scores in case, lists of norm scores or age is used
 #' @examples
 #' # Prediction of single scores
 #' normData <- prepareData()
@@ -119,6 +119,9 @@ predictRaw <-
              maxRaw = Inf,
            covariate = NULL) {
 
+    score.matrix <- matrix(nrow = length(norm), ncol = length(age), dimnames = list(norm, age))
+
+    for(no in 1:nrow(score.matrix)){
     # first intercept
     coef <- coefficients
     if(!is.null(covariate)){
@@ -137,7 +140,7 @@ predictRaw <-
       } else if (nam[[1]][1] == "L") {
         j <- 1
         while (j <= nam[[1]][2]) {
-          p <- p * norm
+          p <- p * norm[[no]]
           j <- j + 1
         }
       } else if (nam[[1]][1] == "A") {
@@ -162,16 +165,15 @@ predictRaw <-
       i <- i + 1
     }
 
-    # check bounds
-    if (is.na(predict)) {
-      warning(paste0("NA value occured in predictValue with norm score ", norm, " and age ", age))
-    } else if (predict < minRaw) {
-      predict <- minRaw
-    } else if (predict > maxRaw) {
-      predict <- maxRaw
+    score.matrix[no,] <- predict
     }
 
-    return(predict)
+    if(nrow(score.matrix)==1&&ncol(score.matrix)==1)
+      return(score.matrix[1, 1])
+    else
+      return(score.matrix)
+
+
   }
 
 #' Create a norm table based on model for specific age
@@ -192,6 +194,7 @@ predictRaw <-
 #' @param step Stepping parameter with lower values indicating higher precision
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
+#' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
@@ -214,7 +217,8 @@ normTable <- function(A,
                       maxNorm = NULL,
                       minRaw = NULL,
                       maxRaw = NULL,
-                      step = NULL, covariate = NULL) {
+                      step = NULL, covariate = NULL,
+                      monotonuous = TRUE) {
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -287,6 +291,18 @@ normTable <- function(A,
       normTable$percentile <- pnorm((normTable$norm - model$scaleM) / model$scaleSD) * 100
     }
 
+    if(monotonuous){
+      minRaw <- normTable$raw[[1]]
+
+      for(y in 1:length(normTable$raw)){
+        if(normTable$raw[[y]] >= minRaw){
+          minRaw <- normTable$raw[[y]]
+        }else{
+          normTable$raw[[y]] <- NA
+        }
+      }
+    }
+
     tables[[x]] <- normTable
   }
 
@@ -315,6 +331,7 @@ normTable <- function(A,
 #' @param step Stepping parameter for the raw scores (default 1)
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
+#' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
@@ -333,7 +350,8 @@ rawTable <- function(A,
                      maxRaw = NULL,
                      minNorm = NULL,
                      maxNorm = NULL,
-                     step = 1, covariate = NULL) {
+                     step = 1, covariate = NULL,
+                     monotonuous = TRUE) {
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -404,18 +422,27 @@ rawTable <- function(A,
     k <- 1
     SUCCESS <- TRUE
     errorText <- ""
-    while (k < nrow(table)) {
-      if ((table$norm[k] >= table$norm[k + 1])) {
-        # inconsistent results -> warning
-        SUCCESS <- FALSE
-        errorText <- paste0(errorText, table$raw[k], ",")
-      }
 
-      k <- k + 1
+    if(monotonuous){
+      minScore <- table$norm[[1]]
+      minPR <- table$percentile[[1]]
+
+      for(y in 1:length(table$norm)){
+        if(table$norm[[y]] >= minScore){
+          minScore <- table$norm[[y]]
+          minPR <- table$percentile[[y]]
+        }else{
+          table$norm[[y]] <- minScore
+          table$percentile[[y]] <- minPR
+
+          SUCCESS <- FALSE
+          errorText <- paste0(errorText, table$raw[y], ",")
+        }
+      }
     }
 
     if (!SUCCESS) {
-      message(paste0("The raw table generation yielded indications of inconsistent raw score results: ", errorText, " please check! Additionally, check overall model consistency."))
+      message(paste0("The raw table generation yielded indications of inconsistent raw score results: ", errorText, ". Please check the model consistency."))
     }
 
     tables[[x]] <- table

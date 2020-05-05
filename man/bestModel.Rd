@@ -4,8 +4,17 @@
 \alias{bestModel}
 \title{Retrieve the best fitting regression model based on powers of A, L and interactions}
 \usage{
-bestModel(data, raw = NULL, R2 = NULL, k = NULL, predictors = NULL,
-  terms = 0, weights = NULL, force.in = NULL, plot = TRUE)
+bestModel(
+  data,
+  raw = NULL,
+  R2 = NULL,
+  k = NULL,
+  predictors = NULL,
+  terms = 0,
+  weights = NULL,
+  force.in = NULL,
+  plot = TRUE
+)
 }
 \arguments{
 \item{data}{The preprocessed dataset, which should include the variables 'raw'

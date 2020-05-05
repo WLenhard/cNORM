@@ -4,13 +4,17 @@
 \name{life}
 \alias{life}
 \title{Life expectancy at birth from 1960 to 2017}
-\format{A data frame with 11182 rows and 4 variables:
+\format{
+A data frame with 11182 rows and 4 variables:
 \describe{
   \item{Country}{The name of the country}
   \item{year}{reference year of data collection}
   \item{life}{the life expectancy at birth}
   \item{group}{a grouping variable based on 'year' but with a lower resolution; spans intervals of 4 years each}
-}}
+}
+
+A data frame with 11182 rows and 4 columns
+}
 \source{
 \url{https://data.worldbank.org/indicator/sp.dyn.le00.in}
 }

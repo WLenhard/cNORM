@@ -4,13 +4,19 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf,
-  covariate = NULL)
+predictRaw(
+  norm,
+  age,
+  coefficients,
+  minRaw = -Inf,
+  maxRaw = Inf,
+  covariate = NULL
+)
 }
 \arguments{
-\item{norm}{The norm score, e. g. a specific T score}
+\item{norm}{The norm score, e. g. a specific T score or a vector of scores}
 
-\item{age}{The age value}
+\item{age}{The age value or a vector of scores}
 
 \item{coefficients}{The coefficients from the regression model}
 
@@ -24,7 +30,7 @@ usually set to the upper bound of the range of values of the test}
 the specific value here.}
 }
 \value{
-the predicted raw score
+the predicted raw score or a data.frame of scores in case, lists of norm scores or age is used
 }
 \description{
 Most elementary function to predict raw score based on Location (L, T score),

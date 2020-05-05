@@ -4,8 +4,7 @@
 \alias{plotNorm}
 \title{Plot manifest and fitted norm scores}
 \usage{
-plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL,
-  type = 0)
+plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0)
 }
 \arguments{
 \item{data}{The raw data within a data.frame}

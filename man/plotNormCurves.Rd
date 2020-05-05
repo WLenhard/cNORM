@@ -4,9 +4,16 @@
 \alias{plotNormCurves}
 \title{Plot norm curves}
 \usage{
-plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = NULL,
-  maxAge = NULL, step = 0.1, minRaw = NULL, maxRaw = NULL,
-  covariate = NULL)
+plotNormCurves(
+  model,
+  normList = c(30, 40, 50, 60, 70),
+  minAge = NULL,
+  maxAge = NULL,
+  step = 0.1,
+  minRaw = NULL,
+  maxRaw = NULL,
+  covariate = NULL
+)
 }
 \arguments{
 \item{model}{The model from the bestModel function}

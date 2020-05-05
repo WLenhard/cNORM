@@ -4,8 +4,15 @@
 \alias{prepareData}
 \title{Prepare data for modeling in one step (convenience method)}
 \usage{
-prepareData(data = NULL, group = "group", raw = "raw",
-  age = "group", width = NA, scale = "T", silent = FALSE)
+prepareData(
+  data = NULL,
+  group = "group",
+  raw = "raw",
+  age = "group",
+  width = NA,
+  scale = "T",
+  silent = FALSE
+)
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable

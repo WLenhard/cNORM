@@ -4,12 +4,16 @@
 \name{elfe}
 \alias{elfe}
 \title{Sentence completion test from ELFE 1-6}
-\format{A data frame with 1400 rows and 3 variables:
+\format{
+A data frame with 1400 rows and 3 variables:
 \describe{
   \item{personID}{ID of the student}
   \item{group}{grade level, with x.5 indicating the end of the school year and x.0 indicating the middle of the school year}
   \item{raw}{the raw score of the student, spanning values from 0 to 28}
-}}
+}
+
+A data frame with 1400 rows and 3 columns
+}
 \source{
 \url{https://www.psychometrica.de/elfe2.html}
 }

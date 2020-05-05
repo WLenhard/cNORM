@@ -4,9 +4,16 @@
 \alias{rankByGroup}
 \title{Determine the norm scores of the participants in each subsample}
 \usage{
-rankByGroup(data, group = "group", raw = "raw", method = 4,
-  scale = "T", descend = FALSE, descriptives = TRUE,
-  covariate = NULL)
+rankByGroup(
+  data,
+  group = "group",
+  raw = "raw",
+  method = 4,
+  scale = "T",
+  descend = FALSE,
+  descriptives = TRUE,
+  covariate = NULL
+)
 }
 \arguments{
 \item{data}{data.frame with norm sample data}

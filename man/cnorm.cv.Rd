@@ -4,9 +4,19 @@
 \alias{cnorm.cv}
 \title{Cross validation for term selection}
 \usage{
-cnorm.cv(data, repetitions = 1, norms = TRUE, min = 1, max = 12,
-  cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA,
-  age = NA)
+cnorm.cv(
+  data,
+  repetitions = 1,
+  norms = TRUE,
+  min = 1,
+  max = 12,
+  cv = "full",
+  pCutoff = NA,
+  width = NA,
+  raw = NA,
+  group = NA,
+  age = NA
+)
 }
 \arguments{
 \item{data}{data frame of norm sample with ranking, powers and interaction of L and A}

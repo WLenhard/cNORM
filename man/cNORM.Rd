@@ -3,7 +3,6 @@
 \docType{package}
 \name{cNORM}
 \alias{cNORM}
-\alias{cNORM-package}
 \title{cNORM: Continuous Norming}
 \description{
 The package provides methods for generating regression based continuous standard

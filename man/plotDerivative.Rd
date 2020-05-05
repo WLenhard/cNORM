@@ -4,8 +4,16 @@
 \alias{plotDerivative}
 \title{Plot first order derivative of regression model}
 \usage{
-plotDerivative(model, minAge = NULL, maxAge = NULL, minNorm = NULL,
-  maxNorm = NULL, stepAge = 0.2, stepNorm = 1, order = 1)
+plotDerivative(
+  model,
+  minAge = NULL,
+  maxAge = NULL,
+  minNorm = NULL,
+  maxNorm = NULL,
+  stepAge = 0.2,
+  stepNorm = 1,
+  order = 1
+)
 }
 \arguments{
 \item{model}{The model from the bestModel function}

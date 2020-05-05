@@ -5,8 +5,14 @@
 \title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
-computePowers(data, k = 4, norm = NULL, age = NULL,
-  covariate = NULL, silent = FALSE)
+computePowers(
+  data,
+  k = 4,
+  norm = NULL,
+  age = NULL,
+  covariate = NULL,
+  silent = FALSE
+)
 }
 \arguments{
 \item{data}{data.frame with the norm data}

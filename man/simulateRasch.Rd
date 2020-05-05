@@ -4,9 +4,17 @@
 \alias{simulateRasch}
 \title{Simulate raw test scores based on Rasch model}
 \usage{
-simulateRasch(data = NULL, n = 100, minAge = 1, maxAge = 7,
-  items.n = 21, items.m = 0, items.sd = 1, Theta = "random",
-  width = 1)
+simulateRasch(
+  data = NULL,
+  n = 100,
+  minAge = 1,
+  maxAge = 7,
+  items.n = 21,
+  items.m = 0,
+  items.sd = 1,
+  Theta = "random",
+  width = 1
+)
 }
 \arguments{
 \item{data}{data.frame from previous simulations for recomputation (overrides n, minAge, maxAge)}
