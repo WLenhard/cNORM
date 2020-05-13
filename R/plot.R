@@ -502,21 +502,33 @@ plotPercentiles <- function(data,
       sep = " + ", collapse = " + "
     )
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
+    if(attr(data, "descend")){
     percentile.actual <- do.call(
       data.frame,
       aggregate(data[, raw],
         list(data[, group]),
         FUN = function(x) quantile(x,
-            probs = percentiles,
+            probs = 1 - percentiles,
             type = type,
             na.rm = TRUE
           )
       )
     )
-  }
+    }else{
+      percentile.actual <- do.call(
+        data.frame,
+        aggregate(data[, raw],
+                  list(data[, group]),
+                  FUN = function(x) quantile(x,
+                                             probs = percentiles,
+                                             type = type,
+                                             na.rm = TRUE
+                  )
+        )
+      )
 
-  if(model$descend){
-    NAMES <- rev(NAMES)
+    }
+
   }
 
   # compute percentile table

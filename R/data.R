@@ -170,3 +170,39 @@
 #' plotPercentileSeries(data.mortality, model.mortality, end=9, percentiles = c(.1, .25, .5, .75, .9))
 #' }
 "mortality"
+
+#' Simulated dataset (Educational and Psychological Measurement, EPM)
+#'
+#' A simulated dataset, based on the the simRasch function. The data were generated on the basis of a 1PL IRT model with
+#' 50 items with a normal distribution and a mean difficulty of m = 0 and sd = 1 and 1400 cases. The age trajectory features a curve
+#' linear increase wit a slight scissor effect. The sample consists of seven age groups with 200 cases each and it includes
+#' information on the latent ability, the age specific latent ability and norm scores based on conventional norming with
+#' differing granularity of the age brackets.
+#'
+#' @format A data frame with 1400 rows and 10 variables:
+#' \describe{
+#'   \item{raw}{the raw score}
+#'   \item{ageSpecificZ}{the age specific latent ability, z standardized}
+#'   \item{latentTrait}{the overall latent trait with respect to the population model}
+#'   \item{age}{the chronological age}
+#'   \item{halfYearGroup}{grouping variable based on six month age brackets}
+#'   \item{spcnT}{Resulting norm score of cNORM, based on the automatic model selection}
+#'   \item{T1}{conventional T scores on the basis of one month age brackets}
+#'   \item{T3}{conventional T scores on the basis of three month age brackets}
+#'   \item{T6}{conventional T scores on the basis of six month age brackets}
+#'   \item{T12}{conventional T scores on the basis of one year age brackets}
+#' }
+#' @source \url{https://osf.io/ntydc/}
+#' @references Lenhard, W. & Lenhard, W. (in press). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement.
+#' @docType data
+#' @keywords datasets
+#' @concept simulated data 1PL IRT
+#' @name epm
+#' @examples
+#' \dontrun{
+#' # Example with continuous age variable
+#' data.epm <- prepareData(epm, raw=epm$raw, group=epm$halfYearGroup, age=epm$age)
+#' model.epm <- bestModel(data.epm)
+#' }
+#' @format A data frame with 1400 rows and 10 columns
+"epm"
