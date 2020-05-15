@@ -11,6 +11,7 @@ prepareData(
   age = "group",
   width = NA,
   scale = "T",
+  descend = FALSE,
   silent = FALSE
 )
 }
@@ -33,6 +34,11 @@ observed raw scores, otherwise, ranking is done by group (default)}
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
 be provided f. e. c(10, 3) for Wechsler scale index point}
+
+\item{descend}{ranking order (default descent = FALSE): inverses the
+ranking order with higher raw scores getting lower norm scores; relevant
+for example when norming error scores, where lower scores mean higher
+performance}
 
 \item{silent}{set to TRUE to suppress messages}
 }

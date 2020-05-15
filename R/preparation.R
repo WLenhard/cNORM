@@ -42,6 +42,10 @@
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index point
+#' @param descend ranking order (default descent = FALSE): inverses the
+#' ranking order with higher raw scores getting lower norm scores; relevant
+#' for example when norming error scores, where lower scores mean higher
+#' performance
 #' @param silent set to TRUE to suppress messages
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
@@ -120,9 +124,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent, descend = descend)
+    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent)
   } else {
-    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent, descend = descend)
+    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent)
   }
 
   return(normData)
