@@ -502,7 +502,7 @@ plotPercentiles <- function(data,
       sep = " + ", collapse = " + "
     )
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
-    if(attr(data, "descend")){
+    if(!is.null(attr(data, "descend"))&&attr(data, "descend")){
     percentile.actual <- do.call(
       data.frame,
       aggregate(data[, raw],

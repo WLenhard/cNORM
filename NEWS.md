@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.3 (in progress)
-Date: 2020.05.13
+Date: 2020.05.15
 
 Changes:
 
@@ -18,6 +18,7 @@ Changes:
 *    predictRaw can now return matrices for list of norm x age
 *    new dataset added on the basis of the EPM paper
 *    Bug in plotPercentiles fixed for datasets with decending ranking order
+*    'descend' parameter added to prepareData
 
 
 

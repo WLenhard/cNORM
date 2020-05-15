@@ -57,7 +57,7 @@
 #' data.elfe2 <- prepareData(data = elfe, group = FALSE)
 #' m <- bestModel(data.elfe2)
 #' @export
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T", silent = FALSE) {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, scale = "T", descend = FALSE, silent = FALSE) {
   if (is.null(data)) {
     normData <- cNORM::elfe
   } else {
@@ -114,15 +114,15 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
   # ranking and powers
   if (is.na(width)) {
-    normData <- rankByGroup(normData, group = group, raw = raw, scale = scale)
+    normData <- rankByGroup(normData, group = group, raw = raw, scale = scale, descend = descend)
   } else {
-    normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width, scale = scale)
+    normData <- rankBySlidingWindow(normData, group = group, raw = raw, width = width, scale = scale, descend = descend)
   }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent)
+    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent, descend = descend)
   } else {
-    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent)
+    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent, descend = descend)
   }
 
   return(normData)
