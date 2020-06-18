@@ -405,7 +405,7 @@ rankByGroup <-
     attr(d, "width") <- NA
 
     if (descriptives && min(d$n) < 30) {
-      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable."))
+      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modelling, it might help to reduce the 'k' parameter."))
     }
 
     return(d)
