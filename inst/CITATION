@@ -36,6 +36,20 @@ citEntry(entry = "Article",
   paste("Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279")
 )
 
+citEntry(entry = "Article",
+  title        = "Improvement of Norm Score Quality via Regression-Based Continuous Norming",
+  author       = personList(as.person("Wolfgang Lenhard"), as.person("Alexandra Lenhard")),
+  journal      = "Educational and Psychological Measurement",
+  year         = "2020",
+  volume       = "Online First",
+  number       = "",
+  pages        = "1-33",
+  url          = "https://journals.sagepub.com/doi/full/10.1177/0013164420928457}",
+
+  textVersion  =
+  paste("Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457")
+)
+
 citEntry(entry = "Manual",
   title        = "Continuous Norming (cNORM)",
   author       = personList(as.person("Alexandra Lenhard"),
