@@ -1,11 +1,9 @@
 ## Resubmission
 This is a resubmission. In this version I have:
 
-* deletet the DOI links, since there was a display problem with the \doi{} tag
-on github and instead include the dois as regular text in the references at the bottom
-of the page
+* added feature updates, new datasets and corrected bugs
 * checked spelling
-* repeated all tests on R CMD Check, winbuilder (dev and release), rhub
+* repeated all tests on R CMD Check, rhub, Travis (Win, Linux, MacOS X)
 
 ## Test environments
 * local WIN10, 64Bit install, R 3.6.1
@@ -17,9 +15,8 @@ of the page
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTES on winbuilder and R CMD Check under Windows.
-
-There were no ERRORs or WARNINGs, but NOTES on misspellings in DESCRIPTION through devtools::check_rhub() on Fedora Linux. These are all false positives.
+There were no ERRORs, WARNINGs or NOTES.
+There were no ERRORs or WARNINGs, but NOTES on potentially outdated links in data descriptions on Ubuntu Linux. These are all false positives.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
