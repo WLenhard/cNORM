@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.3 (in progress)
-Date: 2020.05.15
+Date: 2020.06.18
 
 Changes:
 
@@ -19,7 +19,7 @@ Changes:
 *    new dataset added on the basis of the EPM paper
 *    Bug in plotPercentiles fixed for datasets with decending ranking order
 *    'descend' parameter added to prepareData
-
+*    rawTable can now return matrices
 
 
 ### Version in 1.2.2 (fifth release)
