@@ -193,7 +193,7 @@
 #'   \item{T12}{conventional T scores on the basis of one year age brackets}
 #' }
 #' @source \url{https://osf.io/ntydc/}
-#' @references Lenhard, W. & Lenhard, W. (in press). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement.
+#' @references Lenhard, W. & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement. https://doi.org/10.1177/0013164420928457
 #' @docType data
 #' @keywords datasets
 #' @concept simulated data 1PL IRT

@@ -44,10 +44,10 @@ citEntry(entry = "Article",
   volume       = "Online First",
   number       = "",
   pages        = "1-33",
-  url          = "https://journals.sagepub.com/doi/full/10.1177/0013164420928457}",
+  url          = "https://journals.sagepub.com/doi/full/10.1177/0013164420928457",
 
   textVersion  =
-  paste("Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457")
+  paste("Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, Online First, 1-33. https://doi.org/10.1177/0013164420928457")
 )
 
 citEntry(entry = "Manual",
