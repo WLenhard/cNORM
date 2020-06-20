@@ -207,9 +207,6 @@ shinyServer(function(input, output, session) {
 
   # Calculates prepared data by pressing action button
   preparedData <- eventReactive(input$DoDataPreparation, {
-
-
-
     # Data preperation for data analysis with cNORM
     # Returns prepared data, which can be used for calculating best model
     preparedData <- reactive({
@@ -248,8 +245,30 @@ shinyServer(function(input, output, session) {
     return(preparedData())
   })
 
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste(input$dataset, "data.RData", sep = "")
+    },
+    content = function(file) {
+      data.cnorm <- prepareData()
+      attr(data.cnorm, "descend") <- chosenDescend()
 
-  #
+      save(data.cnorm, file = file)
+    }
+  )
+
+  output$downloadModel <- downloadHandler(
+    filename = function() {
+      paste(input$dataset, "model.RData", sep = "")
+    },
+    content = function(file) {
+      model.cnorm <- bestModel()
+      save(model.cnorm, file = file)
+    }
+  )
+
+
+
   output$NumberOfTerms <- renderUI({
 
     k <- as.numeric(chosenNumberOfPowers())
@@ -284,7 +303,8 @@ shinyServer(function(input, output, session) {
                                            raw = chosenRaw(),
                                            k = chosenNumberOfPowers(),
                                            predictors = NULL,
-                                           terms = chosenNumberOfTerms())
+                                           terms = chosenNumberOfTerms(),
+                                           plot=FALSE)
     }
     else{
       currentBestModel <- cNORM::bestModel(data = preparedData(),
@@ -292,7 +312,8 @@ shinyServer(function(input, output, session) {
                                            k = chosenNumberOfPowers(),
                                            predictors = NULL,
                                            R2 = chosenCoeffOfDet(),
-                                           terms = 0)
+                                           terms = 0,
+                                           plot=FALSE)
     }
 
 
@@ -301,23 +322,12 @@ shinyServer(function(input, output, session) {
   })
 
   modelDerivatives <- eventReactive(input$CalcBestModel, {
-    MIN_AGE <- min((currentFile())[chosenGrouping()])
-    MAX_AGE <- max((currentFile())[chosenGrouping()])
-
-    cNORM::plotDerivative(bestModel(),
-                          minAge = MIN_AGE,
-                          maxAge = MAX_AGE)
+    cNORM::plotDerivative(bestModel())
 
   })
 
 
   modelDensity <- reactive({
-
-    MIN_RAW <- bestModel()$minRaw
-    MAX_RAW <- bestModel()$maxRaw
-    MIN_NORM <- bestModel()$minL1
-    MAX_NORM <- bestModel()$maxL1
-
     if(input$densities == ""){
       cNORM::plotDensity(bestModel())
     }
@@ -340,8 +350,27 @@ shinyServer(function(input, output, session) {
 
 
   wlPlot <- eventReactive(changeObject(), {
-
     cNORM::plotSubset(bestModel(), type = chosenTypeOfPlotSubset())
+  })
+
+  # Generates and prints norm curves
+  output$NormCurves <- renderPlot({
+    return(normCurves())
+  })
+
+  # Generates and plots percentile curves
+  output$modelPlot <- renderPlot({
+
+    MIN_AGE <- min((currentFile())[chosenGrouping()])
+    MAX_AGE <- max((currentFile())[chosenGrouping()])
+
+    # data <- currentFile()
+    # attr(data, "descend") <- chosenDescend()
+
+    cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
+                             group = chosenGrouping(),
+                             minAge = MIN_AGE,
+                             maxAge = MAX_AGE)
 
   })
 
@@ -529,12 +558,13 @@ shinyServer(function(input, output, session) {
 
     MIN_AGE <- min((currentFile())[chosenGrouping()])
     MAX_AGE <- max((currentFile())[chosenGrouping()])
-
+    # data <- currentFile()
+    # attr(data, "descend") <- chosenDescend()
 
     percentileList <- chosenPercentilesForPercentiles()
 
     if(is.null(percentileList)){
-      cNORM::plotPercentiles(currentFile(), bestModel(), raw = chosenRaw(),
+      cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
                              group = chosenGrouping(),
                              minAge = MIN_AGE,
                              maxAge = MAX_AGE)
@@ -542,7 +572,7 @@ shinyServer(function(input, output, session) {
     else{
       percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForPercentiles(), "\\, |\\,| ")))/100
 
-      cNORM::plotPercentiles(currentFile(), bestModel(), raw = chosenRaw(),
+      cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
                              group = chosenGrouping(),
                              minAge = MIN_AGE,
                              maxAge = MAX_AGE,
@@ -727,7 +757,7 @@ shinyServer(function(input, output, session) {
   # Generates and plots modelled against actual data values
   output$PlotValues <- renderPlot({
 
-    cNORM::plotRaw(currentFile(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
+    cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
   })
 
   # Generates and plots contour plot of first derivation

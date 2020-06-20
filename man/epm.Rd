@@ -42,7 +42,7 @@ model.epm <- bestModel(data.epm)
 }
 }
 \references{
-Lenhard, W. & Lenhard, W. (in press). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement.
+Lenhard, W. & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement. https://doi.org/10.1177/0013164420928457
 }
 \concept{simulated data 1PL IRT}
 \keyword{datasets}

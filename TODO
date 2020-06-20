@@ -1,3 +1,8 @@
+TODO
+
+- fix descending bug in Shiny plotPercentiles
+
+
 planned feature enhancements
 
 - add pretty print option to normTable and rawTable to collapse intervals
