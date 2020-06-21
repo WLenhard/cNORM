@@ -97,9 +97,8 @@ shinyUI(fluidPage(
       sidebarLayout(
         sidebarPanel(
           tags$h3("Model Data"),
-          tags$p("Here, you can calculate a regression model that models the original data as close as possible, while smoothing the curves and eliminating noise. After hitting the button, the regression function for a possible model is shown. The plot displays the information criteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. To display plots of observed vs. fitted raw and norm scores, please use the plotting options on the next tab. There, you can check the percentile curves as well and inspect the curves of the different plausible models."),
-          tags$br(), tags$b("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. In case of k > 4, the calculation will take a few seconds."),
-          tags$br(), tags$br(), tags$b("HINT: Look out for an 'elbow' in the chart and try that number of terms for your model. Afterwards, plot the percentiles to check the curves."),
+          tags$p("Here, you can calculate a regression model that models the original data as close as possible, while smoothing the curves and eliminating noise. The plots display the percentile curves and the information criteria for the different models, beginning with the model with one terms up to the maximum. A high R2 with as few terms as possible is preferable."),
+          tags$br(), tags$b("HINT: Please ensure that the data is loaded and prepared, before starting the modeling. In case of k > 4, the calculation will take a few seconds. Look out for an 'elbow' in the information function chart and try that number of terms for your model. Avoid intersecting percentile curves."),
           tags$br(), tags$br(),
 
           actionButton(
@@ -125,14 +124,15 @@ shinyUI(fluidPage(
           verbatimTextOutput("BestModel3"),
           verbatimTextOutput("BestModel4"),
           verbatimTextOutput("BestModel5"),
-          verbatimTextOutput("BestModel6"),
-          verbatimTextOutput("BestModel7"),
+          #verbatimTextOutput("BestModel6"),
+          #verbatimTextOutput("BestModel7"),
           tags$br(),
           # tags$h4("Information Function, Subset Specifics and Fitted Values"),
           # tags$p("The plot shows the informationcriteria for the different models, beginning with the model with one terms up to the maximum. The model should have a high R2 with as few terms as possible. The information of the plot is again displayed as a table below the chart. On the bottom of the page, you can see, how well the observed data are fitted by the model."),
           # plotOutput("PlotPercentiles", width = "100%", height = "600px"),
           withSpinner(plotOutput("modelPlot", width = "100%", height = "600px"), type = 5),
           tags$br(),
+
           withSpinner(plotOutput("PlotWL", width = "100%", height = "600px"), type = 5),
           tags$br(),
           withSpinner(dataTableOutput("PrintSubset"), type = 5),
