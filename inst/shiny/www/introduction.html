@@ -14,22 +14,32 @@
 
 <br><br>
 <h3>1. Preparation</h3>
-<p>First, please load your data or use the example datasets. Your data should include a variable for the raw scores and a grouping variable (e.g. grade or age groups). Additionally, you can use a continuous variable like the exact chronological age. The data is than ranked per group, and a normal score is assigned through normal rank transformation. Afterwards, powers of the explanatory variable (e.g. age or group) and of the normal score is built up to power 4, as well as all linear interactions. Please specify the grouping variable and the variable with the raw scores. If you do not have a continuous explanatory variable besides the grouping variable, please use it as well for the age.</p>
+<p>First, please load your data or use the example datasets. Your data should include a variable for the raw scores and a grouping variable (e.g. grade or age groups). Additionally, you can use a continuous variable like the exact chronological age. The data is than ranked per group, and a normal score is assigned through normal rank transformation. Afterwards, powers of the explanatory variable (e.g. age or group) and of the normal score are built up to the power parameter <i>k</i> (default 4), as well as all linear interactions.</p>
 <p>Additional options: You can set the power parameter, the type of norm scale and the algorithm for bindings in the raw data.</p>
 
 <br><br>
 <h3>2. Modeling and Validation</h3>
-<p>In the data modeling, the most predictive terms from the list of powers and interactions are chosen. Per default, an R<sup>2</sup> = .99 is used as a cutoff value. This means, in the modeling, we try to find a regression formula that captures almost all of the variance in the data with as few terms as possible. There is however no definite value to determine the best model and you can as well specify a number of terms. Usually, with 4 terms, a good fit is retrieved with an extremely simple model. In case of inconsistencies in the model, please increase the number of terms. In this step, you as well get an overview of the fit of the different models (R<sup>2</sup> plotted against information criteria). You can use that plot for a model selection. The same data are additionally printed as a table at the bottom of the page.</p>
+<img src="informationFunction.png" align=right><p>In the data modeling, the most predictive terms from the list of powers and interactions are chosen. Per default, an R<sup>2</sup> = .99 is used as a cutoff value. This means, in the modeling, we try to find a regression formula that captures almost all of the variance in the data with as few terms as possible. There is however no definite value to determine the best model and you can as well specify a number of terms. Usually, with 4 terms, a good fit is retrieved with an extremely simple model. In case of inconsistencies in the model, please vary the number of terms and in case of overfit, reduce <i>k</i>. In this step, you as well get an overview of the fit of the different models (R<sup>2</sup> plotted against information criteria). You can use that plot for a model selection. The same data are additionally printed as a table at the bottom of the page.</p>
 
 <br><br>
 <h3>3. Visualization</h3>
-<p>You can now examine the percentiles of the observed data and compare them with the predicted data, check how well the raw data are fitted and how well observed norm scores correspond to the predicted norm scores. Please look out for intersection percentile curves in the plots, because this indicate the boundaries of the model and possible violations. In the derivative plot, the first order derivation of the model is plotted. Negative values (red areas) indicate possible problems and should be checked.</p>
+<p>You can now examine the percentiles of the observed data and compare them with the predicted data, check how well the raw data are fitted and how well observed norm scores correspond to the predicted norm scores. Please look out for intersecting percentile curves in the plots, because these indicate possible assumption violations. The series plot gives you an overview on how the percentile curves change with the number of terms in the model.</p>
 
 <br><br>
 <h3>4. Generating Norm Tables</h3>
-<p>The last section can be used to retrieve normal scores for specific raw values at a specific age, or to generate norm tables. These tables can be exported for further processing.</p>
+<img src="plotNorm.png" align=right><p>The last section can be used to retrieve normal scores for specific raw values at a specific age, or to generate norm tables. These tables can be exported for further processing.</p>
 
 
 <br><br>
-<p>This graphical user interface does not offer all options of the package. For specific cases, please use the command line for more specific parameter settings. If you use the user interface via cNORM.GUI() on your computer, all data stays within your own environment. If you are using the online-version, please consult the <a href="https://docs.rstudio.com/shinyapps.io/security-and-compliance.html" target="_blank">Shinyapps.io User Guide</a> for information on security and compliance of their service. cNORM does not store any data uploaded through the web interface.</p><br><br><br>
+<b>General remarks, privacy and references</b><br>
+<p>This graphical user interface does not offer all options of the package. For specific cases, please use the command line for more specific parameter settings. If you use the user interface via cNORM.GUI() on your computer, all data stays within your own environment. If you are using the online-version, please consult the <a href="https://docs.rstudio.com/shinyapps.io/security-and-compliance.html" target="_blank">Shinyapps.io User Guide</a> for information on security and compliance of their service. cNORM does not store any data uploaded through the web interface.</p><br>
+
+<ul>
+  <li><a href="https://cran.r-project.org/web/packages/cNORM/" target="_blank">R-Package cNORM (CRAN)</a></li>
+  <li><a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">cNORM - Generating Continuous Test Norms (Tutorial)</a></li>
+  <li>Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2018). A continuous solution to the norming problem. <i>Assessment, 25</i>,  112-125. doi: 10.1177/1073191116656437</li>
+  <li>Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. <i>PLoS ONE, 14</i>(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279</li>
+  <li>Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. <i>Educational and Psychological Measurement(Online First)</i>, 1-33. https://doi.org/10.1177/0013164420928457</li>
+</ul>
+<br><br>
 </body></html>
