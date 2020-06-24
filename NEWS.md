@@ -4,12 +4,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.4 (in progress)
-Date: 2020.06.20
+Date: 2020.06.24
 
 
 Changes:
 
-*    Improvements in Shiny GUI: download buttons for data and model
+*    Improvements in Shiny GUI: download buttons for data and model, introduction page
 *    Descending order bugs corrected in Shiny GUI
 
 
