@@ -184,7 +184,9 @@ predictRaw <-
 #' of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
 #' the population. Please be careful when extrapolating vertically (at the lower and
 #' upper end of the age specific distribution). Depending on the size of your standardization
-#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
+#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
+#' (CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+#' for regression to the mean.
 #' @param A the age as single value or a vector of age values
 #' @param model The regression model
 #' @param minNorm The lower bound of the norm score range
@@ -195,6 +197,8 @@ predictRaw <-
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
+#' @param CI confidence coefficent, ranging from 0 to 1 (default = .9 equaling a confidence coefficent of 90%)
+#' @param reliability reliability coefficient, ranging between 0 and 1
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
@@ -218,7 +222,9 @@ normTable <- function(A,
                       minRaw = NULL,
                       maxRaw = NULL,
                       step = NULL, covariate = NULL,
-                      monotonuous = TRUE) {
+                      monotonuous = TRUE,
+                      CI = .9,
+                      reliability = NULL) {
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -233,6 +239,20 @@ normTable <- function(A,
 
   if (is.null(model)){
     stop("No model specified")
+  }
+
+  if (CI > .9999 || CI < .0001){
+    stop("Confidence coefficient (CI) out of range. Please specify value between 0 and 1.")
+  }
+
+  rel <- FALSE
+  if(!is.null(reliability)){
+    if(reliability > .9999 || reliability < .0001){
+    stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
+  }else{
+      se <- qnorm(1 - ((1 - CI)/2)) * sqrt(reliability * (1 - reliability));
+      rel <- TRUE
+  }
   }
 
   if (is.null(minNorm)||is.na(minNorm)){
@@ -303,6 +323,15 @@ normTable <- function(A,
       }
     }
 
+    if(rel){
+      zPredicted <- reliability * (normTable$norm - model$scaleM)/model$scaleSD
+      normTable$lowerCI <- (zPredicted - se) * model$scaleSD + model$scaleM
+      normTable$upperCI <- (zPredicted + se) * model$scaleSD + model$scaleM
+      normTable$lowerCI_PR <- pnorm(zPredicted - se) * 100
+      normTable$upperCI_PR <- pnorm(zPredicted + se) * 100
+
+    }
+
     tables[[x]] <- normTable
   }
 
@@ -321,7 +350,9 @@ normTable <- function(A,
 #' A table with raw scores and the according norm scores for a specific age based on the regression
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
-#' and smaller stepping, this function becomes computational intensive.
+#' and smaller stepping, this function becomes computational intensive. In case a confidence coefficient
+#' (CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+#' for regression to the mean.
 #' @param A the age, either single value or vector with age values
 #' @param model The regression model
 #' @param minRaw The lower bound of the raw score range
@@ -332,6 +363,8 @@ normTable <- function(A,
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
+#' @param CI confidence coefficent, ranging from 0 to 1 (default = .9 equaling a confidence coefficent of 90%)
+#' @param reliability reliability coefficient, ranging between 0 and 1
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
@@ -343,6 +376,9 @@ normTable <- function(A,
 #'
 #' # generate several raw tables
 #' table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28)
+#'
+#' # additionally compute confidence intervalls
+#' table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
 #' @export
 rawTable <- function(A,
                      model,
@@ -351,7 +387,9 @@ rawTable <- function(A,
                      minNorm = NULL,
                      maxNorm = NULL,
                      step = 1, covariate = NULL,
-                     monotonuous = TRUE) {
+                     monotonuous = TRUE,
+                     CI = .9,
+                     reliability = NULL) {
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -387,6 +425,17 @@ rawTable <- function(A,
   if (is.null(maxRaw)||is.na(maxRaw)) {
     maxRaw <- model$maxRaw
   }
+
+  rel <- FALSE
+  if(!is.null(reliability)){
+    if(reliability > .9999 || reliability < .0001){
+      stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
+    }else{
+      se <- qnorm(1 - ((1 - CI)/2)) * sqrt(reliability * (1 - reliability));
+      rel <- TRUE
+    }
+  }
+
   tables <- vector("list", length(A))
 
   for (x in 1:length(A)) {
@@ -443,6 +492,15 @@ rawTable <- function(A,
 
     if (!SUCCESS) {
       message(paste0("The raw table generation yielded indications of inconsistent raw score results: ", errorText, ". Please check the model consistency."))
+    }
+
+    if(rel){
+      zPredicted <- reliability * (table$norm - model$scaleM)/model$scaleSD
+      table$lowerCI <- (zPredicted - se) * model$scaleSD + model$scaleM
+      table$upperCI <- (zPredicted + se) * model$scaleSD + model$scaleM
+      table$lowerCI_PR <- pnorm(zPredicted - se) * 100
+      table$upperCI_PR <- pnorm(zPredicted + se) * 100
+
     }
 
     tables[[x]] <- table

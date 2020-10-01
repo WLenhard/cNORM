@@ -11,6 +11,7 @@ Changes:
 
 *    Improvements in Shiny GUI: download buttons for data and model, introduction page
 *    Descending order bugs corrected in Shiny GUI
+*    Option to automatically compute confidence intervalls in rawTable() and normTable() via CI and reliability parameters
 
 
 
