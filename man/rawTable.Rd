@@ -13,7 +13,9 @@ rawTable(
   maxNorm = NULL,
   step = 1,
   covariate = NULL,
-  monotonuous = TRUE
+  monotonuous = TRUE,
+  CI = 0.9,
+  reliability = NULL
 )
 }
 \arguments{
@@ -35,6 +37,10 @@ rawTable(
 the specific value here.}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
+
+\item{CI}{confidence coefficent, ranging from 0 to 1, default .9}
+
+\item{reliability}{coefficient, ranging between  0 to 1}
 }
 \value{
 either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
@@ -45,7 +51,9 @@ This function is comparable to 'normTable', despite it reverses the assignment:
 A table with raw scores and the according norm scores for a specific age based on the regression
 model is generated. This way, the inverse function of the regression model is solved numerically with
 brute force. Please specify the range of raw values, you want to cover. With higher precision
-and smaller stepping, this function becomes computational intensive.
+and smaller stepping, this function becomes computational intensive. In case a confidence coefficient
+(CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+for regression to the mean.
 }
 \examples{
 normData <- prepareData()
@@ -55,6 +63,9 @@ table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)
 
 # generate several raw tables
 table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28)
+
+# additionally compute confidence intervalls
+table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
 }
 \seealso{
 normTable

@@ -13,7 +13,9 @@ normTable(
   maxRaw = NULL,
   step = NULL,
   covariate = NULL,
-  monotonuous = TRUE
+  monotonuous = TRUE,
+  CI = 0.9,
+  reliability = NULL
 )
 }
 \arguments{
@@ -35,6 +37,10 @@ normTable(
 the specific value here.}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
+
+\item{CI}{confidence coefficent, ranging from 0 to 1, default .9}
+
+\item{reliability}{coefficient, ranging between  0 to 1}
 }
 \value{
 either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
@@ -47,7 +53,9 @@ range of norm scores, you want to cover. A T value of 25 corresponds to a percen
 of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
 the population. Please be careful when extrapolating vertically (at the lower and
 upper end of the age specific distribution). Depending on the size of your standardization
-sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
+sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
+(CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+for regression to the mean.
 }
 \examples{
 normData <- prepareData()
