@@ -775,6 +775,8 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   r2.test <- rep(0, max)
   delta <- rep(NA, max)
   crossfit <- rep(0, max)
+  norm.rmse <- rep(0, max)
+  norm.rmse.min <- rep(0, max)
 
   # draw test and training data several times ('repetitions' parameter), model data and store MSE
   for (a in 1:repetitions) {
@@ -854,11 +856,13 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
 
         r2.train[i] <- r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs")^2)
         r2.test[i] <- r2.test[i] + (cor(test$normValue, test$T, use = "pairwise.complete.obs")^2)
-      }
+        norm.rmse[i] <- norm.rmse[i] + sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
+        }
     }
   }
 
   # now for the complete data the same logic
+  norm.rmse.min[1] <- NA
   complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
   for (i in 1:max) {
     variables <- names(coef(complete, id = i))
@@ -876,9 +880,15 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
     if (norms) {
       r2.train[i] <- r2.train[i] / repetitions
       r2.test[i] <- r2.test[i] / repetitions
+      norm.rmse[i] <- norm.rmse[i] / repetitions
 
       if (i > min) {
         delta[i] <- r2.test[i] - r2.test[i - 1]
+        if(norm.rmse[i]>0){
+          norm.rmse.min[i] <- norm.rmse[i] - norm.rmse[i - 1]
+        }else{
+          norm.rmse.min[i] <- NA
+        }
       }
     }
 
@@ -888,6 +898,11 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
       val.errors[i] <- NA
       train.errors[i] <- NA
       complete.errors[i] <- NA
+      norm.rmse[i] <- NA
+    }
+
+    if (i <= min) {
+      norm.rmse.min[i] <- NA
     }
   }
 
@@ -896,7 +911,7 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   } else {
     par(mfrow = c(1, 1))
   }
-  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test)
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test, norm.rmse = norm.rmse)
 
   # plot RMSE
   plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim = c(min(train.errors, na.rm = TRUE), max(val.errors, na.rm = TRUE)))
@@ -926,12 +941,17 @@ cnorm.cv <- function(data, repetitions = 1, norms = TRUE, min = 1, max = 12, cv 
   FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
   suggest <- FirstNegative - 1
 
+  FirstNegativeNorm <- which(norm.rmse.min >= 0)[1]
+  suggestNorm <- FirstNegativeNorm - 1
+
+
   cat("\n")
   cat("The simulation yielded the following optimal settings:\n")
   cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
   cat(paste0("\nNumber of terms with best raw validation RMSE: ", which.min(tab$RMSE.raw.test)))
   cat(paste0("\nNumber of terms with best norm validation R2: ", which.max(r2.test), "\n"))
   cat(paste0("The first model with a negative Delta R2 in norm score cross validation is model ", FirstNegative, "\n"))
+  #cat(paste0("The first local minimum in norm score RMSE in cross validation is model ", FirstNegativeNorm, "\n"))
   cat(paste0("Thus, choosing a model with ", suggest, " terms might be the best choice. For this, use the parameter 'terms = ", suggest, "' in the bestModel-function.\n"))
   cat("\nPlease investigate the plots and the summary table, as the results might vary within a narrow range.")
   cat("\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress.")
