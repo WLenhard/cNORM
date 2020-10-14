@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 1.2.4 (in progress)
-Date: 2020.06.24
+Date: 2020.10.14
 
 
 Changes:
@@ -12,7 +12,9 @@ Changes:
 *    Improvements in Shiny GUI: download buttons for data and model, introduction page
 *    Descending order bugs corrected in Shiny GUI
 *    Option to automatically compute confidence intervalls in rawTable() and normTable() via CI and reliability parameters
-*    cnorm.cv now calculates RMSE for norm scores
+*    repeated cross validation cnorm.cv now calculates RMSE for norm scores
+*    repeated cross validation cnorm.cv can now use a prespecified formula
+*    data cleaning in output of cnorm.cv
 
 
 

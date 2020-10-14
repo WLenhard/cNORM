@@ -6,6 +6,7 @@
 \usage{
 cnorm.cv(
   data,
+  formula = NULL,
   repetitions = 1,
   norms = TRUE,
   min = 1,
@@ -20,6 +21,8 @@ cnorm.cv(
 }
 \arguments{
 \item{data}{data frame of norm sample with ranking, powers and interaction of L and A}
+
+\item{formula}{prespecified formula, e. g. from an existing regression model; min and max functions will be ignored}
 
 \item{repetitions}{number of repetitions for cross validation}
 
@@ -86,6 +89,13 @@ avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
 }
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
-data <- prepareData()
-cnorm.cv(data, 3, max = 7, norms = FALSE)
+data <- prepareData(elfe)
+cnorm.cv(data, min = 3, max = 7, norms = FALSE)
+
+# cross validate prespecified formula
+# here, we will use the formula from a model to cross validate it and to retrieve norm RMSE
+# own regression functions can of course be used as well
+# data <- prepareData(elfe)
+# model <- bestModel(data)
+# cnorm.cv(data, formula = model$terms, repetitions = 5)
 }
