@@ -266,8 +266,8 @@ shinyUI(fluidPage(
       "Prediction",
       tabPanel("Norm value prediction", sidebarLayout(sidebarPanel(tags$h3("Prediction of singel norm values"), uiOutput("InputNormValue")), mainPanel(verbatimTextOutput("NormValue")))),
       tabPanel("Raw value prediction", sidebarLayout(sidebarPanel(tags$h3("Prediction of single raw values"), uiOutput("InputRawValue")), mainPanel(verbatimTextOutput("RawValue")))),
-      tabPanel("Norm table", sidebarLayout(sidebarPanel(tags$h3("Generating norm tables"), uiOutput("InputNormTable")), mainPanel(dataTableOutput("NormTable")))),
-      tabPanel("Raw table", sidebarLayout(sidebarPanel(tags$h3("Generating raw tables"), uiOutput("InputRawTable")), mainPanel(dataTableOutput("RawTable"))))
+      tabPanel("Norm table", sidebarLayout(sidebarPanel(tags$h3("Norm table compilation"), uiOutput("InputNormTable")), mainPanel(dataTableOutput("NormTable")))),
+      tabPanel("Raw table", sidebarLayout(sidebarPanel(tags$h3("Raw table compilation"), uiOutput("InputRawTable")), mainPanel(dataTableOutput("RawTable"))))
     )
   )
 ))

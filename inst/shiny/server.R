@@ -648,6 +648,8 @@ shinyServer(function(input, output, session) {
             numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = bestModel()$scaleM - bestModel()$scaleSD*2.5),
             numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = bestModel()$scaleM + bestModel()$scaleSD*2.5),
             numericInput(inputId = "NormTableInputStepping", label = "Choose stepping value", value = NULL),
+            numericInput(inputId = "NormTableCI", label = "Confidence Coefficient", value = .9),
+            numericInput(inputId = "NormTableRel", label = "Reliability Coefficient", value = NULL),
             actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL),
             downloadButton("DownloadNormTable", "Download norm table"))
 
@@ -663,13 +665,28 @@ shinyServer(function(input, output, session) {
       currentBestModel <- bestModel()
       MIN_NORM <- as.numeric(input$NormTableInputStart)
       MAX_NORM <- as.numeric(input$NormTableInputEnd)
+
+      if(is.null(input$NormTableRel)){
+        REL <- NULL
+      }else{
+        REL <- as.numeric(input$NormTableRel)
+      }
+
+      if(is.na(REL)){
+        REL <- NULL
+      }
+
+      CI <- as.numeric(input$NormTableCI)
+      if(is.na(CI)){
+        CI <- NULL
+      }
+
       STEPPING <- as.numeric(input$NormTableInputStepping)
       MIN_RAW <- currentBestModel$minRaw
       MAX_RAW <- currentBestModel$maxRaw
 
-
       currentNormTable <- cNORM::normTable(currentAgeForNormTable, bestModel(), minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
+                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL)
 
       currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
       currentNormTable$percentile <- round(currentNormTable$percentile, digits = 2)
@@ -701,6 +718,8 @@ shinyServer(function(input, output, session) {
             numericInput(inputId = "RawTableInputStart", label = "Choose raw start value", value = bestModel()$minRaw),
             numericInput(inputId = "RawTableInputEnd", label = "Choose raw end value", value = bestModel()$maxRaw),
             numericInput(inputId = "RawTableInputStepping", label = "Choose stepping value", value = NULL),
+            numericInput(inputId = "RawTableCI", label = "Confidence Coefficient", value = .9),
+            numericInput(inputId = "RawTableRel", label = "Reliability Coefficient", value = NULL),
             actionButton(inputId = "CalcRawTables",label = "Generate raw table"),
             downloadButton("DownloadRawTable", label = "Download raw table"))
   })
@@ -719,9 +738,23 @@ shinyServer(function(input, output, session) {
       MAX_RAW <- input$RawTableInputEnd
       STEPPING <- as.numeric(input$RawTableInputStepping)
 
+      if(is.null(input$RawTableRel)){
+        REL <- NULL
+      }else{
+        REL <- as.numeric(input$RawTableRel)
+      }
+
+      if(is.na(REL)){
+        REL <- NULL
+      }
+
+      CI <- as.numeric(input$RawTableCI)
+      if(is.na(CI)){
+        CI <- NULL
+      }
 
       currentRawTable <- cNORM::rawTable(currentAgeForRawTable, currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING)
+                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL)
       currentRawTable$norm <- round(currentRawTable$norm, digits = 3)
       currentRawTable$percentile <- round(currentRawTable$percentile, digits = 2)
 

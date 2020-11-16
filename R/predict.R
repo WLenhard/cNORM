@@ -241,7 +241,9 @@ normTable <- function(A,
     stop("No model specified")
   }
 
-  if (CI > .9999 || CI < .0001){
+  if(is.null(CI)||is.na(CI)){
+    reliability <- NULL
+  }else if (CI > .99999 || CI < .00001){
     stop("Confidence coefficient (CI) out of range. Please specify value between 0 and 1.")
   }
 
