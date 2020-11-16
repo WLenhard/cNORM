@@ -11,6 +11,7 @@ This is a new release of an existing package. In this version I have:
 * OS X (macOS High Sierra, Version 10.13.6), R 3.6.1
 * Ubuntu 16.04.6 LTS via Travis-CI for release and development, R 4.1.0
 * OS X 10.13.6 via Travis-CI for release and development
+* R-hub Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 * R-hub Ubuntu Linux 16.04 LTS, R-release, GCC
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
