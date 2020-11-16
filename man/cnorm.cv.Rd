@@ -56,13 +56,13 @@ sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfi
 }
 \description{
 This function helps in selecting the number of terms for the model by doing repeated
-cross validation with 80 percent of the data as training data and 20 percent as the validation data.
-The cases are drawn randomly but stratified by norm group. Successive models are retrieved
-with increasing number of terms and the RMSE of raw scores (fitted by the regression model)
-is plotted for the training, validation and the complete dataset. Additionally to this
-analysis on the raw score level, it is possible (default) to estimate the mean norm score
-reliability and crossfit measures. For this, please set the norms parameter to TRUE. Due
-to the high computational load when computing norm scores, it takes time to finish
+Monte Carlo cross validation with 80 percent of the data as training data and 20 percent as
+the validation data. The cases are drawn randomly but stratified by norm group. Successive
+models are retrieved with increasing number of terms and the RMSE of raw scores (fitted by
+the regression model) is plotted for the training, validation and the complete dataset.
+Additionally to this analysis on the raw score level, it is possible (default) to estimate
+the mean norm score reliability and crossfit measures. For this, please set the norms parameter
+to TRUE. Due to the high computational load when computing norm scores, it takes time to finish
 when doing repeated cv or comparing models up to the maximum number of terms. When using
 the cv = "full" option, the ranking is done for the test and validation dataset
 separately (always based on T scores), resulting in a complete cross validation. In
