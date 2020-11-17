@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.2.4 (in progress)
+### Version in 1.2.4 (release)
 Date: 2020.10.14
 
 
