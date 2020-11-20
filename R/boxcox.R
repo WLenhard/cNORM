@@ -35,7 +35,7 @@
 #'
 #' @examples
 #' # model sample data set
-#' model <- bestModel(prepareData())
+#' model <- bestModel(prepareData(elfe))
 #'
 #' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function
@@ -140,7 +140,7 @@ boxcox <- function(model, age, n = 250, m = 50, sd = 10) {
 #' @examples
 #' \dontrun{
 #' # model sample data set
-#' model <- bestModel(prepareData())
+#' model <- bestModel(prepareData(elfe))
 #'
 #' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function
@@ -195,7 +195,7 @@ predictRawBC <- function(boxcoxParameters, percentile) {
 #'
 #' @examples
 #' # model sample data set
-#' model <- bestModel(prepareData())
+#' model <- bestModel(prepareData(elfe))
 #'
 #' # fitting scores of regression model box cox power function at specific age and retrieving
 #' # the parameters for the box cox power function

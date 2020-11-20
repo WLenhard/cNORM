@@ -24,7 +24,7 @@ distribution features as f. e. bottom and ceiling effects, non-progressive norm 
 age group or in general #' intersecting percentile curves.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(normData)
 derivedCoefficients <- derive(m)
 }

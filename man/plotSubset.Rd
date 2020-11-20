@@ -31,7 +31,7 @@ negative. The R2 cutoff that was specified in the bestModel function is
 displayed as a dashed line.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotSubset(m)
 }

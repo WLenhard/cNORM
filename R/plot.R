@@ -12,7 +12,7 @@
 #' manifest against difference values
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotRaw(normData, m, group="group")
 #' @export
@@ -122,7 +122,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
 #' }
@@ -261,7 +261,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' @seealso checkConsistency, derivationPlot, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotNormCurves(m, minAge=2, maxAge=5)
 #' @export
@@ -390,7 +390,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotPercentiles(normData, m)
 #' @export
@@ -628,7 +628,7 @@ plotPercentiles <- function(data,
 #' @seealso plotNormCurves, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results for age values 2, 4 and 6
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotDensity(m, group = c (2, 4, 6))
 #' @export
@@ -852,7 +852,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' @param index add index labels to data points
 #' @seealso bestModel, plotPercentiles, printSubset
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotSubset(m)
 #' @export
@@ -997,7 +997,7 @@ plotSubset <- function(model, type = 1, index = FALSE) {
 #' @seealso checkConsistency, bestModel, derive
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export

@@ -56,7 +56,7 @@ and smaller stepping, this function becomes computational intensive. In case a c
 for regression to the mean.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)

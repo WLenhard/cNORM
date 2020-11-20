@@ -3,6 +3,25 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 1.3.0 (in progress)
+Date: 2020.10.14
+
+
+Changes:
+
+*    prepareData, rankByGroup and rankBySlidingWindow no have the option to provide a
+     weighting parameter to compensate for imbalances. The percentiles are weighted
+     accordingly. The weighted ranking is based on an adaption of wtd.rank of the Hmisc
+     package, provided by the courtesy of Frank Harrell
+*    bestModel automatically uses the weighting parameter from the ranking (if applied)
+*    prepareData, rankByGroup and rankBySlidingWindow can now directly handle vectors
+     instead of a data frame, e. g.
+     rankByGroup(raw = elfe$raw, group = elfe$group)
+     If no group is provided and only a raw vector os present, traditional ranking of
+     a single group is done      
+
+
+
 ### Version in 1.2.4 (release)
 Date: 2020.10.14
 

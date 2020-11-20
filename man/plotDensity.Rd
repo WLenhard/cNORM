@@ -37,7 +37,7 @@ please check for inconsistent curves, especially curves showing implausible shap
 }
 \examples{
 # Load example data set, compute model and plot results for age values 2, 4 and 6
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotDensity(m, group = c (2, 4, 6))
 }

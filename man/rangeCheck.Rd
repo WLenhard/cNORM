@@ -35,7 +35,7 @@ the original range) or vertically (extreme norm scores) might lead to inconsiste
 results. The function generates a message, indicating extrapolation and the range of the original data.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(normData)
 print(rangeCheck(m))
 }

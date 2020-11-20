@@ -16,7 +16,7 @@
 #' the specific value here.
 #' @return data.frame of the variables raw, age and norm
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' getNormCurve(35, m)
 #' @export
@@ -101,7 +101,7 @@ getNormCurve <-
 #' @return the predicted raw score or a data.frame of scores in case, lists of norm scores or age is used
 #' @examples
 #' # Prediction of single scores
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' predictRaw(35, 3.5, m$coefficients)
 #'
@@ -203,7 +203,7 @@ predictRaw <-
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #'
 #' # create single norm table
@@ -371,7 +371,7 @@ normTable <- function(A,
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' # generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
 #' table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)
@@ -534,7 +534,7 @@ rawTable <- function(A,
 #' derived regression function
 #' @seealso plotDerivative, derive
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #' d <- derivationTable(6, m, step = 0.5)
 #' @export
@@ -594,7 +594,7 @@ derivationTable <-
 #' the specific value here.
 #' @return The predicted norm score for a raw score, either single value or list of results
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(data = normData)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9

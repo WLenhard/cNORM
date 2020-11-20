@@ -26,7 +26,7 @@ regression line.
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotRaw(normData, m, group="group")
 }

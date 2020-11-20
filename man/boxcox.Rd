@@ -42,7 +42,7 @@ modeling in order to conduct a parametric fitting of the percentiles.
 }
 \examples{
 # model sample data set
-model <- bestModel(prepareData())
+model <- bestModel(prepareData(elfe))
 
 # fitting scores of regression model box cox power function at specific age and retrieving
 # the parameters for the box cox power function

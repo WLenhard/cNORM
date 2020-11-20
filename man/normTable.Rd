@@ -58,7 +58,7 @@ sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 for regression to the mean.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 
 # create single norm table

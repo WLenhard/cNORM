@@ -5,9 +5,10 @@
 \title{Determine the norm scores of the participants by sliding window (experimental)}
 \usage{
 rankBySlidingWindow(
-  data,
+  data = NULL,
   age = "age",
   raw = "raw",
+  weights = NULL,
   width,
   method = 4,
   scale = "T",
@@ -25,6 +26,11 @@ rankBySlidingWindow(
 powers of age and the interactions}
 
 \item{raw}{name of the raw value variable (default 'raw')}
+
+\item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
+data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
+Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
+feature is currently EXPERIMENTAL!}
 
 \item{width}{the width of the sliding window}
 
@@ -94,7 +100,7 @@ beforehand and model them separately.
 \examples{
 \dontrun{
 # Transformation using a sliding window
-data.elfe2 <- rankBySlidingWindow(elfe, raw = "raw", age = "group", width = 0.5)
+data.elfe2 <- rankBySlidingWindow(relfe, raw = "raw", age = "group", width = 0.5)
 
 # Comparing this to the traditional approach should give us exactly the same
 # values, since the sample dataset only has a grouping variable for age

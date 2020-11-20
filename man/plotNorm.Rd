@@ -30,7 +30,7 @@ Ark and Sijtsma (2016).
 \examples{
 # Load example data set, compute model and plot results
 \dontrun{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
 }

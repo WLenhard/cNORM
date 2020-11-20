@@ -59,7 +59,7 @@ checkConsistency and derivationPlot can be used to further inspect the model.
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotNormCurves(m, minAge=2, maxAge=5)
 }

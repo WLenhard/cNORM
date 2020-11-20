@@ -36,7 +36,7 @@ In order to check model assumptions, a table of the first order derivative of th
 coefficients is created.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 d <- derivationTable(6, m, step = 0.5)
 }

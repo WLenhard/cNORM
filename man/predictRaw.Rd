@@ -44,7 +44,7 @@ You than have to provide a prepared data frame with the according input variable
 }
 \examples{
 # Prediction of single scores
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 predictRaw(35, 3.5, m$coefficients)
 

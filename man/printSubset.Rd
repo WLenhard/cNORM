@@ -18,6 +18,6 @@ model has to be chosen. The print function shows the R2 and other information
 on the different best fitting models with increasing number of predictors.
 }
 \examples{
-model <- bestModel(prepareData())
+model <- bestModel(prepareData(elfe))
 printSubset(model)
 }

@@ -73,7 +73,7 @@ parameter in modelling.
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 plotPercentiles(normData, m)
 }

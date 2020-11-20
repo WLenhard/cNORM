@@ -22,7 +22,7 @@ including the beta weights.
 It can be used to predict the raw scores based on age and location.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 model <- bestModel(normData)
 regressionFunction(model)
 }

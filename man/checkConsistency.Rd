@@ -73,7 +73,7 @@ several reasons, why this might occur:
  be handled with caution.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(normData)
 modelViolations <- checkConsistency(m,
   minAge = 2, maxAge = 5, stepAge = 0.1,

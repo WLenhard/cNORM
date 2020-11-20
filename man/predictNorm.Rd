@@ -40,7 +40,7 @@ transformation via a numerical solution: A precise norm table is generated and
 the closest fitting norm score for a raw score is returned.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 
 # return norm value for raw value 21 for grade 2, month 9

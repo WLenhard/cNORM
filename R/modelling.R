@@ -47,8 +47,10 @@
 #' resp. list of predictors, are ignored without further notice and thus do not show up in
 #' the final result. Additionally, all other functions like norm table generation and plotting
 #' are so far not yet prepared to handle covariates.
-#' @param weights Optional vector with weights for the single cases. All weights have to be positive.
-#' This is currently an experimental feature.
+#' @param weights Optional vector with weights for the single cases. By default, if data has been
+#' weighting in ranking, these weights are reused here as well. Please set to FALSE to deactivate
+#' this behavior. All weights have to be positive.
+#' This is currently an EXPERIMENTAL feature and will probably be deprecated in a future release.
 #' @param plot If set to TRUE (default), the percentile plot of the model is shown
 #' @return The model meeting the R2 criteria with coefficients and variable selection
 #' in model$coefficients. Use \code{plotSubset(model)} and
@@ -56,7 +58,7 @@
 #' @examples
 #' \dontrun{
 #' # Standard example with sample data
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
@@ -103,6 +105,10 @@ bestModel <- function(data,
   # retrieve attributes
   if (is.null(raw)) {
     raw <- attr(data, "raw")
+  }
+
+  if (is.null(weights)) {
+    weights <- attr(data, "weights")
   }
 
   if (is.null(k)) {
@@ -337,7 +343,7 @@ bestModel <- function(data,
 #' @export
 #'
 #' @examples
-#' model <- bestModel(prepareData())
+#' model <- bestModel(prepareData(elfe))
 #' printSubset(model)
 printSubset <- function(model) {
   table <-
@@ -393,7 +399,7 @@ printSubset <- function(model) {
 #' the specific value here.
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(normData)
 #' modelViolations <- checkConsistency(m,
 #'   minAge = 2, maxAge = 5, stepAge = 0.1,
@@ -502,7 +508,7 @@ checkConsistency <- function(model,
 #' @return The regression formula as a string
 #'
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' regressionFunction(model)
 #' @export
@@ -546,7 +552,7 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' the specific value here.
 #' @return The derived coefficients
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(normData)
 #' derivedCoefficients <- derive(m)
 #' @export
@@ -617,7 +623,7 @@ derive <- function(model, order = 1, covariate = NULL) {
 #' @return the report
 #' @export
 #' @examples
-#' normData <- prepareData()
+#' normData <- prepareData(elfe)
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
 rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
@@ -651,7 +657,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' the cv = "full" option, the ranking is done for the test and validation dataset
 #' separately (always based on T scores), resulting in a complete cross validation. In
 #' order to only validate the modeling, you as well can use a pre-ranked data set with
-#' prepareData() already applied. In this case, the training and validation data is
+#' prepareData(elfe) already applied. In this case, the training and validation data is
 #' drawn from the already ranked data and the scores for the validation set should improve.
 #' It is however no independent test, as the ranking between both samples is interlinked.
 #' In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.

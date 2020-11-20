@@ -10,6 +10,7 @@ prepareData(
   raw = "raw",
   age = "group",
   width = NA,
+  weights = NULL,
   scale = "T",
   descend = FALSE,
   silent = FALSE
@@ -30,6 +31,11 @@ conventional norm tables.}
 
 \item{width}{if a width is provided, the function switches to rankBySlidingWindow to determine the
 observed raw scores, otherwise, ranking is done by group (default)}
+
+\item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
+data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
+Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
+feature is currently EXPERIMENTAL!}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
@@ -55,7 +61,10 @@ determine the best fitting model.
 }
 \examples{
 # conducts ranking and computation of powers and interactions with the 'elfe' dataset
-data.elfe <- prepareData()
+data.elfe <- prepareData(elfe)
+
+# use vectors instead of data frame
+data.elfe <- prepareData(raw=elfe$raw, group=elfe$group)
 
 # variable names can be specified as well, here with the BMI data included in the package
 data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")

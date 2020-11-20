@@ -67,7 +67,7 @@ when doing repeated cv or comparing models up to the maximum number of terms. Wh
 the cv = "full" option, the ranking is done for the test and validation dataset
 separately (always based on T scores), resulting in a complete cross validation. In
 order to only validate the modeling, you as well can use a pre-ranked data set with
-prepareData() already applied. In this case, the training and validation data is
+prepareData(elfe) already applied. In this case, the training and validation data is
 drawn from the already ranked data and the scores for the validation set should improve.
 It is however no independent test, as the ranking between both samples is interlinked.
 In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.

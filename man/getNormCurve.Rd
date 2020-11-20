@@ -44,7 +44,7 @@ age, while keeping the norm value constant. This way, e. g. academic performance
 of a specific ability is shown.
 }
 \examples{
-normData <- prepareData()
+normData <- prepareData(elfe)
 m <- bestModel(data = normData)
 getNormCurve(35, m)
 }
