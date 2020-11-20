@@ -18,7 +18,7 @@ getNormCurve(
 \arguments{
 \item{norm}{The specific norm score, e. g. T value}
 
-\item{model}{The model from the regression modeling}
+\item{model}{The model from the regression modeling or a cnorm object}
 
 \item{minAge}{Age to start from}
 
@@ -44,7 +44,7 @@ age, while keeping the norm value constant. This way, e. g. academic performance
 of a specific ability is shown.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-getNormCurve(35, m)
+# Generate cnorm object from example data
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+getNormCurve(35, cnorm.elfe)
 }

@@ -30,8 +30,7 @@
 #' scores and interactions. Afterwards, you can use these preprocessed data to
 #' determine the best fitting model.
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
-#' named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
-#' demonstrate the procedure.
+#' named 'raw'.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
 #' Setting group = FALSE deactivates modeling in dependence of age. Use this in case you do want
 #' conventional norm tables.
@@ -50,6 +49,7 @@
 #' ranking order with higher raw scores getting lower norm scores; relevant
 #' for example when norming error scores, where lower scores mean higher
 #' performance
+#' @param k The power paramerer, default = 4
 #' @param silent set to TRUE to suppress messages
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
@@ -68,7 +68,7 @@
 #' data.elfe2 <- prepareData(data = elfe, group = FALSE)
 #' m <- bestModel(data.elfe2)
 #' @export
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", k = 4, width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
   if (is.null(data)) {
     normData <- data.frame(raw=raw)
     raw <- "raw"
@@ -91,6 +91,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   if (is.numeric(age) && (length(age) == nrow(normData))) {
     normData$age <- age
     age <- "age"
+  }else if(is.character(age)){
+    if(!(age %in% colnames(normData))){
+      age <- group
+      width <- NA
+    }
   }
 
   if ((typeof(group) != "logical") && !(group %in% colnames(normData))) {
@@ -133,9 +138,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = 4, norm = "normValue", age = age, silent = silent)
+    normData <- computePowers(normData, k = k, norm = "normValue", age = age, silent = silent)
   } else {
-    normData <- computePowers(normData, k = 4, norm = "normValue", silent = silent)
+    normData <- computePowers(normData, k = k, norm = "normValue", silent = silent)
   }
 
   return(normData)
@@ -165,9 +170,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #'
 #' @param data data.frame with norm sample data. If no data.frame is provided, the raw score
 #' and group vectors are directly used
-#' @param group name of the grouping variable (default 'group'), e. g. grade, setting
+#' @param group name of the grouping variable (default 'group')  or numeric vector, e. g. grade, setting
 #' group to FALSE cancels grouping (data is treated as one group)
-#' @param raw name of the raw value variable (default 'raw')
+#' @param raw name of the raw value variable (default 'raw') or numeric vector
 #' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
 #' data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
 #' Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
@@ -221,8 +226,8 @@ rankByGroup <-
     if(is.null(data)){
       d <- data.frame(raw=raw)
       if(is.numeric(group)){
-        group <- "group"
         d$group <- group
+        group <- "group"
       }else{
         group <- FALSE
       }

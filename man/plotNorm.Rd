@@ -7,9 +7,9 @@
 plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0)
 }
 \arguments{
-\item{data}{The raw data within a data.frame}
+\item{data}{The raw data within a data.frame or a cnorm object}
 
-\item{model}{The regression model}
+\item{model}{The regression model (optional)}
 
 \item{group}{The grouping variable, use empty string for no group}
 
@@ -30,9 +30,8 @@ Ark and Sijtsma (2016).
 \examples{
 # Load example data set, compute model and plot results
 \dontrun{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+plotNorm(result, group="group", minNorm=25, maxNorm=75)
 }
 }
 \references{

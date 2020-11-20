@@ -4,19 +4,23 @@
 #' the regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
 #' regression line.
-#' @param data The raw data within a data.frame
-#' @param model The regression model
+#' @param data The raw data within a data.frame or cnorm object
+#' @param model The regression model (optional)
 #' @param group The grouping variable
 #' @param raw The raw score variable
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
 #' manifest against difference values
 #' @examples
-#' # Load example data set, compute model and plot results
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotRaw(normData, m, group="group")
+#' # Compute model with example dataset and plot results
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotRaw(result)
 #' @export
 plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
+
+  if(class(data)=="cnorm"){
+    model <- data$model
+    data <- data$data
+  }
 
   if (!attr(data, "useAge")){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
@@ -111,8 +115,8 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' of the modeling process. The scores should not deviate too far from
 #' regression line. The computation of the standard error is based on Oosterhuis, van der
 #' Ark and Sijtsma (2016).
-#' @param data The raw data within a data.frame
-#' @param model The regression model
+#' @param data The raw data within a data.frame or a cnorm object
+#' @param model The regression model (optional)
 #' @param group The grouping variable, use empty string for no group
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
@@ -122,12 +126,16 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotNorm(normData, m, group="group", minNorm=25, maxNorm=75)
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotNorm(result, group="group", minNorm=25, maxNorm=75)
 #' }
 #' @export
 plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
+  if(class(data)=="cnorm"){
+    model <- data$model
+    data <- data$data
+  }
+
   if (!attr(data, "useAge")){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
   }
@@ -247,7 +255,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' certain degree outside the original sample, but it should in general
 #' be handled with caution.
 #' checkConsistency and derivationPlot can be used to further inspect the model.
-#' @param model The model from the bestModel function
+#' @param model The model from the bestModel function or a cnorm object
 #' @param normList Vector with norm scores to display
 #' @param minAge Age to start with checking
 #' @param maxAge Upper end of the age check
@@ -272,6 +280,10 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
                            minRaw = NULL,
                            maxRaw = NULL,
                            covariate = NULL) {
+
+  if(class(model)=="cnorm"){
+    model <- model$model
+  }
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -368,8 +380,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' and change the 'type' parameter accordingly.
 #' In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
 #' parameter in modelling.
-#' @param data The raw data including the percentiles and norm scores
-#' @param model The model from the bestModel function
+#' @param data The raw data including the percentiles and norm scores or a cnorm object
+#' @param model The model from the bestModel function (optional)
 #' @param minRaw Lower bound of the raw score (default = 0)
 #' @param maxRaw Upper bound of the raw score
 #' @param minAge Variable to restrict the lower bound of the plot to a specific age
@@ -390,9 +402,8 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotPercentiles(normData, m)
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotPercentiles(result)
 #' @export
 plotPercentiles <- function(data,
                             model,
@@ -406,6 +417,11 @@ plotPercentiles <- function(data,
                             scale = NULL,
                             type = 7,
                             title = NULL, covariate = NULL) {
+
+  if(class(data)=="cnorm"){
+    model <- data$model
+    data <- data$data
+  }
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
@@ -617,7 +633,7 @@ plotPercentiles <- function(data,
 #' The function plots the density  curves based on the regression model against
 #' the actual percentiles from the raw data. As in 'plotNormCurves',
 #' please check for inconsistent curves, especially curves showing implausible shapes.
-#' @param model The model from the bestModel function
+#' @param model The model from the bestModel function or a cnorm object
 #' @param minRaw Lower bound of the raw score
 #' @param maxRaw Upper bound of the raw score
 #' @param minNorm Lower bound of the norm score
@@ -628,9 +644,8 @@ plotPercentiles <- function(data,
 #' @seealso plotNormCurves, plotPercentiles
 #' @examples
 #' # Load example data set, compute model and plot results for age values 2, 4 and 6
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotDensity(m, group = c (2, 4, 6))
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotDensity(result, group = c (2, 4, 6))
 #' @export
 plotDensity <- function(model,
                         minRaw = NULL,
@@ -638,6 +653,11 @@ plotDensity <- function(model,
                         minNorm = NULL,
                         maxNorm = NULL,
                         group = NULL, covariate = NULL) {
+
+  if(class(model)=="cnorm"){
+    model <- model$model
+  }
+
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
     covariate = NULL
@@ -718,8 +738,8 @@ plotDensity <- function(model,
 #' to determine the bounds of the modeling (age and standard score range). It can be used as an
 #' additional model check to determine the best fitting model. Please have a look at the
 #'' plotPercentiles' function for further information.
-#' @param data The raw data including the percentiles and norm scores
-#' @param model The model from the bestModel function
+#' @param data The raw data including the percentiles and norm scores or a cnorm object
+#' @param model The model from the bestModel function (optional)
 #' @param start Number of predictors to start with
 #' @param end Number of predictors to end with
 #' @param group The name of the grouping variable; the distinct groups are automatically
@@ -735,17 +755,23 @@ plotDensity <- function(model,
 #'
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData(elfe)
-#' model <- bestModel(data = normData)
-#' plotPercentileSeries(normData, model, start=1, end=5, group="group")
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotPercentileSeries(result, start=1, end=5, group="group")
 plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  type = 7,
                                  filename = NULL) {
+  if(class(data)=="cnorm"){
+    model <- data$model
+    d <- data$data
+  }else{
+    d <- as.data.frame(data)
+  }
+
   if(!is.null(model$covariate)){
     stop("This function us currently not able to handle models with covariates.")
   }
-  d <- as.data.frame(data)
+
 
   if (!attr(d, "useAge")){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
@@ -844,7 +870,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' In the plot, Mallow's Cp is log transformed and the BIC is always highly
 #' negative. The R2 cutoff that was specified in the bestModel function is
 #' displayed as a dashed line.
-#' @param model The regression model from the bestModel function
+#' @param model The regression model from the bestModel function or a cnorm object
 #' @param type Type of chart with 0 = adjusted R2 by number of predictors,
 #' 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
 #' Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
@@ -852,11 +878,16 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' @param index add index labels to data points
 #' @seealso bestModel, plotPercentiles, printSubset
 #' @examples
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotSubset(m)
+#' # Compute model with example data and plot information function
+#' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotSubset(cnorm.model)
 #' @export
 plotSubset <- function(model, type = 1, index = FALSE) {
+
+  if(class(model)=="cnorm"){
+    model <- model$model
+  }
+
   dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic, cp = model$subsets$cp, RMSE = sqrt(model$subsets$rss / length(model$fitted.values)), nr = seq(1, length(model$subsets$adjr2), by = 1))
   indexLabel <- seq(from = 1, to = nrow(dataFrameTMP))
 
@@ -984,7 +1015,7 @@ plotSubset <- function(model, type = 1, index = FALSE) {
 #' as well.
 #' ATTENTION: plotDerivative is currently still incompatible with reversed raw
 #' score scales ('descent' option)
-#' @param model The model from the bestModel function
+#' @param model The model from the bestModel function or a cnorm object
 #' @param minAge Age to start with checking
 #' @param maxAge Upper end of the age check
 #' @param stepAge Stepping parameter for the age check, usually 1 or 0.1; lower
@@ -997,9 +1028,8 @@ plotSubset <- function(model, type = 1, index = FALSE) {
 #' @seealso checkConsistency, bestModel, derive
 #' @examples
 #' # Load example data set, compute model and plot results
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotDerivative(result, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
 plotDerivative <- function(model,
                            minAge = NULL,
@@ -1009,9 +1039,15 @@ plotDerivative <- function(model,
                            stepAge = 0.2,
                            stepNorm = 1,
                            order = 1) {
+
+  if(class(model)=="cnorm"){
+    model <- model$model
+  }
+
   if (!model$useAge){
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
   }
+
 
   if (is.null(minAge)) {
     minAge <- model$minA1

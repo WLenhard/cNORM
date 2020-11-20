@@ -7,7 +7,7 @@
 plotSubset(model, type = 1, index = FALSE)
 }
 \arguments{
-\item{model}{The regression model from the bestModel function}
+\item{model}{The regression model from the bestModel function or a cnorm object}
 
 \item{type}{Type of chart with 0 = adjusted R2 by number of predictors,
 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
@@ -31,9 +31,9 @@ negative. The R2 cutoff that was specified in the bestModel function is
 displayed as a dashed line.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-plotSubset(m)
+# Compute model with example data and plot information function
+cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
+plotSubset(cnorm.model)
 }
 \seealso{
 bestModel, plotPercentiles, printSubset

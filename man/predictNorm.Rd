@@ -19,7 +19,7 @@ predictNorm(
 
 \item{A}{the age, either single numeric or list of values}
 
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{minNorm}{The lower bound of the norm score range}
 
@@ -40,11 +40,9 @@ transformation via a numerical solution: A precise norm table is generated and
 the closest fitting norm score for a raw score is returned.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
+# Generate cnorm object from example data
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # return norm value for raw value 21 for grade 2, month 9
-# Use 'as.list(normData$raw)' and 'as.list(normData$group)' for raw scores
-# and age to calculate predicted norm values for original data.
-specificNormValue <- predictNorm(raw = 21, A = 2.75, model = m, minNorm = 25, maxNorm = 75)
+specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
 }

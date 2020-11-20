@@ -21,7 +21,7 @@ rawTable(
 \arguments{
 \item{A}{the age, either single value or vector with age values}
 
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{minRaw}{The lower bound of the raw score range}
 
@@ -56,16 +56,16 @@ and smaller stepping, this function becomes computational intensive. In case a c
 for regression to the mean.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-# generate a norm table for the raw value range from 0 to 28 for month 7 of grade 3
-table <- rawTable(3 + 7 / 12, m, minRaw = 0, maxRaw = 28)
+# Generate cnorm object from example data
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+# generate a norm table for the raw value range from 0 to 28 for the time point month 7 of grade 3
+table <- rawTable(3 + 7 / 12, cnorm.elfe, minRaw = 0, maxRaw = 28)
 
 # generate several raw tables
-table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28)
+table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28)
 
 # additionally compute confidence intervalls
-table <- rawTable(c(2.5, 3.5, 4.5), m, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
 }
 \seealso{
 normTable

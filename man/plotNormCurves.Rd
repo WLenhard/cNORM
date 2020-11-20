@@ -16,7 +16,7 @@ plotNormCurves(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function}
+\item{model}{The model from the bestModel function or a cnorm object}
 
 \item{normList}{Vector with norm scores to display}
 

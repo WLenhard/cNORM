@@ -7,7 +7,7 @@
 printSubset(model)
 }
 \arguments{
-\item{model}{The model from the 'bestModel' function}
+\item{model}{The model from the 'bestModel' function or a cnorm object}
 }
 \value{
 A table with information criteria
@@ -18,6 +18,7 @@ model has to be chosen. The print function shows the R2 and other information
 on the different best fitting models with increasing number of predictors.
 }
 \examples{
-model <- bestModel(prepareData(elfe))
-printSubset(model)
+# Generate cnorm object from example data
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+printSubset(result)
 }

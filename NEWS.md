@@ -9,6 +9,9 @@ Date: 2020.10.14
 
 Changes:
 
+*    New function cnorm() that does all the data preparation and modelling in one step
+     It returns a cnorm object, which can be used in all model check, plotting and prediction functions
+*    All functions have been extended to accept a cnorm object instead of data and / or model
 *    prepareData, rankByGroup and rankBySlidingWindow no have the option to provide a
      weighting parameter to compensate for imbalances. The percentiles are weighted
      accordingly. The weighted ranking is based on an adaption of wtd.rank of the Hmisc
@@ -18,7 +21,8 @@ Changes:
      instead of a data frame, e. g.
      rankByGroup(raw = elfe$raw, group = elfe$group)
 *    If no group is provided and only a raw vector is present e.g. ranByGroup(raw=elfe$raw),
-     traditional ranking of a single group is done      
+     traditional ranking of a single group is done
+*    Power parameter k added to prepareData
 
 
 

@@ -9,6 +9,7 @@ prepareData(
   group = "group",
   raw = "raw",
   age = "group",
+  k = 4,
   width = NA,
   weights = NULL,
   scale = "T",
@@ -18,8 +19,7 @@ prepareData(
 }
 \arguments{
 \item{data}{data.frame with a grouping variable named 'group' and a raw score variable
-named 'raw'. In case no object is provided, cNORM uses the inbuilt sample data to
-demonstrate the procedure.}
+named 'raw'.}
 
 \item{group}{grouping variable in the data, e. g. age groups, grades ...
 Setting group = FALSE deactivates modeling in dependence of age. Use this in case you do want
@@ -28,6 +28,8 @@ conventional norm tables.}
 \item{raw}{the raw scores}
 
 \item{age}{the continuous explanatory variable; by default set to "group"}
+
+\item{k}{The power paramerer, default = 4}
 
 \item{width}{if a width is provided, the function switches to rankBySlidingWindow to determine the
 observed raw scores, otherwise, ranking is done by group (default)}

@@ -21,7 +21,7 @@ normTable(
 \arguments{
 \item{A}{the age as single value or a vector of age values}
 
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{minNorm}{The lower bound of the norm score range}
 
@@ -58,14 +58,14 @@ sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
 for regression to the mean.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
+# Generate cnorm object from example data
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # create single norm table
-norms <- normTable(3.5, m, minNorm = 25, maxNorm = 75, step = 0.5)
+norms <- normTable(3.5, cnorm.elfe, minNorm = 25, maxNorm = 75, step = 0.5)
 
 # create list of norm tables
-norms <- normTable(c(2.5, 3.5, 4.5), m,
+norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
   minNorm = 25, maxNorm = 75,
   step = 1, minRaw = 0, maxRaw = 26
 )

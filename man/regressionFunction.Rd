@@ -7,7 +7,7 @@
 regressionFunction(model, raw = NULL, digits = NULL)
 }
 \arguments{
-\item{model}{The regression model from the bestModel function}
+\item{model}{The regression model from the bestModel function or a cnorm object}
 
 \item{raw}{The name of the raw value variable (default 'raw')}
 
@@ -22,7 +22,6 @@ including the beta weights.
 It can be used to predict the raw scores based on age and location.
 }
 \examples{
-normData <- prepareData(elfe)
-model <- bestModel(normData)
-regressionFunction(model)
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+regressionFunction(result)
 }

@@ -14,7 +14,7 @@ rangeCheck(
 )
 }
 \arguments{
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{minAge}{The lower age bound}
 

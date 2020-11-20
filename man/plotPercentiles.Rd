@@ -21,9 +21,9 @@ plotPercentiles(
 )
 }
 \arguments{
-\item{data}{The raw data including the percentiles and norm scores}
+\item{data}{The raw data including the percentiles and norm scores or a cnorm object}
 
-\item{model}{The model from the bestModel function}
+\item{model}{The model from the bestModel function (optional)}
 
 \item{minRaw}{Lower bound of the raw score (default = 0)}
 
@@ -73,9 +73,8 @@ parameter in modelling.
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-plotPercentiles(normData, m)
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+plotPercentiles(result)
 }
 \seealso{
 plotNormCurves, plotPercentileSeries

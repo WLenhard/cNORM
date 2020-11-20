@@ -16,7 +16,7 @@ derivationTable(
 \arguments{
 \item{A}{the age}
 
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{minNorm}{The lower bound of the norm value range}
 
@@ -36,9 +36,11 @@ In order to check model assumptions, a table of the first order derivative of th
 coefficients is created.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-d <- derivationTable(6, m, step = 0.5)
+# Generate cnorm object from example data
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+
+# retrieve function for time point 6
+d <- derivationTable(6, cnorm.elfe, step = 0.5)
 }
 \seealso{
 plotDerivative, derive

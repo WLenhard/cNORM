@@ -20,7 +20,7 @@ checkConsistency(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function}
+\item{model}{The model from the bestModel function or a cnorm object}
 
 \item{minAge}{Age to start with checking}
 
@@ -73,11 +73,10 @@ several reasons, why this might occur:
  be handled with caution.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(normData)
-modelViolations <- checkConsistency(m,
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+modelViolations <- checkConsistency(result,
   minAge = 2, maxAge = 5, stepAge = 0.1,
   minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw = 28, stepNorm = 1
 )
-plotDerivative(m, , minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
+plotDerivative(result, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
 }

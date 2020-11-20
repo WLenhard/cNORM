@@ -20,9 +20,11 @@ cnorm.cv(
 )
 }
 \arguments{
-\item{data}{data frame of norm sample with ranking, powers and interaction of L and A}
+\item{data}{data frame of norm sample with ranking, powers and interaction of L and A or a cnorm object}
 
-\item{formula}{prespecified formula, e. g. from an existing regression model; min and max functions will be ignored}
+\item{formula}{prespecified formula, e. g. from an existing regression model; min and max functions will be ignored
+In case a cnorm object is used, this functions automatically draws on the formula of the inbuilt regression
+function}
 
 \item{repetitions}{number of repetitions for cross validation}
 
@@ -95,7 +97,6 @@ cnorm.cv(data, min = 3, max = 7, norms = FALSE)
 # cross validate prespecified formula
 # here, we will use the formula from a model to cross validate it and to retrieve norm RMSE
 # own regression functions can of course be used as well
-# data <- prepareData(elfe)
-# model <- bestModel(data)
-# cnorm.cv(data, formula = model$terms, repetitions = 5)
+# result <- cnorm(raw = efe$raw, group = elfe$group)
+# cnorm.cv(result, repetitions = 5)
 }

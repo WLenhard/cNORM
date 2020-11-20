@@ -7,7 +7,7 @@
 derive(model, order = 1, covariate = NULL)
 }
 \arguments{
-\item{model}{The regression model}
+\item{model}{The regression model or a cnorm object}
 
 \item{order}{The degree of the derivate, default: 1}
 

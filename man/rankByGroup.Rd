@@ -17,12 +17,13 @@ rankByGroup(
 )
 }
 \arguments{
-\item{data}{data.frame with norm sample data}
+\item{data}{data.frame with norm sample data. If no data.frame is provided, the raw score
+and group vectors are directly used}
 
-\item{group}{name of the grouping variable (default 'group'), e. g. grade, setting
+\item{group}{name of the grouping variable (default 'group')  or numeric vector, e. g. grade, setting
 group to FALSE cancels grouping (data is treated as one group)}
 
-\item{raw}{name of the raw value variable (default 'raw')}
+\item{raw}{name of the raw value variable (default 'raw') or numeric vector}
 
 \item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
 data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the

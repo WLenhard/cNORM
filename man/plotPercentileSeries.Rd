@@ -16,9 +16,9 @@ plotPercentileSeries(
 )
 }
 \arguments{
-\item{data}{The raw data including the percentiles and norm scores}
+\item{data}{The raw data including the percentiles and norm scores or a cnorm object}
 
-\item{model}{The model from the bestModel function}
+\item{model}{The model from the bestModel function (optional)}
 
 \item{start}{Number of predictors to start with}
 
@@ -47,9 +47,8 @@ additional model check to determine the best fitting model. Please have a look a
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData(elfe)
-model <- bestModel(data = normData)
-plotPercentileSeries(normData, model, start=1, end=5, group="group")
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+plotPercentileSeries(result, start=1, end=5, group="group")
 }
 \seealso{
 plotPercentiles

@@ -16,7 +16,7 @@ plotDerivative(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function}
+\item{model}{The model from the bestModel function or a cnorm object}
 
 \item{minAge}{Age to start with checking}
 
@@ -50,9 +50,8 @@ score scales ('descent' option)
 }
 \examples{
 # Load example data set, compute model and plot results
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-plotDerivative(m, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+plotDerivative(result, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 }
 \seealso{
 checkConsistency, bestModel, derive
