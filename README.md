@@ -55,43 +55,40 @@ library(cNORM)
 cNORM.GUI()
 
 # If you prefer the console, you can use the syntax as well
-# Rank data within group and compute powers and interactions for the internal dataset 'elfe'
-data.elfe <- prepareData(elfe)
-
-# Find best fitting regression model
-model.elfe <- bestModel(data.elfe)
+# Rank data within group and compute powers and interactions for the internal dataset 'elfe' and compute model
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors
-plotSubset(model.elfe, type=0)        # plot R2
-plotSubset(model.elfe, type=3)        # plot MSE
+plotSubset(cnorm.elfe, type=0)        # plot R2
+plotSubset(cnorm.elfe, type=3)        # plot MSE
 
-# NOTE! At this point, you usually select a good fitting model and rerun the bestModel function
+# NOTE! At this point, you usually select a good fitting model and rerun the process.
 # with a fixed number of terms, e. g. four. Try avoid models with a high number of terms:
-model.elfe <- bestModel(data.elfe, terms = 4)
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
 #  Visual inspection of the percentile curves of the fitted model
-plotPercentiles(data.elfe, model.elfe)
+plotPercentiles(cnorm.elfe)
 
 # Visual inspection of the observed and fitted raw and norm scores
-plotRaw(data.elfe, model.elfe)
-plotNorm(data.elfe, model.elfe)
+plotRaw(cnorm.elfe)
+plotNorm(cnorm.elfe)
 
 # In order to check, how other models perform, plot series of percentile plots with ascending
-# number of predictors up to 14 predictors.
-plotPercentileSeries(data.elfe, model.elfe, end=14)
+# number of predictors, in this example up to 14 predictors.
+plotPercentileSeries(cnorm.elfe, end=14)
 
 # Cross validation of number of terms with 20% of the data for validation and 80% training.
 # Due to the time intensity, max terms is restricted to 10; 3 repetitions
-cnorm.cv(data.elfe, max=10, repetitions=3)
+cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
 
 # Cross validation with pre-specified terms, e. g. of an already existing model
-cnorm.cv(data.elfe, model.elfe$terms, repetitions=30)
+cnorm.cv(cnorm.elfe, max=10, repetitions=3)
 
-# Print norm table (for grade 3, 3.2, 3.4, 3.6) with T scores from T = 25 to T = 75
-normTable(c(3, 3.2, 3.4, 3.6), model.elfe, minNorm = 25, maxNorm = 75, step = 1)
+# Print norm table (for grade 3, 3.2, 3.4, 3.6)
+normTable(c(3, 3.2, 3.4, 3.6), cnorm.elfe, step = 1)
 
 # The other way round: Print raw table (for grade 3)
-rawTable(3, model.elfe)
+rawTable(3, cnorm.elfe)
 
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
