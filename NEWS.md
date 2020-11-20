@@ -17,8 +17,8 @@ Changes:
 *    prepareData, rankByGroup and rankBySlidingWindow can now directly handle vectors
      instead of a data frame, e. g.
      rankByGroup(raw = elfe$raw, group = elfe$group)
-     If no group is provided and only a raw vector os present, traditional ranking of
-     a single group is done      
+*    If no group is provided and only a raw vector is present e.g. ranByGroup(raw=elfe$raw),
+     traditional ranking of a single group is done      
 
 
 
