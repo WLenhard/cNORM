@@ -53,8 +53,8 @@ library(cNORM)
 # please use cNORM on the console.
 cNORM.GUI()
 
-# If you prefer the console, you can use the syntax as well
-# Rank data within group and compute powers and interactions for the internal dataset 'elfe' and compute model
+# If you prefer the console, you can use the syntax as well: Rank data within
+# group and compute powers and interactions for the internal dataset 'elfe' and compute model
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors
@@ -77,17 +77,18 @@ plot.norm(cnorm.elfe)
 plot.series(cnorm.elfe, end=14)
 
 # Cross validation of number of terms with 20% of the data for validation and 80% training.
-# Due to the time intensity, max terms is restricted to 10; 3 repetitions
+# Due to the time intensity, max terms is restricted to 10 in this example; 3 repetitions
 cv(cnorm.elfe$data, max=10, repetitions=3)
 
 # Cross validation with pre-specified terms, e. g. of an already existing model
-cv(cnorm.elfe, max=10, repetitions=3)
+cv(cnorm.elfe, repetitions=3)
 
 # Print norm table (for grade 3, 3.2, 3.4, 3.6)
 table(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
 
-# The other way round: Print raw table (for grade 3)
-table.raw(3, cnorm.elfe)
+# The other way round: Print raw table (for grade 3) together with 90% confidence intervalls
+# for a test with a reliability of .94
+table.raw(3, cnorm.elfe, CI = .9, reliability = .94)
 
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
