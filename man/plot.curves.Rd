@@ -6,6 +6,11 @@
 \usage{
 plot.curves.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 The function plots the norm curves based on the regression model.
 Please check the function for inconsistent curves: The different

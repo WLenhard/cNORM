@@ -6,6 +6,11 @@
 \usage{
 plot.density.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 The function plots the density  curves based on the regression model against
 the actual percentiles from the raw data. As in 'plotNormCurves',

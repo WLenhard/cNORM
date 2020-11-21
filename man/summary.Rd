@@ -6,6 +6,11 @@
 \usage{
 summary.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 S3 method for printing model summary of cnorm object
 }

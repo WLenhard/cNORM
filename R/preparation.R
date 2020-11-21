@@ -964,7 +964,7 @@ computePowers <-
 
     # check, if it is worthwhile to continue with continuous norming
     if (useAge&&!silent) {
-      r2 <- summary(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, k, raw=TRUE)))$r.squared
+      r2 <- summary.lm(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, k, raw=TRUE)))$r.squared
 
       if (r2 < .05) {
         warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
@@ -996,7 +996,7 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
   total.rep <- total.rep[order(total.rep$raw),]
 
 
-  plot(total.rep$raw, total.rep$percentileReal, type = "l", lty = 1, main = "Simulated effects of weighted ranking", ylab = "Percentile", xlab = "Raw score")
+  base::plot(total.rep$raw, total.rep$percentileReal, type = "l", lty = 1, main = "Simulated effects of weighted ranking", ylab = "Percentile", xlab = "Raw score")
   points(total$raw, total$percentileWeighted, type = "l", lty = 1, col="blue")
   points(total$raw, total$percentileUnweighted, type = "l", lty = 1, col="red")
   legend("bottomright", legend = c("Real percentile", "Weighted", "Unweighted"), col = c("black", "blue", "red"), pch = 19)

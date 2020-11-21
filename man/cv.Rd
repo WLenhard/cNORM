@@ -6,6 +6,11 @@
 \usage{
 cv.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object or ranked data}
+
+\item{...}{Additional parameters}
+}
 \description{
 This function helps in selecting the number of terms for the model by doing repeated
 Monte Carlo cross validation with 80 percent of the data as training data and 20 percent as

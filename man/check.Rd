@@ -6,6 +6,11 @@
 \usage{
 check.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 While abilities increase and decline over age, within one age group, the
 norm scores always have to show a linear increase or decrease with increasing raw

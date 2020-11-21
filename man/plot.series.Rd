@@ -6,6 +6,11 @@
 \usage{
 plot.series.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 This functions makes use of 'plotPercentiles' to generate a series of plots
 with different number of predictors. It draws on the information provided by the model object

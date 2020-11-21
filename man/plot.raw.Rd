@@ -6,6 +6,11 @@
 \usage{
 plot.raw.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 The function plots the raw data against the fitted scores from
 the regression model per group. This helps to inspect the precision

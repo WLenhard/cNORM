@@ -2,6 +2,10 @@
 
 #' S3 method for plotting percentiles of cnorm objects
 #'
+#' The function plots the norm curves based on the regression model against
+#' the actual percentiles from the raw data.
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot
 #' @seealso plotPercentiles
 #' @export
@@ -14,6 +18,8 @@ plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
 #' of the modeling process. The scores should not deviate too far from
 #' regression line.
 #'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.raw
 #' @seealso plotRaw
 #' @export
@@ -26,6 +32,8 @@ plot.raw.cnorm <- function(object, ...) { UseMethod("plot.raw.cnorm") }
 #' regression line. The computation of the standard error is based on Oosterhuis, van der
 #' Ark and Sijtsma (2016).
 #'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.norm
 #' @seealso plotNorm
 #' @export
@@ -39,6 +47,8 @@ plot.norm.cnorm <- function(object, ...) { UseMethod("plot.norm.cnorm") }
 #' choose the model that has a high information criterion, while modeling
 #' the original data as close as possible.
 #'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.subset
 #' @seealso plotSubset
 #' @export
@@ -51,6 +61,9 @@ plot.subset.cnorm <- function(object, ...) { UseMethod("plot.subset.cnorm") }
 #' curves should not intersect. Violations of this assumption are a strong
 #' indication for violations of model assumptions in modeling the relationship between raw
 #' and norm scores.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.curves
 #' @seealso plotNormCurves
 #' @export
@@ -62,6 +75,9 @@ plot.curves.cnorm <- function(object, ...) { UseMethod("plot.curves.cnorm") }
 #' with different number of predictors. It draws on the information provided by the model object
 #' to determine the bounds of the modeling (age and standard score range). It can be used as an
 #' additional model check to determine the best fitting model.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.series
 #' @seealso plotPercentileSeries
 #' @export
@@ -73,6 +89,9 @@ plot.series.cnorm <- function(object, ...) { UseMethod("plot.series.cnorm") }
 #' the actual percentiles from the raw data. As in 'plotNormCurves',
 #' please check for inconsistent curves, especially curves showing implausible shapes as f. e.
 #' violations of biuniqueness.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.density
 #' @seealso plotDensity
 #' @export
@@ -86,6 +105,9 @@ plot.density.cnorm <- function(object, ...) { UseMethod("plot.density.cnorm") }
 #' relies on the assumption of a linear progression of the norm scores.
 #' Negative scores in the first order derivative indicate a violation of this
 #' assumption. Scores near zero are typical for bottom and ceiling effects in the raw data.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname plot.derivative
 #' @seealso plotDerivative
 #' @export
@@ -102,6 +124,8 @@ plot.derivative.cnorm <- function(object, ...) { UseMethod("plot.derivative.cnor
 #' the mean norm score reliability and crossfit measures.
 #' Please apply to the data (e. g. cv(model$data)) for model selection and to model itself
 #' (cv(model)) to estimate precision of predefined regression function.
+#' @param object cnorm object or ranked data
+#' @param ... Additional parameters
 #' @rdname cv
 #' @seealso cnorm.cv
 #' @export
@@ -110,15 +134,20 @@ cv.cnorm <- function(object, ...) {  UseMethod("cnorm.cv") }
 
 #' S3 method for printing model summary of cnorm object
 #'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname summary
 #' @export
-summary.cnorm <- function(object, ...) {  UseMethod("summary.cnorm") }
+summary.cnorm <- function(object, ...) {  UseMethod("modelSummary") }
 
 #' S3 method for printing subset information of cnorm object
 #'
 #' After conducting the model fitting procedure on the data set, the best fitting
 #' model has to be chosen. The print function shows the R2 and other information criteria
 #' on the different best fitting models with increasing number of predictors.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname print
 #' @seealso printSubset
 #' @export
@@ -130,6 +159,9 @@ print.cnorm <- function(object, ...) {  UseMethod("printSubset") }
 #' norm scores always have to show a linear increase or decrease with increasing raw
 #' scores. Violations of this assumption are a strong indication for problems
 #' in modeling the relationship between raw and norm scores.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname check
 #' @seealso checkConsistency
 #' @export
@@ -139,6 +171,11 @@ check.cnorm <- function(object, ...) {  UseMethod("checkConsistency") }
 #'
 #' Most elementary function to predict raw score based on Location (L, T score),
 #' Age (grouping variable) and the coefficients from a regression model.
+#'
+#' @param raw A specific raw score
+#' @param age The age within the continuous model
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname predict.raw
 #' @seealso predictRaw
 #' @export
@@ -149,15 +186,23 @@ predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predictRaw") 
 #' This function conducts this reverse
 #' transformation via a numerical solution: A precise norm table is generated and
 #' the closest fitting norm score for a raw score is returned.
+#'
+#' @param norm A specific raw score
+#' @param age The age within the continuous model
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname predict.norm
 #' @seealso predictNorm
 #' @export
-predict.norm.cnorm <- function(raw, age, object, ...) {  UseMethod("predictNorm") }
+predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predictNorm") }
 
 #' S3 method for creating a raw score table for specific age(s) on the basis of a cnorm object
 #'
 #' This function generates a norm table for raw scores at specific age(s) based on the regression
-#' model by assigning raw scores to norm scores.#'
+#' model by assigning raw scores to norm scores.
+#'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname table.raw
 #' @seealso rawTable
 #' @export
@@ -168,6 +213,8 @@ table.raw.cnorm <- function(object, ...) {  UseMethod("rawTable") }
 #' This function generates a norm table for specific age(s) based on the regression
 #' model by assigning raw scores to norm scores.
 #'
+#' @param object cnorm object
+#' @param ... Additional parameters
 #' @rdname table
 #' @seealso normTable
 #' @export

@@ -209,7 +209,7 @@ bestModel <- function(data,
   }
 
   subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
-  results <- summary(subsets)
+  results <- base::summary(subsets)
   results$numberOfTerms <- as.numeric(rowSums(results$which)-1)
 
   i <- 1
@@ -628,7 +628,7 @@ derive <- function(model, order = 1, covariate = NULL) {
 #' @param model A regression model or cnorm object
 #' @return A report on the regression function, weights, R2 and RMSE
 #' @export
-summary.cnorm <- function(model){
+modelSummary <- function(model){
   if(class(model)=="cnorm"){
     model <- model$model
   }

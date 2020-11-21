@@ -4,7 +4,16 @@
 \alias{predict.norm.cnorm}
 \title{S3 method for predicting single norm score for a given raw score and age}
 \usage{
-predict.norm.cnorm(raw, age, object, ...)
+predict.norm.cnorm(norm, age, object, ...)
+}
+\arguments{
+\item{norm}{A specific raw score}
+
+\item{age}{The age within the continuous model}
+
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
 }
 \description{
 This function conducts this reverse

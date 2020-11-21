@@ -6,8 +6,14 @@
 \usage{
 plot.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
-S3 method for plotting percentiles of cnorm objects
+The function plots the norm curves based on the regression model against
+the actual percentiles from the raw data.
 }
 \seealso{
 plotPercentiles

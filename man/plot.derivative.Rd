@@ -6,6 +6,11 @@
 \usage{
 plot.derivative.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 Plots the scores obtained via the first order derivative of the regression model
 in dependence of the norm score. The results indicate the progression of the

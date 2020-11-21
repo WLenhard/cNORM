@@ -11,6 +11,11 @@ Ark and Sijtsma (2016).}
 \usage{
 plot.norm.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 S3 method for plotting manifest against predicted norm sores
 The function plots the manifest norm score against the fitted norm score from

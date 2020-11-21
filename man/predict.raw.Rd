@@ -6,6 +6,15 @@
 \usage{
 predict.raw.cnorm(raw, age, object, ...)
 }
+\arguments{
+\item{raw}{A specific raw score}
+
+\item{age}{The age within the continuous model}
+
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 Most elementary function to predict raw score based on Location (L, T score),
 Age (grouping variable) and the coefficients from a regression model.

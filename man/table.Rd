@@ -6,6 +6,11 @@
 \usage{
 table.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 This function generates a norm table for specific age(s) based on the regression
 model by assigning raw scores to norm scores.

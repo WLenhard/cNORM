@@ -6,6 +6,11 @@
 \usage{
 print.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 After conducting the model fitting procedure on the data set, the best fitting
 model has to be chosen. The print function shows the R2 and other information criteria

@@ -1,13 +1,12 @@
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+importFrom(stats, summary.lm, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text)
 importFrom(latticeExtra, panel.2dsmoother)
 importFrom(utils, tail, menu)
 export(
 	bestModel,
-	boxcox,
 	checkConsistency,
 	cNORM.GUI,
 	cnorm.cv,
@@ -17,7 +16,6 @@ export(
 	derive,
 	getNormCurve,
 	normTable,
-	plotBoxCox,
 	plotDensity,
 	plotDerivative,
 	plotNormCurves,
@@ -26,10 +24,8 @@ export(
 	plotSubset,
 	plotRaw,
 	plotNorm,
-	predictNormBC,
 	predictNorm,
 	predictRaw,
-	predictRawBC,
 	prepareData,
 	printSubset,
 	rangeCheck,
@@ -38,7 +34,7 @@ export(
 	rawTable,
 	regressionFunction,
 	simulateRasch,
-	summary.cnorm
+	modelSummary
 )
 
 

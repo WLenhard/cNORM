@@ -6,6 +6,11 @@
 \usage{
 plot.subset.cnorm(object, ...)
 }
+\arguments{
+\item{object}{cnorm object}
+
+\item{...}{Additional parameters}
+}
 \description{
 Plots the information criterion - either Cp (default) or BIC - against
 the adjusted R square of the feature selection in the modeling process.
