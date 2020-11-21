@@ -39,9 +39,8 @@ the specific value here.}
 The function plots the norm curves based on the regression model.
 Please check the function for inconsistent curves: The different
 curves should not intersect. Violations of this assumption are a strong
-indication for problems
-in modeling the relationship between raw and norm scores. There are
-several reasons, why this might occur:
+indication for violations of model assumptions in modeling the relationship between raw
+and norm scores. There are several reasons, why this might occur:
 \enumerate{
   \item Vertical extrapolation: Choosing extreme norm scores, e. g. scores
   -3 <= x and x >= 3 In order to model these extreme scores, a large sample

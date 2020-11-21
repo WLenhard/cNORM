@@ -39,8 +39,7 @@ in dependence of the norm score. The results indicate the progression of the
 norm scores within each age group. The regression based modeling approach
 relies on the assumption of a linear progression of the norm scores.
 Negative scores in the first order derivative indicate a violation of this
-assumption. Scores near zero
-are typical for bottom and ceiling effects in the raw data.
+assumption. Scores near zero are typical for bottom and ceiling effects in the raw data.
 The regression models usually converge within the range of the original
 values. In case of vertical and horizontal extrapolation, with increasing
 distance to the original data, the risk of assumption violation increases

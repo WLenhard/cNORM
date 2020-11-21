@@ -54,7 +54,7 @@ Boolean, indicating model violations (TRUE) or no problems (FALSE)
 }
 \description{
 While abilities increase and decline over age, within one age group, the
-norm scores always have to show a linear increase with increasing raw
+norm scores always have to show a linear increase or decrease with increasing raw
 scores. Violations of this assumption are a strong indication for problems
 in modeling the relationship between raw and norm scores. There are
 several reasons, why this might occur:

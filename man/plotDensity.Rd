@@ -33,7 +33,8 @@ the specific value here.}
 \description{
 The function plots the density  curves based on the regression model against
 the actual percentiles from the raw data. As in 'plotNormCurves',
-please check for inconsistent curves, especially curves showing implausible shapes.
+please check for inconsistent curves, especially curves showing implausible shapes as f. e.
+violations of biuniqueness.
 }
 \examples{
 # Load example data set, compute model and plot results for age values 2, 4 and 6

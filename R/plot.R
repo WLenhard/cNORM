@@ -238,9 +238,8 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' The function plots the norm curves based on the regression model.
 #' Please check the function for inconsistent curves: The different
 #' curves should not intersect. Violations of this assumption are a strong
-#' indication for problems
-#' in modeling the relationship between raw and norm scores. There are
-#' several reasons, why this might occur:
+#' indication for violations of model assumptions in modeling the relationship between raw
+#' and norm scores. There are several reasons, why this might occur:
 #' \enumerate{
 #'   \item Vertical extrapolation: Choosing extreme norm scores, e. g. scores
 #'   -3 <= x and x >= 3 In order to model these extreme scores, a large sample
@@ -632,7 +631,8 @@ plotPercentiles <- function(data,
 #'
 #' The function plots the density  curves based on the regression model against
 #' the actual percentiles from the raw data. As in 'plotNormCurves',
-#' please check for inconsistent curves, especially curves showing implausible shapes.
+#' please check for inconsistent curves, especially curves showing implausible shapes as f. e.
+#' violations of biuniqueness.
 #' @param model The model from the bestModel function or a cnorm object
 #' @param minRaw Lower bound of the raw score
 #' @param maxRaw Upper bound of the raw score
@@ -1007,8 +1007,7 @@ plotSubset <- function(model, type = 0, index = FALSE) {
 #' norm scores within each age group. The regression based modeling approach
 #' relies on the assumption of a linear progression of the norm scores.
 #' Negative scores in the first order derivative indicate a violation of this
-#' assumption. Scores near zero
-#' are typical for bottom and ceiling effects in the raw data.
+#' assumption. Scores near zero are typical for bottom and ceiling effects in the raw data.
 #' The regression models usually converge within the range of the original
 #' values. In case of vertical and horizontal extrapolation, with increasing
 #' distance to the original data, the risk of assumption violation increases
