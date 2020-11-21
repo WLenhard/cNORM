@@ -7,7 +7,7 @@
 cnorm.cv(
   data,
   formula = NULL,
-  repetitions = 1,
+  repetitions = 5,
   norms = TRUE,
   min = 1,
   max = 12,

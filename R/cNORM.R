@@ -125,13 +125,18 @@ cNORM.GUI <- function(launch.browser=TRUE){
                 launch.browser=TRUE)
 }
 
+#' Continuous Norming
+#'
 #' Conducts continuous norming in one step and returns an object including ranked raw data and the continuous
 #' norming model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and
 #' 'bestModel' for specifics of the steps in the data preparation and modelling process. Either provide a
-#' grouping vector or an age vector (+ width of the moving window).
+#' grouping vector or an age vector (+ width of the moving window) for the ranking of the raw scores. You can
+#' adjust the grade of smoothing of the regression modell by setting the k and terms parameter. In general,
+#' increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
+#' smoothing.
 #' @param raw Numeric vector of raw scores
 #' @param group Numeric vector of grouping variable, e. g. grade
-#' @param age Numeric vector with chronological age, please specify width of window
+#' @param age Numeric vector with chronological age, please additionally specify width of window
 #' @param width Size of the moving window in case an age vector is used
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
@@ -151,7 +156,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @param k The power constant. Higher values result in more detailed approximations
 #' but have the danger of over-fit (default = 4, max = 6)
 #'
-#' @return object including the ranked raw data and the regression model
+#' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
 #'
@@ -188,4 +193,10 @@ cnorm <- function(raw = NULL,
   result <- list(data = data, model = model)
   class(result) <- "cnorm"
   return(result)
+}
+
+
+
+plot.cnorm <- function(x){
+  plotPercentiles(x)
 }

@@ -23,6 +23,8 @@ Changes:
 *    If no group is provided and only a raw vector is present e.g. ranByGroup(raw=elfe$raw),
      traditional ranking of a single group is done
 *    Power parameter k added to prepareData
+*    new convenience function summary.cv
+*    preparing for S3 generic methods
 
 
 

@@ -717,7 +717,7 @@ plotDensity <- function(model,
     data = matrix, groups = group,
     panel = function(...)
       panel.superpose(..., panel.groups = panelfun),
-    main = "Density function",
+    main = "Density functions",
     ylab = "Density", xlab = "Raw Score",
     col = COL, lwd = 1.5, grid = TRUE,
     key = list(
@@ -726,7 +726,7 @@ plotDensity <- function(model,
       text = list(NAMES)
     )
   )
-  print(plot)
+  base::print(plot)
   return(matrix)
 }
 
@@ -882,7 +882,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotSubset(cnorm.model)
 #' @export
-plotSubset <- function(model, type = 1, index = FALSE) {
+plotSubset <- function(model, type = 0, index = FALSE) {
 
   if(class(model)=="cnorm"){
     model <- model$model
@@ -1069,7 +1069,7 @@ plotDerivative <- function(model,
   colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
   coeff <- derive(model, order)
   cat(paste0(rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
-  print(coeff)
+  base::print(coeff)
 
   devFrame <- data.frame(matrix(NA, nrow = length(rowS), ncol = length(colS)))
   dev2 <- data.frame()

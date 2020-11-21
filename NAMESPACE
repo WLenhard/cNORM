@@ -37,5 +37,8 @@ export(
 	rankBySlidingWindow,
 	rawTable,
 	regressionFunction,
-	simulateRasch
+	simulateRasch,
+	summary.cnorm
 )
+
+

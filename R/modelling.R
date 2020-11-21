@@ -320,10 +320,10 @@ bestModel <- function(data,
   }
 
   if (terms > 15) {
-    message("\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cnorm.cv' or an inspection of information functions with 'plotSubset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number.")
+    message("\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cv(model$data)' or an inspection of information functions with 'plot.subset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number.")
   }
 
-  message("\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotSubset(model)' to inspect model fit, 'plotPercentiles(data, model)' to visualize percentile curves and 'summary(model)' for statistics on the regression model.")
+  message("\nUse 'print(model)' to get detailed information on the different solutions, 'plot.subset(model)' to inspect model fit.")
 
   if(plot&&attr(data, "useAge"))
     plotPercentiles(data, bestformula)
@@ -623,6 +623,19 @@ derive <- function(model, order = 1, covariate = NULL) {
   return(coeff)
 }
 
+#' Prints the results and regression function of a cnorm model
+#'
+#' @param model A regression model or cnorm object
+#' @return A report on the regression function, weights, R2 and RMSE
+#' @export
+summary.cnorm <- function(model){
+  if(class(model)=="cnorm"){
+    model <- model$model
+  }
+
+  cat(model$report, sep = "\n")
+}
+
 #' Check for horizontal and vertical extrapolation
 #'
 #' Regression model only work in a specific range and extrapolation horizontally (outside
@@ -728,7 +741,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # own regression functions can of course be used as well
 #' # result <- cnorm(raw = efe$raw, group = elfe$group)
 #' # cnorm.cv(result, repetitions = 5)
-cnorm.cv <- function(data, formula = NULL, repetitions = 1, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA, age = NA) {
+cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA, age = NA) {
 
   if(class(data)=="cnorm"){
     formula <- data$model$terms
@@ -961,19 +974,19 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 1, norms = TRUE, min = 
 
   if(is.null(formula)){
   # plot RMSE
-  plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim = c(min(train.errors, na.rm = TRUE), max(val.errors, na.rm = TRUE)))
+  base::plot(val.errors, pch = 19, type = "b", col = "blue", main = "Raw Score RMSE", ylab = "Root MSE", xlab = "Number of terms", ylim = c(min(train.errors, na.rm = TRUE), max(val.errors, na.rm = TRUE)))
   points(complete.errors, pch = 19, type = "b", col = "black")
   points(train.errors, pch = 19, type = "b", col = "red")
   legend("topright", legend = c("Training", "Validation", "Complete"), col = c("red", "blue", "black"), pch = 19)
 
   if (norms) {
     # plot R2
-    plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms", ylim = c(min(r2.test, na.rm = TRUE), 1))
+    base::plot(r2.train, pch = 19, type = "b", col = "red", main = "Norm Score R2", ylab = "R Square", xlab = "Number of terms", ylim = c(min(r2.test, na.rm = TRUE), 1))
     points(r2.test, pch = 19, type = "b", col = "blue")
     legend("bottomright", legend = c("Training", "Validation"), col = c("red", "blue"), pch = 19)
 
     # plot CROSSFIT
-    plot(tab$Crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim = c(min(c(tab$Crossfit, .88), na.rm = TRUE), max(c(tab$Crossfit, 1.12), na.rm = TRUE)))
+    base::plot(tab$Crossfit, pch = 19, type = "b", col = "black", main = "Norm Score CROSSFIT", ylab = "Crossfit", xlab = "Number of terms", ylim = c(min(c(tab$Crossfit, .88), na.rm = TRUE), max(c(tab$Crossfit, 1.12), na.rm = TRUE)))
     abline(h = 1, col = 3, lty = 2)
     abline(h = .9, col = 2, lty = 3)
     text(max, .89, adj = c(1, 1), "underfit", col = 2, cex = .75)
@@ -981,7 +994,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 1, norms = TRUE, min = 
     text(max, 1.11, adj = c(1, 0), "overfit", col = 2, cex = .75)
 
     # plot delta r2 test
-    plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim = c(min(tab$Delta.R2.test, na.rm = TRUE), max(tab$Delta.R2.test, na.rm = TRUE)))
+    base::plot(tab$Delta.R2.test, pch = 19, type = "b", col = "black", main = "Norm Score Delta R2 in Validation", ylab = "Delta R2", xlab = "Number of terms", ylim = c(min(tab$Delta.R2.test, na.rm = TRUE), max(tab$Delta.R2.test, na.rm = TRUE)))
     abline(h = 0, col = 3, lty = 2)
   }else{
     tab$R2.norm.train <- NULL
@@ -1015,7 +1028,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 1, norms = TRUE, min = 
     cat("\n")
     cat("\n")
 
-    cat("Repeated cross validation with prespecified formula yielded the following results:\n")
+    cat(paste0("Repeated cross validation with prespecified formula and ", repetitions, " repetitions yielded the following results:\n"))
     cat("\n")
     tab$Delta.R2.test <- NULL
     return(tab[complete.cases(tab), ])

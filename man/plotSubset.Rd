@@ -4,7 +4,7 @@
 \alias{plotSubset}
 \title{Evaluate information criteria for regression model}
 \usage{
-plotSubset(model, type = 1, index = FALSE)
+plotSubset(model, type = 0, index = FALSE)
 }
 \arguments{
 \item{model}{The regression model from the bestModel function or a cnorm object}

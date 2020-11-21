@@ -2,10 +2,7 @@
 % Please edit documentation in R/cNORM.R
 \name{cnorm}
 \alias{cnorm}
-\title{Conducts continuous norming in one step and returns an object including ranked raw data and the continuous
-norming model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and
-'bestModel' for specifics of the steps in the data preparation and modelling process. Either provide a
-grouping vector or an age vector (+ width of the moving window).}
+\title{Continuous Norming}
 \usage{
 cnorm(
   raw = NULL,
@@ -25,7 +22,7 @@ cnorm(
 
 \item{group}{Numeric vector of grouping variable, e. g. grade}
 
-\item{age}{Numeric vector with chronological age, please specify width of window}
+\item{age}{Numeric vector with chronological age, please additionally specify width of window}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
@@ -53,13 +50,16 @@ this number of terms is used}
 (default R2 = 0.99)}
 }
 \value{
-object including the ranked raw data and the regression model
+cnorm object including the ranked raw data and the regression model
 }
 \description{
 Conducts continuous norming in one step and returns an object including ranked raw data and the continuous
 norming model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and
 'bestModel' for specifics of the steps in the data preparation and modelling process. Either provide a
-grouping vector or an age vector (+ width of the moving window).
+grouping vector or an age vector (+ width of the moving window) for the ranking of the raw scores. You can
+adjust the grade of smoothing of the regression modell by setting the k and terms parameter. In general,
+increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
+smoothing.
 }
 \examples{
 
