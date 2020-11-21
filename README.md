@@ -37,13 +37,12 @@ Please report errors. Suggestions for improvement are always welcome!
 
 ## Example
 
-Conducting the analysis consists of four steps:
-1.  Data preparation
-1.  Establishing the regression model and selecting the parameters
+Conducting the analysis consists of the following steps:
+1.  Data preparation und establishing the regression model
 1.  Validating the model
 1.  Generating norm tables and plotting the results
 
-cNORM offers functions for all of these steps, helps in selecting the best fitting models and in generating the norm tables.
+cNORM offers functions for selecting the best fitting models and in generating the norm tables.
 
 ```{r example}
 ## Basic example code for modeling the sample dataset
@@ -59,36 +58,36 @@ cNORM.GUI()
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors
-plotSubset(cnorm.elfe, type=0)        # plot R2
-plotSubset(cnorm.elfe, type=3)        # plot MSE
+plot.subset(cnorm.elfe, type=0)        # plot R2
+plot.subset(cnorm.elfe, type=3)        # plot MSE
 
 # NOTE! At this point, you usually select a good fitting model and rerun the process.
 # with a fixed number of terms, e. g. four. Try avoid models with a high number of terms:
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
 #  Visual inspection of the percentile curves of the fitted model
-plotPercentiles(cnorm.elfe)
+plot(cnorm.elfe)
 
 # Visual inspection of the observed and fitted raw and norm scores
-plotRaw(cnorm.elfe)
-plotNorm(cnorm.elfe)
+plot.raw(cnorm.elfe)
+plot.norm(cnorm.elfe)
 
 # In order to check, how other models perform, plot series of percentile plots with ascending
 # number of predictors, in this example up to 14 predictors.
-plotPercentileSeries(cnorm.elfe, end=14)
+plot.series(cnorm.elfe, end=14)
 
 # Cross validation of number of terms with 20% of the data for validation and 80% training.
 # Due to the time intensity, max terms is restricted to 10; 3 repetitions
-cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
+cv(cnorm.elfe$data, max=10, repetitions=3)
 
 # Cross validation with pre-specified terms, e. g. of an already existing model
-cnorm.cv(cnorm.elfe, max=10, repetitions=3)
+cv(cnorm.elfe, max=10, repetitions=3)
 
 # Print norm table (for grade 3, 3.2, 3.4, 3.6)
-normTable(c(3, 3.2, 3.4, 3.6), cnorm.elfe, step = 1)
+table(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
 
 # The other way round: Print raw table (for grade 3)
-rawTable(3, cnorm.elfe)
+table.raw(3, cnorm.elfe)
 
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
@@ -125,5 +124,4 @@ cNORM is licensed under GNU Affero General Public License v3 (AGPL-3.0). This me
 *   Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
 *   Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
 *   Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
-
 
