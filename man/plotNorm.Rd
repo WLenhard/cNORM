@@ -37,3 +37,22 @@ plotNorm(result, group="group", minNorm=25, maxNorm=75)
 \references{
 Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 }
+\seealso{
+Other plot: 
+\code{\link{plot.cnorm}()},
+\code{\link{plot.curves.cnorm}()},
+\code{\link{plot.density.cnorm}()},
+\code{\link{plot.derivative.cnorm}()},
+\code{\link{plot.norm.cnorm}()},
+\code{\link{plot.raw.cnorm}()},
+\code{\link{plot.series.cnorm}()},
+\code{\link{plot.subset.cnorm}()},
+\code{\link{plotDensity}()},
+\code{\link{plotDerivative}()},
+\code{\link{plotNormCurves}()},
+\code{\link{plotPercentileSeries}()},
+\code{\link{plotPercentiles}()},
+\code{\link{plotRaw}()},
+\code{\link{plotSubset}()}
+}
+\concept{plot}

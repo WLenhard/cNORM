@@ -110,4 +110,10 @@ mean(data.elfe$normValue - data.elfe2$normValue)
 }
 \seealso{
 rankByGroup, computePowers
+
+Other prepare: 
+\code{\link{computePowers}()},
+\code{\link{prepareData}()},
+\code{\link{rankByGroup}()}
 }
+\concept{prepare}

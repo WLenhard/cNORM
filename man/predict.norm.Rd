@@ -22,4 +22,16 @@ the closest fitting norm score for a raw score is returned.
 }
 \seealso{
 predictNorm
+
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
 }
+\concept{predict}

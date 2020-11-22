@@ -14,3 +14,18 @@ summary.cnorm(object, ...)
 \description{
 S3 method for printing model summary of cnorm object
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()}
+}
+\concept{model}

@@ -58,3 +58,16 @@ fitted.values <- predict(m)
 # break up contribution of each predictor variable
 fitted.partial <- predict(m, type = "terms")
 }
+\seealso{
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.norm.cnorm}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictNorm}()},
+\code{\link{rawTable}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
+}
+\concept{predict}

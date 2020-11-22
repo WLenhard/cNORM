@@ -100,3 +100,18 @@ cnorm.cv(data, min = 3, max = 7, norms = FALSE)
 # result <- cnorm(raw = efe$raw, group = elfe$group)
 # cnorm.cv(result, repetitions = 5)
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
+}
+\concept{model}

@@ -19,4 +19,22 @@ violations of biuniqueness.
 }
 \seealso{
 plotDensity
+
+Other plot: 
+\code{\link{plot.cnorm}()},
+\code{\link{plot.curves.cnorm}()},
+\code{\link{plot.derivative.cnorm}()},
+\code{\link{plot.norm.cnorm}()},
+\code{\link{plot.raw.cnorm}()},
+\code{\link{plot.series.cnorm}()},
+\code{\link{plot.subset.cnorm}()},
+\code{\link{plotDensity}()},
+\code{\link{plotDerivative}()},
+\code{\link{plotNormCurves}()},
+\code{\link{plotNorm}()},
+\code{\link{plotPercentileSeries}()},
+\code{\link{plotPercentiles}()},
+\code{\link{plotRaw}()},
+\code{\link{plotSubset}()}
 }
+\concept{plot}

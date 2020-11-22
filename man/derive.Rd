@@ -28,3 +28,18 @@ normData <- prepareData(elfe)
 m <- bestModel(normData)
 derivedCoefficients <- derive(m)
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
+}
+\concept{model}

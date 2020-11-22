@@ -22,3 +22,18 @@ on the different best fitting models with increasing number of predictors.
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 printSubset(result)
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
+}
+\concept{model}

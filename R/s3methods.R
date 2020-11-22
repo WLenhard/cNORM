@@ -8,6 +8,7 @@
 #' @param ... Additional parameters
 #' @rdname plot
 #' @seealso plotPercentiles
+#' @family plot
 #' @export
 plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
 
@@ -22,6 +23,7 @@ plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.raw
 #' @seealso plotRaw
+#' @family plot
 #' @export
 plot.raw.cnorm <- function(object, ...) { UseMethod("plot.raw.cnorm") }
 
@@ -36,6 +38,7 @@ plot.raw.cnorm <- function(object, ...) { UseMethod("plot.raw.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.norm
 #' @seealso plotNorm
+#' @family plot
 #' @export
 plot.norm.cnorm <- function(object, ...) { UseMethod("plot.norm.cnorm") }
 
@@ -51,6 +54,7 @@ plot.norm.cnorm <- function(object, ...) { UseMethod("plot.norm.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.subset
 #' @seealso plotSubset
+#' @family plot
 #' @export
 plot.subset.cnorm <- function(object, ...) { UseMethod("plot.subset.cnorm") }
 
@@ -66,6 +70,7 @@ plot.subset.cnorm <- function(object, ...) { UseMethod("plot.subset.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.curves
 #' @seealso plotNormCurves
+#' @family plot
 #' @export
 plot.curves.cnorm <- function(object, ...) { UseMethod("plot.curves.cnorm") }
 
@@ -80,6 +85,7 @@ plot.curves.cnorm <- function(object, ...) { UseMethod("plot.curves.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.series
 #' @seealso plotPercentileSeries
+#' @family plot
 #' @export
 plot.series.cnorm <- function(object, ...) { UseMethod("plot.series.cnorm") }
 
@@ -94,6 +100,7 @@ plot.series.cnorm <- function(object, ...) { UseMethod("plot.series.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.density
 #' @seealso plotDensity
+#' @family plot
 #' @export
 plot.density.cnorm <- function(object, ...) { UseMethod("plot.density.cnorm") }
 
@@ -110,6 +117,7 @@ plot.density.cnorm <- function(object, ...) { UseMethod("plot.density.cnorm") }
 #' @param ... Additional parameters
 #' @rdname plot.derivative
 #' @seealso plotDerivative
+#' @family plot
 #' @export
 plot.derivative.cnorm <- function(object, ...) { UseMethod("plot.derivative.cnorm") }
 
@@ -128,6 +136,7 @@ plot.derivative.cnorm <- function(object, ...) { UseMethod("plot.derivative.cnor
 #' @param ... Additional parameters
 #' @rdname cv
 #' @seealso cnorm.cv
+#' @family model
 #' @export
 cv.cnorm <- function(object, ...) {  UseMethod("cnorm.cv") }
 
@@ -137,6 +146,7 @@ cv.cnorm <- function(object, ...) {  UseMethod("cnorm.cv") }
 #' @param object cnorm object
 #' @param ... Additional parameters
 #' @rdname summary
+#' @family model
 #' @export
 summary.cnorm <- function(object, ...) {  UseMethod("modelSummary") }
 
@@ -150,6 +160,7 @@ summary.cnorm <- function(object, ...) {  UseMethod("modelSummary") }
 #' @param ... Additional parameters
 #' @rdname print
 #' @seealso printSubset
+#' @family model
 #' @export
 print.cnorm <- function(object, ...) {  UseMethod("printSubset") }
 
@@ -164,6 +175,7 @@ print.cnorm <- function(object, ...) {  UseMethod("printSubset") }
 #' @param ... Additional parameters
 #' @rdname check
 #' @seealso checkConsistency
+#' @family model
 #' @export
 check.cnorm <- function(object, ...) {  UseMethod("checkConsistency") }
 
@@ -178,6 +190,7 @@ check.cnorm <- function(object, ...) {  UseMethod("checkConsistency") }
 #' @param ... Additional parameters
 #' @rdname predict.raw
 #' @seealso predictRaw
+#' @family predict
 #' @export
 predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predictRaw") }
 
@@ -193,6 +206,7 @@ predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predictRaw") 
 #' @param ... Additional parameters
 #' @rdname predict.norm
 #' @seealso predictNorm
+#' @family predict
 #' @export
 predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predictNorm") }
 
@@ -205,6 +219,7 @@ predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predictNorm
 #' @param ... Additional parameters
 #' @rdname table.raw
 #' @seealso rawTable
+#' @family predict
 #' @export
 table.raw.cnorm <- function(object, ...) {  UseMethod("rawTable") }
 
@@ -217,6 +232,7 @@ table.raw.cnorm <- function(object, ...) {  UseMethod("rawTable") }
 #' @param ... Additional parameters
 #' @rdname table
 #' @seealso normTable
+#' @family predict
 #' @export
 table.cnorm <- function(object, ...) {  UseMethod("normTable") }
 

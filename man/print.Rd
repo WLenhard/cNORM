@@ -18,4 +18,18 @@ on the different best fitting models with increasing number of predictors.
 }
 \seealso{
 printSubset
+
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
 }
+\concept{model}

@@ -80,3 +80,18 @@ modelViolations <- checkConsistency(result,
 )
 plotDerivative(result, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
+}
+\concept{model}

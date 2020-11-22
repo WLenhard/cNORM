@@ -45,4 +45,18 @@ cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # return norm value for raw value 21 for grade 2, month 9
 specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
+
 }
+\seealso{
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.norm.cnorm}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
+}
+\concept{predict}

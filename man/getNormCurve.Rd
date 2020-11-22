@@ -48,3 +48,16 @@ of a specific ability is shown.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 getNormCurve(35, cnorm.elfe)
 }
+\seealso{
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{normTable}()},
+\code{\link{predict.norm.cnorm}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
+}
+\concept{predict}

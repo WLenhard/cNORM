@@ -19,6 +19,7 @@
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #' getNormCurve(35, cnorm.elfe)
+#' @family predict
 #' @export
 getNormCurve <-
   function(norm,
@@ -119,6 +120,7 @@ getNormCurve <-
 #'
 #' # break up contribution of each predictor variable
 #' fitted.partial <- predict(m, type = "terms")
+#' @family predict
 #' @export
 predictRaw <-
   function(norm,
@@ -228,6 +230,7 @@ predictRaw <-
 #'   minNorm = 25, maxNorm = 75,
 #'   step = 1, minRaw = 0, maxRaw = 26
 #' )
+#' @family predict
 #' @export
 normTable <- function(A,
                       model,
@@ -399,6 +402,7 @@ normTable <- function(A,
 #'
 #' # additionally compute confidence intervalls
 #' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+#' @family predict
 #' @export
 rawTable <- function(A,
                      model,
@@ -561,6 +565,8 @@ rawTable <- function(A,
 #'
 #' # retrieve function for time point 6
 #' d <- derivationTable(6, cnorm.elfe, step = 0.5)
+#'
+#' @family predict
 #' @export
 derivationTable <-
   function(A,
@@ -627,6 +633,8 @@ derivationTable <-
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
 #' specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
+#'
+#' @family predict
 #' @export
 predictNorm <-
   function(raw,

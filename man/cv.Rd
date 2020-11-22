@@ -24,4 +24,18 @@ Please apply to the data (e. g. cv(model$data)) for model selection and to model
 }
 \seealso{
 cnorm.cv
+
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
 }
+\concept{model}

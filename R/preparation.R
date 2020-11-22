@@ -68,6 +68,7 @@
 #' data.elfe2 <- prepareData(data = elfe, group = FALSE)
 #' m <- bestModel(data.elfe2)
 #' @export
+#' @family prepare
 prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", k = 4, width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
   if (is.null(data)) {
     normData <- data.frame(raw=raw)
@@ -210,6 +211,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
 #' @seealso rankBySlidingWindow, computePowers
 #' @export
+#' @family prepare
 rankByGroup <-
   function(data = NULL,
            group = "group",
@@ -548,6 +550,7 @@ rankByGroup <-
 #' }
 #' @seealso rankByGroup, computePowers
 #' @export
+#' @family prepare
 rankBySlidingWindow <- function(data = NULL,
                                 age = "age",
                                 raw = "raw",
@@ -804,6 +807,7 @@ rankBySlidingWindow <- function(data = NULL,
 #' data.ppvt <- rankByGroup(ppvt)
 #' data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
 #' @export
+#' @family prepare
 computePowers <-
   function(data,
              k = 4,

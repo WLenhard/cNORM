@@ -69,4 +69,16 @@ table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9
 }
 \seealso{
 normTable
+
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.norm.cnorm}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
 }
+\concept{predict}

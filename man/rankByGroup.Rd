@@ -93,4 +93,10 @@ rawTable(0, model = m) # please use an arbitrary value for age when generating t
 }
 \seealso{
 rankBySlidingWindow, computePowers
+
+Other prepare: 
+\code{\link{computePowers}()},
+\code{\link{prepareData}()},
+\code{\link{rankBySlidingWindow}()}
 }
+\concept{prepare}

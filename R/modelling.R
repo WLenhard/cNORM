@@ -92,6 +92,7 @@
 #' }
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
+#' @family model
 bestModel <- function(data,
                       raw = NULL,
                       R2 = NULL,
@@ -346,6 +347,7 @@ bestModel <- function(data,
 #' # Generate cnorm object from example data
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' printSubset(result)
+#' @family model
 printSubset <- function(model) {
   if(class(model)=="cnorm"){
     model <- model$model
@@ -411,6 +413,7 @@ printSubset <- function(model) {
 #' )
 #' plotDerivative(result, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
 #' @export
+#' @family model
 checkConsistency <- function(model,
                              minAge = NULL,
                              maxAge = NULL,
@@ -518,6 +521,7 @@ checkConsistency <- function(model,
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' regressionFunction(result)
 #' @export
+#' @family model
 regressionFunction <- function(model, raw = NULL, digits = NULL) {
   if(class(model)=="cnorm"){
     raw <- "raw"
@@ -567,6 +571,7 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' m <- bestModel(normData)
 #' derivedCoefficients <- derive(m)
 #' @export
+#' @family model
 derive <- function(model, order = 1, covariate = NULL) {
   if(class(model)=="cnorm"){
     model <- model$model
@@ -628,6 +633,7 @@ derive <- function(model, order = 1, covariate = NULL) {
 #' @param model A regression model or cnorm object
 #' @return A report on the regression function, weights, R2 and RMSE
 #' @export
+#' @family model
 modelSummary <- function(model){
   if(class(model)=="cnorm"){
     model <- model$model
@@ -653,6 +659,7 @@ modelSummary <- function(model){
 #' normData <- prepareData(elfe)
 #' m <- bestModel(normData)
 #' print(rangeCheck(m))
+#' @family model
 rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
   if(class(model)=="cnorm"){
     model <- model$model
@@ -741,6 +748,7 @@ rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxN
 #' # own regression functions can of course be used as well
 #' # result <- cnorm(raw = efe$raw, group = elfe$group)
 #' # cnorm.cv(result, repetitions = 5)
+#' @family model
 cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA, age = NA) {
 
   if(class(data)=="cnorm"){

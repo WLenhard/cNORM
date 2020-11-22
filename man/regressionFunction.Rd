@@ -25,3 +25,18 @@ It can be used to predict the raw scores based on age and location.
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 regressionFunction(result)
 }
+\seealso{
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{check.cnorm}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{summary.cnorm}()}
+}
+\concept{model}

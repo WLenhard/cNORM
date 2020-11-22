@@ -41,7 +41,20 @@ cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # retrieve function for time point 6
 d <- derivationTable(6, cnorm.elfe, step = 0.5)
+
 }
 \seealso{
 plotDerivative, derive
+
+Other predict: 
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.norm.cnorm}()},
+\code{\link{predict.raw.cnorm}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()},
+\code{\link{table.cnorm}()},
+\code{\link{table.raw.cnorm}()}
 }
+\concept{predict}

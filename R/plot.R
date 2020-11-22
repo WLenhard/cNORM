@@ -15,6 +15,7 @@
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotRaw(result)
 #' @export
+#' @family plot
 plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 
   if(class(data)=="cnorm"){
@@ -130,6 +131,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' plotNorm(result, group="group", minNorm=25, maxNorm=75)
 #' }
 #' @export
+#' @family plot
 plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
   if(class(data)=="cnorm"){
     model <- data$model
@@ -272,6 +274,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' m <- bestModel(data = normData)
 #' plotNormCurves(m, minAge=2, maxAge=5)
 #' @export
+#' @family plot
 plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
                            minAge = NULL,
                            maxAge = NULL,
@@ -404,6 +407,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotPercentiles(result)
 #' @export
+#' @family plot
 plotPercentiles <- function(data,
                             model,
                             minRaw = NULL,
@@ -647,6 +651,7 @@ plotPercentiles <- function(data,
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotDensity(result, group = c (2, 4, 6))
 #' @export
+#' @family plot
 plotDensity <- function(model,
                         minRaw = NULL,
                         maxRaw = NULL,
@@ -757,6 +762,7 @@ plotDensity <- function(model,
 #' # Load example data set, compute model and plot results
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotPercentileSeries(result, start=1, end=5, group="group")
+#' @family plot
 plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  type = 7,
@@ -882,6 +888,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotSubset(cnorm.model)
 #' @export
+#' @family plot
 plotSubset <- function(model, type = 0, index = FALSE) {
 
   if(class(model)=="cnorm"){
@@ -1030,6 +1037,7 @@ plotSubset <- function(model, type = 0, index = FALSE) {
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotDerivative(result, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
 #' @export
+#' @family plot
 plotDerivative <- function(model,
                            minAge = NULL,
                            maxAge = NULL,

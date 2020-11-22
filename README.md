@@ -54,8 +54,8 @@ library(cNORM)
 cNORM.GUI()
 
 # If you prefer the console, you can use the syntax as well: Rank data within
-# group and compute powers and interactions for the internal dataset 'elfe' and compute model
-# The resulting object includes the ranked via object$data and model via object$model
+# group and compute powers and interactions for the internal dataset 'elfe' and compute model.
+# The resulting object includes the ranked via object$data and model via object$model.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors

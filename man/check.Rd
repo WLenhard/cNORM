@@ -19,4 +19,18 @@ in modeling the relationship between raw and norm scores.
 }
 \seealso{
 checkConsistency
+
+Other model: 
+\code{\link{bestModel}()},
+\code{\link{checkConsistency}()},
+\code{\link{cnorm.cv}()},
+\code{\link{cv.cnorm}()},
+\code{\link{derive}()},
+\code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
+\code{\link{printSubset}()},
+\code{\link{rangeCheck}()},
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
 }
+\concept{model}
