@@ -126,7 +126,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
     if(max(normData[, age])<min(normData[, group])||min(normData[, age])>max(normData[, group])){
       warning("The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter.")
-      plot(normData[, age], normData[, group])
+      base::plot(normData[, age], normData[, group])
     }
   }
   normData <- normData[!is.na(normData[, raw]), ]
@@ -694,7 +694,6 @@ rankBySlidingWindow <- function(data = NULL,
   }
     nObs <- nrow(observations)
 
-    # print((rank(observations[, raw]) + numerator[method]) / (n + denominator[method]))
     if (descend) {
       observations$percentile <- (wr(-observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
     } else {

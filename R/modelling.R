@@ -324,10 +324,11 @@ bestModel <- function(data,
     message("\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cv(model$data)' or an inspection of information functions with 'plot.subset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number.")
   }
 
-  message("\nUse 'print(model)' to get detailed information on the different solutions, 'plot.subset(model)' to inspect model fit.")
+  message("\nUse 'print(model)' to get detailed information on the different solutions, 'plot(model) to display percentile plot, plot.subset(model)' to inspect model fit.")
 
-  if(plot&&attr(data, "useAge"))
+  if(plot&&attr(data, "useAge")&&(attributes(data)$group %in% colnames(data))){
     plotPercentiles(data, bestformula)
+  }
 
   return(bestformula)
 }

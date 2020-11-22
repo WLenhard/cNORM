@@ -34,11 +34,12 @@
 #'   \code{\link{plotNormCurves}})
 #' }
 #'
+#' The function \link{cnorm}
 #' For an easy start, you can use the graphical user interface by typing \code{cNORM.GUI()} on the console.
 #' Example datasets with large cohorts are available for demonstration purposes ('elfe',
 #' 'ppvt', 'CDC', 'life' and 'mortality' sample data from the references). Use
-#' \code{data <- prepareData(elfe)} or \code{data <- prepareData(ppvt)} to load and prepare
-#' example data for the modeling. Use  \code{vignette(cNORM-Demo)} for a walk through on
+#' \code{model <- cnorm(raw = elfe$raw, group = elfe$group)} to get a first impression.
+#' Use  \code{vignette(cNORM-Demo)} for a walk through on
 #' conducting  the modeling and \url{https://www.psychometrica.de/cNorm_en.html} for a
 #' comprehensive tutorial.
 #'
@@ -127,10 +128,15 @@ cNORM.GUI <- function(launch.browser=TRUE){
 
 #' Continuous Norming
 #'
-#' Conducts continuous norming in one step and returns an object including ranked raw data and the continuous
-#' norming model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and
-#' 'bestModel' for specifics of the steps in the data preparation and modelling process. Either provide a
-#' grouping vector or an age vector (+ width of the moving window) for the ranking of the raw scores. You can
+#' Conducts continuous norming in one step and returns an object including ranked raw data and the continuous norming
+#' model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
+#' of the steps in the data preparation and modelling process. In addition to the raw scores, either provide
+#' \itemize{
+#'  \item{a numeric vector for the grouping information (group)}
+#'  \item{a numeric vector for both grouping and age (group, age)}
+#'  \item{a numeric age vector and the width of the sliding window (age, width)}
+#' }
+#' for the ranking of the raw scores. You can
 #' adjust the grade of smoothing of the regression modell by setting the k and terms parameter. In general,
 #' increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
 #' smoothing.
@@ -178,25 +184,33 @@ cnorm <- function(raw = NULL,
     if(length(raw)!=length(group)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
+
     data <- rankByGroup(raw=raw, group=group, scale=scale, weights=weights, descend = descend)
+    if(is.numeric(age)){
+      if(length(raw)!=length(age)){
+        warning("Length of the age vector does not match the raw score vector, ignoring age information.")
+        data <- computePowers(data, k = k)
+      }else{
+        data$age <- age
+        data <- computePowers(data, k = k, age = age)
+      }
+    }else{
+      data <- computePowers(data, k = k)
+    }
   }else if(is.numeric(raw)&&is.numeric(age)&&!is.na(width)){
     if(length(raw)!=length(age)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
-    data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend)
+
+    message("Ranking data with sliding window ...")
+    data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width)
+    data <- computePowers(data, k = k)
   }else{
-    stop("Please provide a numerical vector for the raw scores and either a vector for grouping or age of the same length, If you use age, please specify the width of the window.")
+    stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }
 
-  data <- computePowers(data, k = k)
   model <- bestModel(data, R2=R2, terms=terms)
   result <- list(data = data, model = model)
   class(result) <- "cnorm"
   return(result)
-}
-
-
-
-plot.cnorm <- function(x){
-  plotPercentiles(x)
 }

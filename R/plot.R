@@ -446,7 +446,7 @@ plotPercentiles <- function(data,
               minAge = minAge, maxAge = maxAge,
               raw = raw, group = group, percentiles = percentiles,
               scale = scale, title = title))
-    return(print(trel))
+    return(base::print(trel))
   }
 
   if(!is.null(model$covariate)){
@@ -613,7 +613,7 @@ plotPercentiles <- function(data,
     title <- paste0("Observed and Predicted Percentile Curves\nModel: ", model$ideal.model, ", R2 = ", round(model$subsets$adjr2[[model$ideal.model]], digits = 4))
   }
 
-  plot <- xyplot(formula(xyFunction), percentile,
+  chart <- xyplot(formula(xyFunction), percentile,
     panel = function(...)
       panel.superpose(..., panel.groups = panelfun),
     main = title,
@@ -626,8 +626,8 @@ plotPercentiles <- function(data,
     )
   )
 
-  print(plot)
-  return(plot)
+  base::print(chart)
+  return(chart)
 }
 
 
@@ -853,7 +853,7 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 
     if (!is.null(filename)) {
       trellis.device(device = "png", filename = paste0(filename, start, ".png"))
-      print(l[[length(l)]])
+      base::print(l[[length(l)]])
       dev.off()
     }
     start <- start + 1
