@@ -70,30 +70,30 @@
 #' @examples
 #' # Model internal 'elfe' dataset with the default k = 4 regression on T scores
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotPercentiles(results)
+#' plot(results)
 #'
 #' # Show model fit of models with progressing number of predictors
-#' printSubset(results)
-#' plotSubset(results)
+#' print(results)
+#' plot.subset(results)
 #'
 #' # Plot manifest and predicted values, plot series of percentile charts
 #' plotRaw(results)
 #' \dontrun{
-#' plotPercentileSeries(results)
+#' plot.series(results)
 #' }
 #'
 #' # Additional tests: Check model assumptions
-#' checkConsistency(results)
-#' plotDerivative(results)
+#' check(results)
+#' plot.derivative(results)
 #'
 #' # Generate norm tables; predict values, here: grade 3.75 from T score 25
 #' # to 75 and within the raw value range of this specific test (0 to 28)
-#' normTable <- normTable(3.75, results, minNorm=25, maxNorm=75, step=0.5)
-#' rawTable <- rawTable(3.75, results, minRaw = 0, maxRaw = 28, minNorm=25,
+#' table <- normTable(3.75, results, minNorm=25, maxNorm=75, step=0.5)
+#' table.raw <- rawTable(3.75, results, minRaw = 0, maxRaw = 28, minNorm=25,
 #'                      maxNorm=75)
 #'
 #' # Predict a specific norm score
-#' score <- predictNorm(raw = 21, A = 3.75,
+#' score <- predict.norm(raw = 21, A = 3.75,
 #'                           model = results, minNorm=25, maxNorm=75)
 NULL
 
@@ -147,6 +147,10 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index points
+#' @param method Ranking method in case of bindings, please provide an index,
+#' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+#' 6 = Filliben (1975), 7 = Yu & Huang (2001)
 #' @param descend ranking order (default descent = FALSE): inverses the
 #' ranking order with higher raw scores getting lower norm scores; relevant
 #' for example when norming error scores, where lower scores mean higher
@@ -167,15 +171,26 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @examples
 #'
 #' # Using this function with the example dataset 'elfe'
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+#'
+#' # return norm tables including 90% confidence intervalls for a
+#' # test with a reliability of r = .85; table are set to mean of quartal
+#' # in grade 3 (children completed 2 years of schooling)
+#' table(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+#'
+#' # ... or instead of raw scores for norm scores, the other way round
+#' table.raw(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+#'
+#' @export
 #'
 cnorm <- function(raw = NULL,
                   group = NULL,
                   age = NULL,
-                  scale = "T",
-                  descend = FALSE,
-                  weights = NULL,
                   width = NA,
+                  weights = NULL,
+                  scale = "T",
+                  method = 4,
+                  descend = FALSE,
                   k = 4,
                   terms = 0,
                   R2 = NULL){
@@ -185,7 +200,17 @@ cnorm <- function(raw = NULL,
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
 
-    data <- rankByGroup(raw=raw, group=group, scale=scale, weights=weights, descend = descend)
+    if(is.numeric(age)&&!is.na(width)){
+      if(length(raw)!=length(age)){
+        stop("Please provide numeric vectors of equal length for raw score and group data.")
+      }
+
+      message("Ranking data with sliding window ...")
+      data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width, method = method)
+      data <- computePowers(data, k = k)
+    }else{
+      data <- rankByGroup(raw=raw, group=group, scale=scale, weights=weights, descend = descend, method = method)
+    }
     if(is.numeric(age)){
       if(length(raw)!=length(age)){
         warning("Length of the age vector does not match the raw score vector, ignoring age information.")
@@ -197,19 +222,22 @@ cnorm <- function(raw = NULL,
     }else{
       data <- computePowers(data, k = k)
     }
-  }else if(is.numeric(raw)&&is.numeric(age)&&!is.na(width)){
+  }
+
+  # if no grouping variable is given
+  else if(is.numeric(raw)&&is.numeric(age)&&!is.na(width)){
     if(length(raw)!=length(age)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
 
     message("Ranking data with sliding window ...")
-    data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width)
+    data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width, method = method)
     data <- computePowers(data, k = k)
   }else{
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }
 
-  model <- bestModel(data, R2=R2, terms=terms)
+  model <- bestModel(data, R2=R2, terms=terms, weights = weights)
   result <- list(data = data, model = model)
   class(result) <- "cnorm"
   return(result)

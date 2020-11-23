@@ -8,10 +8,11 @@ cnorm(
   raw = NULL,
   group = NULL,
   age = NULL,
-  scale = "T",
-  descend = FALSE,
-  weights = NULL,
   width = NA,
+  weights = NULL,
+  scale = "T",
+  method = 4,
+  descend = FALSE,
   k = 4,
   terms = 0,
   R2 = NULL
@@ -24,21 +25,26 @@ cnorm(
 
 \item{age}{Numeric vector with chronological age, please additionally specify width of window}
 
-\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
-transformation); a double vector with the mean and standard deviation can as well,
-be provided f. e. c(10, 3) for Wechsler scale index points}
-
-\item{descend}{ranking order (default descent = FALSE): inverses the
-ranking order with higher raw scores getting lower norm scores; relevant
-for example when norming error scores, where lower scores mean higher
-performance}
+\item{width}{Size of the moving window in case an age vector is used}
 
 \item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
 data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
 Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
 feature is currently EXPERIMENTAL!}
 
-\item{width}{Size of the moving window in case an age vector is used}
+\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
+transformation); a double vector with the mean and standard deviation can as well,
+be provided f. e. c(10, 3) for Wechsler scale index points}
+
+\item{method}{Ranking method in case of bindings, please provide an index,
+choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+6 = Filliben (1975), 7 = Yu & Huang (2001)}
+
+\item{descend}{ranking order (default descent = FALSE): inverses the
+ranking order with higher raw scores getting lower norm scores; relevant
+for example when norming error scores, where lower scores mean higher
+performance}
 
 \item{k}{The power constant. Higher values result in more detailed approximations
 but have the danger of over-fit (default = 4, max = 6)}
@@ -69,7 +75,15 @@ smoothing.
 \examples{
 
 # Using this function with the example dataset 'elfe'
-result <- cnorm(raw = elfe$raw, group = elfe$group)
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+
+# return norm tables including 90\% confidence intervalls for a
+# test with a reliability of r = .85; table are set to mean of quartal
+# in grade 3 (children completed 2 years of schooling)
+table(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+
+# ... or instead of raw scores for norm scores, the other way round
+table.raw(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 
 }
 \seealso{

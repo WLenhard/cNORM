@@ -3,12 +3,13 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 1.3.0 (in progress)
-Date: 2020.10.14
+### Version in 2.0.0 (in progress)
+Date: 2020.11.23
 
 
 Changes:
 
+*    Preparing for next major release with complete redesign of S3 method structure and weighting
 *    New function cnorm() that does all the data preparation and modelling in one step
      It returns a cnorm object, which can be used in all model check, plotting and prediction functions
 *    All functions have been extended to accept a cnorm object instead of data and / or model
