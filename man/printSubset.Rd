@@ -31,9 +31,7 @@ Other model:
 \code{\link{cv.cnorm}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
 \code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+\code{\link{regressionFunction}()}
 }
 \concept{model}

@@ -659,7 +659,7 @@ modelSummary <- function(model){
 #' @examples
 #' normData <- prepareData(elfe)
 #' m <- bestModel(normData)
-#' print(rangeCheck(m))
+#' rangeCheck(m)
 #' @family model
 rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
   if(class(model)=="cnorm"){

@@ -37,7 +37,7 @@ results. The function generates a message, indicating extrapolation and the rang
 \examples{
 normData <- prepareData(elfe)
 m <- bestModel(normData)
-print(rangeCheck(m))
+rangeCheck(m)
 }
 \seealso{
 Other model: 
@@ -48,9 +48,7 @@ Other model:
 \code{\link{cv.cnorm}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
 \code{\link{printSubset}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+\code{\link{regressionFunction}()}
 }
 \concept{model}

@@ -23,7 +23,6 @@ assumption. Scores near zero are typical for bottom and ceiling effects in the r
 plotDerivative
 
 Other plot: 
-\code{\link{plot.cnorm}()},
 \code{\link{plot.curves.cnorm}()},
 \code{\link{plot.density.cnorm}()},
 \code{\link{plot.norm.cnorm}()},

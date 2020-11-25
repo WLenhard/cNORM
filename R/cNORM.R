@@ -176,10 +176,10 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' # return norm tables including 90% confidence intervalls for a
 #' # test with a reliability of r = .85; table are set to mean of quartal
 #' # in grade 3 (children completed 2 years of schooling)
-#' table(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+#' normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 #'
 #' # ... or instead of raw scores for norm scores, the other way round
-#' table.raw(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+#' rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 #'
 #' @export
 #'

@@ -1,15 +1,3 @@
-# Mapping of S3 methods to cNORM methods
-
-#' S3 method for plotting percentiles of cnorm objects
-#'
-#' The function plots the norm curves based on the regression model against
-#' the actual percentiles from the raw data.
-#' @param object cnorm object
-#' @param ... Additional parameters
-#' @rdname plot
-#' @seealso plotPercentiles
-#' @family plot
-#' @export
 plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
 
 #' S3 method for plotting raw scores against fitted raw scores of cnorm objects
@@ -21,7 +9,6 @@ plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.raw
 #' @seealso plotRaw
 #' @family plot
 #' @export
@@ -36,7 +23,6 @@ plot.raw.cnorm <- function(object, ...) { UseMethod("plot.raw.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.norm
 #' @seealso plotNorm
 #' @family plot
 #' @export
@@ -52,7 +38,6 @@ plot.norm.cnorm <- function(object, ...) { UseMethod("plot.norm.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.subset
 #' @seealso plotSubset
 #' @family plot
 #' @export
@@ -68,7 +53,6 @@ plot.subset.cnorm <- function(object, ...) { UseMethod("plot.subset.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.curves
 #' @seealso plotNormCurves
 #' @family plot
 #' @export
@@ -83,7 +67,6 @@ plot.curves.cnorm <- function(object, ...) { UseMethod("plot.curves.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.series
 #' @seealso plotPercentileSeries
 #' @family plot
 #' @export
@@ -98,7 +81,6 @@ plot.series.cnorm <- function(object, ...) { UseMethod("plot.series.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.density
 #' @seealso plotDensity
 #' @family plot
 #' @export
@@ -115,7 +97,6 @@ plot.density.cnorm <- function(object, ...) { UseMethod("plot.density.cnorm") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname plot.derivative
 #' @seealso plotDerivative
 #' @family plot
 #' @export
@@ -134,35 +115,15 @@ plot.derivative.cnorm <- function(object, ...) { UseMethod("plot.derivative.cnor
 #' (cv(model)) to estimate precision of predefined regression function.
 #' @param object cnorm object or ranked data
 #' @param ... Additional parameters
-#' @rdname cv
 #' @seealso cnorm.cv
 #' @family model
 #' @export
-cv.cnorm <- function(object, ...) {  UseMethod("cnorm.cv") }
+cv.cnorm <- function(object, ...) {  UseMethod("cv.cnorm") }
 
 
-#' S3 method for printing model summary of cnorm object
-#'
-#' @param object cnorm object
-#' @param ... Additional parameters
-#' @rdname summary
-#' @family model
-#' @export
-summary.cnorm <- function(object, ...) {  UseMethod("modelSummary") }
 
-#' S3 method for printing subset information of cnorm object
-#'
-#' After conducting the model fitting procedure on the data set, the best fitting
-#' model has to be chosen. The print function shows the R2 and other information criteria
-#' on the different best fitting models with increasing number of predictors.
-#'
-#' @param object cnorm object
-#' @param ... Additional parameters
-#' @rdname print
-#' @seealso printSubset
-#' @family model
-#' @export
-print.cnorm <- function(object, ...) {  UseMethod("printSubset") }
+summary.cnorm <- function(object, ...) {  UseMethod("summary.cnorm") }
+print.cnorm <- function(object, ...) {  UseMethod("print.cnorm") }
 
 #' S3 method for checking the consistency of a cnorm regression model
 #'
@@ -173,11 +134,10 @@ print.cnorm <- function(object, ...) {  UseMethod("printSubset") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname check
 #' @seealso checkConsistency
 #' @family model
 #' @export
-check.cnorm <- function(object, ...) {  UseMethod("checkConsistency") }
+check.cnorm <- function(object, ...) {  UseMethod("check.cnorm") }
 
 #' S3 method for predicting single raw score for a given norm score and age
 #'
@@ -188,11 +148,10 @@ check.cnorm <- function(object, ...) {  UseMethod("checkConsistency") }
 #' @param age The age within the continuous model
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname predict.raw
 #' @seealso predictRaw
 #' @family predict
 #' @export
-predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predictRaw") }
+predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predict.raw.cnorm") }
 
 #' S3 method for predicting single norm score for a given raw score and age
 #'
@@ -204,11 +163,10 @@ predict.raw.cnorm <- function(raw, age, object, ...) {  UseMethod("predictRaw") 
 #' @param age The age within the continuous model
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname predict.norm
 #' @seealso predictNorm
 #' @family predict
 #' @export
-predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predictNorm") }
+predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predict.norm.cnorm") }
 
 #' S3 method for creating a raw score table for specific age(s) on the basis of a cnorm object
 #'
@@ -217,11 +175,10 @@ predict.norm.cnorm <- function(norm, age, object, ...) {  UseMethod("predictNorm
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname table.raw
 #' @seealso rawTable
 #' @family predict
 #' @export
-table.raw.cnorm <- function(object, ...) {  UseMethod("rawTable") }
+table.raw.cnorm <- function(object, ...) {  UseMethod("raw.table.cnorm") }
 
 #' S3 method for creating a norm table for specific age(s) on the basis of a cnorm object
 #'
@@ -230,24 +187,22 @@ table.raw.cnorm <- function(object, ...) {  UseMethod("rawTable") }
 #'
 #' @param object cnorm object
 #' @param ... Additional parameters
-#' @rdname table
 #' @seealso normTable
 #' @family predict
 #' @export
-table.cnorm <- function(object, ...) {  UseMethod("normTable") }
+table.cnorm <- function(object, ...) {  UseMethod("table.cnorm") }
 
-plot <- plotPercentiles
-plot.series <- plotPercentileSeries
+plot.cnorm <- plotPercentiles
 plot.raw <- plotRaw
 plot.norm <- plotNorm
-plot.curves <- plotNormCurves
 plot.density <- plotDensity
+plot.series <- plotPercentileSeries
 plot.subset <- plotSubset
 plot.derivative <- plotDerivative
-
+plot.curves <- plotNormCurves
 cv <- cnorm.cv
-summary <- summary.cnorm
-print <- printSubset
+summary.cnorm <- summary
+print.cnorm <- printSubset
 check <- checkConsistency
 predict.raw <- predictRaw
 predict.norm <- predictNorm

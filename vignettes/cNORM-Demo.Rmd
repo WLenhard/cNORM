@@ -145,6 +145,9 @@ We now want to find a regression model that models the original data as closely 
 
 ```{r}
 model <- bestModel(normData)
+
+# Or just the convenience method that does everything at once
+model <- cnorm(raw=elfe$raw, group=elfe$group)
 ```
 
 Fine! The determined model already exceeds the predefined threshold of $R_{adjusted}^{2}$ = .99 with only three predictors (plus intercept). The 'bestModel' function as well returns the coefficients and the complete regression formula, which - as was specified - captures more than 99% of the variance in the data set.
@@ -153,20 +156,19 @@ If you want to have a look at the selection procedure, all the information is av
 
 
 ```{r}
-print(model)
+printSubset(model)
 ```
 
 Furthermore, information about the change of Radjusted and other information criteria (Mallow's Cp or BIC) depending on the number of predictors (with fixed k) can also be graphically inspected. Please use the following command to do this:
 
 ```{r fig1, fig.height = 4, fig.width = 7}
-
-plot.subset(model, type = 0) 
+plotSubset(model, type = 0) 
 ```
 
 The figure displays Radjusted2 as a function of the number of predictors by default. Alternatively, you can also plot log-transformed Mallow's $C_p$ (type = 1) and $BIC$ (type = 2) as a function of $R_{adjusted}^{2}$ or RMSE (type = 3) as a function of the number of terms.
 
 ```{r fig2, fig.height = 4, fig.width = 7}
-plot.subset(model, type = 1) 
+plotSubset(model, type = 1) 
 ``` 
 
 The figure shows that the default value of $R_{adjusted}^{2}$ = .99 is already achieved with only three predictors. The inclusion of further predictors only leads to small increases of Radjusted or to small decreases of Mallow's $C_p$. Where the dots are close together, the inclusion of further predictors is of little use. To avoid over-fitting, a model with as few predictors as possible should therefore be selected from this area.
@@ -174,11 +176,8 @@ The figure shows that the default value of $R_{adjusted}^{2}$ = .99 is already a
 The model with three predictors seems to be suitable. Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k should be chosen differently. What is more, you can use the cnorm.cv cross validation function to get an impression on the quality of the norm sample and modeling process. The function determines RMSE for the raw score of the training and validation data (80% and 20% drawn from the data set), $R^{2}$ for the norm scores, crossfit and norm score $R^{2}$. Crossfit values below indicate an underfit and values greater 1 an overfit, with values between .9 and 1.1 being optimal:
 
 ```
-# use the original elfe data
-cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-
 # do a cross validation with 2 repetitions, restrict number of max terms to 10
-cv(cnorm.elfe$data, max=10, repetitions = 2)
+cnorm.cv(model$data, max=10, repetitions = 2)
 ```
 <img src="cnorm.cv.png" align=center style="border:0;">
 
@@ -200,7 +199,7 @@ The following figure shows how well the model generally fits the manifest data:
 # Plots the fitted and the manifest percentiles
 # modelling already  displays the plot; you can call it
 # directly with plot(results) as well
-cnorm.elfe <- cnorm(raw=elfe$raw, group=elfe$group)
+plotPercentiles(model)
 
 ```
 
@@ -211,13 +210,13 @@ If you are not sure yet, which model to choose, you can display a series of plot
 ```
 # Displays a series of plots of the fitted and the manifest percentiles
 # Here the maximum number of terms is fixed (optional)
-plot.series(cnorm.elfe, terms = 10)
+plotPercentileSeries(model, terms = 10)
 ```
 
 ### plotRaw
 In the next figure, the fitted and the manifest data are compared separately for each (age) group:
 ```{r fig4, fig.height = 4, fig.width = 7}
-plot.raw(cnorm.elfe)
+plotRaw(model)
 ```
 
 The adjustment is particularly good if all points are as close as possible to the bisecting line. However, it must be noted that deviations in the extremely upper, but particularly in the extremely lower performance range often occur because the manifest data in these areas are also associated with low reliability.
@@ -225,13 +224,13 @@ The adjustment is particularly good if all points are as close as possible to th
 ### plotNorm
 This function does the same as plotRaw, but instead uses norm values. Please note, that it might take some time depending on the sample size:
 ```
-plot.norm(cnorm.elfe)
+plotNorm(model)
 ```
 ### plotDerivative
 To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. This can be done in the following way:
 
 ```{r fig5, fig.height = 4, fig.width = 7}
-plot.derivative(cnorm.elfe, minAge=1, maxAge=6, minNorm=20, maxNorm=80)
+plotDerivative(model, minAge=1, maxAge=6, minNorm=20, maxNorm=80)
 # if parameters on age an norm are not specified, cnorm plots within
 # the ranges of the current dataset
 ```
@@ -247,26 +246,26 @@ In addition to the pure modeling functions, cNORM also contains functions for ge
 ### getNormCurve
 The first function 'getNormCurve' returns the fitted raw scores for a certain normal score (e.g., T = 50) across different age groups. The parameter 'step' specifies the distance between two age groups. If no further specifications are made, the output is limited to actually occurring raw values and age groups.
 ```
-getNormCurve(50, cnorm.elfe, minAge = 2, maxAge = 5, step = 0.25, minRaw = 0, maxRaw = 28)
+getNormCurve(50, model, minAge = 2, maxAge = 5, step = 0.25, minRaw = 0, maxRaw = 28)
 ```
 
 ### plotNormCurves
 The 'plotNormCurves' function plots the fitted raw scores for pre-specified normal scores (e.g., T = 30, 40, 50, 60, 70) across age.
 ```{r fig6, fig.height = 4, fig.width = 7}
-plot.curves(cnorm.elfe, normList = c(30, 40, 50, 60, 70), minAge = 2, maxAge = 5, step = 0.1, minRaw = 0, maxRaw = 28)
+plotNormCurves(model, normList = c(30, 40, 50, 60, 70), minAge = 2, maxAge = 5, step = 0.1, minRaw = 0, maxRaw = 28)
 ```
 
 ### predictNorm
 The 'predictNorm' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores can be limited to a minimum and maximum value in order to take into account the limits of model validity.
 ```{r}
-predict.norm(15, 4.7, cnorm.elfe, minNorm = 25, maxNorm = 75)
+predictNorm(15, 4.7, model, minNorm = 25, maxNorm = 75)
 ```
 
 ### predictRaw
 
 The 'predictRaw' function returns the predicted raw score for a specific normal score (e.g., T = 55) and a specific age (e.g., a = 4.5).
 ```{r}
-predict.raw(55, 4.5, cnorm.elfe)
+predictRaw(55, 4.5, model)
 ```
 
 ### normTable
@@ -274,11 +273,11 @@ predict.raw(55, 4.5, cnorm.elfe)
 The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) or vector of ages and a pre-specified series of normal scores. The parameter 'step' specifies the distance between two normal scores.
 ```
 # Generate norm table for grade 3
-table(3, cnorm.elfe, minRaw = 0, maxRaw = 28, minNorm=30, maxNorm=70, step = 1)
+normTable(3, model, minRaw = 0, maxRaw = 28, minNorm=30, maxNorm=70, step = 1)
 
 # You as well can generate multiple tables at once, by providing a vector for the age groups,
 # here for grade 3, 3.5, 4 and 4.5
-normTables -> normTable(c(3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, 
+normTables -> normTable(c(3.5, 4.5), model, minRaw = 0, maxRaw = 28, 
               minNorm=30, maxNorm=70, step = 1)
 
 # In case, you want to use the data for producing paper and pencil tests, you might

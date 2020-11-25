@@ -80,7 +80,6 @@ plotPercentiles(result)
 plotNormCurves, plotPercentileSeries
 
 Other plot: 
-\code{\link{plot.cnorm}()},
 \code{\link{plot.curves.cnorm}()},
 \code{\link{plot.density.cnorm}()},
 \code{\link{plot.derivative.cnorm}()},

@@ -54,7 +54,6 @@ plotPercentileSeries(result, start=1, end=5, group="group")
 plotPercentiles
 
 Other plot: 
-\code{\link{plot.cnorm}()},
 \code{\link{plot.curves.cnorm}()},
 \code{\link{plot.density.cnorm}()},
 \code{\link{plot.derivative.cnorm}()},

@@ -38,3 +38,19 @@ export(
 )
 
 
+S3method(plot.subset, cnorm)
+S3method(plot.norm, cnorm)
+S3method(plot.raw, cnorm)
+S3method(plot.derivative, cnorm)
+S3method(plot.density, cnorm)
+S3method(plot.curves, cnorm)
+S3method(predict.raw, cnorm)
+S3method(predict.norm, cnorm)
+S3method(plot, cnorm)
+S3method(print, cnorm)
+S3method(summary, cnorm)
+S3method(table, cnorm)
+S3method(table.raw, cnorm)
+S3method(cv, cnorm)
+
+

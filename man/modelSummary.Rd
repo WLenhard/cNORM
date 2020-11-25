@@ -23,10 +23,8 @@ Other model:
 \code{\link{cnorm.cv}()},
 \code{\link{cv.cnorm}()},
 \code{\link{derive}()},
-\code{\link{print.cnorm}()},
 \code{\link{printSubset}()},
 \code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+\code{\link{regressionFunction}()}
 }
 \concept{model}
