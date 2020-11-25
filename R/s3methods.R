@@ -123,7 +123,7 @@ cv.cnorm <- function(object, ...) {  UseMethod("cv.cnorm") }
 
 
 summary.cnorm <- function(object, ...) {  UseMethod("summary.cnorm") }
-print.cnorm <- function(object, ...) {  UseMethod("print.cnorm") }
+print.cnorm <- function(object) {  UseMethod("print.cnorm") }
 
 #' S3 method for checking the consistency of a cnorm regression model
 #'
