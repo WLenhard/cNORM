@@ -1,4 +1,16 @@
-plot.cnorm <- function(object, ...) {  UseMethod("plot.cnorm") }
+# Mapping of S3 methods to cNORM methods
+
+#' S3 method for plotting percentiles of cnorm objects
+#'
+#' The function plots the norm curves based on the regression model against
+#' the actual percentiles from the raw data.
+#' @param object cnorm object
+#' @param ... Additional parameters
+#' @rdname plot
+#' @seealso plotPercentiles
+#' @family plot
+#' @export
+plot.percentiles.cnorm <- function(object, ...) {  UseMethod("plot.percentiles.cnorm") }
 
 #' S3 method for plotting raw scores against fitted raw scores of cnorm objects
 #'
@@ -120,10 +132,9 @@ plot.derivative.cnorm <- function(object, ...) { UseMethod("plot.derivative.cnor
 #' @export
 cv.cnorm <- function(object, ...) {  UseMethod("cv.cnorm") }
 
-
-
 summary.cnorm <- function(object, ...) {  UseMethod("summary.cnorm") }
-print.cnorm <- function(object) {  UseMethod("print.cnorm") }
+
+print.cnorm <- function(x, ...) {  UseMethod("print.cnorm") }
 
 #' S3 method for checking the consistency of a cnorm regression model
 #'
@@ -192,7 +203,7 @@ table.raw.cnorm <- function(object, ...) {  UseMethod("raw.table.cnorm") }
 #' @export
 table.cnorm <- function(object, ...) {  UseMethod("table.cnorm") }
 
-plot.cnorm <- plotPercentiles
+plot.percentiles <- plotPercentiles
 plot.raw <- plotRaw
 plot.norm <- plotNorm
 plot.density <- plotDensity
@@ -201,7 +212,7 @@ plot.subset <- plotSubset
 plot.derivative <- plotDerivative
 plot.curves <- plotNormCurves
 cv <- cnorm.cv
-summary.cnorm <- summary
+summary.cnorm <- modelSummary
 print.cnorm <- printSubset
 check <- checkConsistency
 predict.raw <- predictRaw

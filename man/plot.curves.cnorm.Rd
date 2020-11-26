@@ -25,6 +25,7 @@ Other plot:
 \code{\link{plot.density.cnorm}()},
 \code{\link{plot.derivative.cnorm}()},
 \code{\link{plot.norm.cnorm}()},
+\code{\link{plot.percentiles.cnorm}()},
 \code{\link{plot.raw.cnorm}()},
 \code{\link{plot.series.cnorm}()},
 \code{\link{plot.subset.cnorm}()},

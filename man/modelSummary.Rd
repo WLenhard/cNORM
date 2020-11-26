@@ -4,10 +4,12 @@
 \alias{modelSummary}
 \title{Prints the results and regression function of a cnorm model}
 \usage{
-modelSummary(model)
+modelSummary(object, ...)
 }
 \arguments{
-\item{model}{A regression model or cnorm object}
+\item{object}{A regression model or cnorm object}
+
+\item{...}{additional parameters}
 }
 \value{
 A report on the regression function, weights, R2 and RMSE

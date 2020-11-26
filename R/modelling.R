@@ -339,8 +339,8 @@ bestModel <- function(data,
 #' After conducting the model fitting procedure on the data set, the best fitting
 #' model has to be chosen. The print function shows the R2 and other information
 #' on the different best fitting models with increasing number of predictors.
-#' @param model The model from the 'bestModel' function or a cnorm object
-#'
+#' @param x The model from the 'bestModel' function or a cnorm object
+#' @param ... additional parameters
 #' @return A table with information criteria
 #' @export
 #'
@@ -349,20 +349,20 @@ bestModel <- function(data,
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' printSubset(result)
 #' @family model
-printSubset <- function(model) {
-  if(class(model)=="cnorm"){
-    model <- model$model
+printSubset <- function(x, ...) {
+  if(class(x)=="cnorm"){
+    x <- x$model
   }
 
   table <-
     do.call(rbind, Map(data.frame,
-      R2 = model$subsets$rsq,
-      R2adj = model$subsets$adjr2,
-      RSS = model$subsets$rss,
-      RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
-      Cp = model$subsets$cp,
-      BIC = model$subsets$bic,
-      Terms = model$subsets$numberOfTerms
+      R2 = x$subsets$rsq,
+      R2adj = x$subsets$adjr2,
+      RSS = x$subsets$rss,
+      RMSE = sqrt(x$subsets$rss / length(x$fitted.values)),
+      Cp = x$subsets$cp,
+      BIC = x$subsets$bic,
+      Terms = x$subsets$numberOfTerms
     ))
   return(table)
 }
@@ -631,16 +631,17 @@ derive <- function(model, order = 1, covariate = NULL) {
 
 #' Prints the results and regression function of a cnorm model
 #'
-#' @param model A regression model or cnorm object
+#' @param object A regression model or cnorm object
+#' @param ... additional parameters
 #' @return A report on the regression function, weights, R2 and RMSE
 #' @export
 #' @family model
-modelSummary <- function(model){
-  if(class(model)=="cnorm"){
-    model <- model$model
+modelSummary <- function(object, ...){
+  if(class(object)=="cnorm"){
+    object <- object$model
   }
 
-  cat(model$report, sep = "\n")
+  cat(object$report, sep = "\n")
 }
 
 #' Check for horizontal and vertical extrapolation
@@ -648,12 +649,13 @@ modelSummary <- function(model){
 #' Regression model only work in a specific range and extrapolation horizontally (outside
 #' the original range) or vertically (extreme norm scores) might lead to inconsistent
 #' results. The function generates a message, indicating extrapolation and the range of the original data.
-#' @param model The regression model or a cnorm object
+#' @param object The regression model or a cnorm object
 #' @param minAge The lower age bound
 #' @param maxAge The upper age bound
 #' @param minNorm The lower norm value bound
 #' @param maxNorm The upper norm value bound
 #' @param digits The precision for rounding the norm and age data
+#' @param ... additional parameters
 #' @return the report
 #' @export
 #' @examples
@@ -661,21 +663,21 @@ modelSummary <- function(model){
 #' m <- bestModel(normData)
 #' rangeCheck(m)
 #' @family model
-rangeCheck <- function(model, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3) {
-  if(class(model)=="cnorm"){
-    model <- model$model
+rangeCheck <- function(object, minAge = NULL, maxAge = NULL, minNorm = NULL, maxNorm = NULL, digits = 3, ...) {
+  if(class(object)=="cnorm"){
+    object <- object$model
   }
 
-  summary <- paste0("The original data for the regression model spanned from age ", round(model$minA1, digits), " to ", round(model$maxA1, digits), ", with a norm score range from ", round(model$minL1, digits), " to ", round(model$maxL1, digits), ". The raw scores range from ", model$minRaw, " to ", model$maxRaw, ".")
-  if (model$descend) {
+  summary <- paste0("The original data for the regression model spanned from age ", round(object$minA1, digits), " to ", round(object$maxA1, digits), ", with a norm score range from ", round(object$minL1, digits), " to ", round(object$maxL1, digits), ". The raw scores range from ", object$minRaw, " to ", object$maxRaw, ".")
+  if (object$descend) {
     summary <- paste0(summary, " The ranking was done in descending order.")
   }
   reportOnly <- (is.null(minAge) || is.null(maxAge) || is.null(minNorm) || is.null(maxNorm))
-  if (!reportOnly && (minAge < model$minA1 || maxAge > model$maxA1) && (minNorm < model$minL1 || maxNorm > model$maxL1)) {
+  if (!reportOnly && (minAge < object$minA1 || maxAge > object$maxA1) && (minNorm < object$minL1 || maxNorm > object$maxL1)) {
     summary <- paste("Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.", summary, sep = "\n")
-  } else if (!reportOnly && (minAge < model$minA1 || maxAge > model$maxA1)) {
+  } else if (!reportOnly && (minAge < object$minA1 || maxAge > object$maxA1)) {
     summary <- paste("Horizontal extrapolation detected. Be careful using age groups outside the original sample.", summary, sep = "\n")
-  } else if (!reportOnly && (minNorm < model$minL1 || maxNorm > model$maxL1)) {
+  } else if (!reportOnly && (minNorm < object$minL1 || maxNorm > object$maxL1)) {
     summary <- paste("Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.", summary, sep = "\n")
   }
 

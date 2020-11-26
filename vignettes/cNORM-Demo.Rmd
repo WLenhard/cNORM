@@ -45,7 +45,7 @@ model <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Fine tune model selection by checking model fit and by
 # visual inspection, e. g. with the following checks
-plot.series(model, end = 12)   # series of percentile plots
+plot.series(model, start=4, end = 8)   # series of percentile plots
 plot.subset(model)             # plot information function
 cv(model$data)                 # run repeated cross validation
 
@@ -143,9 +143,10 @@ The data set now has 24 new variables ( $2*k + k^{2}$ ), namely `L1`, `L2`, `L3`
 We now want to find a regression model that models the original data as closely as possible with as few predictors as possible. We however want to smooth out noise from the original norm data, which can be due to the random sampling process or violations of representativeness. This is done through the 'bestModel' function. You can use this function in two different ways: If you specify $R_{adjusted}^{2}$, then the regression function will be selected that meets this requirement with the smallest number of predictors. You can however also specify a fixed number of predictors. Then the model is selected that achieves the highest $R_{adjusted}^{2}$ with this specification. To select the best model, cNORM uses the 'regsubset' function from the 'leaps' package. As we do not know beforehand, how well the data can be modeled, we start with the default values (k = 4 and $R_{adjusted}^{2}$ = .99):
 
 
-```{r}
-model <- bestModel(normData)
-
+```{r fig0, fig.height = 4, fig.width = 7}
+# If you only need the model, than use
+# model <- bestModel(normData)
+#
 # Or just the convenience method that does everything at once
 model <- cnorm(raw=elfe$raw, group=elfe$group)
 ```
@@ -223,9 +224,14 @@ The adjustment is particularly good if all points are as close as possible to th
 
 ### plotNorm
 This function does the same as plotRaw, but instead uses norm values. Please note, that it might take some time depending on the sample size:
-```
+```{r fig4b, fig.height = 4, fig.width = 7}
 plotNorm(model)
 ```
+The plot can be split by group as well:
+```{r fig4c, fig.height = 4, fig.width = 7}
+plotNorm(model, group = "group")
+```
+
 ### plotDerivative
 To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. This can be done in the following way:
 

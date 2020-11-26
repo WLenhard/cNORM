@@ -5,16 +5,17 @@
 \title{Check for horizontal and vertical extrapolation}
 \usage{
 rangeCheck(
-  model,
+  object,
   minAge = NULL,
   maxAge = NULL,
   minNorm = NULL,
   maxNorm = NULL,
-  digits = 3
+  digits = 3,
+  ...
 )
 }
 \arguments{
-\item{model}{The regression model or a cnorm object}
+\item{object}{The regression model or a cnorm object}
 
 \item{minAge}{The lower age bound}
 
@@ -25,6 +26,8 @@ rangeCheck(
 \item{maxNorm}{The upper norm value bound}
 
 \item{digits}{The precision for rounding the norm and age data}
+
+\item{...}{additional parameters}
 }
 \value{
 the report

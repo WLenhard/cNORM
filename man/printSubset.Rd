@@ -4,10 +4,12 @@
 \alias{printSubset}
 \title{Convenience method for printing model selection information}
 \usage{
-printSubset(model)
+printSubset(x, ...)
 }
 \arguments{
-\item{model}{The model from the 'bestModel' function or a cnorm object}
+\item{x}{The model from the 'bestModel' function or a cnorm object}
+
+\item{...}{additional parameters}
 }
 \value{
 A table with information criteria
