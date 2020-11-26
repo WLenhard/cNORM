@@ -45,10 +45,8 @@ rangeCheck(m)
 \seealso{
 Other model: 
 \code{\link{bestModel}()},
-\code{\link{check.cnorm}()},
 \code{\link{checkConsistency}()},
 \code{\link{cnorm.cv}()},
-\code{\link{cv.cnorm}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
 \code{\link{printSubset}()},

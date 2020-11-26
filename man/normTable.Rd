@@ -76,12 +76,8 @@ rawTable
 Other predict: 
 \code{\link{derivationTable}()},
 \code{\link{getNormCurve}()},
-\code{\link{predict.norm.cnorm}()},
-\code{\link{predict.raw.cnorm}()},
 \code{\link{predictNorm}()},
 \code{\link{predictRaw}()},
-\code{\link{rawTable}()},
-\code{\link{table.cnorm}()},
-\code{\link{table.raw.cnorm}()}
+\code{\link{rawTable}()}
 }
 \concept{predict}

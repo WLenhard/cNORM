@@ -103,9 +103,7 @@ cnorm.cv(data, min = 3, max = 7, norms = FALSE)
 \seealso{
 Other model: 
 \code{\link{bestModel}()},
-\code{\link{check.cnorm}()},
 \code{\link{checkConsistency}()},
-\code{\link{cv.cnorm}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
 \code{\link{printSubset}()},

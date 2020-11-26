@@ -39,14 +39,6 @@ plotSubset(cnorm.model)
 bestModel, plotPercentiles, printSubset
 
 Other plot: 
-\code{\link{plot.curves.cnorm}()},
-\code{\link{plot.density.cnorm}()},
-\code{\link{plot.derivative.cnorm}()},
-\code{\link{plot.norm.cnorm}()},
-\code{\link{plot.percentiles.cnorm}()},
-\code{\link{plot.raw.cnorm}()},
-\code{\link{plot.series.cnorm}()},
-\code{\link{plot.subset.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNormCurves}()},

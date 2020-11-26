@@ -45,16 +45,16 @@ model <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Fine tune model selection by checking model fit and by
 # visual inspection, e. g. with the following checks
-plot.series(model, start=4, end = 8)   # series of percentile plots
-plot.subset(model)             # plot information function
-cv(model$data)                 # run repeated cross validation
+plotPercentileSeries(model, start=4, end = 8)   # series of percentile plots
+plotSubset(model)             # plot information function
+cnorm.cv(model$data)          # run repeated cross validation
 
 # Select final model
 model <- cnorm(raw = elfe$raw, group = elfe$group, terms = 3)
 
 # generate norm score table with 90% confiden interval and
 # a reliability of .94 for several grade levels
-table(c(3, 3.2, 3.4, 3.6), model, CI = .9, reliability = .94)
+normTable(c(3, 3.2, 3.4, 3.6), model, CI = .9, reliability = .94)
 
 ```
 
@@ -272,6 +272,11 @@ predictNorm(15, 4.7, model, minNorm = 25, maxNorm = 75)
 The 'predictRaw' function returns the predicted raw score for a specific normal score (e.g., T = 55) and a specific age (e.g., a = 4.5).
 ```{r}
 predictRaw(55, 4.5, model)
+```
+
+... or a matrix, if you like ...
+```{r}
+predictRaw(c(45, 50, 55), c(2.5, 3, 3.5, 4, 4.5), model)
 ```
 
 ### normTable
