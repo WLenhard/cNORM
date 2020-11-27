@@ -32,7 +32,9 @@ Other model:
 \code{\link{cnorm.cv}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
 \code{\link{printSubset}()},
-\code{\link{rangeCheck}()}
+\code{\link{rangeCheck}()},
+\code{\link{summary.cnorm}()}
 }
 \concept{model}

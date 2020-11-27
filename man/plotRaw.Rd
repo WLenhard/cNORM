@@ -31,6 +31,7 @@ plotRaw(result)
 }
 \seealso{
 Other plot: 
+\code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNormCurves}()},

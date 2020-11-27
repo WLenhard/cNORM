@@ -39,6 +39,7 @@ Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requ
 }
 \seealso{
 Other plot: 
+\code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNormCurves}()},

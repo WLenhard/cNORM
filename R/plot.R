@@ -1146,3 +1146,39 @@ plotDerivative <- function(model,
   p3 <- p1 + p2
   p3
 }
+
+#' General convencience plotting function
+#'
+#' @param x a cnorm object
+#' @param y the type of plot as a string, can be one of
+#' 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'
+#' @param ... additional parameters for the specific plotting function
+#'
+#' @export
+plotCnorm <- function(x, y, ...){
+  if(!class(x)=="cnorm"||!is.character(y)){
+    message("Please provide a cnorm object as parameter x and the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'.")
+    return()
+  }
+
+  if(y == "raw"){
+    plotRaw(x, ...)
+  }else if(y == "norm"){
+    plotNorm(x, ...)
+  }else if(y == "curves"){
+    plotNormCurves(x, ...)
+  }else if(y == "percentiles"){
+    plotPercentiles(x, ...)
+  }else if(y == "density"){
+    plotDensity(x, ...)
+  }else if(y == "series"){
+    plotPercentileSeries(x, ...)
+  }else if(y == "subset"){
+    plotSubset(x, ...)
+  }else if(y == "derivative"){
+    plotDerivative(x, ...)
+  }else{
+    message("Please provide the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'.")
+    return()
+  }
+}

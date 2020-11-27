@@ -66,6 +66,7 @@ plotNormCurves(m, minAge=2, maxAge=5)
 checkConsistency, derivationPlot, plotPercentiles
 
 Other plot: 
+\code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNorm}()},

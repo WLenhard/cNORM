@@ -15,6 +15,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
+
 <img src="logo.png" align=right style="border:0;">cNORM is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. It is based on the approach of A. Lenhard et al. (2016, 2019).
 
 The method stems from psychometric test construction and was developed to create continuous norms for age or grade in performance assessment (e. g. vocabulary development, A. Lenhard, Lenhard, Segerer & Suggate, 2015; reading and writing development, W. Lenhard, Lenhard & Schneider, 2017). It can however be applied wherever test data like psychological (e. g. intelligence), physiological (e. g. weight) or other measures are dependent on continuous (e.g., age) or discrete (e.g., sex or test mode) explanatory variables and it has been applied to biometric data (fetal growth in dependence of gestation week) and macro economic data as well.
@@ -45,9 +46,9 @@ model <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Fine tune model selection by checking model fit and by
 # visual inspection, e. g. with the following checks
-plotPercentileSeries(model, start=4, end = 8)   # series of percentile plots
-plotSubset(model)             # plot information function
-cnorm.cv(model$data)          # run repeated cross validation
+plot(model, "series", start=4, end = 8)   # series of percentile plots
+plot(model, "subset")                     # plot information function
+cnorm.cv(model$data)                      # run repeated cross validation
 
 # Select final model
 model <- cnorm(raw = elfe$raw, group = elfe$group, terms = 3)
@@ -81,32 +82,24 @@ Of course, it is also possible to use a data set for which standard scores alrea
 ### Sample Data
 For demonstration purposes, cNORM includes a cleaned data set from a German test standardization (ELFE 1-6, W. Lenhard & Schneider, 2006, subtest sentence comprehension) that will be used for demonstrating the method. Another large (but unrepresentative) data set for demonstration purposes stems from the adaption of a vocabulary test to the German language (PPVT-4, A. Lenhard, Lenhard, Segerer & Suggate, 2015). For biometric modeling, it includes a large CDC dataset (N > 45,000) for growth curves from age 2 to 25 (weight, height, BMI; CDC, 2012) and for macro economical and sociological data the data on mortality and life expectancy at birth from 1960 to 2017 from the World Bank. You can retrieve information on the data by typing ?elfe, ?ppvt, ?CDC, ?life or ?mortality on the R console. To load the data sets, please use the following code:
 
-```
-# Loads the package cNorm
+```{r}
 library(cNORM)
-
-# Copies the data set "elfe" from the environment into the object 'normData'
-normData <- elfe
-
-# Displays the first lines of the data
-head(normData)
+# Displays the first lines of the data of the example dataset 'elfe
+head(elfe)
 ```
 
 ### Data Exploration
 As you can see, there is no age variable in the data set 'elfe', only a person ID, a raw score and a grouping variable. In this case, the grouping variable also serves as a continuous explanatory variable, since children were only examined at the very beginning and in the exact middle of the school year during the test standardization. For example, the value 2.0 means that the children were at the beginning of the second school year, the value 2.5 means that the children were examined in the middle of the second school year. Another possibility would have been to examine children throughout the entire school year. In this case, the duration of schooling would have to be entered as a continuous explanatory variable. To build the grouping variable, the first and second half of each school year could, for example, be aggregated into one group respectively. In the 'elfe' data set there are seven groups with 200 cases each, i.e. a total of 1400 cases. With the help of the psych package, descriptive data can be displayed in groups if desired (optional):
 
-```
-# Display descriptive results
-library(psych)
-describeBy(normData, group="group")
+```{r}
+# Display some descriptive results by group
+by(elfe$raw, elfe$group, summary)
 ```
 
 ### Ranking
 The next step is to rank each person in each group using the rankByGroup function. The function returns percentiles and also performs a normal-rank transformation in which T-Scores (M = 50, SD = 10) are returned by default. In principle, our mathematical method also works without normal rank transformation, i.e., the method could theoretically also be carried out with the percentiles. This is useful, for example, if you want to enter a variable that deviates extremely from the normal distribution or follows a completely different distribution. For most psychological or physical scales, however, the distributions are still sufficiently similar to the normal distribution even with strong bottom and ceiling effects. In these cases, the normal-rank transformation usually increases the model fit and facilitates the further processing of the data. In addition to T-Scores, the standard scores can also be expressed as z- or IQ-Scores. You can also choose between different ranking methods (RankIt, Blom, van der Warden, Tukey, Levenbach, Filliben, Yu & Huang). However, we want to stick to T-Scores and RankIt, which are preset by default:
 
-```{r}
-# Start up cNORM
-library(cNORM)
+```
 # Determine percentiles by group
 normData <- rankByGroup(elfe, group = elfe$group) 
 ```
@@ -115,8 +108,6 @@ To change the ranking method, please specify a method index with method = x (x =
 Please note that there is another function for determining the rank, which works without discrete grouping variables. The rank of each individual subject is then estimated based on the continuous explanatory variables using a sliding window. The width of this window can be specified individually. In the case of a continuous age variable, the specification width = 0.5 means, for example, that the width of the window is half a year. As a consequence, the rank of a test persons is based on all participants who are no more than 3 months younger or older than the test person in question, i. e., the group comprises a total of 6 months.
 
 ```
-library(cNORM)
-
 # Percentile generation by a sliding window of the size 'width'
 normData2 <- rankBySlidingWindow(data = elfe, age = elfe$group, raw = elfe$raw, width = 0.5)
 ```
@@ -132,7 +123,7 @@ At this point, where many test developers already stop standardization, the actu
 
 To retrieve the mathematical model, all powers of the variables 'l' and 'a' up to a certain exponent k must be computed. Subsequently, all interactions between these powers must also be calculated by simple multiplication. As a rule of thumb, k > 5 leads to over-adjustment. In general, k = 4 or even k = 3 will already be sufficient to model human performance data with adequate precision. Please use the following function for the calculation:
 
-```{r}
+```
 # Calculation of powers and interactions up to k = 4
 normData <- computePowers(normData, k = 4, norm = "normValue", age = "group") 
 ```

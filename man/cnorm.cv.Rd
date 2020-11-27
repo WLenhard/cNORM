@@ -106,8 +106,10 @@ Other model:
 \code{\link{checkConsistency}()},
 \code{\link{derive}()},
 \code{\link{modelSummary}()},
+\code{\link{print.cnorm}()},
 \code{\link{printSubset}()},
 \code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()}
+\code{\link{regressionFunction}()},
+\code{\link{summary.cnorm}()}
 }
 \concept{model}

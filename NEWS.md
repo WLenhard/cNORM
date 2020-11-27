@@ -12,6 +12,8 @@ Changes:
 *    Preparing for next major release with complete redesign of S3 method structure and weighting
 *    New function cnorm() that does all the data preparation and modelling in one step
      It returns a cnorm object, which can be used in all model check, plotting and prediction functions
+*    New S3 functions: print, plot, summary
+*    Vignette revised
 *    All functions have been extended to accept a cnorm object instead of data and / or model
 *    prepareData, rankByGroup and rankBySlidingWindow no have the option to provide a
      weighting parameter to compensate for imbalances. The percentiles are weighted
@@ -24,7 +26,7 @@ Changes:
 *    If no group is provided and only a raw vector is present e.g. ranByGroup(raw=elfe$raw),
      traditional ranking of a single group is done
 *    Power parameter k added to prepareData
-*    New convenience function summary.cv
+*    New convenience function modelSummary
 
 
 

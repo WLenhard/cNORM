@@ -45,6 +45,7 @@ plotDensity(result, group = c (2, 4, 6))
 plotNormCurves, plotPercentiles
 
 Other plot: 
+\code{\link{plot.cnorm}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNormCurves}()},
 \code{\link{plotNorm}()},
