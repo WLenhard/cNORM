@@ -59,37 +59,37 @@ cNORM.GUI()
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors
-plot.subset(cnorm.elfe, type=0)        # plot R2
-plot.subset(cnorm.elfe, type=3)        # plot MSE
+plot(cnorm.elfe, "subset", type=0)        # plot R2
+plot(cnorm.elfe, "subset", type=3)        # plot MSE
 
 # NOTE! At this point, you usually select a good fitting model and rerun the process.
 # with a fixed number of terms, e. g. four. Try avoid models with a high number of terms:
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
 #  Visual inspection of the percentile curves of the fitted model
-plot(cnorm.elfe)
+plot(cnorm.elfe, "percentiles")
 
 # Visual inspection of the observed and fitted raw and norm scores
-plot.raw(cnorm.elfe)
-plot.norm(cnorm.elfe)
+plot(cnorm.elfe, "norm")
+plot(cnorm.elfe, "raw")
 
 # In order to check, how other models perform, plot series of percentile plots with ascending
 # number of predictors, in this example up to 14 predictors.
-plot.series(cnorm.elfe, end=14)
+plot(cnorm.elfe, "series", end=14)
 
 # Cross validation of number of terms with 20% of the data for validation and 80% training.
 # Due to the time intensity, max terms is restricted to 10 in this example; 3 repetitions
-cv(cnorm.elfe$data, max=10, repetitions=3)
+cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
 
 # Cross validation with pre-specified terms, e. g. of an already existing model
-cv(cnorm.elfe, repetitions=3)
+cnorm.cv(cnorm.elfe, repetitions=3)
 
 # Print norm table (for grade 3, 3.2, 3.4, 3.6)
-table(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
+normTable(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
 
 # The other way round: Print raw table (for grade 3) together with 90% confidence intervalls
 # for a test with a reliability of .94
-table.raw(3, cnorm.elfe, CI = .9, reliability = .94)
+rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
