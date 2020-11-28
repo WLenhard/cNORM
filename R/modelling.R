@@ -702,7 +702,8 @@ rangeCheck <- function(object, minAge = NULL, maxAge = NULL, minNorm = NULL, max
 #' prepareData(elfe) already applied. In this case, the training and validation data is
 #' drawn from the already ranked data and the scores for the validation set should improve.
 #' It is however no independent test, as the ranking between both samples is interlinked.
-#' In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.
+#' In the output, you will get RMSE for the raw score models, norm score R2 and delta R2, the crossfit
+#' and the norm score SE sensu Oosterhuis, van der Ark, & Sijtsma (2016).
 #' For assessing, if a model over-fits the data and to what extent, we need cross-validation. We assumed
 #' that an overfitting occurred when a model captures more variance of the observed norm scores of the
 #' training sample compared to the captured variance of the norm scores of the validation sample. The
@@ -752,6 +753,7 @@ rangeCheck <- function(object, minAge = NULL, maxAge = NULL, minNorm = NULL, max
 #' # own regression functions can of course be used as well
 #' # result <- cnorm(raw = efe$raw, group = elfe$group)
 #' # cnorm.cv(result, repetitions = 5)
+#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @family model
 cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 1, max = 12, cv = "full", pCutoff = NA, width = NA, raw = NA, group = NA, age = NA) {
 
@@ -845,6 +847,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
   delta <- rep(NA, max)
   crossfit <- rep(0, max)
   norm.rmse <- rep(0, max)
+  norm.se <- rep(0, max)
   norm.rmse.min <- rep(0, max)
 
   # draw test and training data several times ('repetitions' parameter), model data and store MSE
@@ -928,6 +931,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
         r2.train[i] <- r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs")^2)
         r2.test[i] <- r2.test[i] + (cor(test$normValue, test$T, use = "pairwise.complete.obs")^2)
         norm.rmse[i] <- norm.rmse[i] + sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
+        norm.se[i] <- norm.se[i] + sum(sqrt((test$T - test$normValue)^2))/(length(!is.na(test$T))-2)
         }
     }
   }
@@ -952,6 +956,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
       r2.train[i] <- r2.train[i] / repetitions
       r2.test[i] <- r2.test[i] / repetitions
       norm.rmse[i] <- norm.rmse[i] / repetitions
+      norm.se[i] <- norm.se[i] / repetitions
 
       if (i > min) {
         delta[i] <- r2.test[i] - r2.test[i - 1]
@@ -982,7 +987,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
   } else {
     par(mfrow = c(1, 1))
   }
-  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test, RMSE.norm.test = norm.rmse)
+  tab <- data.frame(RMSE.raw.train = train.errors, RMSE.raw.test = val.errors, RMSE.raw.complete = complete.errors, R2.norm.train = r2.train, R2.norm.test = r2.test, Delta.R2.test = delta, Crossfit = r2.train / r2.test, RMSE.norm.test = norm.rmse, SE.norm.test = norm.se)
 
   if(is.null(formula)){
   # plot RMSE
@@ -1046,4 +1051,42 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     return(tab[complete.cases(tab), ])
   }
 
+
+
 }
+
+
+
+#' Calculates the standard error (SE) of the norm scores
+#'
+#' @param model a cnorm object
+#'
+#' @return The standard error (SE) of the norm scores sensu Oosterhuis et al. (2016)
+#' @export
+#'
+#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+  getNormScoreSE <- function(model){
+    if(!class(model)=="cnorm"){
+      stop("Please provide cnorm object as the model parameter")
+    }
+
+    data <- model$data
+    model <- model$model
+    minNorm <- model$minL1
+    maxNorm <- model$maxL1
+    d <- data
+    raw <- data[[model$raw]]
+    age <- data[[model$age]]
+    if(!is.null(model$covariate))
+      covariate <- data[[attr(data, "covariate")]]
+    else
+      covariate <- NULL
+
+    d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
+
+    d$diff <- d$fitted - data$normValue
+    d <- d[!is.na(d$fitted), ]
+    d <- d[!is.na(d$diff), ]
+
+    return(sum(sqrt(d$diff^2))/(nrow(d)-2))
+  }

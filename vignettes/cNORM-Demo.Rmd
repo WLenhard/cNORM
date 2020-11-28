@@ -215,11 +215,11 @@ The adjustment is particularly good if all points are as close as possible to th
 
 ### plotNorm
 This function does the same as plotRaw, but instead uses norm values. Please note, that it might take some time depending on the sample size:
-```{r fig4b, fig.height = 4, fig.width = 7}
+```
 plotNorm(model)
 ```
 The plot can be split by group as well:
-```{r fig4c, fig.height = 4, fig.width = 7}
+```
 plotNorm(model, group = "group")
 ```
 

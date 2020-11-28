@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 2.0.0 (in progress)
-Date: 2020.11.26
+Date: 2020.11.28
 
 
 Changes:
@@ -27,6 +27,8 @@ Changes:
      traditional ranking of a single group is done
 *    Power parameter k added to prepareData
 *    New convenience function modelSummary
+*    New method getNormScoreSE added: Compute SE for regression based norm scores senso Oosterhuis
+     van der Ark & Sijtsma (2016)
 
 
 

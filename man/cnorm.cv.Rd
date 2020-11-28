@@ -72,7 +72,8 @@ order to only validate the modeling, you as well can use a pre-ranked data set w
 prepareData(elfe) already applied. In this case, the training and validation data is
 drawn from the already ranked data and the scores for the validation set should improve.
 It is however no independent test, as the ranking between both samples is interlinked.
-In the output, you will get RMSE for the raw score models, norm score R2 and delta R2 and the crossfit.
+In the output, you will get RMSE for the raw score models, norm score R2 and delta R2, the crossfit
+and the norm score SE sensu Oosterhuis, van der Ark, & Sijtsma (2016).
 For assessing, if a model over-fits the data and to what extent, we need cross-validation. We assumed
 that an overfitting occurred when a model captures more variance of the observed norm scores of the
 training sample compared to the captured variance of the norm scores of the validation sample. The
@@ -99,6 +100,9 @@ cnorm.cv(data, min = 3, max = 7, norms = FALSE)
 # own regression functions can of course be used as well
 # result <- cnorm(raw = efe$raw, group = elfe$group)
 # cnorm.cv(result, repetitions = 5)
+}
+\references{
+Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 }
 \seealso{
 Other model: 

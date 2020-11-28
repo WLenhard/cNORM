@@ -36,7 +36,8 @@ export(
 	rawTable,
 	regressionFunction,
 	simulateRasch,
-	modelSummary
+	modelSummary,
+	getNormScoreSE
 )
 
 

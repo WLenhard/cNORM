@@ -86,6 +86,17 @@ normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95
 rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 
 }
+\references{
+\enumerate{
+  \item Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
+  \item Harrel, F. (2020). Hmisc: Harrell Miscellaneous (v. 4.4-1). available https://CRAN.R-project.org/package=Hmisc
+  (code for weighted ranking adapted from wtd.rank & wtd.table by courtesy of Frank Harrell)
+  \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi:10.1177/1073191116656437
+  \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
+  \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
+  \item Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
+}
+}
 \seealso{
 rankByGroup, rankBySlidingWindow, computePowers, bestModel
 }

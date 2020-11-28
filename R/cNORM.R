@@ -70,30 +70,29 @@
 #' @examples
 #' # Model internal 'elfe' dataset with the default k = 4 regression on T scores
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plot(results)
 #'
 #' # Show model fit of models with progressing number of predictors
 #' print(results)
-#' plot.subset(results)
+#' plot(results, "subset")
 #'
 #' # Plot manifest and predicted values, plot series of percentile charts
 #' plotRaw(results)
 #' \dontrun{
-#' plot.series(results)
+#' plot(results, "series", start = 3, end = 9)
 #' }
 #'
 #' # Additional tests: Check model assumptions
-#' check(results)
-#' plot.derivative(results)
+#' checkConsistency(results)
+#' plot(results, "derivative")
 #'
 #' # Generate norm tables; predict values, here: grade 3.75 from T score 25
 #' # to 75 and within the raw value range of this specific test (0 to 28)
-#' table <- normTable(3.75, results, minNorm=25, maxNorm=75, step=0.5)
-#' table.raw <- rawTable(3.75, results, minRaw = 0, maxRaw = 28, minNorm=25,
+#' normTable <- normTable(3.75, results, minNorm=25, maxNorm=75, step=0.5)
+#' rawTable <- rawTable(3.75, results, minRaw = 0, maxRaw = 28, minNorm=25,
 #'                      maxNorm=75)
 #'
 #' # Predict a specific norm score
-#' score <- predict.norm(raw = 21, A = 3.75,
+#' score <- predictNorm(raw = 21, A = 3.75,
 #'                           model = results, minNorm=25, maxNorm=75)
 NULL
 
@@ -182,7 +181,18 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 #'
 #' @export
-#'
+#' @references
+#' \enumerate{
+#'   \item Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
+#'   \item Harrel, F. (2020). Hmisc: Harrell Miscellaneous (v. 4.4-1). available https://CRAN.R-project.org/package=Hmisc
+#'   (code for weighted ranking adapted from wtd.rank & wtd.table by courtesy of Frank Harrell)
+#'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi:10.1177/1073191116656437
+#'   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
+#'   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
+#'   \item Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
+
+
+#' }
 cnorm <- function(raw = NULL,
                   group = NULL,
                   age = NULL,
