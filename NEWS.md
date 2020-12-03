@@ -4,7 +4,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 2.0.0 (in progress)
-Date: 2020.11.28
+Date: 2020.12.03
+Version 2.0.0 features many fundamental improvements both relating to the procedure but as well to the
+package itself. It introduces weighted percentiles and thus helps in correcting violations of 
+representativeness in the norm sample. There is a new main function 'cnorm()' that returns a
+cnorm object. Most functions now accept this cnorm object and do not require separate data objects and
+statistical models. And finally S3 methods plot(), summary() and print() have been introduced.
 
 
 Changes:
