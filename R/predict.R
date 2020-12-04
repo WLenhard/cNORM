@@ -201,7 +201,7 @@ predictRaw <-
 #' the population. Please be careful when extrapolating vertically (at the lower and
 #' upper end of the age specific distribution). Depending on the size of your standardization
 #' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
-#' (CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+#' (CI) and the reliability is specified, confidence intervals are computed as well, including a correction
 #' for regression to the mean.
 #' @param A the age as single value or a vector of age values
 #' @param model The regression model or a cnorm object
@@ -374,7 +374,7 @@ normTable <- function(A,
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
 #' and smaller stepping, this function becomes computational intensive. In case a confidence coefficient
-#' (CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+#' (CI) and the reliability is specified, confidence intervals are computed as well, including a correction
 #' for regression to the mean.
 #' @param A the age, either single value or vector with age values
 #' @param model The regression model or a cnorm object
@@ -400,7 +400,7 @@ normTable <- function(A,
 #' # generate several raw tables
 #' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28)
 #'
-#' # additionally compute confidence intervalls
+#' # additionally compute confidence intervals
 #' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
 #' @family predict
 #' @export

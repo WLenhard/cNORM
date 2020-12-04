@@ -49,7 +49,7 @@
 #' ranking order with higher raw scores getting lower norm scores; relevant
 #' for example when norming error scores, where lower scores mean higher
 #' performance
-#' @param k The power paramerer, default = 4
+#' @param k The power parameter, default = 4
 #' @param silent set to TRUE to suppress messages
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable

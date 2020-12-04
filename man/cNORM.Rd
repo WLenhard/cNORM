@@ -77,7 +77,7 @@ smoothing.
 # Using this function with the example dataset 'elfe'
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
-# return norm tables including 90\% confidence intervalls for a
+# return norm tables including 90\% confidence intervals for a
 # test with a reliability of r = .85; table are set to mean of quartal
 # in grade 3 (children completed 2 years of schooling)
 normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)

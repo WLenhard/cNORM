@@ -54,7 +54,7 @@ of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 
 the population. Please be careful when extrapolating vertically (at the lower and
 upper end of the age specific distribution). Depending on the size of your standardization
 sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
-(CI) and the reliability is specified, confidence intervalls are computed as well, including a correction
+(CI) and the reliability is specified, confidence intervals are computed as well, including a correction
 for regression to the mean.
 }
 \examples{

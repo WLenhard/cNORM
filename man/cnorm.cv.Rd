@@ -53,7 +53,7 @@ has to reach at least. To minimize beta error, the value is set to .2 per defaul
 \item{age}{Name of the age variable}
 }
 \value{
-table with results per term number, including RMSE for raw scores in training, validationand complete
+table with results per term number, including RMSE for raw scores in training, validation and complete
 sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
 }
 \description{

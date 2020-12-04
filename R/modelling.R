@@ -740,7 +740,7 @@ rangeCheck <- function(object, minAge = NULL, maxAge = NULL, minNorm = NULL, max
 #' @param raw Name of the raw variable
 #' @param age Name of the age variable
 #' @param group Name of the grouping variable
-#' @return table with results per term number, including RMSE for raw scores in training, validationand complete
+#' @return table with results per term number, including RMSE for raw scores in training, validation and complete
 #' sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
 #' @export
 #' @examples

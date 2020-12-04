@@ -32,7 +32,7 @@ Changes:
      traditional ranking of a single group is done
 *    Power parameter k added to prepareData
 *    New convenience function modelSummary
-*    New method getNormScoreSE added: Compute SE for regression based norm scores senso Oosterhuis
+*    New method getNormScoreSE added: Compute SE for regression based norm scores sensu Oosterhuis
      van der Ark & Sijtsma (2016)
 
 
@@ -65,7 +65,7 @@ Changes:
 *    correction for monotonicity in rawTable and normTable (now default)
 *    predictRaw can now return matrices for list of norm x age
 *    new dataset added on the basis of the EPM paper
-*    Bug in plotPercentiles fixed for datasets with decending ranking order
+*    Bug in plotPercentiles fixed for datasets with descending ranking order
 *    'descend' parameter added to prepareData
 *    rawTable can now return matrices
 
@@ -303,7 +303,7 @@ Date: 2018.10.26
 
 Changes:
 
-*   Final polishing finished; realising first major version
+*   Final polishing finished; releasing first major version
 
 
 
