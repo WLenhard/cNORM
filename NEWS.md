@@ -3,8 +3,8 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.0.0 (in progress)
-Date: 2020.12.03
+### Version in 2.0.0 (release candidate)
+Date: 2020.12.04
 Version 2.0.0 features many fundamental improvements both relating to the procedure but as well to the
 package itself. It introduces weighted percentiles and thus helps in correcting violations of 
 representativeness in the norm sample. There is a new main function 'cnorm()' that returns a
