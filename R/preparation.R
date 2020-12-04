@@ -126,7 +126,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
     if(max(normData[, age])<min(normData[, group])||min(normData[, age])>max(normData[, group])){
       warning("The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter.")
-      base::plot(normData[, age], normData[, group])
+      graphics::plot(normData[, age], normData[, group])
     }
   }
   normData <- normData[!is.na(normData[, raw]), ]
@@ -999,7 +999,7 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
   total.rep <- total.rep[order(total.rep$raw),]
 
 
-  base::plot(total.rep$raw, total.rep$percentileReal, type = "l", lty = 1, main = "Simulated effects of weighted ranking", ylab = "Percentile", xlab = "Raw score")
+  graphics::plot(total.rep$raw, total.rep$percentileReal, type = "l", lty = 1, main = "Simulated effects of weighted ranking", ylab = "Percentile", xlab = "Raw score")
   points(total$raw, total$percentileWeighted, type = "l", lty = 1, col="blue")
   points(total$raw, total$percentileUnweighted, type = "l", lty = 1, col="red")
   legend("bottomright", legend = c("Real percentile", "Weighted", "Unweighted"), col = c("black", "blue", "red"), pch = 19)
