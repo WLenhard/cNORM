@@ -3,6 +3,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.0.1 (in progress)
+Date: 2020.12.06
+
+
+Changes:
+
+*    Fixing errors in the context of weighted percentile modelling
+*    Additional message for plotting, when weighted percentiles are used
+
+
+
+
 ### Version in 2.0.0 (release candidate)
 Date: 2020.12.04
 Version 2.0.0 features many fundamental improvements both relating to the procedure but as well to the

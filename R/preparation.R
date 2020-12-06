@@ -262,7 +262,7 @@ rankByGroup <-
           weighting <- d[, weights]
         }
         }else{
-          if(length(weights)!=nrow(data)){
+          if(length(weights)!=nrow(d)){
             warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
 
           }else{

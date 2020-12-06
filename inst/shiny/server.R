@@ -123,6 +123,12 @@ shinyServer(function(input, output, session) {
     selectInput(inputId = "InputExplanatoryVariable", "Explanatory variable", choices = variableNames(), selected = input$InputGroupingVariable)
   })
 
+  # Generates selectINput for choosing explanatory variable for data analysis
+  output$WeightVariable <- renderUI({
+
+    selectInput(inputId = "InputWeightVariable", "Weighting variable", choices = c("---", variableNames()))
+  })
+
   # Generates selectInput for choosing raw values for data analysis
   output$RawValues <- renderUI({
 
@@ -178,6 +184,11 @@ shinyServer(function(input, output, session) {
     return(input$InputRawValues)
   })
 
+  # Returns chosen weighting
+  chosenWeighting <- reactive({
+    return(input$InputWeightingVariable)
+  })
+
   chosenDescend <- reactive({
     if(input$RankingOrder == "Descending")
       return(TRUE)
@@ -220,12 +231,18 @@ shinyServer(function(input, output, session) {
         return()}
 
       # Ranky by chosen group
+      weights <- NULL
+      if(chosenWeighting()!="---")
+        weights <- chosenWeighting()
+
+      print(weights)
       data_to_output <- cNORM::rankByGroup(currentFile(),
                                            group = chosenGrouping(),
                                            raw = chosenRaw(),
                                            method = chosenMethod(),
                                            scale = chosenScale(),
-                                           descend = chosenDescend())
+                                           descend = chosenDescend(),
+                                           weights = weights)
       # Computation of powers and linear combinations
       data_to_output <- cNORM::computePowers(data_to_output,
                                              k = chosenNumberOfPowers(), age = chosenGrouping(),

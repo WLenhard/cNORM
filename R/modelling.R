@@ -265,7 +265,7 @@ bestModel <- function(data,
   }else{
     d <- as.data.frame(data)
     d$weights <- weights
-    bestformula <- lm(text, d, weights = d$weights)
+    bestformula <- lm(text, d, weights = data$weights)
   }
 
   if(!is.null(attr(data, "covariate"))){
