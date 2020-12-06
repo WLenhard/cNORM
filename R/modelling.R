@@ -108,8 +108,15 @@ bestModel <- function(data,
     raw <- attr(data, "raw")
   }
 
-  if (is.null(weights)) {
-    weights <- attr(data, "weights")
+  if (!is.null(weights)||!is.null(attr(data, "weights"))) {
+    if(!is.null(attr(data, "weights"))){
+      weights <- as.numeric(data[, attr(data, "weights")])
+    }else if(is.numeric(weights)&&length(weights)==nrow(data)){
+      data$weights <- weights
+      attibutes(data)$weights <- weights
+    }else{
+      weights <- NULL
+    }
   }
 
   if (is.null(k)) {
@@ -260,13 +267,10 @@ bestModel <- function(data,
 
   report[3] <- paste0("Final regression model: ", text)
 
-  if(is.null(weights)){
-    bestformula <- lm(text, as.data.frame(data))
-  }else{
-    d <- as.data.frame(data)
-    d$weights <- weights
-    bestformula <- lm(text, d, weights = data$weights)
-  }
+  if(is.null(attr(data, "weights")))
+    bestformula <- lm(text, data)
+  else
+    bestformula <- lm(text, data, weights = data$weights)
 
   if(!is.null(attr(data, "covariate"))){
     if(length(grep("COV", names(bestformula$coefficients)))==0)
@@ -778,6 +782,10 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     stop("This function is currently not ready for including covariates.")
   }
 
+  if(!is.null(attr(d, "weights"))){
+    message("Cross validation is conducted without weighting.")
+  }
+
   d <- data
 
   if (is.na(raw) || is.na(group) || is.na(age)) {
@@ -785,6 +793,8 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     age <- attr(d, "age")
     group <- attr(d, "group")
   }
+
+
 
   if (is.na(raw) || is.na(group) || is.na(age)) {
     stop("Variables raw, age and group neither available as function parameters nor as attributes from data object. Please provide according information.")
