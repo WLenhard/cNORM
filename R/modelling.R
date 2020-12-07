@@ -113,7 +113,7 @@ bestModel <- function(data,
       weights <- as.numeric(data[, attr(data, "weights")])
     }else if(is.numeric(weights)&&length(weights)==nrow(data)){
       data$weights <- weights
-      attibutes(data)$weights <- weights
+      attr(data, "weights") <- "weights"
     }else{
       weights <- NULL
     }
@@ -782,7 +782,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     stop("This function is currently not ready for including covariates.")
   }
 
-  if(!is.null(attr(d, "weights"))){
+  if(!is.null(attr(data, "weights"))){
     message("Cross validation is conducted without weighting.")
   }
 

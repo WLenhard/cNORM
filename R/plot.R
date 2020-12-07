@@ -427,7 +427,7 @@ plotPercentiles <- function(data,
   }
 
   if(!is.null(attributes(data)$weights))
-    message("Maifest percentiles are based on the unweighted data.")
+    message("Manifest percentiles are based on the unweighted data.")
 
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
