@@ -467,6 +467,12 @@ rankByGroup <-
     attr(d, "width") <- NA
     attr(d, "weights") <- weights
 
+    naPerc <- sum(is.na(d$percentile))
+    if(naPerc>0){
+      message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+      d <- d[!is.na(d$percentile), ]
+    }
+
     if (descriptives && min(d$n) < 30) {
       warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modelling, it might help to reduce the 'k' parameter."))
     }
@@ -757,6 +763,12 @@ rankBySlidingWindow <- function(data = NULL,
   attr(d, "normValue") <- "normValue"
   attr(d, "group") <- "group"
   attr(d, "weights") <- weights
+
+  naPerc <- sum(is.na(d$percentile))
+  if(naPerc>0){
+    message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+    d <- d[!is.na(d$percentile), ]
+  }
 
   if (descriptives && min(d$n) < 30) {
     warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."))
