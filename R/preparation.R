@@ -39,8 +39,7 @@
 #' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
 #' observed raw scores, otherwise, ranking is done by group (default)
 #' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-#' data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-#' Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
+#' data stratification. All weights have to be numerical and positive. Please note, that this
 #' feature is currently EXPERIMENTAL!
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
@@ -175,8 +174,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' group to FALSE cancels grouping (data is treated as one group)
 #' @param raw name of the raw value variable (default 'raw') or numeric vector
 #' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-#' data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-#' Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
+#' data stratification. All weights have to be numerical and positive. Please note, that this
 #' feature is currently EXPERIMENTAL!
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
