@@ -1,11 +1,11 @@
 
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, summary.lm, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+importFrom(stats, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text)
 importFrom(latticeExtra, panel.2dsmoother)
-importFrom(utils, tail, menu)
+importFrom(utils, tail, menu, head)
 export(
 	bestModel,
 	checkConsistency,
@@ -37,7 +37,9 @@ export(
 	regressionFunction,
 	simulateRasch,
 	modelSummary,
-	getNormScoreSE
+	getNormScoreSE,
+	whdquantile,
+	weighted.rank
 )
 
 

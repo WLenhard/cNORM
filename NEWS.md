@@ -10,6 +10,8 @@ Date: 2020.12.07
 Changes:
 
 *    Fixing errors in the context of weighted percentile modelling
+*    Code change of weighted rank estimation from https://aakinshin.net/posts/weighted-quantiles/
+     code by Andrey Akinshin
 *    Additional message for plotting, when weighted percentiles are used
 
 

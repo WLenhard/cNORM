@@ -91,7 +91,9 @@ rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 # and consequently, females will get the double weight. This procedure can be used
 # to correct imbalances in the dataset, but it is still experimental. Please use
 # positive, non-zero numerics, preferably integers for this:
+\dontrun{
 cnorm.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, weight = ppvt$sex)
+}
 
 }
 \references{

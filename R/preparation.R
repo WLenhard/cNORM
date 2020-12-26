@@ -327,9 +327,9 @@ rankByGroup <-
     if (is.null(covariate)) {
       if (typeof(group) == "logical" && !group) {
         if (descend) {
-          d$percentile <- (wr(-1 * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
+          d$percentile <- (weighted.rank(-1 * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
         } else {
-          d$percentile <- (wr(d[, raw], weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
+          d$percentile <- (weighted.rank(d[, raw], weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
         }
 
         if (descriptives) {
@@ -341,11 +341,11 @@ rankByGroup <-
       } else {
         if (descend) {
           d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-            (wr(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+            (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
           })
         } else {
           d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-            (wr(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+            (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
           })
         }
         if (descriptives) {
@@ -375,11 +375,11 @@ rankByGroup <-
         if (descend) {
           if (descend) {
             d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              (wr(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+              (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
             })
           } else {
             d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-              (wr(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+              (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
             })
           }
           if (descriptives) {
@@ -400,11 +400,11 @@ rankByGroup <-
       } else {
         if (descend) {
           d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            (wr(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+            (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
           })
         } else {
           d$percentile <- ave(d[, raw], d[, group], d[, group], d[, covariate], FUN = function(x) {
-            (wr(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+            (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
           })
         }
         if (descriptives) {
@@ -701,9 +701,9 @@ rankBySlidingWindow <- function(data = NULL,
     nObs <- nrow(observations)
 
     if (descend) {
-      observations$percentile <- (wr(-observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(-observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
     } else {
-      observations$percentile <- (wr(observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
     }
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
@@ -1018,79 +1018,67 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
 
 }
 
-# adapted from wtd.rank, package Hmisc
-wr <- function(x, weights=NULL){
-  if(! length(weights))
+
+#' Weighted ranking
+#'
+#' Conducts weighted ranking on the basis of the weighted Harrell-Davis quantile estimator
+#'
+#' @param x A numerical vector
+#' @param weights A numerical vector with weights; should have the same length as x
+#' @param n Granularity for approximation
+#'
+#' @return weighted ranks
+#' @references Harrell, F.E. and Davis, C.E., 1982. A new distribution-free quantile estimator. Biometrika, 69(3), pp.635-640.
+#' @export
+weighted.rank <- function(x, weights=NULL, n = 1000){
+  if(is.null(weights))
     return(rank(x))
 
-  tab <- wt(x, weights, na.rm=TRUE)
-  freqs <- tab$sum.of.weights
-  r <- cumsum(freqs) - .5*(freqs-1)
-  y <- approx(tab$x, r, xout=x)$y / freqs # modified
-  return(y)
+  probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
+  return(approx(whdquantile(x, probs, weights = weights), probs, x)$y * length(x))
 }
 
 
-
-# adapted from wtd.table, package Hmisc
-wt <- function(x, weights=NULL, type=c('list','table'), na.rm=TRUE){
-  type <- match.arg(type)
-  if(! length(weights))
-    weights <- rep(1, length(x))
-
-  ax <- attributes(x)
-  ax$names <- NULL
-
-  if(is.character(x)) x <- as.factor(x)
-  lev <- levels(x)
-  x <- unclass(x)
-
-  if(na.rm) {
-    s <- ! is.na(x + weights)
-    x <- x[s, drop=FALSE]    ## drop is for factor class
-    weights <- weights[s]
-  }
-
+# Weighted generic quantile estimator
+# Code made available via the CC BY-NC-SA 4.0 license from code from
+# Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+wquantile.generic <- function(x, probs, cdf.gen, weights = NA) {
   n <- length(x)
-  #weights <- weights * length(x) / sum(weights)
+  if (any(is.na(weights)))
+    weights <- rep(1 / n, n)
+  nw <- sum(weights) / max(weights)
 
-  i <- order(x)  # R does not preserve levels here
-  x <- x[i]; weights <- weights[i]
+  indexes <- order(x)
+  x <- x[indexes]
+  weights <- weights[indexes]
 
-  if(anyDuplicated(x)) {  ## diff(x) == 0 faster but doesn't handle Inf
-    weights <- tapply(weights, x, sum)
-    if(length(lev)) {
-      levused <- lev[sort(unique(x))]
-      if((length(weights) > length(levused)) &&
-         any(is.na(weights)))
-        weights <- weights[! is.na(weights)]
+  weights <- weights / sum(weights)
+  cdf.probs <- cumsum(c(0, weights))
 
-      if(length(weights) != length(levused))
-        stop('program logic error')
+  sapply(probs, function(p) {
+    cdf <- cdf.gen(nw, p)
+    q <- cdf(cdf.probs)
+    w <- tail(q, -1) - head(q, -1)
+    sum(w * x)
+  })
+}
 
-      names(weights) <- levused
-    }
 
-    if(! length(names(weights)))
-      stop('program logic error')
-
-    if(type=='table')
-      return(weights)
-
-    x <- as.numeric(names(weights))
-    names(weights) <- NULL
-    return(list(x=x, sum.of.weights=weights))
-  }
-
-  xx <- x
-
-  if(type=='list')
-    list(x=if(length(lev))lev[x]
-         else xx,
-         sum.of.weights=weights)
-  else {
-    names(weights) <- if(length(lev)) lev[x]
-    else xx
-    weights
-  }
+#' Weighted Harrell-Davis quantile estimator
+#'
+#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param weights A numerical vector with weights; should have the same length as x
+#'
+#' @return the quantiles
+#' @export
+#'
+whdquantile <- function(x, probs, weights = NA) {
+  cdf.gen <- function(n, p) return(function(cdf.probs) {
+    pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
+  })
+  wquantile.generic(x, probs, cdf.gen, weights)
 }
