@@ -1026,8 +1026,11 @@ wr <- function(x, weights=NULL){
   tab <- wt(x, weights, na.rm=TRUE)
   freqs <- tab$sum.of.weights
   r <- cumsum(freqs) - .5*(freqs-1)
-  return(approx(tab$x, r, xout=x)$y)
+  y <- approx(tab$x, r, xout=x)$y / freqs # modified
+  return(y)
 }
+
+
 
 # adapted from wtd.table, package Hmisc
 wt <- function(x, weights=NULL, type=c('list','table'), na.rm=TRUE){
@@ -1049,7 +1052,7 @@ wt <- function(x, weights=NULL, type=c('list','table'), na.rm=TRUE){
   }
 
   n <- length(x)
-  weights <- weights * length(x) / sum(weights)
+  #weights <- weights * length(x) / sum(weights)
 
   i <- order(x)  # R does not preserve levels here
   x <- x[i]; weights <- weights[i]

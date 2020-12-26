@@ -109,11 +109,11 @@ bestModel <- function(data,
   }
 
   if (!is.null(weights)||!is.null(attr(data, "weights"))) {
-    if(!is.null(attr(data, "weights"))){
-      weights <- as.numeric(data[, attr(data, "weights")])
-    }else if(is.numeric(weights)&&length(weights)==nrow(data)){
+    if(is.numeric(weights)&&length(weights)==nrow(data)){
       data$weights <- weights
       attr(data, "weights") <- "weights"
+    }else if(!is.null(attr(data, "weights"))){
+      weights <- as.numeric(data[, attr(data, "weights")])
     }else{
       weights <- NULL
     }
@@ -214,6 +214,13 @@ bestModel <- function(data,
     index <- match(force.in, c[[1]])
   } else {
     index <- NULL
+  }
+
+
+  # rename variable, otherwise it would be automatically used
+  if(is.null(weights)&&!is.null(data$weights)){
+    data$weights.old <- data$weights
+    data$weights <- NULL
   }
 
   subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
