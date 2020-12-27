@@ -1032,8 +1032,11 @@ weighted.rank <- function(x, weights=NULL, n = 1000){
   if(is.null(weights))
     return(rank(x))
 
+  # prepare for ordering x values
+  o <- order(x)
+
   probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
-  return(approx(whdquantile(x, probs, weights = weights), probs, x)$y * length(x))
+  return(approx(whdquantile(x[o], probs, weights = weights[o]), probs, x)$y * length(x))
 }
 
 
