@@ -13,7 +13,8 @@ rankByGroup(
   scale = "T",
   descend = FALSE,
   descriptives = TRUE,
-  covariate = NULL
+  covariate = NULL,
+  na.rm = TRUE
 )
 }
 \arguments{
@@ -25,10 +26,11 @@ group to FALSE cancels grouping (data is treated as one group)}
 
 \item{raw}{name of the raw value variable (default 'raw') or numeric vector}
 
-\item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
-feature is currently EXPERIMENTAL!}
+\item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
+to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+and positive.
+Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
+On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
 
 \item{method}{Ranking method in case of bindings, please provide an index,
 choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
@@ -50,6 +52,9 @@ standard deviation per group is added to each observation}
 \item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
 either by specifying the variable name or including the variable itself. BEWARE!
 Not all subsequent functions are already prepared for it.  It is an experimental feature.}
+
+\item{na.rm}{remove values, where the percentiles could not be estimated,
+most likely happens in the context of weighting}
 }
 \value{
 the dataset with the percentiles and norm scales per group

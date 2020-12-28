@@ -38,8 +38,8 @@ export(
 	simulateRasch,
 	modelSummary,
 	getNormScoreSE,
-	whdquantile,
-	weighted.rank
+	weighted.rank,
+	weighted.quantile
 )
 
 

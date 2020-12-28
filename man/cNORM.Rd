@@ -27,10 +27,11 @@ cnorm(
 
 \item{width}{Size of the moving window in case an age vector is used}
 
-\item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
-feature is currently EXPERIMENTAL!}
+\item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
+to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+and positive.
+Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
+On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
@@ -99,8 +100,6 @@ cnorm.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, weight = ppvt$sex)
 \references{
 \enumerate{
   \item Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
-  \item Harrel, F. (2020). Hmisc: Harrell Miscellaneous (v. 4.4-1). available https://CRAN.R-project.org/package=Hmisc
-  (code for weighted ranking adapted from wtd.rank & wtd.table by courtesy of Frank Harrell)
   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi:10.1177/1073191116656437
   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279

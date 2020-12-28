@@ -173,9 +173,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @param group name of the grouping variable (default 'group')  or numeric vector, e. g. grade, setting
 #' group to FALSE cancels grouping (data is treated as one group)
 #' @param raw name of the raw value variable (default 'raw') or numeric vector
-#' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-#' data stratification. All weights have to be numerical and positive. Please note, that this
-#' feature is currently EXPERIMENTAL!
+#' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
+#' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+#' and positive.
+#' Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
+#' On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -192,6 +194,8 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. BEWARE!
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
+#' @param na.rm remove values, where the percentiles could not be estimated,
+#' most likely happens in the context of weighting
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -218,7 +222,9 @@ rankByGroup <-
            method = 4,
            scale = "T",
            descend = FALSE,
-           descriptives = TRUE, covariate = NULL) {
+           descriptives = TRUE,
+           covariate = NULL,
+           na.rm = TRUE) {
 
     # experimental code to include covariates
     # covariate <- NULL
@@ -465,10 +471,12 @@ rankByGroup <-
     attr(d, "width") <- NA
     attr(d, "weights") <- weights
 
-    naPerc <- sum(is.na(d$percentile))
-    if(naPerc>0){
-      message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
-      d <- d[!is.na(d$percentile), ]
+    if(na.rm){
+      naPerc <- sum(is.na(d$percentile))
+      if(naPerc>0){
+        message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+        d <- d[!is.na(d$percentile), ]
+      }
     }
 
     if (descriptives && min(d$n) < 30) {
@@ -514,10 +522,11 @@ rankByGroup <-
 #' powers of age and the interactions
 #' @param raw name of the raw value variable (default 'raw')
 #' @param width the width of the sliding window
-#' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-#' data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-#' Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
-#' feature is currently EXPERIMENTAL!
+#' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
+#' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+#' and positive.
+#' Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
+#' On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -540,6 +549,8 @@ rankByGroup <-
 #' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. BEWARE!
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
+#' @param na.rm remove values, where the percentiles could not be estimated,
+#' most likely happens in the context of weighting
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
@@ -565,7 +576,9 @@ rankBySlidingWindow <- function(data = NULL,
                                 descend = FALSE,
                                 descriptives = TRUE,
                                 nGroup = 0,
-                                group = NA, covariate = NULL) {
+                                group = NA,
+                                covariate = NULL,
+                                na.rm = TRUE) {
 
   # experimental code to include covariates
   # covariate <- NULL
@@ -762,10 +775,14 @@ rankBySlidingWindow <- function(data = NULL,
   attr(d, "group") <- "group"
   attr(d, "weights") <- weights
 
-  naPerc <- sum(is.na(d$percentile))
-  if(naPerc>0){
-    message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
-    d <- d[!is.na(d$percentile), ]
+
+
+  if(na.rm){
+    naPerc <- sum(is.na(d$percentile))
+    if(naPerc>0){
+      message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+      d <- d[!is.na(d$percentile), ]
+    }
   }
 
   if (descriptives && min(d$n) < 30) {
@@ -996,13 +1013,13 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
 
   total.rep <- rbind(group1[1:(n1*weight1),], group2[1:(n2*weight2),])
   total.rep <- total.rep[sample(nrow(total.rep)),]
-  total.rep$percentileReal <- rankByGroup(total.rep, group = FALSE, raw = total.rep$raw)$percentile
+  total.rep$percentileReal <- rankByGroup(total.rep, group = FALSE, raw = total.rep$raw, descriptives = FALSE, na.rm = FALSE)$percentile
 
   total <- rbind(group1, group2)
   total <- total[sample(nrow(total)),]
   total <- total[1:nrow(total.rep),]
-  total$percentileUnweighted <- rankByGroup(total, group = FALSE, raw = total$raw)$percentile
-  total$percentileWeighted <- rankByGroup(total, group = FALSE, raw = total$raw, weights = total$weights)$percentile
+  total$percentileUnweighted <- rankByGroup(total, group = FALSE, raw = total$raw, descriptives = FALSE, na.rm = FALSE)$percentile
+  total$percentileWeighted <- rankByGroup(total, group = FALSE, raw = total$raw, descriptives = FALSE,  weights = total$weights, na.rm = FALSE)$percentile
 
 
   total <- total[order(total$raw),]
@@ -1017,18 +1034,25 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
 }
 
 
-#' Weighted ranking
+#' Weighted rank estimation
 #'
 #' Conducts weighted ranking on the basis of the weighted Harrell-Davis quantile estimator
 #'
 #' @param x A numerical vector
 #' @param weights A numerical vector with weights; should have the same length as x
 #' @param n Granularity for approximation
-#'
-#' @return weighted ranks
-#' @references Harrell, F.E. and Davis, C.E., 1982. A new distribution-free quantile estimator. Biometrika, 69(3), pp.635-640.
+#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
+#' approximate the weighted percentiles (Harrel & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
+#' @references
+#' \enumerate{
+#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
+#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
+#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
+#' }
+#' @return the weighted ranks
 #' @export
-weighted.rank <- function(x, weights=NULL, n = 1000){
+weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
   if(is.null(weights))
     return(rank(x))
 
@@ -1036,9 +1060,77 @@ weighted.rank <- function(x, weights=NULL, n = 1000){
   o <- order(x)
 
   probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
-  return(approx(whdquantile(x[o], probs, weights = weights[o]), probs, x)$y * length(x))
+  return(approx(weighted.quantile(x[o], probs, weights = weights[o], type), probs, x)$y * length(x))
 }
 
+
+
+
+#' Weighted quantile estimator
+#'
+#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
+#' approximate the weighted percentiles (Harrel & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
+#' @param weights A numerical vector with weights; should have the same length as x
+#' @references
+#' \enumerate{
+#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
+#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
+#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
+#' }
+#' @return the weighted quantiles
+#' @export
+weighted.quantile <- function(x, probs, weights = NA, type="Type7"){
+  if(is.na(weights)){
+    return(quantile(x, probs))
+  }else if(type=="Harrell-Davis"){
+    return(weighted.quantile.harrell.davis(x, probs, weights))
+  }else{
+    return(weighted.quantile.type7(x, probs, weights))
+  }
+}
+
+#' Weighted Harrell-Davis quantile estimator
+#'
+#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param weights A numerical vector with weights; should have the same length as x
+#'
+#' @return the quantiles
+weighted.quantile.harrell.davis <- function(x, probs, weights = NA) {
+  cdf.gen <- function(n, p) return(function(cdf.probs) {
+    pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
+  })
+  wquantile.generic(x, probs, cdf.gen, weights)
+}
+
+
+#' Weighted type7 quantile estimator
+#'
+#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param weights A numerical vector with weights; should have the same length as x
+#'
+#' @return the quantiles
+weighted.quantile.type7 <- function(x, probs, weights = NA) {
+  cdf.gen <- function(n, p) return(function(cdf.probs) {
+    h <- p * (n - 1) + 1
+    u <- pmax((h - 1) / n, pmin(h / n, cdf.probs))
+    u * n - h + 1
+  })
+  wquantile.generic(x, probs, cdf.gen, weights)
+}
 
 # Weighted generic quantile estimator
 # Code made available via the CC BY-NC-SA 4.0 license from code from
@@ -1064,22 +1156,3 @@ wquantile.generic <- function(x, probs, cdf.gen, weights = NA) {
   })
 }
 
-
-#' Weighted Harrell-Davis quantile estimator
-#'
-#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-#' Code made available via the CC BY-NC-SA 4.0 license
-#'
-#' @param x A numerical vector
-#' @param probs Numerical vector of quantiles
-#' @param weights A numerical vector with weights; should have the same length as x
-#'
-#' @return the quantiles
-#' @export
-#'
-whdquantile <- function(x, probs, weights = NA) {
-  cdf.gen <- function(n, p) return(function(cdf.probs) {
-    pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
-  })
-  wquantile.generic(x, probs, cdf.gen, weights)
-}

@@ -16,7 +16,8 @@ rankBySlidingWindow(
   descriptives = TRUE,
   nGroup = 0,
   group = NA,
-  covariate = NULL
+  covariate = NULL,
+  na.rm = TRUE
 )
 }
 \arguments{
@@ -27,10 +28,11 @@ powers of age and the interactions}
 
 \item{raw}{name of the raw value variable (default 'raw')}
 
-\item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
-feature is currently EXPERIMENTAL!}
+\item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
+to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+and positive.
+Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
+On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
 
 \item{width}{the width of the sliding window}
 
@@ -62,6 +64,9 @@ if ngroups is used)}
 \item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
 either by specifying the variable name or including the variable itself. BEWARE!
 Not all subsequent functions are already prepared for it.  It is an experimental feature.}
+
+\item{na.rm}{remove values, where the percentiles could not be estimated,
+most likely happens in the context of weighting}
 }
 \value{
 the dataset with the individual percentiles and norm scores

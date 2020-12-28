@@ -35,8 +35,7 @@ conventional norm tables.}
 observed raw scores, otherwise, ranking is done by group (default)}
 
 \item{weights}{Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-data stratification. All weights have to be numerical and positive. The code to compute weighted percentiles originates from the
-Hmisc package (functions) wtd.rank and wtd.table) and is provided by the courtesy of Frank Harrell. Please note, that this
+data stratification. All weights have to be numerical and positive. Please note, that this
 feature is currently EXPERIMENTAL!}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
