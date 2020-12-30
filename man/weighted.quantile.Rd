@@ -14,14 +14,14 @@ weighted.quantile(x, probs, weights = NA, type = "Type7")
 \item{weights}{A numerical vector with weights; should have the same length as x}
 
 \item{type}{Type of estimator, can either be "Harrell-Davis" using a beta function to
-approximate the weighted percentiles (Harrel & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
 of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).}
 }
 \value{
 the weighted quantiles
 }
 \description{
-Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
 Code made available via the CC BY-NC-SA 4.0 license
 }
 \references{

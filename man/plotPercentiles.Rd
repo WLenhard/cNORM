@@ -69,7 +69,7 @@ Please note, that the estimation of the percentiles of the raw data is done with
 the quantile function with the default settings. Please consult help(quantile)
 and change the 'type' parameter accordingly.
 In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
-parameter in modelling.
+parameter in modeling.
 }
 \examples{
 # Load example data set, compute model and plot results

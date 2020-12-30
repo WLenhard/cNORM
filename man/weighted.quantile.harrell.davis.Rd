@@ -17,6 +17,6 @@ weighted.quantile.harrell.davis(x, probs, weights = NA)
 the quantiles
 }
 \description{
-Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
 Code made available via the CC BY-NC-SA 4.0 license
 }

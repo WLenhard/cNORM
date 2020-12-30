@@ -38,7 +38,7 @@ the specific value here.}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
 
-\item{CI}{confidence coefficent, ranging from 0 to 1, default .9}
+\item{CI}{confidence coefficient, ranging from 0 to 1, default .9}
 
 \item{reliability}{coefficient, ranging between  0 to 1}
 }
