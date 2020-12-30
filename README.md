@@ -38,7 +38,7 @@ Please report errors. Suggestions for improvement are always welcome!
 ## Example
 
 Conducting the analysis consists of the following steps:
-1.  Data preparation und establishing the regression model
+1.  Data preparation and establishing the regression model
 1.  Validating the model
 1.  Generating norm tables and plotting the results
 

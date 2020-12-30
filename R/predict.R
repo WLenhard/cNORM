@@ -213,7 +213,7 @@ predictRaw <-
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
-#' @param CI confidence coefficent, ranging from 0 to 1, default .9
+#' @param CI confidence coefficient, ranging from 0 to 1, default .9
 #' @param reliability coefficient, ranging between  0 to 1
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
@@ -386,7 +386,7 @@ normTable <- function(A,
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
-#' @param CI confidence coefficent, ranging from 0 to 1, default .9
+#' @param CI confidence coefficient, ranging from 0 to 1, default .9
 #' @param reliability coefficient, ranging between  0 to 1
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided

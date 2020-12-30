@@ -480,7 +480,7 @@ rankByGroup <-
     }
 
     if (descriptives && min(d$n) < 30) {
-      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modelling, it might help to reduce the 'k' parameter."))
+      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modeling, it might help to reduce the 'k' parameter."))
     }
 
     return(d)
@@ -1042,7 +1042,7 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
 #' @param weights A numerical vector with weights; should have the same length as x
 #' @param n Granularity for approximation
 #' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
-#' approximate the weighted percentiles (Harrel & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
 #' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
 #' @references
 #' \enumerate{
@@ -1068,13 +1068,13 @@ weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
 
 #' Weighted quantile estimator
 #'
-#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
 #' Code made available via the CC BY-NC-SA 4.0 license
 #'
 #' @param x A numerical vector
 #' @param probs Numerical vector of quantiles
 #' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
-#' approximate the weighted percentiles (Harrel & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
 #' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
 #' @param weights A numerical vector with weights; should have the same length as x
 #' @references
@@ -1097,7 +1097,7 @@ weighted.quantile <- function(x, probs, weights = NA, type="Type7"){
 
 #' Weighted Harrell-Davis quantile estimator
 #'
-#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
 #' Code made available via the CC BY-NC-SA 4.0 license
 #'
 #' @param x A numerical vector
@@ -1115,7 +1115,7 @@ weighted.quantile.harrell.davis <- function(x, probs, weights = NA) {
 
 #' Weighted type7 quantile estimator
 #'
-#' Computes weightes quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
 #' Code made available via the CC BY-NC-SA 4.0 license
 #'
 #' @param x A numerical vector

@@ -381,7 +381,7 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 #' the quantile function with the default settings. Please consult help(quantile)
 #' and change the 'type' parameter accordingly.
 #' In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
-#' parameter in modelling.
+#' parameter in modeling.
 #' @param data The raw data including the percentiles and norm scores or a cnorm object
 #' @param model The model from the bestModel function (optional)
 #' @param minRaw Lower bound of the raw score (default = 0)

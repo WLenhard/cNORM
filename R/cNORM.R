@@ -127,14 +127,14 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #'
 #' Conducts continuous norming in one step and returns an object including ranked raw data and the continuous norming
 #' model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
-#' of the steps in the data preparation and modelling process. In addition to the raw scores, either provide
+#' of the steps in the data preparation and modeling process. In addition to the raw scores, either provide
 #' \itemize{
 #'  \item{a numeric vector for the grouping information (group)}
 #'  \item{a numeric vector for both grouping and age (group, age)}
 #'  \item{a numeric age vector and the width of the sliding window (age, width)}
 #' }
 #' for the ranking of the raw scores. You can
-#' adjust the grade of smoothing of the regression modell by setting the k and terms parameter. In general,
+#' adjust the grade of smoothing of the regression model by setting the k and terms parameter. In general,
 #' increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
 #' smoothing.
 #' @param raw Numeric vector of raw scores
