@@ -1,8 +1,7 @@
 ## Resubmission
-This is a new major release of an existing package. In this version I have:
+This is a minor release of an existing package. In this version I have:
 
-* added features (wheighted percentiles, S3 methods)
-* ran all tests on R CMD Check, rhub, Travis (Win, Linux, MacOS X)
+* corrected bugs
 
 ## Test environments
 * local WIN10, 64Bit install, R 4.0.2
