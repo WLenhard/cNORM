@@ -3,8 +3,8 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.0.1 (in progress)
-Date: 2020.12.07
+### Version in 2.0.1 (release)
+Date: 2020.12.31
 
 
 Changes:
