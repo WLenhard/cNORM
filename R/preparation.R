@@ -354,16 +354,11 @@ rankByGroup <-
           d$md <- median(d[, raw])
           d$sd <- sd(d[, raw])
         }
-      } else {library(dplyr)
-        message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
-        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-          (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
-        })
-
-#        d$percentile2 <- unlist(by(d, d$group, function(x) {
-#            (rank(sign * x$raw) + numerator[method]) / (nrow(x) + denominator[method])
-#          }))
-
+      } else {
+        d <- d[order(d$group), ]
+        d$percentile <- unlist(by(d, d$group, function(x) {
+            (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
+          }))
 
         if (descriptives) {
           d$n <- ave(d[, raw], d[, group], FUN = function(x) {
@@ -607,27 +602,25 @@ rankBySlidingWindow <- function(data = NULL,
 
   weighting <- NULL
   if(!is.null(weights)){
-    message("Weighting is currently not working in rankBySlidingWindow. Proceeding without weighting.")
-    weights <- NULL
 
-    # if(is.character(weights)){
-    #
-    #   if(!(weights %in% colnames(d))){
-    #     warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
-    #     weights <- NULL
-    #   }else{
-    #     weighting <- d[, weights]
-    #   }
-    # }else{
-    #   if(length(weights)!=nrow(data)){
-    #     warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
-    #
-    #   }else{
-    #     d$weights <- as.numeric(weights)
-    #     weighting <- as.numeric(weights)
-    #     weights <- "weights"
-    #   }
-    # }
+    if(is.character(weights)){
+
+      if(!(weights %in% colnames(d))){
+        warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+        weights <- NULL
+      }else{
+        weighting <- d[, weights]
+      }
+    }else{
+      if(length(weights)!=nrow(data)){
+        warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+
+      }else{
+        d$weights <- as.numeric(weights)
+        weighting <- as.numeric(weights)
+        weights <- "weights"
+      }
+    }
   }
 
   if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
@@ -716,11 +709,13 @@ rankBySlidingWindow <- function(data = NULL,
   }
     nObs <- nrow(observations)
 
+    sign <- 1
     if (descend) {
-      observations$percentile <- (rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
-    } else {
-      observations$percentile <- (rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+      sign <- -1
     }
+
+    observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
     if (descriptives) {
