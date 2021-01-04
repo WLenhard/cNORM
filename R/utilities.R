@@ -205,8 +205,6 @@ weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
 }
 
 
-
-
 #' Weighted quantile estimator
 #'
 #' Computes weighted quantiles (code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/

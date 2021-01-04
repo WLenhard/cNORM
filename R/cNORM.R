@@ -155,8 +155,8 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
 #' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
 #' and positive.
-#' Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
-#' On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
+#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
+#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param terms Selection criterion for model building. The best fitting model with
 #' this number of terms is used
 #' @param R2 Adjusted R square as a stopping criterion for the model building
@@ -213,7 +213,9 @@ cnorm <- function(raw = NULL,
                   R2 = NULL){
 
   if(!is.null(weights)){
-    warning("Weighting is still an experimental feature. It is currently not yet encouraged to use it.")
+    warning("Weighting is still an experimental feature. It is currently not yet encouraged to use it and has been deactivated in the current release.")
+
+    weights <- NULL
   }
 
   if(is.numeric(raw)&&is.numeric(group)){

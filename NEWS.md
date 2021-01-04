@@ -3,12 +3,13 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.0.1 (release)
+### Version in 2.0.1 (work in progress)
 Date: 2020.12.31
 
 
 Changes:
 
+*    Weighting has been temporarily deactivated due to data handling issues
 *    Fixing errors in the context of weighted percentile modelling
 *    Code change of weighted rank estimation from https://aakinshin.net/posts/weighted-quantiles/
      code by Andrey Akinshin

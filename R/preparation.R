@@ -38,9 +38,11 @@
 #' @param age the continuous explanatory variable; by default set to "group"
 #' @param width if a width is provided, the function switches to rankBySlidingWindow to determine the
 #' observed raw scores, otherwise, ranking is done by group (default)
-#' @param weights Vector or variable name in the dataset with weights to compensate imbalances due to insufficient norm
-#' data stratification. All weights have to be numerical and positive. Please note, that this
-#' feature is currently EXPERIMENTAL!
+#' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
+#' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
+#' and positive.
+#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
+#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index point
@@ -176,8 +178,8 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
 #' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
 #' and positive.
-#' Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
-#' On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
+#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
+#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -255,26 +257,31 @@ rankByGroup <-
     }
     }
 
+
     weighting <- NULL
     if(!is.null(weights)){
-      if(is.character(weights)){
+        message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
+        weights <- NULL
 
-        if(!(weights %in% colnames(d))){
-          warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
-          weights <- NULL
-          }else{
-          weighting <- d[, weights]
-        }
-        }else{
-          if(length(weights)!=nrow(d)){
-            warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+      # if(is.character(weights)){
+      #
+      #   if(!(weights %in% colnames(d))){
+      #     warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+      #     weights <- NULL
+      #     }else{
+      #     weighting <- d[, weights]
+      #   }
+      #   }else{
+      #     if(length(weights)!=nrow(d)){
+      #       warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+      #
+      #     }else{
+      #       d$weights <- as.numeric(weights)
+      #       weighting <- as.numeric(weights)
+      #       weights <- "weights"
+      #     }
+      #   }
 
-          }else{
-            d$weights <- as.numeric(weights)
-            weighting <- as.numeric(weights)
-            weights <- "weights"
-          }
-        }
       }
 
     if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
@@ -525,8 +532,8 @@ rankByGroup <-
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
 #' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
 #' and positive.
-#' Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
-#' On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
+#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
+#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -605,24 +612,27 @@ rankBySlidingWindow <- function(data = NULL,
 
   weighting <- NULL
   if(!is.null(weights)){
-    if(is.character(weights)){
+    message("Weighting is currently not working in rankBySlidingWindow. Proceeding without weighting.")
+    weights <- NULL
 
-      if(!(weights %in% colnames(d))){
-        warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
-        weights <- NULL
-      }else{
-        weighting <- d[, weights]
-      }
-    }else{
-      if(length(weights)!=nrow(data)){
-        warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
-
-      }else{
-        d$weights <- as.numeric(weights)
-        weighting <- as.numeric(weights)
-        weights <- "weights"
-      }
-    }
+    # if(is.character(weights)){
+    #
+    #   if(!(weights %in% colnames(d))){
+    #     warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+    #     weights <- NULL
+    #   }else{
+    #     weighting <- d[, weights]
+    #   }
+    # }else{
+    #   if(length(weights)!=nrow(data)){
+    #     warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+    #
+    #   }else{
+    #     d$weights <- as.numeric(weights)
+    #     weighting <- as.numeric(weights)
+    #     weights <- "weights"
+    #   }
+    # }
   }
 
   if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
@@ -712,9 +722,9 @@ rankBySlidingWindow <- function(data = NULL,
     nObs <- nrow(observations)
 
     if (descend) {
-      observations$percentile <- (weighted.rank(-observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     } else {
-      observations$percentile <- (weighted.rank(observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     }
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
