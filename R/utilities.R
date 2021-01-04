@@ -231,8 +231,8 @@ weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
 #' }
 #' @return the weighted quantiles
 #' @export
-weighted.quantile <- function(x, probs, weights = NA, type="Type7"){
-  if(is.na(weights)){
+weighted.quantile <- function(x, probs, weights = NULL, type="Type7"){
+  if(is.null(weights)){
     return(quantile(x, probs))
   }else if(type=="Harrell-Davis"){
     return(weighted.quantile.harrell.davis(x, probs, weights))
@@ -248,10 +248,15 @@ weighted.quantile <- function(x, probs, weights = NA, type="Type7"){
 #'
 #' @param x A numerical vector
 #' @param probs Numerical vector of quantiles
-#' @param weights A numerical vector with weights; should have the same length as x
+#' @param weights A numerical vector with weights; should have the same length as x.
+#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
 #'
 #' @return the quantiles
-weighted.quantile.harrell.davis <- function(x, probs, weights = NA) {
+weighted.quantile.harrell.davis <- function(x, probs, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
   cdf.gen <- function(n, p) return(function(cdf.probs) {
     pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
   })
@@ -266,10 +271,15 @@ weighted.quantile.harrell.davis <- function(x, probs, weights = NA) {
 #'
 #' @param x A numerical vector
 #' @param probs Numerical vector of quantiles
-#' @param weights A numerical vector with weights; should have the same length as x
+#' @param weights A numerical vector with weights; should have the same length as x.
+#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
 #'
 #' @return the quantiles
-weighted.quantile.type7 <- function(x, probs, weights = NA) {
+weighted.quantile.type7 <- function(x, probs, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
   cdf.gen <- function(n, p) return(function(cdf.probs) {
     h <- p * (n - 1) + 1
     u <- pmax((h - 1) / n, pmin(h / n, cdf.probs))
@@ -279,9 +289,14 @@ weighted.quantile.type7 <- function(x, probs, weights = NA) {
 }
 
 # Weighted generic quantile estimator
+#
 # Code made available via the CC BY-NC-SA 4.0 license from code from
 # Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-wquantile.generic <- function(x, probs, cdf.gen, weights = NA) {
+wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
   n <- length(x)
   if (any(is.na(weights)))
     weights <- rep(1 / n, n)
