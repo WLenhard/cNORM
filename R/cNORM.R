@@ -215,7 +215,6 @@ cnorm <- function(raw = NULL,
   if(!is.null(weights)){
     warning("Weighting is still an experimental feature. It is currently not yet encouraged to use it and has been deactivated in the current release.")
 
-    weights <- NULL
   }
 
   if(is.numeric(raw)&&is.numeric(group)){

@@ -249,10 +249,16 @@ rankByGroup <-
     if (is.numeric(group) && (length(group) == nrow(d))) {
       d$group <- group
       group <- "group"
+    }else if(is.character(group)){
+      d$group <- d[, group]
+      group <- "group"
     }
 
     if (is.numeric(raw) && (length(raw) == nrow(d))) {
       d$raw <- raw
+      raw <- "raw"
+    }else if(is.character(raw)){
+      d$raw <- d[, raw]
       raw <- "raw"
     }
     }
@@ -260,27 +266,27 @@ rankByGroup <-
 
     weighting <- NULL
     if(!is.null(weights)){
-        message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
-        weights <- NULL
+        # message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
+        # weights <- NULL
 
-      # if(is.character(weights)){
-      #
-      #   if(!(weights %in% colnames(d))){
-      #     warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
-      #     weights <- NULL
-      #     }else{
-      #     weighting <- d[, weights]
-      #   }
-      #   }else{
-      #     if(length(weights)!=nrow(d)){
-      #       warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
-      #
-      #     }else{
-      #       d$weights <- as.numeric(weights)
-      #       weighting <- as.numeric(weights)
-      #       weights <- "weights"
-      #     }
-      #   }
+      if(is.character(weights)){
+
+        if(!(weights %in% colnames(d))){
+          warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+          weights <- NULL
+          }else{
+          weighting <- d[, weights]
+        }
+        }else{
+          if(length(weights)!=nrow(d)){
+            warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+
+          }else{
+            d$weights <- as.numeric(weights)
+            weighting <- as.numeric(weights)
+            weights <- "weights"
+          }
+        }
 
       }
 
@@ -331,34 +337,34 @@ rankByGroup <-
     numerator <- c(-3.75, -1 / 3, 0, -0.5, -1 / 3, -0.3175, -0.326)
     denominator <- c(0.25, 1 / 3, 1, 0, 0.4, 0.365, 0.348)
 
+    sign = 1
+    if (descend)
+      sign = -1
+
     if (method < 1 || method > length(numerator)) {
       message("Method parameter out of range, setting to RankIt")
     }
 
     if (is.null(covariate)) {
       if (typeof(group) == "logical" && !group) {
-        if (descend) {
-          d$percentile <- (weighted.rank(-1 * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
-        } else {
-          d$percentile <- (weighted.rank(d[, raw], weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
-        }
-
+        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
         if (descriptives) {
           d$n <- length(d[, raw])
           d$m <- mean(d[, raw])
           d$md <- median(d[, raw])
           d$sd <- sd(d[, raw])
         }
-      } else {
-        if (descend) {
-          d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-            (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-          })
-        } else {
-          d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
-            (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-          })
-        }
+      } else {library(dplyr)
+        message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
+        d$percentile <- ave(d[, raw], d[, group], FUN = function(x) {
+          (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
+        })
+
+#        d$percentile2 <- unlist(by(d, d$group, function(x) {
+#            (rank(sign * x$raw) + numerator[method]) / (nrow(x) + denominator[method])
+#          }))
+
+
         if (descriptives) {
           d$n <- ave(d[, raw], d[, group], FUN = function(x) {
             length(x)
@@ -383,16 +389,11 @@ rankByGroup <-
       warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
 
       if (typeof(group) == "logical" && !group) {
-        if (descend) {
-          if (descend) {
+
             d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+              (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
             })
-          } else {
-            d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-              (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-            })
-          }
+
           if (descriptives) {
             d$n <- ave(d[, raw], d[, covariate], FUN = function(x) {
               length(x)
@@ -407,17 +408,13 @@ rankByGroup <-
               sd(x)
             })
           }
-        }
       } else {
-        if (descend) {
+          # TODO weighting and covariates. Switch to unlist(by(..))
+          warning("Currently, it is not possible to use both covariates and weights. Ignoring weights in ranking.")
           d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            (weighted.rank(-x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+            (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
           })
-        } else {
-          d$percentile <- ave(d[, raw], d[, group], d[, group], d[, covariate], FUN = function(x) {
-            (weighted.rank(x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-          })
-        }
+
         if (descriptives) {
           d$n <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
             length(x)
@@ -433,8 +430,6 @@ rankByGroup <-
           })
         }
       }
-
-
     }
 
     scaleM <- NA
@@ -722,9 +717,9 @@ rankBySlidingWindow <- function(data = NULL,
     nObs <- nrow(observations)
 
     if (descend) {
-      observations$percentile <- (weighted.rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (rank(-observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     } else {
-      observations$percentile <- (weighted.rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (rank(observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     }
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)

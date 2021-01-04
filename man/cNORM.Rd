@@ -30,8 +30,8 @@ cnorm(
 \item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
 to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
 and positive.
-Please note, that this feature is currently EXPERIMENTAL! Precision of weighting increases with sample size.
-On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
+Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
+with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
