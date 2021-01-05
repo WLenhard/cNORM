@@ -16,7 +16,7 @@ This is a minor release of an existing package. In this version I have:
 * R-hub Fedora Linux, R-devel, clang, gfortran
 
 ## R CMD check results
-There were no ERRORs or WARNINGs, but NOTES on potentially outdated links in data descriptions. These are all false positives. In the first submission, I had wrongly used 2020 as the year. The error is corrected.
+There were no ERRORs or WARNINGs, but NOTES on potentially outdated links in data descriptions and a problem with the date in description. The notes on links all false positives. In the first submission, I had wrongly used 2020 as the year. The error is corrected, but the note still shows up on rhub.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

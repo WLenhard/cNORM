@@ -946,7 +946,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
         r2.train[i] <- r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs")^2)
         r2.test[i] <- r2.test[i] + (cor(test$normValue, test$T, use = "pairwise.complete.obs")^2)
         norm.rmse[i] <- norm.rmse[i] + sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
-        norm.se[i] <- norm.se[i] + sum(sqrt((test$T - test$normValue)^2))/(length(!is.na(test$T))-2)
+        norm.se[i] <- norm.se[i] + sum(sqrt((test$T - test$normValue)^2), na.rm = TRUE)/(length(!is.na(test$T))-2)
         }
     }
   }
@@ -1100,8 +1100,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
 
     d$diff <- d$fitted - data$normValue
-    d <- d[!is.na(d$fitted), ]
     d <- d[!is.na(d$diff), ]
 
-    return(sum(sqrt(d$diff^2))/(nrow(d)-2))
+    return(sum(sqrt(d$diff^2))/(nrow(d)-2), na.rm = TRUE)
   }
