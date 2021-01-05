@@ -108,12 +108,10 @@ bestModel <- function(data,
     raw <- attr(data, "raw")
   }
 
-  if (!is.null(weights)||!is.null(attr(data, "weights"))) {
+  if (!is.null(weights)) {
     if(is.numeric(weights)&&length(weights)==nrow(data)){
       data$weights <- weights
       attr(data, "weights") <- "weights"
-    }else if(!is.null(attr(data, "weights"))){
-      weights <- as.numeric(data[, attr(data, "weights")])
     }else{
       weights <- NULL
     }

@@ -426,11 +426,6 @@ plotPercentiles <- function(data,
     data <- data$data
   }
 
-  if(!is.null(attributes(data)$weights)){
-    message("Manifest percentiles are based on the unweighted data.")
-
-  }
-
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
     covariate = NULL
@@ -496,6 +491,9 @@ plotPercentiles <- function(data,
     stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
   }
 
+  if (typeof(group) == "logical" && !group) {
+    stop("The plotPercentiles-function does not work without a grouping variable.")
+  }
 
 
   # compute norm scores from percentile vector
@@ -520,45 +518,20 @@ plotPercentiles <- function(data,
   NAMESP <- paste("PredPR", percentiles * 100, sep = "")
 
   # build function for xyplot and aggregate actual percentiles per group
-  if (typeof(group) == "logical" && !group) {
-    message("The plotPercentiles-function does not work without a grouping variable.")
-  } else {
     xyFunction <- paste(paste(NAMES, collapse = " + "),
       paste(NAMESP, collapse = " + "),
       sep = " + ", collapse = " + "
     )
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
-    if(!is.null(attr(data, "descend"))&&attr(data, "descend")){
-    percentile.actual <- do.call(
-      data.frame,
-      aggregate(data[, raw],
-        list(data[, group]),
-        FUN = function(x) quantile(x,
-            probs = 1 - percentiles,
-            type = type,
-            na.rm = TRUE
-          )
-      )
-    )
-    }else{
-      percentile.actual <- do.call(
-        data.frame,
-        aggregate(data[, raw],
-                  list(data[, group]),
-                  FUN = function(x) quantile(x,
-                                             probs = percentiles,
-                                             type = type,
-                                             na.rm = TRUE
-                  )
-        )
-      )
 
-    }
-
+  w <- attributes(data)$weights
+  if(!is.null(attr(data, "descend"))&&attr(data, "descend")){
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df){weighted.quantile(df[, raw], probs = 1 - percentiles, weights = df$w)})))
+  }else{
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df){weighted.quantile(df[, raw], probs = percentiles, weights = df$w)})))
   }
-
-  # compute percentile table
-  colnames(percentile.actual) <- c(c(group), NAMES)
+  percentile.actual$group <- as.numeric(rownames(percentile.actual))
+  colnames(percentile.actual) <- c(NAMES, c(group))
 
   # build finer grained grouping variable for prediction
   AGEP <- unique(data[, group])

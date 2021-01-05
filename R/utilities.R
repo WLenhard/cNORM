@@ -201,7 +201,7 @@ weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
     return(rank(x))
 
   probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
-  return(approx(weighted.quantile(x, probs, weights = weights, type), probs, x)$y * length(x))
+  suppressWarnings(return(approx(weighted.quantile(x, probs, weights = weights, type), probs, x)$y * length(x)))
 }
 
 

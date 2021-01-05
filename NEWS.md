@@ -3,6 +3,19 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.0.2 (progress)
+Date: 2020.01.06
+
+
+Changes:
+
+*    Use weighted percentiles in plotPercentiles
+*    automatic weighting deactivated in bestModel, since it is already applied in ranking
+*    suppressWarnings in weighted ranking
+
+
+
+
 ### Version in 2.0.1 (release candidate)
 Date: 2020.01.05
 
