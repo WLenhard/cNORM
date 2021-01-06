@@ -655,7 +655,7 @@ plotDensity <- function(model,
   }
 
   if (is.null(group)&&model$useAge) {
-    group <- c(model$minA1, (model$maxA1 + model$minA1) / 2, model$maxA1)
+    group <- round(seq(from = model$minA1, to = model$maxA1, length.out = 4), digits = 3)
   }else if(!model$useAge){
     group <- c(1)
   }

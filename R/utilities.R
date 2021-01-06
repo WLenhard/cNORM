@@ -149,7 +149,7 @@ wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
 #'
 #' @param x The continuous variable to be split
 #' @param n The number of groups; if NULL then the function determines a number
-#' of groups with usually 100 cases or 3 <= n <= 30.
+#' of groups with usually 100 cases or 3 <= n <= 20.
 #' @param equidistant If set to TRUE, builds equidistant interval, otherwise (default)
 #' with equal number of observations
 #'
@@ -166,8 +166,8 @@ getGroups <- function(x, n = NULL, equidistant = FALSE){
 
     if(n < 3)
       n <- 3
-    else if(n > 30)
-      n <- 30
+    else if(n > 20)
+      n <- 20
   }
 
   # define grouping variable
