@@ -9,9 +9,9 @@ Date: 2021.01.06
 
 Changes:
 
-*    Fixed regression in rankBySlidingWindow due to ranking
+*    Fixed bug in rankBySlidingWindow due to ranking
 *    New function for building groups and assign group means: getGroups
-*    display errors fixed in plotPercentiles
+*    display errors fixed in plotPercentiles, function optimized
 
 
 

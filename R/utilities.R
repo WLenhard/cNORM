@@ -144,13 +144,12 @@ wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
 #' Determine groups and group means
 #'
 #' Helps to split the continuous explanatory variable into groups and assigns
-#' the group mean. The groups can be split either into groups of equal size
-#' or equal number of observations. Results are rounded to 3 digits to avoid later
-#' plotting problems.
+#' the group mean. The groups can be split either into groups of equal size (default)
+#' or equal number of observations.
 #'
 #' @param x The continuous variable to be split
 #' @param n The number of groups; if NULL then the function determines a number
-#' of groups with usually 100 cases or 2 <= n <= 10.
+#' of groups with usually 100 cases or 3 <= n <= 30.
 #' @param equidistant If set to TRUE, builds equidistant interval, otherwise (default)
 #' with equal number of observations
 #'
@@ -165,10 +164,10 @@ getGroups <- function(x, n = NULL, equidistant = FALSE){
   if(is.null(n)){
     n <- length(x)/100
 
-    if(n < 2)
-      n <- 2
-    else if(n > 10)
-      n <- 10
+    if(n < 3)
+      n <- 3
+    else if(n > 30)
+      n <- 30
   }
 
   # define grouping variable
@@ -179,7 +178,7 @@ getGroups <- function(x, n = NULL, equidistant = FALSE){
   }
 
   # determine group means and assign to intervals
-  return(round(ave(x, groups, FUN = function(x) {mean(x, na.rm = TRUE)}), digits=3))
+  return(ave(x, groups, FUN = function(x) {mean(x, na.rm = TRUE)}))
 }
 
 

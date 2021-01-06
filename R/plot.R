@@ -530,6 +530,7 @@ plotPercentiles <- function(data,
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
 
   w <- attributes(data)$weights
+  data[, group] <- round(data[, group], digits=3)
   AGEP <- unique(data[, group])
 
   # get actual percentiles
@@ -542,41 +543,21 @@ plotPercentiles <- function(data,
   colnames(percentile.actual) <- c(NAMES, c(group))
   rownames(percentile.actual) <- AGEP
 
-  # build finer grained grouping variable for prediction
-  lines <- length(AGEP)
-
-  for (m in 1:lines - 1) {
-    share <- (AGEP[m + 1] - AGEP[m]) / 5
-    additional <- c(share + AGEP[m], 2 * share + AGEP[m], 3 * share + AGEP[m], 4 * share + AGEP[m])
-    AGEP <- c(AGEP, additional)
-  }
-
-
-  # fitt predicted percentiles
+  # build finer grained grouping variable for prediction and fit predicted percentiles
+  share <- seq(from = model$minA1, to = model$maxA1, length.out = 100)
+  AGEP <- c(AGEP, share)
   percentile.fitted <- data.frame(matrix(NA,
-    nrow = length(AGEP),
-    ncol = length(T) + 1
+                                         nrow = length(AGEP),
+                                         ncol = length(T)
   ))
-  percentile.fitted[, 1] <- AGEP
-  colnames(percentile.fitted) <- c(c(group), NAMESP)
 
-
-  i <- 1
-  while (i <= length(AGEP)) {
-    j <- 1
-
-    while (j <= length(T)) {
-      percentile.fitted[i, j + 1] <- predictRaw(
-        T[[j]],
-        AGEP[[i]],
-        model$coefficients,
-        minRaw, maxRaw
-      )
-
-      j <- j + 1
-    }
-    i <- i + 1
+  for(i in 1:length(AGEP)){
+    percentile.fitted[i, ] <- predictRaw(T, AGEP[[i]], model$coefficients, minRaw, maxRaw)
   }
+
+  percentile.fitted$group <- AGEP
+  colnames(percentile.fitted) <- c(NAMESP, c(group))
+  rownames(percentile.fitted) <- AGEP
 
   # Merge actual and predicted scores and plot them show lines
   # for predicted scores and dots for actual scores
@@ -584,7 +565,7 @@ plotPercentiles <- function(data,
     by = group, all = TRUE
   )
 
-  END <- 5 / 6
+  END <- .8
   COL1 <- rainbow(length(percentiles), end = END)
   COL2 <- c(rainbow(length(percentiles), end = END), rainbow(length(percentiles), end = END))
 
