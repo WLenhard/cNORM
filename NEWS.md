@@ -3,6 +3,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.0.2 (in progress)
+Date: 2021.01.06
+
+
+Changes:
+
+*    Fixed regression in rankBySlidingWindow due to ranking
+*    New function for building groups and assign group means: getGroups
+*    display errors fixed in plotPercentiles
+
+
+
 ### Version in 2.0.1 (release candidate)
 Date: 2021.01.05
 

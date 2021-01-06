@@ -1,3 +1,188 @@
+#' Weighted rank estimation
+#'
+#' Conducts weighted ranking on the basis of either the weighted Harrell-Davis quantile estimator
+#' or an adaption of the type 7 quantile estimator of the generic quantile function in the base
+#' package. Please provide a vector with raw values and an additional vector with the weight of each
+#' observation. In case the weight vector is NULL, a normal ranking is done. The vectors may not
+#' include NAs and the weights should be positive non-zero values.
+#'
+#' @param x A numerical vector
+#' @param weights A numerical vector with weights; should have the same length as x
+#' @param n Granularity for approximation
+#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
+#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
+#' @references
+#' \enumerate{
+#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
+#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
+#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
+#' }
+#' @return the weighted ranks
+#' @export
+weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
+  if(is.null(weights))
+    return(rank(x))
+
+  probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
+  suppressWarnings(return(approx(weighted.quantile(x, probs, weights = weights, type), probs, x)$y * length(x)))
+}
+
+
+#' Weighted quantile estimator
+#'
+#' Computes weighted quantiles (code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license) on the basis of either the weighted Harrell-Davis
+#' quantile estimator or an adaption of the type 7 quantile estimator of the generic quantile function in
+#' the base package. Please provide a vector with raw values, the pobabilities for the quantiles and an
+#' additional vector with the weight of each observation. In case the weight vector is NULL, a normal
+#' quantile estimation is done. The vectors may not include NAs and the weights should be positive non-zero
+#' values.
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
+#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
+#' @param weights A numerical vector with weights; should have the same length as x
+#' @references
+#' \enumerate{
+#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
+#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
+#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
+#' }
+#' @return the weighted quantiles
+#' @export
+weighted.quantile <- function(x, probs, weights = NULL, type="Type7"){
+  if(is.null(weights)){
+    return(quantile(x, probs))
+  }else if(type=="Harrell-Davis"){
+    return(weighted.quantile.harrell.davis(x, probs, weights))
+  }else{
+    return(weighted.quantile.type7(x, probs, weights))
+  }
+}
+
+#' Weighted Harrell-Davis quantile estimator
+#'
+#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param weights A numerical vector with weights; should have the same length as x.
+#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
+#'
+#' @return the quantiles
+weighted.quantile.harrell.davis <- function(x, probs, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
+  cdf.gen <- function(n, p) return(function(cdf.probs) {
+    pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
+  })
+  wquantile.generic(x, probs, cdf.gen, weights)
+}
+
+
+#' Weighted type7 quantile estimator
+#'
+#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+#' Code made available via the CC BY-NC-SA 4.0 license
+#'
+#' @param x A numerical vector
+#' @param probs Numerical vector of quantiles
+#' @param weights A numerical vector with weights; should have the same length as x.
+#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
+#'
+#' @return the quantiles
+weighted.quantile.type7 <- function(x, probs, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
+  cdf.gen <- function(n, p) return(function(cdf.probs) {
+    h <- p * (n - 1) + 1
+    u <- pmax((h - 1) / n, pmin(h / n, cdf.probs))
+    u * n - h + 1
+  })
+  wquantile.generic(x, probs, cdf.gen, weights)
+}
+
+# Weighted generic quantile estimator
+#
+# Code made available via the CC BY-NC-SA 4.0 license from code from
+# Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
+  if(is.null(weights)){
+    return(quantile(x, probs = probs))
+  }
+
+  n <- length(x)
+  if (any(is.na(weights)))
+    weights <- rep(1 / n, n)
+  nw <- sum(weights) / max(weights)
+
+  indexes <- order(x)
+  x <- x[indexes]
+  weights <- weights[indexes]
+
+  weights <- weights / sum(weights)
+  cdf.probs <- cumsum(c(0, weights))
+
+  sapply(probs, function(p) {
+    cdf <- cdf.gen(nw, p)
+    q <- cdf(cdf.probs)
+    w <- tail(q, -1) - head(q, -1)
+    sum(w * x)
+  })
+}
+
+
+
+#' Determine groups and group means
+#'
+#' Helps to split the continuous explanatory variable into groups and assigns
+#' the group mean. The groups can be split either into groups of equal size
+#' or equal number of observations. Results are rounded to 3 digits to avoid later
+#' plotting problems.
+#'
+#' @param x The continuous variable to be split
+#' @param n The number of groups; if NULL then the function determines a number
+#' of groups with usually 100 cases or 2 <= n <= 10.
+#' @param equidistant If set to TRUE, builds equidistant interval, otherwise (default)
+#' with equal number of observations
+#'
+#' @return vector with group means for each observation
+#' @export
+#'
+#' @examples
+#' x <- rnorm(1000, m = 50, sd = 10)
+#' m <- getGroups(x, n = 10, equidisant = FALSE)
+#'
+getGroups <- function(x, n = NULL, equidistant = FALSE){
+  if(is.null(n)){
+    n <- length(x)/100
+
+    if(n < 2)
+      n <- 2
+    else if(n > 10)
+      n <- 10
+  }
+
+  # define grouping variable
+  if(equidistant){
+    groups <- as.numeric(cut(x, n))
+  }else{
+    groups <- findInterval(x, quantile(x, probs = seq(from = 0, to = 1, length.out = n + 1)), all.inside = TRUE)
+  }
+
+  # determine group means and assign to intervals
+  return(round(ave(x, groups, FUN = function(x) {mean(x, na.rm = TRUE)}), digits=3))
+}
+
+
 #' Simulate mean per age
 #'
 #' @param age the age variable
@@ -172,147 +357,3 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
   legend("bottomright", legend = c("Real percentile", "Weighted", "Unweighted"), col = c("black", "blue", "red"), pch = 19)
 
 }
-
-
-#' Weighted rank estimation
-#'
-#' Conducts weighted ranking on the basis of either the weighted Harrell-Davis quantile estimator
-#' or an adaption of the type 7 quantile estimator of the generic quantile function in the base
-#' package. Please provide a vector with raw values and an additional vector with the weight of each
-#' observation. In case the weight vector is NULL, a normal ranking is done. The vectors may not
-#' include NAs and the weights should be positive non-zero values.
-#'
-#' @param x A numerical vector
-#' @param weights A numerical vector with weights; should have the same length as x
-#' @param n Granularity for approximation
-#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
-#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
-#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
-#' @references
-#' \enumerate{
-#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
-#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
-#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
-#' }
-#' @return the weighted ranks
-#' @export
-weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
-  if(is.null(weights))
-    return(rank(x))
-
-  probs <- seq(from = .5/n, to = (n - .5)/n, length.out = n)
-  suppressWarnings(return(approx(weighted.quantile(x, probs, weights = weights, type), probs, x)$y * length(x)))
-}
-
-
-#' Weighted quantile estimator
-#'
-#' Computes weighted quantiles (code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-#' Code made available via the CC BY-NC-SA 4.0 license) on the basis of either the weighted Harrell-Davis
-#' quantile estimator or an adaption of the type 7 quantile estimator of the generic quantile function in
-#' the base package. Please provide a vector with raw values, the pobabilities for the quantiles and an
-#' additional vector with the weight of each observation. In case the weight vector is NULL, a normal
-#' quantile estimation is done. The vectors may not include NAs and the weights should be positive non-zero
-#' values.
-#'
-#' @param x A numerical vector
-#' @param probs Numerical vector of quantiles
-#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
-#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
-#' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
-#' @param weights A numerical vector with weights; should have the same length as x
-#' @references
-#' \enumerate{
-#'   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
-#'   \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
-#'   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
-#' }
-#' @return the weighted quantiles
-#' @export
-weighted.quantile <- function(x, probs, weights = NULL, type="Type7"){
-  if(is.null(weights)){
-    return(quantile(x, probs))
-  }else if(type=="Harrell-Davis"){
-    return(weighted.quantile.harrell.davis(x, probs, weights))
-  }else{
-    return(weighted.quantile.type7(x, probs, weights))
-  }
-}
-
-#' Weighted Harrell-Davis quantile estimator
-#'
-#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-#' Code made available via the CC BY-NC-SA 4.0 license
-#'
-#' @param x A numerical vector
-#' @param probs Numerical vector of quantiles
-#' @param weights A numerical vector with weights; should have the same length as x.
-#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
-#'
-#' @return the quantiles
-weighted.quantile.harrell.davis <- function(x, probs, weights = NULL) {
-  if(is.null(weights)){
-    return(quantile(x, probs = probs))
-  }
-
-  cdf.gen <- function(n, p) return(function(cdf.probs) {
-    pbeta(cdf.probs, (n + 1) * p, (n + 1) * (1 - p))
-  })
-  wquantile.generic(x, probs, cdf.gen, weights)
-}
-
-
-#' Weighted type7 quantile estimator
-#'
-#' Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-#' Code made available via the CC BY-NC-SA 4.0 license
-#'
-#' @param x A numerical vector
-#' @param probs Numerical vector of quantiles
-#' @param weights A numerical vector with weights; should have the same length as x.
-#' If no weights are provided (NULL), it falls back to the base quantile function, type 7
-#'
-#' @return the quantiles
-weighted.quantile.type7 <- function(x, probs, weights = NULL) {
-  if(is.null(weights)){
-    return(quantile(x, probs = probs))
-  }
-
-  cdf.gen <- function(n, p) return(function(cdf.probs) {
-    h <- p * (n - 1) + 1
-    u <- pmax((h - 1) / n, pmin(h / n, cdf.probs))
-    u * n - h + 1
-  })
-  wquantile.generic(x, probs, cdf.gen, weights)
-}
-
-# Weighted generic quantile estimator
-#
-# Code made available via the CC BY-NC-SA 4.0 license from code from
-# Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
-wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
-  if(is.null(weights)){
-    return(quantile(x, probs = probs))
-  }
-
-  n <- length(x)
-  if (any(is.na(weights)))
-    weights <- rep(1 / n, n)
-  nw <- sum(weights) / max(weights)
-
-  indexes <- order(x)
-  x <- x[indexes]
-  weights <- weights[indexes]
-
-  weights <- weights / sum(weights)
-  cdf.probs <- cumsum(c(0, weights))
-
-  sapply(probs, function(p) {
-    cdf <- cdf.gen(nw, p)
-    q <- cdf(cdf.probs)
-    w <- tail(q, -1) - head(q, -1)
-    sum(w * x)
-  })
-}
-
-

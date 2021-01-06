@@ -463,6 +463,11 @@ plotPercentiles <- function(data,
     group <- attr(data, "group")
   }
 
+  if(is.null(data[[group]])){
+    data$group <- getGroups(data[, attributes(data)$age])
+    group <- "group"
+  }
+
   if (is.null(minAge)) {
     minAge <- model$minA1
   }
@@ -525,6 +530,9 @@ plotPercentiles <- function(data,
     xyFunction <- paste(xyFunction, group, sep = " ~ ")
 
   w <- attributes(data)$weights
+  AGEP <- unique(data[, group])
+
+  # get actual percentiles
   if(!is.null(attr(data, "descend"))&&attr(data, "descend")){
     percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df){weighted.quantile(df[, raw], probs = 1 - percentiles, weights = df$w)})))
   }else{
@@ -532,9 +540,9 @@ plotPercentiles <- function(data,
   }
   percentile.actual$group <- as.numeric(rownames(percentile.actual))
   colnames(percentile.actual) <- c(NAMES, c(group))
+  rownames(percentile.actual) <- AGEP
 
   # build finer grained grouping variable for prediction
-  AGEP <- unique(data[, group])
   lines <- length(AGEP)
 
   for (m in 1:lines - 1) {
@@ -551,6 +559,7 @@ plotPercentiles <- function(data,
   ))
   percentile.fitted[, 1] <- AGEP
   colnames(percentile.fitted) <- c(c(group), NAMESP)
+
 
   i <- 1
   while (i <= length(AGEP)) {
@@ -572,7 +581,7 @@ plotPercentiles <- function(data,
   # Merge actual and predicted scores and plot them show lines
   # for predicted scores and dots for actual scores
   percentile <- merge(percentile.actual, percentile.fitted,
-    by = group, all.y = TRUE
+    by = group, all = TRUE
   )
 
   END <- 5 / 6

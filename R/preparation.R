@@ -714,7 +714,10 @@ rankBySlidingWindow <- function(data = NULL,
       sign <- -1
     }
 
-    observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+    if(is.null(weights))
+      observations$percentile <- (rank(sign * observations[, raw]) + numerator[method]) / (nObs + denominator[method])
+    else
+      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
 
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
