@@ -185,10 +185,12 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' # and consequently, females will get the double weight. This procedure can be used
 #' # to correct imbalances in the dataset, but it is still experimental. Please use
 #' # positive, non-zero numerics, preferably integers for this:
-#' \dontrun{
 #' cnorm.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, weight = ppvt$sex)
-#' }
 #'
+#' # Using a continuous age variable instead of distinct groups, using a sliding window for
+#' # percentile estimation. Please specify continuos variable for age and the sliding window
+#' # size.
+#' cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
 #' @export
 #' @references
 #' \enumerate{
