@@ -552,12 +552,13 @@ plotPercentiles <- function(data,
   ))
 
   for(i in 1:length(AGEP)){
-    percentile.fitted[i, ] <- predictRaw(T, AGEP[[i]], model$coefficients, minRaw, maxRaw)
+    percentile.fitted[i, ] <- predictRaw(T, AGEP[[i]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
   }
 
   percentile.fitted$group <- AGEP
+  percentile.fitted <- percentile.fitted[!duplicated(percentile.fitted$group), ]
   colnames(percentile.fitted) <- c(NAMESP, c(group))
-  rownames(percentile.fitted) <- AGEP
+  rownames(percentile.fitted) <- percentile.fitted$group
 
   # Merge actual and predicted scores and plot them show lines
   # for predicted scores and dots for actual scores

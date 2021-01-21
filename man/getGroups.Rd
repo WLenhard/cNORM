@@ -10,7 +10,7 @@ getGroups(x, n = NULL, equidistant = FALSE)
 \item{x}{The continuous variable to be split}
 
 \item{n}{The number of groups; if NULL then the function determines a number
-of groups with usually 100 cases or 2 <= n <= 10.}
+of groups with usually 100 cases or 3 <= n <= 20.}
 
 \item{equidistant}{If set to TRUE, builds equidistant interval, otherwise (default)
 with equal number of observations}
@@ -20,11 +20,11 @@ vector with group means for each observation
 }
 \description{
 Helps to split the continuous explanatory variable into groups and assigns
-the group mean. The groups can be split either into groups of equal size
+the group mean. The groups can be split either into groups of equal size (default)
 or equal number of observations.
 }
 \examples{
 x <- rnorm(1000, m = 50, sd = 10)
-m <. getGroups(x, n = 10, equidisant = FALSE)
+m <- getGroups(x, n = 10)
 
 }

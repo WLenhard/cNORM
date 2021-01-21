@@ -158,7 +158,7 @@ wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
 #'
 #' @examples
 #' x <- rnorm(1000, m = 50, sd = 10)
-#' m <- getGroups(x, n = 10, equidisant = FALSE)
+#' m <- getGroups(x, n = 10)
 #'
 getGroups <- function(x, n = NULL, equidistant = FALSE){
   if(is.null(n)){
