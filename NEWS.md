@@ -12,6 +12,7 @@ Changes:
 *    Fixed bug in rankBySlidingWindow due to ranking
 *    New function for building groups and assign group means: getGroups
 *    display errors fixed in plotPercentiles, function optimized
+*    Fixed regression: Clipping of minRaw and maxRaw in predictRaw
 
 
 

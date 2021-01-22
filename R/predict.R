@@ -181,13 +181,22 @@ predictRaw <-
       i <- i + 1
     }
 
+
     score.matrix[no,] <- predict
     }
 
-    if(nrow(score.matrix)==1&&ncol(score.matrix)==1)
+    if(nrow(score.matrix)==1&&ncol(score.matrix)==1){
+      if(score.matrix[1, 1] > maxRaw)
+        return(maxRaw)
+      else if(score.matrix[1, 1] < minRaw)
+        return(minRaw)
       return(score.matrix[1, 1])
-    else
+    }   else{
+      score.matrix[score.matrix > maxRaw] <- maxRaw
+      score.matrix[score.matrix < minRaw] <- minRaw
       return(score.matrix)
+    }
+
 
 
   }
