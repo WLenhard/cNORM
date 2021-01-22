@@ -1120,7 +1120,8 @@ plotDerivative <- function(model,
 #'
 #' @param x a cnorm object
 #' @param y the type of plot as a string, can be one of
-#' 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'
+#' 'raw' (1), 'norm' (2), 'curves' (3), 'percentiles' (4), 'series' (5), 'subset' (6),
+#' or 'derivative' (7), either as a string or the according index
 #' @param ... additional parameters for the specific plotting function
 #'
 #' @export
@@ -1130,24 +1131,24 @@ plotCnorm <- function(x, y, ...){
     return()
   }
 
-  if(y == "raw"){
+  if(y == "raw" || y == 1){
     plotRaw(x, ...)
-  }else if(y == "norm"){
+  }else if(y == "norm" || y == 2){
     plotNorm(x, ...)
-  }else if(y == "curves"){
+  }else if(y == "curves" || y == 3){
     plotNormCurves(x, ...)
-  }else if(y == "percentiles"){
+  }else if(y == "percentiles" || y == 4){
     plotPercentiles(x, ...)
-  }else if(y == "density"){
+  }else if(y == "density" || y == 5){
     plotDensity(x, ...)
-  }else if(y == "series"){
+  }else if(y == "series" || y == 6){
     plotPercentileSeries(x, ...)
-  }else if(y == "subset"){
+  }else if(y == "subset" || y == 7){
     plotSubset(x, ...)
-  }else if(y == "derivative"){
+  }else if(y == "derivative" || y == 8){
     plotDerivative(x, ...)
   }else{
-    message("Please provide the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'.")
-    return()
+    plotPercentiles(x, ...)
+    message("Please provide the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', 'derivative' or the according index.")
   }
 }

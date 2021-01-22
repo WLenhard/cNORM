@@ -74,7 +74,7 @@
 #' plot(results, "subset")
 #'
 #' # Plot manifest and predicted values, plot series of percentile charts
-#' plotRaw(results)
+#' plot(results, "raw")
 #' \dontrun{
 #' plot(results, "series", start = 3, end = 9)
 #' }

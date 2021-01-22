@@ -10,7 +10,8 @@
 \item{x}{the cnorm object}
 
 \item{y}{the type of plot as a string, can be one of
-'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'}
+'raw' (1), 'norm' (2), 'curves' (3), 'percentiles' (4), 'series' (5), 'subset' (6),
+or 'derivative' (7), either as a string or the according index}
 
 \item{...}{additional parameters for the specific plotting function}
 }
