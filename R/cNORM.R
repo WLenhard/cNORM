@@ -66,6 +66,7 @@
 #' @name cNORM
 #' @seealso cNORM.GUI
 #' @examples
+#' \dontrun{
 #' # Model internal 'elfe' dataset with the default k = 4 regression on T scores
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
@@ -75,9 +76,8 @@
 #'
 #' # Plot manifest and predicted values, plot series of percentile charts
 #' plot(results, "raw")
-#' \dontrun{
 #' plot(results, "series", start = 3, end = 9)
-#' }
+#'
 #'
 #' # Additional tests: Check model assumptions
 #' checkConsistency(results)
@@ -92,6 +92,7 @@
 #' # Predict a specific norm score
 #' score <- predictNorm(raw = 21, A = 3.75,
 #'                           model = results, minNorm=25, maxNorm=75)
+#' }
 NULL
 
 
@@ -167,7 +168,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
-#'
+#' \dontrun{
 #' # Using this function with the example dataset 'elfe'
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
@@ -190,7 +191,9 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' # Using a continuous age variable instead of distinct groups, using a sliding window for
 #' # percentile estimation. Please specify continuos variable for age and the sliding window
 #' # size.
+#'
 #' cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
+#' }
 #' @export
 #' @references
 #' \enumerate{

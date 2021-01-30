@@ -74,7 +74,7 @@ increasing k to more than 4 and the number of terms lead to a higher fit, while 
 smoothing.
 }
 \examples{
-
+\dontrun{
 # Using this function with the example dataset 'elfe'
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
@@ -97,7 +97,9 @@ cnorm.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, weight = ppvt$sex)
 # Using a continuous age variable instead of distinct groups, using a sliding window for
 # percentile estimation. Please specify continuos variable for age and the sliding window
 # size.
+
 cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
+}
 }
 \references{
 \enumerate{

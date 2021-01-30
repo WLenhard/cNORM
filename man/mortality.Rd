@@ -27,7 +27,7 @@ with a broader scope spanning 4 years each has been added. It can be used for de
 percentile curves at bottom effects.
 }
 \examples{
-\dontrun{
+\donttest{
 # data preparation
 data.mortality <- rankByGroup(mortality, raw="mortality")
 data.mortality <- computePowers(data.mortality, age="year")

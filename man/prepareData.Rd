@@ -70,7 +70,9 @@ data.elfe <- prepareData(elfe)
 data.elfe <- prepareData(raw=elfe$raw, group=elfe$group)
 
 # variable names can be specified as well, here with the BMI data included in the package
+\dontrun{
 data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
+}
 
 # modeling with only one group with the 'elfe' dataset as an example
 # this results in conventional norming

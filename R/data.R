@@ -159,7 +159,7 @@
 #' \url{https://data.worldbank.org/indicator/SP.DYN.IMRT.IN} (date of retrieval: 02/09/2018)
 #' @name mortality
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # data preparation
 #' data.mortality <- rankByGroup(mortality, raw="mortality")
 #' data.mortality <- computePowers(data.mortality, age="year")
