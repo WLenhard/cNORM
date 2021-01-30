@@ -12,11 +12,12 @@ This is a minor release of an existing package. In this version I have:
 * Ubuntu 16.04.6 LTS via Travis-CI for release and development, R 4.1.0
 * OS X 10.13.6 via Travis-CI for release and development
 * R-hub Windows Server 2008 R2 SP1, R-devel, 32/64 bit
-* R-hub Ubuntu Linux 16.04 LTS, R-release, GCC
+* R-hub Ubuntu Linux 20.04.1 LTS, R-release, GCC
 * R-hub Fedora Linux, R-devel, clang, gfortran
+* R-hub Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 
 ## R CMD check results
-There were no ERRORs or WARNINGs, but NOTES on potentially outdated links in data descriptions and a problem with the date in description. The notes on links all false positives. In the first submission, I had wrongly used 2020 as the year. The error is corrected, but the note still shows up on rhub.
+There were no ERRORs or WARNINGs, but NOTES on winbuilder develop on potentially outdated links in data descriptions and a problem with the date in description. The notes on links all false positives.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
