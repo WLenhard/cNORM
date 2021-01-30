@@ -3,7 +3,7 @@ This is a minor release of an existing package. In this version I have:
 
 * corrected bugs
 * revised several functions
-* added documentation
+* added tests via testthat
 
 ## Test environments
 * local WIN10, 64Bit install, R 4.0.2
