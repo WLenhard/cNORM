@@ -653,11 +653,11 @@ predictNorm <-
              maxNorm = NULL, force = FALSE, covariate = NULL) {
     if(class(model)=="cnorm"){
       if(is.null(minNorm)){
-        minNorm <- attributes(model$data)$scaleMean - (attributes(model$data)$scaleMean * 2.5)
+        minNorm <- attributes(model$data)$scaleMean - (attributes(model$data)$scaleSD * 2.5)
       }
 
       if(is.null(maxNorm)){
-        maxNorm <- attributes(model$data)$scaleMean + (attributes(model$data)$scaleMean * 2.5)
+        maxNorm <- attributes(model$data)$scaleMean + (attributes(model$data)$scaleSD * 2.5)
       }
 
       model <- model$model
