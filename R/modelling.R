@@ -120,20 +120,24 @@ bestModel <- function(data,
   if (is.null(k)) {
     k <- attr(data, "k")
   } else if (k > attr(data, "k")) {
-    stop("k parameter exceeds the power degrees in the dataset. Please use computePowers with a higher degree in preparating the data. ")
+    warning(paste0("k parameter exceeds the power degrees in the dataset. Setting to default of k = ", attr(data, "k")))
+    k <- attr(data, "k")
   }
 
   # check variable range
   if (!is.null(R2)&&(R2 <= 0 || R2 >= 1)) {
-    stop("R2 parameter out of bounds.")
+    warning("R2 parameter out of bounds. Setting to default R2 = .99")
+    R2 <- .99
   }
 
   if (terms < 0) {
-    stop("terms parameter out of bounds. The value has to be positive.")
+    warning("terms parameter out of bounds. The value has to be positive. Setting to default = 4.")
+    k <- 4
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
-    stop("k parameter out of bounds. Please specify a value between 1 and 6 (default = 4).")
+    warning("k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 4.")
+    k <- 4
   }
 
   if (!(raw %in% colnames(data)) && (!inherits(predictors, "formula"))) {
@@ -144,59 +148,18 @@ bestModel <- function(data,
     stop("ERROR: Missing variables from predictors variable. Please check variable list.")
   }
 
-  covTerms <- ""
-  if(!is.null(attr(data, "covariate"))){
-    covTerms <- "+ COV + L1COV + A1COV + L1A1COV"
-  }
-
-  if (!is.null(predictors)) {
-    if (inherits(predictors, "formula")) {
-      lmX <- predictors
-    } else {
-      lmX <- formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
-    }
-  } else if (attr(data, "useAge")) {
-    if (k == 1) {
-      lmX <- formula(paste0(raw, " ~ L1 + A1 + L1A1", covTerms))
-    } else if (k == 2) {
-      lmX <-
-        formula(paste0(raw, " ~ L1 + L2 + A1 + A2 + L1A1 + L1A2 + L2A1 + L2A2", covTerms))
-    } else if (k == 3) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + A1 + A2 + A3 + L1A1 + L1A2 + L1A3 + L2A1 + L2A2 + L2A3 + L3A1 + L3A2 + L3A3", covTerms))
-    } else if (k == 4) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", covTerms))
-    } else if (k == 5) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4 + L5 + A1 + A2 + A3 + A4 + A5 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5", covTerms))
-    } else if (k == 6) {
-      lmX <-
-        formula(paste0(raw, "~ L1 + L2 + L3 + L4 + L5 + L6 + A1 + A2 + A3 + A4 + A5 + A6 + L1A1 + L1A2 + L1A3 + L1A4 + L1A5 + L1A6 + L2A1 + L2A2 + L2A3 + L2A4 + L2A5 + L2A6 + L3A1 + L3A2 + L3A3 + L3A4 + L3A5 + L3A6 + L4A1 + L4A2 + L4A3 + L4A4 + L4A5 + L4A6 + L5A1 + L5A2 + L5A3 + L5A4 + L5A5 + L5A6 + L6A1 + L6A2 + L6A3 + L6A4 + L6A5 + L6A6", covTerms))
-    } else {
-      message("Power parameter unknown, setting to k = 4")
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4 + A1 + A2 + A3 + A4 + L1A1 + L1A2 + L1A3 + L1A4 + L2A1 + L2A2 + L2A3 + L2A4 + L3A1 + L3A2 + L3A3 + L3A4 + L4A1 + L4A2 + L4A3 + L4A4", covTerms))
-    }
-  } else {
-    # in case, age is missing
-    if(!is.null(attr(data, "covariate"))){
-      covTerms <- "+ COV + L1COV"
-    }
-
-    if (k == 1) {
-      lmX <- formula(paste0(raw, " ~ L1", covTerms))
-    } else if (k == 2) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2",covTerms))
-    } else if (k == 3) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3", covTerms))
-    } else if (k == 4) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4", covTerms))
-    } else if (k == 5) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4 + L5", covTerms))
-    } else if (k == 6) {
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4 + L5 + L6", covTerms))
-    } else {
-      message("Power parameter unknown, setting to k = 4")
-      lmX <- formula(paste0(raw, " ~ L1 + L2 + L3 + L4", covTerms))
-    }
-  }
+  # set up regression function
+  if (is.null(predictors)) {
+    useCOV <- !is.null(attr(data, "covariate"))
+    useAge <- attr(data, "useAge")
+    lmX <- buildFunction(raw, k, useAge, useCOV)
+  }else {
+     if (inherits(predictors, "formula")) {
+       lmX <- predictors
+     } else {
+       lmX <- formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
+     }
+   }
 
   big <- FALSE
   nvmax <- 2 * k + k * k + length(predictors)
@@ -221,7 +184,12 @@ bestModel <- function(data,
     data$weights <- NULL
   }
 
-  subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
+  # determine best subset
+  if(is.null(weights))
+    subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big)
+  else
+    subsets <- regsubsets(lmX, data = data, nbest = 1, nvmax = nvmax, force.in = index, really.big = big, weights = weights)
+
   results <- base::summary(subsets)
   results$numberOfTerms <- as.numeric(rowSums(results$which)-1)
 
@@ -1101,4 +1069,40 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     d <- d[!is.na(d$diff), ]
 
     return(sum(sqrt(d$diff^2))/(nrow(d)-2), na.rm = TRUE)
+  }
+
+
+
+#' Build regression function for bestModel
+#'
+#' @param raw name of the raw score variable
+#' @param k the power degree
+#' @param age use age
+#' @param covariates use covariates
+#'
+#' @return reression function
+  buildFunction <- function(raw, k, age, covariates){
+    f <- paste0(raw, " ~ ")
+    if(age){
+      for(i in 1:k){
+        f <- paste0(f, paste0("L", i), " + ", paste0("A", i), " + ")
+
+        for(j in 1:k){
+          f <- paste0(f, paste0("L", i), paste0("A", j), " + ")
+        }
+      }
+      if(covariates)
+        return(formula(paste0(f, "COV + L1COV + A1COV + L1A1COV")))
+      else
+        return(formula(substr(f, 1 , nchar(f)  - 3)))
+    }else{
+      for(i in 1:k){
+        f <- paste0(f, paste0("L", i), " + ")
+      }
+
+      if(covariates)
+        return(formula(paste0(f, "COV + L1COV")))
+      else
+        return(formula(substr(f, 1 , nchar(f)  - 3)))
+    }
   }

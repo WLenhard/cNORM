@@ -10,6 +10,8 @@ Date: 2021.01.30
 Changes:
 
 *    Fixed bug in setting minNorm and maxNorm in predictNorm, if  attribute is missing
+*    Aligned function in predictNorm for single scores and vectors
+*    Code simplification
 
 
 

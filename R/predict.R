@@ -736,18 +736,6 @@ predictNorm <-
       # project values on original data
       values <- values[match(hash, normTable$hash)]
 
-      # n <- length(raw)
-      # values <- rep(NA, n)
-      #
-      # # iterate through cases
-      # for (i in 1:n) {
-      #   v <- predictNormByRoots(raw[[i]], A[[i]], model, minNorm, maxNorm)
-      #   if (length(v) == 0) {
-      #     v <- NA
-      #   }
-      #   values[[i]] <- v
-      # }
-
       return(values)
     } else {
       stop("Please check raw and A value. Both have to be either single values or vectors of the same length.")

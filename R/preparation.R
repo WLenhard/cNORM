@@ -214,7 +214,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' d <- rankByGroup(raw = elfe$raw)
 #' d <- computePowers(d)
 #' m <- bestModel(d)
-#' rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
+#' rawTable(0, m) # please use an arbitrary value for age when generating the tables
 #' @seealso rankBySlidingWindow, computePowers
 #' @export
 #' @family prepare
@@ -864,11 +864,11 @@ computePowers <-
 
     # check if columns exist
     if (!(norm %in% colnames(d))) {
-      stop(paste(c("ERROR: Norm variable '", norm, "' does not exist in data object."), collapse = ""))
+      stop(paste0("ERROR: Norm variable '", norm, "' does not exist in data object."))
     }
 
     if (!is.numeric(d[, norm])) {
-      warning(paste(c("Norm score variable '", norm, "' has to be numeric."), collapse = ""))
+      warning(paste0("Norm score variable '", norm, "' has to be numeric."))
     }
 
     if (is.numeric(age) && (length(age) == nrow(d))) {
@@ -890,91 +890,22 @@ computePowers <-
     }
 
 
+    # generate powers and interactions of location L and age A up to parameter k
     L1 <- as.numeric(d[[norm]])
-    d$L1 <- L1
-
     if (useAge) {
       A1 <- as.numeric(d[[age]])
-      L1A1 <- L1 * A1
-      d$A1 <- A1
-      d$L1A1 <- L1A1
 
-      if (k > 1) {
-        d$L2 <- d$L1 * d$L1
-        d$A2 <- d$A1 * d$A1
-        d$L1A2 <- d$L1 * d$A2
-        d$L2A1 <- d$L2 * d$A1
-        d$L2A2 <- d$L2 * d$A2
-      }
+      for(i in 1:k){
+        d[paste0("L", i)] <- L1^i
+        d[paste0("A", i)] <- A1^i
 
-      if (k > 2) {
-        d$L3 <- d$L2 * d$L1
-        d$A3 <- d$A2 * d$A1
-
-        d$L1A3 <- d$L1 * d$A3
-        d$L2A3 <- d$L2 * d$A3
-
-        d$L3A1 <- d$L3 * d$A1
-        d$L3A2 <- d$L3 * d$A2
-        d$L3A3 <- d$L3 * d$A3
-      }
-
-      if (k > 3) {
-        d$L4 <- d$L3 * d$L1
-        d$A4 <- d$A3 * d$A1
-        d$L1A4 <- d$L1 * d$A4
-        d$L2A4 <- d$L2 * d$A4
-        d$L3A4 <- d$L3 * d$A4
-        d$L4A1 <- d$L4 * d$A1
-        d$L4A2 <- d$L4 * d$A2
-        d$L4A3 <- d$L4 * d$A3
-        d$L4A4 <- d$L4 * d$A4
-      }
-
-      if (k > 4) {
-        d$L5 <- d$L4 * d$L1
-        d$A5 <- d$A4 * d$A1
-        d$L1A5 <- d$L1 * d$A5
-        d$L2A5 <- d$L2 * d$A5
-        d$L3A5 <- d$L3 * d$A5
-        d$L4A5 <- d$L4 * d$A5
-        d$L5A1 <- d$L5 * d$A1
-        d$L5A2 <- d$L5 * d$A2
-        d$L5A3 <- d$L5 * d$A3
-        d$L5A4 <- d$L5 * d$A4
-        d$L5A5 <- d$L5 * d$A5
-      }
-
-      if (k > 5) {
-        d$L6 <- d$L5 * d$L1
-        d$A6 <- d$A5 * d$A1
-        d$L1A6 <- d$L1 * d$A6
-        d$L2A6 <- d$L2 * d$A6
-        d$L3A6 <- d$L3 * d$A6
-        d$L4A6 <- d$L4 * d$A6
-        d$L5A6 <- d$L5 * d$A6
-        d$L6A1 <- d$L6 * d$A1
-        d$L6A2 <- d$L6 * d$A2
-        d$L6A3 <- d$L6 * d$A3
-        d$L6A4 <- d$L6 * d$A4
-        d$L6A5 <- d$L6 * d$A5
-        d$L6A6 <- d$L6 * d$A6
+        for(j in 1:k){
+          d[paste0("L", i, "A", j)] <- L1^i*A1^j
+        }
       }
     } else {
-      if (k > 1) {
-        d$L2 <- d$L1 * d$L1
-      }
-      if (k > 2) {
-        d$L3 <- d$L2 * d$L1
-      }
-      if (k > 3) {
-        d$L4 <- d$L3 * d$L1
-      }
-      if (k > 4) {
-        d$L5 <- d$L4 * d$L1
-      }
-      if (k > 5) {
-        d$L6 <- d$L5 * d$L1
+      for(i in 1:k){
+        d[paste0("L", i)] <- L1^i
       }
     }
 

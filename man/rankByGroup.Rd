@@ -94,7 +94,7 @@ data.elfe <- rankByGroup(raw = elfe$raw, group = elfe$group, method = 7, scale =
 d <- rankByGroup(raw = elfe$raw)
 d <- computePowers(d)
 m <- bestModel(d)
-rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
+rawTable(0, m) # please use an arbitrary value for age when generating the tables
 }
 \seealso{
 rankBySlidingWindow, computePowers
