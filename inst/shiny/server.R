@@ -186,7 +186,7 @@ shinyServer(function(input, output, session) {
 
   # Returns chosen weighting
   chosenWeighting <- reactive({
-    return(input$InputWeightingVariable)
+    return(input$InputWeightVariable)
   })
 
   chosenDescend <- reactive({
@@ -232,6 +232,7 @@ shinyServer(function(input, output, session) {
 
       # Ranky by chosen group
       weights <- NULL
+      print(chosenWeighting())
       if(chosenWeighting()!="---")
         weights <- chosenWeighting()
 
