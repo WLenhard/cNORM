@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 2.0.3 (in progress)
-Date: 2021.01.30
+Date: 2021.02.26
 
 
 Changes:
@@ -12,6 +12,7 @@ Changes:
 *    Fixed bug in setting minNorm and maxNorm in predictNorm, if  attribute is missing
 *    Aligned function in predictNorm for single scores and vectors
 *    Code simplification
+*    suboptimal model selection when leaps.setups dependencies found; bug fixed
 
 
 
