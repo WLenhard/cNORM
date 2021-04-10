@@ -17,7 +17,7 @@ This is a minor release of an existing package. In this version I have:
 * R-hub Windows Server 2008 R2 SP1, R-devel, 32/64 bit
 
 ## R CMD check results
-There were no ERRORs or WARNINGs, but NOTES on winbuilder develop on potentially outdated links in data descriptions and a problem with the date in description. The notes on links all false positives.
+There were no ERRORs or WARNINGs or NOTES
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
