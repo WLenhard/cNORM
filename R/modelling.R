@@ -1064,10 +1064,11 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
 
     d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
 
-    d$diff <- d$fitted - data$normValue
-    d <- d[!is.na(d$diff), ]
+    diff <- d$fitted - data$normValue
+    diff <- diff[!is.na(diff)]
 
-    return(sum(sqrt(d$diff^2))/(nrow(d)-2), na.rm = TRUE)
+    #return(sqrt(mean(diff^2)))
+    return(sqrt(sum(diff^2)/(length(diff)-2)))
   }
 
 

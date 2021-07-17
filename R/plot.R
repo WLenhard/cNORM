@@ -171,7 +171,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   d <- d[!is.na(d$fitted), ]
   d <- d[!is.na(d$diff), ]
 
-  se <- round(sum(sqrt(d$diff^2))/(nrow(d)-2), digits = 4)
+  se <- round(sqrt(sum(d$diff^2)/(nrow(d)-2)), digits = 4)
   r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
 
   if (group != "" && !is.null(group)) {
@@ -1096,7 +1096,7 @@ plotDerivative <- function(model,
       col.regions = regions,
       panel = panel.2dsmoother,
       main = paste0("Slope of the Regression Function\n", desc),
-      ylab = "First Order Derivate of Norm Score",
+      ylab = "Norm Score",
       xlab = "Explanatory Variable"
     )
   } else {
@@ -1106,7 +1106,7 @@ plotDerivative <- function(model,
       colorkey = key,
       col.regions = regions,
       main = paste0("Slope of the Regression Function\n", desc),
-      ylab = "1st Order Derivate of Norm Score",
+      ylab = "Norm Score",
       xlab = "Explanatory Variable"
     )
   }
