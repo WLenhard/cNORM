@@ -114,8 +114,7 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' The function plots the manifest norm score against the fitted norm score from
 #' the inverse regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
-#' regression line. The computation of the standard error is based on Oosterhuis, van der
-#' Ark and Sijtsma (2016).
+#' regression line.
 #' @param data The raw data within a data.frame or a cnorm object
 #' @param model The regression model (optional)
 #' @param group The grouping variable, use empty string for no group
@@ -123,7 +122,6 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
 #' @param maxNorm upper bound of fitted norm scores
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
 #' manifest against difference values
-#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
@@ -171,7 +169,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   d <- d[!is.na(d$fitted), ]
   d <- d[!is.na(d$diff), ]
 
-  se <- round(sqrt(sum(d$diff^2)/(nrow(d)-2)), digits = 4)
+  rmse <- round(sqrt(mean(d$diff^2)), digits = 4)
   r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
 
   if (group != "" && !is.null(group)) {
@@ -180,7 +178,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     if (type == 0) {
       xyplot(fitted ~ normValue | group, d,
         main = paste("Observed vs. Fitted Norm Scores by ", group, "\nr = ",
-                     r, ", SE = ", se),
+                     r, ", RMSE = ", rmse),
         ylab = "Fitted Scores",
         xlab = "Observed Scores",
         grid = TRUE,
@@ -191,7 +189,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     } else {
       xyplot(diff ~ normValue | group, d,
         main = paste("Observed Norm Scores vs. Difference Scores by ", group, "\nr = ",
-                     r, ", SE = ", se),
+                     r, ", RMSE = ", rmse),
         ylab = "Difference",
         xlab = "Observed Scores",
         grid = TRUE,
@@ -208,7 +206,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     if (type == 0) {
       xyplot(fitted ~ normValue, d,
         main = paste("Observed vs. Fitted Norm Scores\nr = ",
-                     r, ", SE = ", se),
+                     r, ", RMSE = ", rmse),
         ylab = "Fitted Scores",
         xlab = "Observed Scores",
         grid = TRUE,
@@ -219,7 +217,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     } else {
       xyplot(diff ~ normValue, d,
         main = paste("Observed Norm Scores vs. Difference Scores\nr = ",
-                     r, ", SE = ", se),
+                     r, ", RMSE = ", rmse),
         ylab = "Difference",
         xlab = "Observed Scores",
         grid = TRUE,

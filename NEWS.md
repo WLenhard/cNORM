@@ -3,6 +3,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.0.4 (in progress)
+Date: 2021.07.18
+
+
+Changes:
+
+*    Fixed bug in setting getNormScoreSE and added option to calculate RMSE (now default)
+*    Corrected y axis label in plotDerivative
+*    changes header in plotNorm from SE to RMSE
+
+
+
 ### Version in 2.0.3 (release candidate)
 Date: 2021.04.10
 
