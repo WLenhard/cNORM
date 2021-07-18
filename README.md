@@ -1,3 +1,6 @@
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/cNORM)](https://cran.r-project.org/package=cNORM)
+[![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/cNORM)](https://cran.r-project.org/package=cNORM)
+
 <img src="vignettes/logo.png" align=right style="border:0;">
 
 # cNorm
