@@ -15,9 +15,9 @@ predictNorm(
 )
 }
 \arguments{
-\item{raw}{The raw value, either single numeric or list of values}
+\item{raw}{The raw value, either single numeric or numeric vector}
 
-\item{A}{the age, either single numeric or list of values}
+\item{A}{the explanatory variable (e. g. age), either single numeric or numeric vector}
 
 \item{model}{The regression model or a cnorm object}
 
@@ -31,13 +31,11 @@ predictNorm(
 the specific value here.}
 }
 \value{
-The predicted norm score for a raw score, either single value or list of results
+The predicted norm score for a raw score, either single value or vector
 }
 \description{
-In real test scenarios, usually the results are available as raw values, for
-which norm scores have to be looked up. This function conducts this reverse
-transformation via a numerical solution: A precise norm table is generated and
-the closest fitting norm score for a raw score is returned.
+This functions numericaly determines the norm score for raw scores depending on the
+level of the explanatory variable A, e. g. norm scores for raw scores at given ages.
 }
 \examples{
 # Generate cnorm object from example data
@@ -45,6 +43,9 @@ cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # return norm value for raw value 21 for grade 2, month 9
 specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
+
+# predicted norm scores for the elfe dataset
+predictNorm(elfe$raw, elfe$group, cnorm.elfe)
 
 }
 \seealso{

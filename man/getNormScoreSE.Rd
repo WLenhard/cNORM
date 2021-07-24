@@ -2,18 +2,23 @@
 % Please edit documentation in R/modelling.R
 \name{getNormScoreSE}
 \alias{getNormScoreSE}
-\title{Calculates the standard error (SE) of the norm scores}
+\title{Calculates the standard error (SE) or root mean square error (RMSE) of the norm scores
+In case of large datasets, both results should be almost identical}
 \usage{
-getNormScoreSE(model)
+getNormScoreSE(model, type = 2)
 }
 \arguments{
 \item{model}{a cnorm object}
+
+\item{type}{either '1' for the standard error senso Oosterhuis et al. (2016) or '2' for
+the RMSE (default)}
 }
 \value{
-The standard error (SE) of the norm scores sensu Oosterhuis et al. (2016)
+The standard error (SE) of the norm scores sensu Oosterhuis et al. (2016) or the RMSE
 }
 \description{
-Calculates the standard error (SE) of the norm scores
+Calculates the standard error (SE) or root mean square error (RMSE) of the norm scores
+In case of large datasets, both results should be almost identical
 }
 \references{
 Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
