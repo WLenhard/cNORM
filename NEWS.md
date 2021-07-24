@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.0.4 (in progress)
+### Version in 2.0.4 (release candidate)
 Date: 2021.07.24
 
 
@@ -16,7 +16,7 @@ Changes:
 
 
 
-### Version in 2.0.3 (release candidate)
+### Version in 2.0.3 
 Date: 2021.04.10
 
 
@@ -29,7 +29,7 @@ Changes:
 
 
 
-### Version in 2.0.2 (release candidate)
+### Version in 2.0.2
 Date: 2021.01.30
 
 
@@ -42,7 +42,7 @@ Changes:
 
 
 
-### Version in 2.0.1 (release candidate)
+### Version in 2.0.1
 Date: 2021.01.05
 
 
