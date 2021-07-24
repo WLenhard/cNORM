@@ -623,25 +623,26 @@ derivationTable <-
 
 #' Retrieve norm value for raw score at a specific age
 #'
-#' In real test scenarios, usually the results are available as raw values, for
-#' which norm scores have to be looked up. This function conducts this reverse
-#' transformation via a numerical solution: A precise norm table is generated and
-#' the closest fitting norm score for a raw score is returned.
-#' @param raw The raw value, either single numeric or list of values
-#' @param A the age, either single numeric or list of values
+#' This functions numericaly determines the norm score for raw scores depending on the
+#' level of the explanatory variable A, e. g. norm scores for raw scores at given ages.
+#' @param raw The raw value, either single numeric or numeric vector
+#' @param A the explanatory variable (e. g. age), either single numeric or numeric vector
 #' @param model The regression model or a cnorm object
 #' @param minNorm The lower bound of the norm score range
 #' @param maxNorm The upper bound of the norm score range
 #' @param force Try to resolve missing norm scores in case of inconsistent models
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
-#' @return The predicted norm score for a raw score, either single value or list of results
+#' @return The predicted norm score for a raw score, either single value or vector
 #' @examples
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
 #' specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
+#'
+#' # predicted norm scores for the elfe dataset
+#' predictNorm(elfe$raw, elfe$group, cnorm.model)
 #'
 #' @family predict
 #' @export
@@ -651,6 +652,26 @@ predictNorm <-
              model,
              minNorm = NULL,
              maxNorm = NULL, force = FALSE, covariate = NULL) {
+    if(!is.numeric(raw)){
+      stop("Please provide a single numeric value or a numeric vector for the raw score.")
+    }
+
+    if(!is.numeric(A)){
+      stop("Please provide a single numeric value or a numeric vector for A.")
+    }
+
+    if(length(A)>1&&length(raw)>1&&length(raw)!=length(A)){
+      stop("A and raw need to have the same length.")
+    }
+
+    if (anyNA(A)||anyNA(raw)) {
+      stop("NAs are present in 'A' or 'raw' vector. Please exclude missing values first.")
+    }
+
+    if(length(A)==0||length(raw)==0){
+      return(NULL)
+    }
+
     if(class(model)=="cnorm"){
       if(is.null(minNorm)){
         minNorm <- attributes(model$data)$scaleMean - (attributes(model$data)$scaleSD * 2.5)
@@ -677,7 +698,7 @@ predictNorm <-
 
 
     # determine single norm value by optimization
-    if (length(raw) == 1 && length(A) == 1 && is.numeric(raw) && is.numeric(A)) {
+    if (length(raw) == 1 && length(A) == 1) {
       coef <- model$coefficients
       if(!is.null(covariate)){
         coef <- simplifyCoefficients(coef, covariate)
@@ -692,14 +713,13 @@ predictNorm <-
 
       optimum <- optimize(functionToMinimize, lower = minNorm, upper = maxNorm, tol = .Machine$double.eps)
       return(optimum$minimum)
-    } else if (is.vector(raw) && is.vector(A)) {
-      if (length(raw) != length(A)) {
-        stop("'A' and 'raw' need to have the same length.")
-      } else if (anyNA(A)) {
-        stop(paste0("NAs are present in 'A' vector. Please exclude missing values first."))
-      } else if (anyNA(raw)) {
-        stop(paste0("NAs are present in 'raw' vector. Please exclude missing values first."))
+    } else if (length(raw) > 1 || length(A)>1) {
+      if(length(raw)==1){
+        raw <- rep(raw, length(A))
+      }else if(length(A)==1){
+        A <- rep(A, length(raw))
       }
+
 
       if(!is.vector(covariate))
         cov <- rep(covariate, times = length(raw))
