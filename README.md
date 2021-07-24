@@ -94,6 +94,9 @@ normTable(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
 # for a test with a reliability of .94
 rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 
+# Get the predicted norm scores for a vector of raw scores and explanatory variable, e. g. age
+predicted <- predictNorm(elfe$raw, elfe$grop, cnorm.elfe)
+
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
 d <- rankByGroup(elfe, raw="raw", group=FALSE)
