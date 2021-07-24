@@ -19,7 +19,7 @@ A data frame with 45053 rows and 7 variables:
 A data frame with 45035 rows and 7 columns
 }
 \source{
-\url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx}
+\url{https://www.cdc.gov/nchs/nhanes/index.htm}
 }
 \usage{
 CDC
@@ -33,7 +33,7 @@ based on the original dataset.
 }
 \references{
 CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets and Related
-Documentation. available \url{https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx} (date of retrieval: 25/08/2018)
+Documentation. available \url{https://www.cdc.gov/nchs/nhanes/index.htm} (date of retrieval: 25/08/2018)
 }
 \concept{Body Mass Index growth curves weight height}
 \keyword{datasets}

@@ -46,7 +46,7 @@
 #' @references
 #' \enumerate{
 #'   \item CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets
-#'   and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/OtherNhanesData.aspx.
+#'   and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/.
 #'   date of retrieval: 25/08/2018
 #'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to
 #'   the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
