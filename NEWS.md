@@ -11,7 +11,8 @@ Changes:
 
 *    add remarks on decrease of age power parameter in computePowers when R2 is low
 *    add parameter for powers of a in computePowers, prepareData, bestModel and cnorm
-
+*    predictNorm is now able to handle NA
+*    count, how often terms had been selected in cnorm.cv
 
 
 

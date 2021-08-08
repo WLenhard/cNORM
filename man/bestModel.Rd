@@ -9,6 +9,7 @@ bestModel(
   raw = NULL,
   R2 = NULL,
   k = NULL,
+  t = NULL,
   predictors = NULL,
   terms = 0,
   weights = NULL,
@@ -29,7 +30,10 @@ and an explanatory variably (usually age = A)}
 \item{k}{The power constant. Higher values result in more detailed approximations
 but have the danger of over-fit (default = 4, max = 6)}
 
-\item{predictors}{List of the names of predictor to use for the model selection.
+\item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k}
+
+\item{predictors}{List of the names of predictors or regression formula to use for the model selection.
 The parameter overrides the 'k' parameter and it can be used to preselect the
 variables entering the regression, or even to add variables like sex, that are
 not part of the original model building. Please note, that adding other variables

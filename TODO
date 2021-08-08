@@ -8,5 +8,3 @@ planned feature enhancements
 - add pretty print option to normTable and rawTable to collapse intervals
 - revise/extend simulation function for other scissor effects, decreasing and non-monotonuous trajectories
 - add k parameter in plotPercentileSeries
-- add additional analysis on most important terms in cnorm.cv
-- predictNorm should be able to handle NA

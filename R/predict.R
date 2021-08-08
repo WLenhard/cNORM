@@ -652,20 +652,21 @@ predictNorm <-
              model,
              minNorm = NULL,
              maxNorm = NULL, force = FALSE, covariate = NULL) {
-    if(!is.numeric(raw)){
+
+    if(length(raw)==1&&is.na(raw)){
+      return(rep(NA, times=length(A)))
+    }else if(!is.numeric(raw)){
       stop("Please provide a single numeric value or a numeric vector for the raw score.")
     }
 
-    if(!is.numeric(A)){
+    if(length(A)==1&&is.na(A)){
+      return(rep(NA, times=length(raw)))
+    }else if(!is.numeric(A)){
       stop("Please provide a single numeric value or a numeric vector for A.")
     }
 
     if(length(A)>1&&length(raw)>1&&length(raw)!=length(A)){
       stop("A and raw need to have the same length.")
-    }
-
-    if (anyNA(A)||anyNA(raw)) {
-      stop("NAs are present in 'A' or 'raw' vector. Please exclude missing values first.")
     }
 
     if(length(A)==0||length(raw)==0){
@@ -732,8 +733,8 @@ predictNorm <-
       hash <- paste0(raw, "_", A)
 
       # build norm table and use this as a lookup table
-      # delete duplicates
-      normTable <- data.frame(A = A, raw = raw, hash = hash)
+      # delete duplicates and NA
+      normTable <- na.omit(data.frame(A = A, raw = raw, hash = hash))
       normTable <- normTable[!duplicated(normTable[,c('hash')]),]
 
       if(nrow(normTable)>500){

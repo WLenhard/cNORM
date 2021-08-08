@@ -10,6 +10,7 @@ computePowers(
   k = 4,
   norm = NULL,
   age = NULL,
+  t = NULL,
   covariate = NULL,
   silent = FALSE
 )
@@ -27,6 +28,9 @@ Can be either the grouping variable itself or a finer grained variable like the 
 explanatory variables can be used here instead an age variable as well, as long as the variable is
 at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 most common field of application.}
+
+\item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k}
 
 \item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
 either by specifying the variable name or including the variable itself. If this has already

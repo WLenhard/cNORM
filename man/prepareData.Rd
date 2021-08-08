@@ -10,6 +10,7 @@ prepareData(
   raw = "raw",
   age = "group",
   k = 4,
+  t = NULL,
   width = NA,
   weights = NULL,
   scale = "T",
@@ -30,6 +31,9 @@ conventional norm tables.}
 \item{age}{the continuous explanatory variable; by default set to "group"}
 
 \item{k}{The power parameter, default = 4}
+
+\item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+can be used to specify the k to produce rectangular matrices and specify the course of scores per  independently from k}
 
 \item{width}{if a width is provided, the function switches to rankBySlidingWindow to determine the
 observed raw scores, otherwise, ranking is done by group (default)}

@@ -14,6 +14,7 @@ cnorm(
   method = 4,
   descend = FALSE,
   k = 4,
+  t = NULL,
   terms = 0,
   R2 = NULL
 )
@@ -49,6 +50,9 @@ performance}
 
 \item{k}{The power constant. Higher values result in more detailed approximations
 but have the danger of over-fit (default = 4, max = 6)}
+
+\item{t}{The age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+can be used to specify the k to produce rectangular matrices and specify the course of scores per age independently from k}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
