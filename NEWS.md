@@ -3,6 +3,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.1.0 (in progress)
+Date: 2021.07.24
+
+
+Changes:
+
+*    add remarks on decrease of age power parameter in computePowers when R2 is low
+*    add parameter for powers of a in computePowers, prepareData, bestModel and cnorm
+
+
+
+
 ### Version in 2.0.4 (release candidate)
 Date: 2021.07.24
 

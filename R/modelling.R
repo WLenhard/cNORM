@@ -30,7 +30,7 @@
 #' (default R2 = 0.99)
 #' @param k The power constant. Higher values result in more detailed approximations
 #' but have the danger of over-fit (default = 4, max = 6)
-#' @param predictors List of the names of predictor to use for the model selection.
+#' @param predictors List of the names of predictors or regression formula to use for the model selection.
 #' The parameter overrides the 'k' parameter and it can be used to preselect the
 #' variables entering the regression, or even to add variables like sex, that are
 #' not part of the original model building. Please note, that adding other variables
@@ -97,6 +97,7 @@ bestModel <- function(data,
                       raw = NULL,
                       R2 = NULL,
                       k = NULL,
+                      A = NULL,
                       predictors = NULL,
                       terms = 0,
                       weights = NULL,
@@ -123,6 +124,17 @@ bestModel <- function(data,
     warning(paste0("k parameter exceeds the power degrees in the dataset. Setting to default of k = ", attr(data, "k")))
     k <- attr(data, "k")
   }
+
+
+
+  if (is.null(A)){
+    if(is.null(attr(data, "A"))){
+      A <- k
+    }else if(!is.null(attr(data, "A"))){
+      A <- attr(data, "A")
+    }
+  }
+
 
   # check variable range
   if (!is.null(R2)&&(R2 <= 0 || R2 >= 1)) {
@@ -152,7 +164,7 @@ bestModel <- function(data,
   if (is.null(predictors)) {
     useCOV <- !is.null(attr(data, "covariate"))
     useAge <- attr(data, "useAge")
-    lmX <- buildFunction(raw, k, useAge, useCOV)
+    lmX <- buildFunction(raw = raw, k = k, A = A, age = useAge, covariates = useCOV)
   }else {
      if (inherits(predictors, "formula")) {
        lmX <- predictors
@@ -162,7 +174,7 @@ bestModel <- function(data,
    }
 
   big <- FALSE
-  nvmax <- 2 * k + k * k + length(predictors)
+  nvmax <- (A * k)^2 - 1 + length(predictors)
 
   if (nvmax > 25) {
     big <- TRUE
@@ -279,6 +291,7 @@ bestModel <- function(data,
   bestformula$group <- attributes(data)$group
   bestformula$age <- attributes(data)$age
   bestformula$k <- attributes(data)$k
+  bestformula$A <- attributes(data)$A
   if(!is.null(attr(data, "covariate"))){
       bestformula$covariate <- attributes(data)$covariate
   }
@@ -1086,18 +1099,26 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
 #' Build regression function for bestModel
 #'
 #' @param raw name of the raw score variable
-#' @param k the power degree
+#' @param k the power degree for location
+#' @param A the power degree for age
 #' @param age use age
 #' @param covariates use covariates
 #'
 #' @return reression function
-  buildFunction <- function(raw, k, age, covariates){
+  buildFunction <- function(raw, k, A, age, covariates){
     f <- paste0(raw, " ~ ")
     if(age){
-      for(i in 1:k){
-        f <- paste0(f, paste0("L", i), " + ", paste0("A", i), " + ")
 
-        for(j in 1:k){
+      for(i in 1:k){
+        f <- paste0(f, paste0("L", i), " + ")
+      }
+
+      for(i in 1:A){
+        f <- paste0(f, paste0("A", i), " + ")
+      }
+
+      for(i in 1:k){
+        for(j in 1:A){
           f <- paste0(f, paste0("L", i), paste0("A", j), " + ")
         }
       }

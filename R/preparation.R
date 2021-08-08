@@ -51,6 +51,8 @@
 #' for example when norming error scores, where lower scores mean higher
 #' performance
 #' @param k The power parameter, default = 4
+#' @param A the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+#' can be used to specify the k to produce rectangular matrices and specify the course of A independently from k
 #' @param silent set to TRUE to suppress messages
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
@@ -72,7 +74,7 @@
 #' m <- bestModel(data.elfe2)
 #' @export
 #' @family prepare
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", k = 4, width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
+prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", k = 4, A = NULL, width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
   if (is.null(data)) {
     normData <- data.frame(raw=raw)
     raw <- "raw"
@@ -142,9 +144,9 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = k, norm = "normValue", age = age, silent = silent)
+    normData <- computePowers(normData, k = k, A = A, norm = "normValue", age = age, silent = silent)
   } else {
-    normData <- computePowers(normData, k = k, norm = "normValue", silent = silent)
+    normData <- computePowers(normData, k = k, A = A, norm = "normValue", silent = silent)
   }
 
   return(normData)
@@ -821,6 +823,8 @@ rankBySlidingWindow <- function(data = NULL,
 #' explanatory variables can be used here instead an age variable as well, as long as the variable is
 #' at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
 #' most common field of application.
+#' @param A the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
+#' can be used to specify the k to produce rectangular matrices and specify the course of A independently from k
 #' @param covariate Include a binary covariate into the preparation and subsequently modeling,
 #' either by specifying the variable name or including the variable itself. If this has already
 #' been done in the ranking, the function uses the according variable. BEWARE!
@@ -844,6 +848,7 @@ computePowers <-
              k = 4,
              norm = NULL,
              age = NULL,
+             A = NULL,
              covariate = NULL, silent = FALSE) {
     d <- as.data.frame(data)
 
@@ -889,17 +894,30 @@ computePowers <-
       k <- 6
     }
 
+    if(is.null(A)){
+      A <- k
+    }
 
-    # generate powers and interactions of location L and age A up to parameter k
+    if ((A < 1) | (A > 6)) {
+      message("Parameter A out of range, setting to k")
+      A <- k
+    }
+
+    # generate powers and interactions of location and age up to parameters k and A
     L1 <- as.numeric(d[[norm]])
     if (useAge) {
       A1 <- as.numeric(d[[age]])
 
+      for(j in 1:A){
+        d[paste0("A", j)] <- A1^j
+      }
+
       for(i in 1:k){
         d[paste0("L", i)] <- L1^i
-        d[paste0("A", i)] <- A1^i
+      }
 
-        for(j in 1:k){
+      for(i in 1:k){
+        for(j in 1:A){
           d[paste0("L", i, "A", j)] <- L1^i*A1^j
         }
       }
@@ -926,14 +944,15 @@ computePowers <-
     attr(d, "age") <- age
     attr(d, "normValue") <- norm
     attr(d, "k") <- k
+    attr(d, "A") <- A
     attr(d, "useAge") <- useAge
 
     # check, if it is worthwhile to continue with continuous norming
     if (useAge&&!silent) {
       r2 <- summary.lm(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, k, raw=TRUE)))$r.squared
 
-      if (r2 < .05) {
-        warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable."))
+      if (r2 < .05 && A>2) {
+        warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable. You can try to reduce the powers of A indepentently from k and/or to reduce the number of age groups. To model a simple linear age effect, this means to reduce the number of groups to 2 and to set A to 1."))
       }else{
         cat(paste0("Multiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4), "\n"))
       }
