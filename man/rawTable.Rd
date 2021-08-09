@@ -15,7 +15,8 @@ rawTable(
   covariate = NULL,
   monotonuous = TRUE,
   CI = 0.9,
-  reliability = NULL
+  reliability = NULL,
+  pretty = TRUE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ the specific value here.}
 \item{CI}{confidence coefficient, ranging from 0 to 1, default .9}
 
 \item{reliability}{coefficient, ranging between  0 to 1}
+
+\item{pretty}{Format table by collapsing intervals and rounding to meaningful precision}
 }
 \value{
 either data.frame with raw scores and the predicted norm scores in case of simple A value or a list

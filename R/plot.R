@@ -663,7 +663,7 @@ plotDensity <- function(model,
 
   i <- 1
   while (i <= length(group)) {
-    norm <- normTable(group[[i]], model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, covariate = covariate)
+    norm <- normTable(group[[i]], model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, covariate = covariate, pretty = F)
     norm$group <- rep(group[[i]], length.out = nrow(norm))
 
     if (i == 1) {

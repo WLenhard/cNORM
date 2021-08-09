@@ -224,6 +224,7 @@ predictRaw <-
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
 #' @param reliability coefficient, ranging between  0 to 1
+#' @param pretty Format table by collapsing intervals and rounding to meaningful precision
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
@@ -250,7 +251,8 @@ normTable <- function(A,
                       step = NULL, covariate = NULL,
                       monotonuous = TRUE,
                       CI = .9,
-                      reliability = NULL) {
+                      reliability = NULL,
+                      pretty = T) {
 
   if(class(model)=="cnorm"){
     model <- model$model
@@ -344,11 +346,11 @@ normTable <- function(A,
     }
 
     if(monotonuous){
-      minRaw <- normTable$raw[[1]]
+      minRawX <- normTable$raw[[1]]
 
       for(y in 1:length(normTable$raw)){
-        if(normTable$raw[[y]] >= minRaw){
-          minRaw <- normTable$raw[[y]]
+        if(normTable$raw[[y]] >= minRawX){
+          minRawX <- normTable$raw[[y]]
         }else{
           normTable$raw[[y]] <- NA
         }
@@ -363,8 +365,10 @@ normTable <- function(A,
       normTable$upperCI_PR <- pnorm(zPredicted + se) * 100
 
     }
-
-    tables[[x]] <- normTable
+    if(pretty)
+      tables[[x]] <- prettyPrint(normTable)
+    else
+      tables[[x]] <- normTable
   }
 
   names(tables) <- A
@@ -397,6 +401,7 @@ normTable <- function(A,
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
 #' @param reliability coefficient, ranging between  0 to 1
+#' @param pretty Format table by collapsing intervals and rounding to meaningful precision
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
@@ -422,7 +427,8 @@ rawTable <- function(A,
                      step = 1, covariate = NULL,
                      monotonuous = TRUE,
                      CI = .9,
-                     reliability = NULL) {
+                     reliability = NULL,
+                     pretty = TRUE) {
 
   if(class(model)=="cnorm"){
     model <- model$model
@@ -540,7 +546,12 @@ rawTable <- function(A,
 
     }
 
-    tables[[x]] <- table
+    if(pretty)
+      tables[[x]] <- prettyPrint(table)
+    else
+      tables[[x]] <- table
+
+
   }
 
   names(tables) <- A
@@ -762,3 +773,54 @@ predictNorm <-
       stop("Please check raw and A value. Both have to be either single values or vectors of the same length.")
     }
   }
+
+#' Format raw and norm tables
+#' The function takes a raw or norm table, condenses intervals at the bottom and top
+#' and round the numbers to meaningful interval.
+#'
+#' @param table The table to format
+#'
+#' @return formatted table
+prettyPrint <- function(table){
+  if(colnames(table)[1] == "raw")
+    tab <- table[match(unique(table$norm), table$norm), ]
+  else
+    tab <- table[match(unique(table$raw), table$raw), ]
+
+  row.table <- as.numeric(row.names(table))
+  row.tab <- as.numeric(row.names(tab))
+  if(nrow(tab)==1)
+    return(tab)
+  #rows <- row.names(tab)
+
+
+  if(tab[2, 1] != table[2, 1])
+    tab[1, 1] <- paste0(tab[1, 1], " - ", (table[row.tab[2] - 1, 1]))
+
+  if(tab[nrow(tab), 1] != table[nrow(table), 1])
+    tab[nrow(tab), 1] <- paste0(tab[nrow(tab), 1], " - ", table[nrow(table), 1])
+
+
+  # round to meaningfull precision
+  if(colnames(table)[1] == "raw")
+    tab$norm <- round(tab$norm, digits = 2)
+  else
+    tab$raw <- round(tab$raw, digits = 2)
+
+  tab$percentile <- round(tab$percentile, digits = 1)
+
+
+  if(!is.null(tab$lowerCI_PR))
+    tab$lowerCI_PR <- round(tab$lowerCI_PR, 1)
+
+  if(!is.null(tab$upperCI_PR))
+    tab$upperCI_PR <- round(tab$upperCI_PR, 1)
+
+  if(!is.null(tab$lowerCI))
+    tab$lowerCI <- round(tab$upperCI, 2)
+
+  if(!is.null(tab$upperCI))
+    tab$upperCI <- round(tab$upperCI, 2)
+
+  return(tab)
+}
