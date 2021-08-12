@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.1.0 (in progress)
+### Version in 2.1.0 (release candidate)
 Date: 2021.08.10
 
 
