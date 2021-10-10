@@ -3,6 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.1.1
+Date: 2021.10.10
+
+
+Changes:
+
+*    normList parameter in plotNormCurves not working in non T score scales fixed 
+
+
+
 ### Version in 2.1.0
 Date: 2021.08.10
 

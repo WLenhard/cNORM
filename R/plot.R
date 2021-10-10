@@ -273,7 +273,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 #' plotNormCurves(m, minAge=2, maxAge=5)
 #' @export
 #' @family plot
-plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
+plotNormCurves <- function(model, normList = NULL,
                            minAge = NULL,
                            maxAge = NULL,
                            step = 0.1,
@@ -283,6 +283,11 @@ plotNormCurves <- function(model, normList = c(30, 40, 50, 60, 70),
 
   if(class(model)=="cnorm"){
     model <- model$model
+  }
+
+  if(is.null(normList)){
+    normList <- c(-2, -1, 0, 1, 2)
+    normList <- normList*model$scaleSD + model$scaleM
   }
 
   if(!is.null(covariate)&&is.null(model$covariate)){
