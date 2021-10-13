@@ -798,15 +798,22 @@ prettyPrint <- function(table){
     return(tab)
   #rows <- row.names(tab)
 
+  for(i in 1:nrow(tab)){
+    x <- which(tab[i, 2] == table[, 2])
+    if(length(x)>1){
+      label <- paste0(table[x[1], 1], " - ", table[x[length(x)], 1])
+      tab[i, 1] <- label
+  }}
 
-  if(tab[2, 1] != table[2, 1])
-    tab[1, 1] <- paste0(tab[1, 1], " - ", (table[row.tab[2] - 1, 1]))
 
-  if(tab[nrow(tab), 1] != table[nrow(table), 1])
-    tab[nrow(tab), 1] <- paste0(tab[nrow(tab), 1], " - ", table[nrow(table), 1])
+  #if(tab[2, 1] != table[2, 1])
+  #  tab[1, 1] <- paste0(tab[1, 1], " - ", (table[row.tab[2] - 1, 1]))
+
+  #if(tab[nrow(tab), 1] != table[nrow(table), 1])
+  #  tab[nrow(tab), 1] <- paste0(tab[nrow(tab), 1], " - ", table[nrow(table), 1])
 
 
-  # round to meaningfull precision
+  # round to meaningful precision
   if(colnames(table)[1] == "raw")
     tab$norm <- round(tab$norm, digits = 2)
   else
