@@ -54,9 +54,10 @@ This function is comparable to 'normTable', despite it reverses the assignment:
 A table with raw scores and the according norm scores for a specific age based on the regression
 model is generated. This way, the inverse function of the regression model is solved numerically with
 brute force. Please specify the range of raw values, you want to cover. With higher precision
-and smaller stepping, this function becomes computational intensive. In case a confidence coefficient
-(CI) and the reliability is specified, confidence intervals are computed as well, including a correction
-for regression to the mean.
+and smaller stepping, this function becomes computational intensive.
+In case a confidence coefficient (CI, default .9) and the reliability is specified,
+confidence intervals are computed for the true score estimates, including a correction for
+regression to the mean (Eid & Schmidt, 2012, p. 272).
 }
 \examples{
 # Generate cnorm object from example data
@@ -69,6 +70,9 @@ table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28)
 
 # additionally compute confidence intervals
 table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+}
+\references{
+Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 }
 \seealso{
 normTable

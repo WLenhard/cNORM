@@ -6,7 +6,7 @@
 \usage{
 plotNormCurves(
   model,
-  normList = c(30, 40, 50, 60, 70),
+  normList = NULL,
   minAge = NULL,
   maxAge = NULL,
   step = 0.1,

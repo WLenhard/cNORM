@@ -206,12 +206,14 @@ predictRaw <-
 #' This function generates a norm table for a specific age based on the regression
 #' model by assigning raw scores to norm scores. Please specify the
 #' range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
-#' of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
+#' of .6. As a consequence, specifying a range of T = 25 to T = 75 would cover 98.4 % of
 #' the population. Please be careful when extrapolating vertically (at the lower and
 #' upper end of the age specific distribution). Depending on the size of your standardization
-#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
-#' (CI) and the reliability is specified, confidence intervals are computed as well, including a correction
-#' for regression to the mean.
+#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
+#' In case a confidence coefficient (CI, default .9) and the reliability is specified,
+#' confidence intervals are computed for the true score estimates, including a correction for
+#' regression to the mean (Eid & Schmidt, 2012, p. 272).
+#'
 #' @param A the age as single value or a vector of age values
 #' @param model The regression model or a cnorm object
 #' @param minNorm The lower bound of the norm score range
@@ -228,6 +230,7 @@ predictRaw <-
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list #' of norm tables if vector of A values was provided
 #' @seealso rawTable
+#' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
@@ -386,9 +389,10 @@ normTable <- function(A,
 #' A table with raw scores and the according norm scores for a specific age based on the regression
 #' model is generated. This way, the inverse function of the regression model is solved numerically with
 #' brute force. Please specify the range of raw values, you want to cover. With higher precision
-#' and smaller stepping, this function becomes computational intensive. In case a confidence coefficient
-#' (CI) and the reliability is specified, confidence intervals are computed as well, including a correction
-#' for regression to the mean.
+#' and smaller stepping, this function becomes computational intensive.
+#' In case a confidence coefficient (CI, default .9) and the reliability is specified,
+#' confidence intervals are computed for the true score estimates, including a correction for
+#' regression to the mean (Eid & Schmidt, 2012, p. 272).
 #' @param A the age, either single value or vector with age values
 #' @param model The regression model or a cnorm object
 #' @param minRaw The lower bound of the raw score range
@@ -405,6 +409,7 @@ normTable <- function(A,
 #' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
 #' of norm tables if vector of A values was provided
 #' @seealso normTable
+#' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
@@ -817,7 +822,7 @@ prettyPrint <- function(table){
     tab$upperCI_PR <- round(tab$upperCI_PR, 1)
 
   if(!is.null(tab$lowerCI))
-    tab$lowerCI <- round(tab$upperCI, 2)
+    tab$lowerCI <- round(tab$lowerCI, 2)
 
   if(!is.null(tab$upperCI))
     tab$upperCI <- round(tab$upperCI, 2)

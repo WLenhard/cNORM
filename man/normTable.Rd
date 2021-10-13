@@ -53,12 +53,13 @@ value or a list #' of norm tables if vector of A values was provided
 This function generates a norm table for a specific age based on the regression
 model by assigning raw scores to norm scores. Please specify the
 range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
-of .6. As a consequence, specifying a rang of T = 25 to T = 75 would cover 98.4 % of
+of .6. As a consequence, specifying a range of T = 25 to T = 75 would cover 98.4 % of
 the population. Please be careful when extrapolating vertically (at the lower and
 upper end of the age specific distribution). Depending on the size of your standardization
-sample, extreme values with T < 20 or T > 80 might lead to inconsistent results. In case a confidence coefficient
-(CI) and the reliability is specified, confidence intervals are computed as well, including a correction
-for regression to the mean.
+sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
+In case a confidence coefficient (CI, default .9) and the reliability is specified,
+confidence intervals are computed for the true score estimates, including a correction for
+regression to the mean (Eid & Schmidt, 2012, p. 272).
 }
 \examples{
 # Generate cnorm object from example data
@@ -72,6 +73,9 @@ norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
   minNorm = 25, maxNorm = 75,
   step = 1, minRaw = 0, maxRaw = 26
 )
+}
+\references{
+Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 }
 \seealso{
 rawTable

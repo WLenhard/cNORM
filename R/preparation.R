@@ -18,7 +18,7 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Good morning star-shine, cNORM says 'Hello!'")
+  packageStartupMessage("Good morning star-shine!\ncNORM is free software. Please report bugs: https://github.com/WLenhard/cNORM/issues")
 }
 
 
