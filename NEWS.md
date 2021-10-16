@@ -12,8 +12,8 @@ Changes:
 *    normList parameter in plotNormCurves not working in non T score scales fixed 
 *    lower CI not reported correctly in normTable and rawTable corrected
 *    documentation in normTable and rawTable extended
-*    prettyPrint function corrected; now it display interval in the middle of the tables
-     correctly
+*    internal prettyPrint function corrected; now it displays interval in the middle of the tables
+     correctly in rawTable and normTable function
 
 
 
