@@ -29,9 +29,11 @@ cNORM can be installed via
 install.packages("cNORM", dependencies = TRUE)
 ```
 
-Additionally, you can [download a precompiled version](https://www.psychometrica.de/cNorm_installation_en.html) or access the github development version via
+Additionally, you can [download a precompiled version](https://github.com/WLenhard/cNORM/releases) or access the github development version via
 ```{r example}
 install.packages("devtools")
+library(devtools)
+
 devtools::install_github("WLenhard/cNORM")
 library(cNORM)
 ```
