@@ -3,6 +3,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 2.1.2
+Date: 2021.02.12
+
+
+Changes:
+
+*    automatically remove  cases with missings in 'cnorm' function
+
+
+
+
 ### Version in 2.1.1
 Date: 2021.10.13
 

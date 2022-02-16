@@ -235,11 +235,29 @@ cnorm <- function(raw = NULL,
         stop("Please provide numeric vectors of equal length for raw score and group data.")
       }
 
+      if(is.null(weights))
+        data <- data.frame(raw = raw, age = age)
+      else
+        data <- data.frame(raw = raw, age = age, weights = weights)
+
+      # removing missing cases
+      data <- data[complete.cases(data), ]
+
       message("Ranking data with sliding window ...")
-      data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width, method = method)
+      data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
       data <- computePowers(data, k = k, t = t)
     }else{
-      data <- rankByGroup(raw=raw, group=group, scale=scale, weights=weights, descend = descend, method = method)
+
+      if(is.null(weights))
+        data <- data.frame(raw = raw, group = group)
+      else
+        data <- data.frame(raw = raw, group = group, weights = weights)
+
+      # removing missing cases
+      data <- data[complete.cases(data), ]
+
+      # model with rank by group
+      data <- rankByGroup(raw=data$raw, group=data$group, scale=scale, weights=data$weights, descend = descend, method = method)
     }
     if(is.numeric(age)){
       if(length(raw)!=length(age)){
@@ -260,8 +278,16 @@ cnorm <- function(raw = NULL,
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
 
+    if(is.null(weights))
+      data <- data.frame(raw = raw, age = age)
+    else
+      data <- data.frame(raw = raw, age = age, weights = weights)
+
+    # removing missing cases
+    data <- data[complete.cases(data), ]
+
     message("Ranking data with sliding window ...")
-    data <- rankBySlidingWindow(raw=raw, age=age, scale=scale, weights=weights, descend = descend, width = width, method = method)
+    data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
     data <- computePowers(data, k = k, t = t)
   }else{
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
