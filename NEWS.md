@@ -3,12 +3,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 2.1.2
+### Version in 3.0.0
 Date: 2021.02.12
 
 
 Changes:
 
+*    Major version: Includes weighting functions to overcome biased norm samples
+     Weights are built through the survey package. it is necessary to provide
+     marginal means factor levels of stratification variables in the population
+*    weighted quantile estimation now draws on Harrell-Davis instead of Type7
+     by default
 *    automatically remove  cases with missings in 'cnorm' function
 
 

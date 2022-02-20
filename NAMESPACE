@@ -40,7 +40,8 @@ export(
 	modelSummary,
 	getNormScoreSE,
 	weighted.rank,
-	weighted.quantile
+	weighted.quantile,
+	computeWeights
 )
 
 

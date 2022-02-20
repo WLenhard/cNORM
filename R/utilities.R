@@ -9,8 +9,8 @@
 #' @param x A numerical vector
 #' @param weights A numerical vector with weights; should have the same length as x
 #' @param n Granularity for approximation
-#' @param type Type of estimator, can either be "Harrell-Davis" using a beta function to
-#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+#' @param type Type of estimator, can either be "Harrell-Davis" (default) using a beta function to
+#' approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (Hyndman & Fan, 1996), an adaption
 #' of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).
 #' @references
 #' \enumerate{
@@ -20,7 +20,7 @@
 #' }
 #' @return the weighted ranks
 #' @export
-weighted.rank <- function(x, weights=NULL, n = 1000, type="Type7"){
+weighted.rank <- function(x, weights=NULL, n = 1000, type="Harrell-Davis"){
   if(is.null(weights))
     return(rank(x))
 
