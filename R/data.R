@@ -28,21 +28,23 @@
 #' @format A data frame with 1400 rows and 3 columns
 "elfe"
 
-#' Vocabulary development from 4 to 16
+#' Vocabulary development from 2.5 to 17
 #'
 #' A dataset based on an unstratified sample of PPVT4 data (German adaption). The PPVT4 consists of blocks of items with
 #' 12 items each. Each item consists of 4 pictures. The test taker is given a word orally and he or she has to point out
 #' the picture matching the oral word. Bottom and ceiling blocks of items are determined according to age and performance. For
 #' instance, when a student knows less than 4 word from a block of 12 items, the testing stops. The sample is not identical
 #' with the norm sample and includes doublets of cases in order to align the sample size per age group. It is
-#' primarily intended for running the cNORM analyses. The cleaned and stratified data is available on request.
+#' primarily intended for running the cNORM analyses with regard to modeling and stratification.
 #'
-#' @format A data frame with 5600 rows and 4 variables:
+#' @format A data frame with 4542 rows and 6 variables:
 #' \describe{
 #'   \item{age}{the chronological age of the child}
-#'   \item{group}{the according age group, e.g. age group 4 consists of children age 3.5 to 4.5}
 #'   \item{sex}{the sex of the test taker, 1=male, 2=female}
+#'   \item{migration}{migration status of the family, 0=no, 1=yes}
+#'   \item{region}{factor specifiying the region, the data were collected; grouped into south, north, east and west}
 #'   \item{raw}{the raw score of the student, spanning values from 0 to 228}
+#'   \item{group}{age group of the child, determined by the getGroups()-function with 12 equidistant age groups}
 #' }
 #' @source \url{https://www.psychometrica.de/ppvt4.html}
 #' @references Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary Test - Revision IV (Deutsche Adaption). Frankfurt a. M./Germany: Pearson Assessment.
@@ -52,19 +54,24 @@
 #' @name ppvt
 #' @examples
 #' \dontrun{
-#' # Example with continuous age variable
-#' data.ppvt <- rankBySlidingWindow(ppvt, age="age", width=1.5)
-#' data.ppvt <- computePowers(data.ppvt, age="age")
-#' model.ppvt <- bestModel(data.ppvt, R2 = .994)
+#' # Example with continuous age variable, ranked with sliding window
+#' model.ppvt.sliding <- cnorm(age=ppvt$age, raw=ppvt$raw, width=1)
+#'
+#' # Example with age groups; you might first want to experiment with
+#' # the granularity of the groups via the 'getGroups()' function
+#' model.ppvt.group <- cnorm(group=ppvt$group, raw=ppvt$raw) # with predefined groups
+#' model.ppvt.group <- cnorm(group=getGroups(ppvt$age, n=15, equidistant = T),
+#'                           raw=ppvt$raw) # groups built 'on the fly'
+#'
 #'
 #' # plot information function
-#' plotSubset(model.ppvt, type=2)
+#' plot(model.ppvt.group, "subset")
 #'
 #' # check model consistency
-#' checkConsistency(model.ppvt)
+#' checkConsistency(model.ppvt.group)
 #'
 #' # plot percentiles
-#' plotPercentiles(data.ppvt, model.ppvt)
+#' plot(model.ppvt.group, "percentiles")
 #' }
 #' @format A data frame with 5600 rows and 9 columns
 "ppvt"

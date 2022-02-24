@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.0
-Date: 2021.02.12
+Date: 2021.02.24
 
 
 Changes:
@@ -15,6 +15,8 @@ Changes:
 *    weighted quantile estimation now draws on Harrell-Davis instead of Type7
      by default
 *    automatically remove  cases with missings in 'cnorm' function
+*    ppvt dataset exchanged with unstratified sample with additional background
+     variables (migration, region, sex)
 
 
 
