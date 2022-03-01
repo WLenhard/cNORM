@@ -4,7 +4,7 @@
 \alias{weighted.rank}
 \title{Weighted rank estimation}
 \usage{
-weighted.rank(x, weights = NULL, n = 1000, type = "Type7")
+weighted.rank(x, weights = NULL, n = 1000, type = "Harrell-Davis")
 }
 \arguments{
 \item{x}{A numerical vector}
@@ -13,8 +13,8 @@ weighted.rank(x, weights = NULL, n = 1000, type = "Type7")
 
 \item{n}{Granularity for approximation}
 
-\item{type}{Type of estimator, can either be "Harrell-Davis" using a beta function to
-approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
+\item{type}{Type of estimator, can either be "Harrell-Davis" (default) using a beta function to
+approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (Hyndman & Fan, 1996), an adaption
 of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).}
 }
 \value{
