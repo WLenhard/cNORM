@@ -245,7 +245,9 @@ cnorm <- function(raw = NULL,
 
       message("Ranking data with sliding window ...")
       data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
-      data <- computePowers(data, k = k, t = t)
+
+      # again remove missing cases; might occur due to weighting
+      data <- data[complete.cases(data), ]
     }else{
 
       if(is.null(weights))
@@ -258,7 +260,12 @@ cnorm <- function(raw = NULL,
 
       # model with rank by group
       data <- rankByGroup(raw=data$raw, group=data$group, scale=scale, weights=data$weights, descend = descend, method = method)
+
+      # again remove missing cases; might occur due to weighting
+      data <- data[complete.cases(data), ]
+
     }
+
     if(is.numeric(age)){
       if(length(raw)!=length(age)){
         warning("Length of the age vector does not match the raw score vector, ignoring age information.")
