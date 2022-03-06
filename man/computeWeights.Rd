@@ -2,31 +2,76 @@
 % Please edit documentation in R/raking.R
 \name{computeWeights}
 \alias{computeWeights}
-\title{Integration of raking into cNORM}
+\title{Weighting of cases through iterative proportional fitting (Raking)}
 \usage{
-computeWeights(data, population.margins)
+computeWeights(data, population.margins, partial = FALSE)
 }
 \arguments{
 \item{data}{data.frame with norm sample data.
 The function is used to compute the actual raking weights using the survey package.}
 
-\item{population.margins}{List of data frames containing the marginals of
-the specified stratification variables. The first column of each data frame
-must contain the different levels of one variable and the second rows the
-frequency. Moreover, the name of the first column must match the corresponding
-variable name, while the name of the second column must be "Freq". That means that
-the marginals must be passed to function as a list of single data frames, one data frame
-per stratification variable.}
+\item{population.margins}{A data.frame including three columns, specifying the variable name in
+the original dataset used for data stratification, the factor level of the variable and the
+according population share. Please ensure, the original data does not include factor levels,
+not present in the population.margins. Additionally, summing up the shares of the
+different levels of a variable should result in a value near 1.0.}
+
+\item{partial}{allow factor level to be present in the population margins that are not
+available in the dataset (default is false)}
+}
+\value{
+a vector with the standardized weights
 }
 \description{
 Computes and standardize raking weights based on the implementation in
-the survey R package.
-Generation of weights to compensate for non-stratified samples
+the survey R package. Generation of weights to compensate for non-stratified samples.
 }
 \details{
 This function computes standardized raking weights based on the implementation in
 the survey R package to overcome biases in norm samples. It generates weights, by drawing
 on the information of population shares (e. g. for sex, ethnic group, region ...) and
 subsequently reduces the influence of over-represented groups or increases underrepresented
-cases. The returned weights or scaled to be larger than 0.
+cases. The returned weights are standardized and scaled to be larger than 0.
+
+Raking in general has a number of advantages over post stratification and it additionally
+allows cNORM to draw on larger datasets, since less cases have to be removed during
+startification. To use this function, additionally to the data, a data frame with stratification
+variables has to be specified. The data frame should include a row with (a) the variable name,
+(b) the level of the variable and (c) the according population proportion.
+}
+\examples{
+# cNORM includes a dataset on vocabulary development (ppvt)
+# that includes variables like sex or migration. In order
+# to weight the data, we have to specify the population shares.
+# According to census, the population includes 52\% boys
+# (factor level 1 in the ppvt dataset) and 70\% / 30\% of persons
+# without / with a a history of migration (= 0 / 1 in the dataset).
+# First we set up the popolation margins with all shares of the
+# different levels:
+
+margins <- data.frame(variables = c("sex", "sex",
+                                    "migration", "migration"),
+                      levels = c(1, 2, 0, 1),
+                      share = c(.52, .48, .7, .3))
+head(margins)
+
+# Now we use the population margins to generate weights
+# through raking
+
+weights <- computeWeights(ppvt, population.margin)
+
+
+# There are as many different weights as combinations of
+# factor levels, thus only four in this specific case
+
+unique(weights)
+
+
+# To include the weights in the cNORM modelling, we have
+# to pass them as weights. They are then used to set up
+# weighted quantiles and as weights in the regession.
+
+model <- cnorm(raw = ppvt$raw,
+               group=ppvt$group,
+               weights = weights)
 }
