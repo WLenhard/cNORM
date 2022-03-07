@@ -1,10 +1,9 @@
 #' Weighting of cases through iterative proportional fitting (Raking)
 #'
-#' Computes and standardizes weights via raking. It is based on the implementation in
-#' the survey R package. Generation of weights to compensate for non-stratified samples.
-#' It compensates for data collection biases in the norm data by the means of post
-#' stratification, thus reducing the effect of unbalanced data in percentile estimation
-#' and norm data modeling.
+#' Computes and standardizes weights via raking to compensate for non-stratified samples.
+#' It is based on the implementation in the survey R package. It reduces data collection
+#' biases in the norm data by the means of post stratification, thus reducing the effect
+#' of unbalanced data in percentile estimation and norm data modeling.
 #'
 #' This function computes standardized raking weights based on the implementation in
 #' the survey R package to overcome biases in norm samples. It generates weights, by drawing
