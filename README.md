@@ -106,6 +106,22 @@ d <- computePowers(d)
 m <- bestModel(d)
 rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
 
+
+# In case of unbalanced datasets, deviating from the census, the norm data
+# can be weighted by the means of raking / post stratification. Please generate
+# the weights with the computeWeights() function and pass them as the weights
+# parameter. For computing the weights, please specify a data.frame with the
+# population margins (further information is available in the computeWeights
+# function). A demonstration based on sex and migration status in vocabulary
+# development (ppvt dataset):
+margins <- data.frame(variables = c("sex", "sex",
+                                    "migration", "migration"),
+                      levels = c(1, 2, 0, 1),
+                      share = c(.52, .48, .7, .3))
+weights <- computeWeights(ppvt, margins)
+model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
+
+
 # start vignette for a complete walk through
 vignette("cNORM-Demo", package = "cNORM")
 ```

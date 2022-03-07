@@ -49,8 +49,8 @@ this number of terms is used}
 
 \item{weights}{Optional vector with weights for the single cases. By default, if data has been
 weighting in ranking, these weights are reused here as well. Please set to FALSE to deactivate
-this behavior. All weights have to be positive.
-This is currently an EXPERIMENTAL feature and will probably be deprecated in a future release.}
+this behavior. All weights have to be positive and no missings are allowed. Otherwise
+the weights will be ignored.}
 
 \item{force.in}{List of variable names forced into the regression function. This option
 can be used to force the regression to include covariates like sex or other background

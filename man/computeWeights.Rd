@@ -23,8 +23,11 @@ available in the dataset (default is false)}
 a vector with the standardized weights
 }
 \description{
-Computes and standardize raking weights based on the implementation in
+Computes and standardizes weights via raking. It is based on the implementation in
 the survey R package. Generation of weights to compensate for non-stratified samples.
+It compensates for data collection biases in the norm data by the means of post
+stratification, thus reducing the effect of unbalanced data in percentile estimation
+and norm data modeling.
 }
 \details{
 This function computes standardized raking weights based on the implementation in
@@ -35,12 +38,12 @@ cases. The returned weights are standardized and scaled to be larger than 0.
 
 Raking in general has a number of advantages over post stratification and it additionally
 allows cNORM to draw on larger datasets, since less cases have to be removed during
-startification. To use this function, additionally to the data, a data frame with stratification
+stratification. To use this function, additionally to the data, a data frame with stratification
 variables has to be specified. The data frame should include a row with (a) the variable name,
 (b) the level of the variable and (c) the according population proportion.
 }
 \examples{
-# cNORM includes a dataset on vocabulary development (ppvt)
+# cNORM features a dataset on vocabulary development (ppvt)
 # that includes variables like sex or migration. In order
 # to weight the data, we have to specify the population shares.
 # According to census, the population includes 52\% boys
@@ -58,7 +61,7 @@ head(margins)
 # Now we use the population margins to generate weights
 # through raking
 
-weights <- computeWeights(ppvt, population.margin)
+weights <- computeWeights(ppvt, margins)
 
 
 # There are as many different weights as combinations of

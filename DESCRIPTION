@@ -3,12 +3,13 @@ Type: Package
 Title: Continuous Norming
 Version: 3.0.0
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2021-02-20
+Date: 2021-03-07
 Authors@R: c(person("Wolfgang", "Lenhard", role = c("cre","aut"), email="wolfgang.lenhard@uni-wuerzburg.de", comment=c("<https://orcid.org/0000-0002-8184-6889>")), person("Alexandra", "Lenhard", role=c("aut")), person("Sebastian", "Gary", role=c("aut")))
 Description: Conventional methods for producing standard scores in psychometrics or biometrics 
     are often plagued with "jumps" or "gaps" (i.e., discontinuities) in norm tables and low 
     confidence for assessing extreme scores. The continuous norming method introduced by A. 
-    Lenhard et al. (2016, <doi:10.1177/1073191116656437>; 2019, <doi:10.1371/journal.pone.0222279>) and generates continuous test norm 
+    Lenhard et al. (2016, <doi:10.1177/1073191116656437>; 2019, <doi:10.1371/journal.pone.0222279>) 
+    estimates percentile development (e. g. over age) and generates continuous test norm 
     scores on the basis of the raw data from standardization samples, without requiring 
     assumptions about the distribution of the raw data: Norm scores are directly established 
     from raw data by modeling the latter ones as a function of both percentile scores and an 
@@ -17,7 +18,7 @@ Description: Conventional methods for producing standard scores in psychometrics
     or ceiling effects and capturing almost all of the variance in the original norm data 
     sample. An online demonstration is available via <https://cnorm.shinyapps.io/cNORM/>.
 Depends:
-    R (>= 3.5.0)
+    R (>= 4.0.0)
 Imports:
     lattice (>= 0.20),
     leaps (>= 3.0), latticeExtra (>= 0.6)

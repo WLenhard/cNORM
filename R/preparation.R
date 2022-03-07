@@ -40,9 +40,7 @@
 #' observed raw scores, otherwise, ranking is done by group (default)
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
 #' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
-#' and positive.
-#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
-#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
+#' and positive. Please use the 'computeWeights' function for this purpose.
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as well,
 #' be provided f. e. c(10, 3) for Wechsler scale index point
@@ -525,9 +523,7 @@ rankByGroup <-
 #' @param width the width of the sliding window
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
 #' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
-#' and positive.
-#' Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
-#' with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.
+#' and positive. Please use the 'computeWeights' function for this purpose.
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),

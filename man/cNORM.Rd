@@ -30,9 +30,7 @@ cnorm(
 
 \item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
 to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
-and positive.
-Please note, that this feature is currently EXPERIMENTAL and subject to ongoing work! Precision of weighting increases
-with sample size. On the other hand, in large samples, it is easy to stratificate and then weighting is not needed anymore.}
+and positive.}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
 transformation); a double vector with the mean and standard deviation can as well,
@@ -69,17 +67,18 @@ model. Please consult the function description ' of 'rankByGroup', 'rankBySlidin
 of the steps in the data preparation and modeling process. In addition to the raw scores, either provide
 \itemize{
  \item{a numeric vector for the grouping information (group)}
- \item{a numeric vector for both grouping and age (group, age)}
  \item{a numeric age vector and the width of the sliding window (age, width)}
 }
 for the ranking of the raw scores. You can
 adjust the grade of smoothing of the regression model by setting the k and terms parameter. In general,
 increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
-smoothing.
+smoothing. The power parameter for the age trajectory can be specified independently
+by 't'.
 }
 \examples{
 \dontrun{
 # Using this function with the example dataset 'elfe'
+# You can use the 'getGroups()' function to set up grouping variable.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # return norm tables including 90\% confidence intervals for a
@@ -91,18 +90,25 @@ normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95
 rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 
 
-# Not really a plausible scenario, but just for demonstration purposes, we will
-# use the PPVT dataset and sex as the weighting variable (1 = male, 2 = female),
-# and consequently, females will get the double weight. This procedure can be used
-# to correct imbalances in the dataset, but it is still experimental. Please use
-# positive, non-zero numerics, preferably integers for this:
-cnorm.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, weight = ppvt$sex)
-
 # Using a continuous age variable instead of distinct groups, using a sliding window for
 # percentile estimation. Please specify continuos variable for age and the sliding window
 # size.
-
 cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
+
+
+# In case of unbalanced datasets, deviating from the census, the norm data
+# can be weighted by the means of raking / post stratification. Please generate
+# the weights with the computeWeights() function and pass them as the weights
+# parameter. For computing the weights, please specify a data.frame with the
+# population margins (further information is available in the computeWeights
+# function). A demonstration based on sex and migration status in vocabulary
+# development (ppvt dataset):
+margins <- data.frame(variables = c("sex", "sex",
+                                    "migration", "migration"),
+                      levels = c(1, 2, 0, 1),
+                      share = c(.52, .48, .7, .3))
+weights <- computeWeights(ppvt, margins)
+model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
 }
 }
 \references{
