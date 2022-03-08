@@ -4,7 +4,7 @@
 \alias{computeWeights}
 \title{Weighting of cases through iterative proportional fitting (Raking)}
 \usage{
-computeWeights(data, population.margins, partial = FALSE)
+computeWeights(data, population.margins)
 }
 \arguments{
 \item{data}{data.frame with norm sample data.
@@ -15,19 +15,15 @@ the original dataset used for data stratification, the factor level of the varia
 according population share. Please ensure, the original data does not include factor levels,
 not present in the population.margins. Additionally, summing up the shares of the
 different levels of a variable should result in a value near 1.0.}
-
-\item{partial}{allow factor level to be present in the population margins that are not
-available in the dataset (default is false)}
 }
 \value{
 a vector with the standardized weights
 }
 \description{
-Computes and standardizes weights via raking. It is based on the implementation in
-the survey R package. Generation of weights to compensate for non-stratified samples.
-It compensates for data collection biases in the norm data by the means of post
-stratification, thus reducing the effect of unbalanced data in percentile estimation
-and norm data modeling.
+Computes and standardizes weights via raking to compensate for non-stratified samples.
+It is based on the implementation in the survey R package. It reduces data collection
+biases in the norm data by the means of post stratification, thus reducing the effect
+of unbalanced data in percentile estimation and norm data modeling.
 }
 \details{
 This function computes standardized raking weights based on the implementation in

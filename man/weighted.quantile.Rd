@@ -27,12 +27,12 @@ quantile estimator or an adaption of the type 7 quantile estimator of the generi
 the base package. Please provide a vector with raw values, the pobabilities for the quantiles and an
 additional vector with the weight of each observation. In case the weight vector is NULL, a normal
 quantile estimation is done. The vectors may not include NAs and the weights should be positive non-zero
-values.
+values. Please draw on the computeWeights() function for retrieving weights in post stratification.
 }
 \references{
 \enumerate{
   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
-  \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
+  \item Hyndman, R. J. & Fan, Y. (1996). Sample quantiles in statistical packages, American Statistician 50, 361–365.
   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
 }
 }

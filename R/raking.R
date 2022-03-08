@@ -24,8 +24,6 @@
 #' according population share. Please ensure, the original data does not include factor levels,
 #' not present in the population.margins. Additionally, summing up the shares of the
 #' different levels of a variable should result in a value near 1.0.
-#' @param partial allow factor level to be present in the population margins that are not
-#' available in the dataset (default is false)
 #' @return a vector with the standardized weights
 #' @examples
 #' # cNORM features a dataset on vocabulary development (ppvt)
@@ -63,7 +61,7 @@
 #'                group=ppvt$group,
 #'                weights = weights)
 #' @export
-computeWeights<- function(data, population.margins, partial=FALSE){
+computeWeights<- function(data, population.margins){
 
   # Require survey package; returns error with hint to install survey if
   # not already installed
@@ -133,7 +131,7 @@ computeWeights<- function(data, population.margins, partial=FALSE){
   # every single stratification variable
   for(marg in list_of_marginals_new){
     marg_sum <- sum(marg[[2]])
-    if(!abs(marg_sum-1.0)<=0.5)
+    if(!abs(marg_sum-1.0)<=0.05)
     {
       warning(paste("Sum of proportions of variable", toString(names(marg)[[1]]), "is not within [0.95;1.05].\nPlease make sure, the proportions for every single sratification variable sum up to almost 1.00"))
     }
