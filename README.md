@@ -87,6 +87,7 @@ plot(cnorm.elfe, "percentiles")
 # Visual inspection of the observed and fitted raw and norm scores
 plot(cnorm.elfe, "norm")
 plot(cnorm.elfe, "raw")
+plot(cnorm.elfe, "raw", group = "group") # show fit per grouping variable
 
 # In order to check, how other models perform, plot series of percentile plots with ascending
 # number of predictors, in this example up to 14 predictors.
