@@ -76,9 +76,9 @@ cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 # Per default, the power parameter is set to 4. You can choose a value up to 6, but higher
 # values can lead to overfit. In most cases, 4 is fine or the value can be reduced to 3 by
 # specifying the k prarameter (e. g., k = 3). If you do not want to have a square matrix of
-# powers, you can specify the age trajectory via parameter t. In the following example, the
-# distribution per age is modeled with power parameter 3 (= cubic), while for the age, there
-# is only a quadratic trajectory (-> 't = 2').
+# powers as depicted above, you can specify the age trajectory via parameter t. In the 
+# following example, the distribution per age is modeled with power parameter k = 3 (= cubic), 
+# while for the age, there is only a quadratic trajectory (-> 't = 2').
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 3, t = 2)
 
 #  Visual inspection of the percentile curves of the fitted model
