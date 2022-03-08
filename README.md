@@ -14,9 +14,10 @@ Conventional methods for producing test norms are often plagued with "jumps" or 
 cNORM addresses these problems and also has the added advantage of not requiring
 assumptions about the distribution of the raw data: The standard scores are established from
 raw data by modeling the latter ones as a function  of both percentile scores and an
-explanatory variable (e.g., age) through [Taylor polynomials](https://www.psychometrica.de/cNorm_math_en.html). The method minimizes
-bias arising from sampling and measurement error, while handling marked deviations from
-normality – such as are commonplace in clinical samples. Contrary to parametric approaches, it does not rely on distribution assumptions of the initial norm data and is thus a very robust approach in generating norm tables.
+explanatory variable (e.g., age) through [Taylor polynomials](https://www.psychometrica.de/cNorm_math_en.html). 
+The method minimizes bias arising from sampling and measurement error, while handling marked deviations from
+normality – such as are commonplace in clinical samples. It includes procedures for post stratification of norm
+samples to overcome bias in data collection and to mitigate violations of representativeness. Contrary to parametric approaches, it does not rely on distribution assumptions of the initial norm data and is thus a very robust approach in generating norm tables.
 
 The rationale of the approach is model the relationship between location / norm score, age and raw score via multiple regression and to fit a 3-dimensional hyperplane. This hyperplane is used to close all gaps and to compute continuous norm scores:
 

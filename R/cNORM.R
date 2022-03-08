@@ -48,6 +48,12 @@
 #'   \item CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets
 #'   and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/.
 #'   date of retrieval: 25/08/2018
+#'   \item Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based
+#'   Continuous Norming. Educational and Psychological Measurement, 81(2), 229–261.
+#'   doi: 10.1177/0013164420928457
+#'   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests:
+#'   A simulation study of parametric and semi-parametric approaches.
+#'   PLoS ONE, 14(9),  e0222279. doi: 10.1371/journal.pone.0222279
 #'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to
 #'   the norming problem. Assessment, Online first, 1-14. doi: 10.1177/1073191116656437
 #'   \item Lenhard, A., Lenhard, W., Segerer, R. & Suggate, S. (2015). Peabody Picture Vocabulary
