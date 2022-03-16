@@ -200,6 +200,8 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
+#' @param type Algorithm for weighted ranking. Can either be inflation (default)
+#' Harrell-Davis or type7
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -215,7 +217,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' d <- computePowers(d)
 #' m <- bestModel(d)
 #' rawTable(0, m) # please use an arbitrary value for age when generating the tables
-#' @seealso rankBySlidingWindow, computePowers
+#' @seealso rankBySlidingWindow, computePowers, weighted.rank, weighted.quantile
 #' @export
 #' @family prepare
 rankByGroup <-
@@ -228,7 +230,7 @@ rankByGroup <-
            descend = FALSE,
            descriptives = TRUE,
            covariate = NULL,
-           na.rm = TRUE) {
+           na.rm = TRUE, type ="inflation") {
 
     # experimental code to include covariates
     # covariate <- NULL
@@ -349,7 +351,7 @@ rankByGroup <-
 
     if (is.null(covariate)) {
       if (typeof(group) == "logical" && !group) {
-        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
+        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting, type = type) + numerator[method]) / (length(d[, raw]) + denominator[method])
         if (descriptives) {
           d$n <- length(d[, raw])
           d$m <- mean(d[, raw])
@@ -359,7 +361,7 @@ rankByGroup <-
       } else {
         d <- d[order(d$group), ]
         d$percentile <- unlist(by(d, d$group, function(x) {
-            (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
+            (weighted.rank(sign * x$raw, weights = x$weights, type = type) + numerator[method]) / (nrow(x) + denominator[method])
           }))
 
         if (descriptives) {
@@ -388,7 +390,7 @@ rankByGroup <-
       if (typeof(group) == "logical" && !group) {
 
             d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+              (weighted.rank(sign * x, weights = weighting, type = type) + numerator[method]) / (length(x) + denominator[method])
             })
 
           if (descriptives) {

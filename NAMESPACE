@@ -41,6 +41,9 @@ export(
 	getNormScoreSE,
 	weighted.rank,
 	weighted.quantile,
+	weighted.quantile.inflation,
+	weighted.quantile.harrell.davis,
+	weighted.quantile.type7,
 	computeWeights,
 	standardizeRakingWeights
 )

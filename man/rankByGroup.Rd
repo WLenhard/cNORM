@@ -14,7 +14,8 @@ rankByGroup(
   descend = FALSE,
   descriptives = TRUE,
   covariate = NULL,
-  na.rm = TRUE
+  na.rm = TRUE,
+  type = "inflation"
 )
 }
 \arguments{
@@ -55,6 +56,9 @@ Not all subsequent functions are already prepared for it.  It is an experimental
 
 \item{na.rm}{remove values, where the percentiles could not be estimated,
 most likely happens in the context of weighting}
+
+\item{type}{Algorithm for weighted ranking. Can either be inflation (default)
+Harrell-Davis or type7}
 }
 \value{
 the dataset with the percentiles and norm scales per group
@@ -97,7 +101,7 @@ m <- bestModel(d)
 rawTable(0, m) # please use an arbitrary value for age when generating the tables
 }
 \seealso{
-rankBySlidingWindow, computePowers
+rankBySlidingWindow, computePowers, weighted.rank, weighted.quantile
 
 Other prepare: 
 \code{\link{computePowers}()},

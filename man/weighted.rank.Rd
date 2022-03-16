@@ -34,3 +34,6 @@ include NAs and the weights should be positive non-zero values.
   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
 }
 }
+\seealso{
+weighted.quantile
+}

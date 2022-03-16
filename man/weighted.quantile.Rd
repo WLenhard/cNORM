@@ -4,7 +4,7 @@
 \alias{weighted.quantile}
 \title{Weighted quantile estimator}
 \usage{
-weighted.quantile(x, probs, weights = NULL, type = "Type7")
+weighted.quantile(x, probs, weights = NULL, type = "Harrell-Davis")
 }
 \arguments{
 \item{x}{A numerical vector}
@@ -13,9 +13,13 @@ weighted.quantile(x, probs, weights = NULL, type = "Type7")
 
 \item{weights}{A numerical vector with weights; should have the same length as x}
 
-\item{type}{Type of estimator, can either be "Harrell-Davis" using a beta function to
+\item{type}{Type of estimator, can either be "inflation", "Harrell-Davis" using a beta function to
 approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (default; Hyndman & Fan, 1996), an adaption
-of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).}
+of the generic quantile function in R, including weighting. The inflation procedure is essentially
+a numerical, non-parametric solution that gives the same results as Harrel-Davis. It requires less
+ressources with small datasets and always finds a solution (e. g. 1000 cases with
+weights between 1 and 10). If it becomes too resource intense, it switches to Harrell-Davis automatically.
+Harrel-Davis and Type7 code is  based on the work of Akinshin (2020).}
 }
 \value{
 the weighted quantiles
@@ -35,4 +39,7 @@ values. Please draw on the computeWeights() function for retrieving weights in p
   \item Hyndman, R. J. & Fan, Y. (1996). Sample quantiles in statistical packages, American Statistician 50, 361–365.
   \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
 }
+}
+\seealso{
+weighted.quantile.inflation, weighted.quantile.harrell.davis, weighted.quantile.type7
 }
