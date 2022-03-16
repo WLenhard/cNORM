@@ -550,6 +550,8 @@ rankByGroup <-
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
+#' @param type Algorithm for weighted ranking. Can either be inflation (default)
+#' Harrell-Davis or type7
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
@@ -562,7 +564,7 @@ rankByGroup <-
 #' data.elfe <- rankByGroup(elfe, group = "group")
 #' mean(data.elfe$normValue - data.elfe2$normValue)
 #' }
-#' @seealso rankByGroup, computePowers
+#' @seealso rankByGroup, computePowers, weighted.rank, weighted.quantile
 #' @export
 #' @family prepare
 rankBySlidingWindow <- function(data = NULL,
@@ -577,7 +579,8 @@ rankBySlidingWindow <- function(data = NULL,
                                 nGroup = 0,
                                 group = NA,
                                 covariate = NULL,
-                                na.rm = TRUE) {
+                                na.rm = TRUE,
+                                type ="inflation") {
 
   # experimental code to include covariates
   # covariate <- NULL
@@ -719,7 +722,7 @@ rankBySlidingWindow <- function(data = NULL,
     if(is.null(weights))
       observations$percentile <- (rank(sign * observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     else
-      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights], type = type) + numerator[method]) / (nObs + denominator[method])
 
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
