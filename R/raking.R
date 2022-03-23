@@ -69,7 +69,7 @@ computeWeights<- function(data, population.margins){
   packageList <- c("survey")
 
   if (!requireNamespace(packageList, quietly = TRUE)) {
-    cat("The survey package is needed to start the user interface. Would you like to try to install it now?")
+    cat("The survey package is needed. Would you like to try to install it now?")
     installChoice <- menu(c("yes", "no"))
     if(installChoice == 1){
       utils::install.packages(packageList)
@@ -153,6 +153,11 @@ computeWeights<- function(data, population.margins){
 
   # Get weights from the survey object
   weights <- weights(rake_original_input)
+  if(min(weights<=0)){
+    warning("Negative values or zeros occured during raking. Using the raking weights is not recommended.")
+  }else if(sum(is.na(weights)>0)){
+    warning("Undefined value occured during raking. Using the raking weights is not recommended.")
+  }
 
   # Standardizing raking weights by dividing every weight through the smallest
   # weight
@@ -170,8 +175,8 @@ computeWeights<- function(data, population.margins){
 #' @param weights Raking weights computed by computeWeights()
 standardizeRakingWeights <- function(weights){
   weights_min <- min(weights)
-  if(weights_min ==0){
-    warning("Smallest raking weight is zero and weights can not be standardized.\nTherefore, non-standardized weights are used.")
+  if(min(weights) <=0){
+    warning("Smallest raking weight is zero or below. Weights can not be standardized.\nTherefore, non-standardized weights are used.")
   }
   weights <- weights/weights_min
   return(weights)
