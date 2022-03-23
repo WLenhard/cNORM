@@ -174,7 +174,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #'
 #' @param data data.frame with norm sample data. If no data.frame is provided, the raw score
 #' and group vectors are directly used
-#' @param group name of the grouping variable (default 'group')  or numeric vector, e. g. grade, setting
+#' @param group name of the grouping variable (default 'group') or numeric vector, e. g. grade, setting
 #' group to FALSE cancels grouping (data is treated as one group)
 #' @param raw name of the raw value variable (default 'raw') or numeric vector
 #' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
@@ -198,8 +198,6 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
-#' @param type Algorithm for weighted ranking. Can either be inflation (default)
-#' Harrell-Davis or type7
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -215,7 +213,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' d <- computePowers(d)
 #' m <- bestModel(d)
 #' rawTable(0, m) # please use an arbitrary value for age when generating the tables
-#' @seealso rankBySlidingWindow, computePowers, computeWeights, weighted.rank, weighted.quantile
+#' @seealso rankBySlidingWindow, computePowers, computeWeights, weighted.rank
 #' @export
 #' @family prepare
 rankByGroup <-
@@ -228,7 +226,7 @@ rankByGroup <-
            descend = FALSE,
            descriptives = TRUE,
            covariate = NULL,
-           na.rm = TRUE, type ="inflation") {
+           na.rm = TRUE) {
 
     # experimental code to include covariates
     # covariate <- NULL
@@ -268,9 +266,6 @@ rankByGroup <-
 
     weighting <- NULL
     if(!is.null(weights)){
-        # message("Weighting is currently not working in rankByGroup. Proceeding without weighting.")
-        # weights <- NULL
-
       if(is.character(weights)){
 
         if(!(weights %in% colnames(d))){
@@ -349,7 +344,8 @@ rankByGroup <-
 
     if (is.null(covariate)) {
       if (typeof(group) == "logical" && !group) {
-        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting, type = type) + numerator[method]) / (length(d[, raw]) + denominator[method])
+        cat("No grouping variable specified. Ranking without grouping ...")
+        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
         if (descriptives) {
           d$n <- length(d[, raw])
           d$m <- mean(d[, raw])
@@ -359,7 +355,7 @@ rankByGroup <-
       } else {
         d <- d[order(d$group), ]
         d$percentile <- unlist(by(d, d$group, function(x) {
-            (weighted.rank(sign * x$raw, weights = x$weights, type = type) + numerator[method]) / (nrow(x) + denominator[method])
+            (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
           }))
 
         if (descriptives) {
@@ -386,9 +382,9 @@ rankByGroup <-
       warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
 
       if (typeof(group) == "logical" && !group) {
-
+            cat("No grouping variable specified. Ranking without grouping ...")
             d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              (weighted.rank(sign * x, weights = weighting, type = type) + numerator[method]) / (length(x) + denominator[method])
+              (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
             })
 
           if (descriptives) {
@@ -548,8 +544,6 @@ rankByGroup <-
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
-#' @param type Algorithm for weighted ranking. Can either be inflation (default)
-#' Harrell-Davis or type7
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
@@ -577,8 +571,7 @@ rankBySlidingWindow <- function(data = NULL,
                                 nGroup = 0,
                                 group = NA,
                                 covariate = NULL,
-                                na.rm = TRUE,
-                                type ="inflation") {
+                                na.rm = TRUE) {
 
   # experimental code to include covariates
   # covariate <- NULL
@@ -720,7 +713,7 @@ rankBySlidingWindow <- function(data = NULL,
     if(is.null(weights))
       observations$percentile <- (rank(sign * observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     else
-      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights], type = type) + numerator[method]) / (nObs + denominator[method])
+      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
 
     # get percentile for raw value in sliding window subsample
     d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)

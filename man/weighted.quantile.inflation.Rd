@@ -9,7 +9,7 @@ weighted.quantile.inflation(
   probs,
   weights = NULL,
   degree = 3,
-  cutoff = 1e+06
+  cutoff = 1e+07
 )
 }
 \arguments{

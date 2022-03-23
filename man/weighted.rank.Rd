@@ -4,36 +4,19 @@
 \alias{weighted.rank}
 \title{Weighted rank estimation}
 \usage{
-weighted.rank(x, weights = NULL, n = 1000, type = "Harrell-Davis")
+weighted.rank(x, weights = NULL)
 }
 \arguments{
 \item{x}{A numerical vector}
 
 \item{weights}{A numerical vector with weights; should have the same length as x}
-
-\item{n}{Granularity for approximation}
-
-\item{type}{Type of estimator, can either be "Harrell-Davis" (default) using a beta function to
-approximate the weighted percentiles (Harrell & Davis, 1982) or "Type7" (Hyndman & Fan, 1996), an adaption
-of the generic quantile function in R, including weighting. All code based on the work of Akinshin (2020).}
 }
 \value{
-the weighted ranks
+the weighted absolute ranks
 }
 \description{
-Conducts weighted ranking on the basis of either the weighted Harrell-Davis quantile estimator
-or an adaption of the type 7 quantile estimator of the generic quantile function in the base
-package. Please provide a vector with raw values and an additional vector with the weight of each
+Conducts weighted ranking on the basis of sums of weights per unique raw score.
+Please provide a vector with raw values and an additional vector with the weight of each
 observation. In case the weight vector is NULL, a normal ranking is done. The vectors may not
 include NAs and the weights should be positive non-zero values.
-}
-\references{
-\enumerate{
-  \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
-  \item Hyndman, R. J. & Fan, Y. 1996. Sample quantiles in statistical packages, American Statistician 50, 361–365.
-  \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
-}
-}
-\seealso{
-weighted.quantile
 }
