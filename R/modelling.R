@@ -301,6 +301,9 @@ bestModel <- function(data,
   # Print output
   report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
   report[5] <- paste0("Raw Score RMSE = ", round(rmse, digits = 5))
+  if(!is.null(weights)){
+    report[6] <- paste0("Post stratification was applied. The weights range from ", round(min(weights), digits=3), " to ", round(max(weights), digits=3), ".")
+  }
 
   bestformula$report <- report
   cat(report, sep = "\n")

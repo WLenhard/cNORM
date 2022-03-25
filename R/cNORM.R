@@ -233,10 +233,6 @@ cnorm <- function(raw = NULL,
                   terms = 0,
                   R2 = NULL){
 
-  if(!is.null(weights)){
-    warning("Weighting is still an experimental feature. It is currently not yet encouraged to use it.")
-  }
-
   if(is.numeric(raw)&&is.numeric(group)){
     if(length(raw)!=length(group)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
