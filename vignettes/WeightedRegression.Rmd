@@ -1,0 +1,97 @@
+---
+title: "Weighted regression-based norming"
+author: "Sebastian Gary, Wolfgang Lenhard, Alexandra Lenhard"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{"Weighted regression-based norming"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Automatic post-stratification through weighted regression-based norming in cNORM
+The *cNORM* R package offers functionality to integrate sampling weights into the norming process and, therefore, to reduce negative effects of non-representative norm samples on the norm score quality. For this purpose, the so-called raking (= iterative proportional fitting) was integrated in *cNORM* based on the R package *survey* (Lumley, 2011), which allows post-stratifying the used norm sample with respect to one or more stratification variables (SVs) for given population marginals of the used SVs. 
+
+### Problem of non-representative norm samples
+Non-representative norm samples, i.e., norm samples not representing the target population with respect to one or more relevant stratification variables (Kruskal & Mosteller, 1979), can reduce the quality of norm scores of tests. This is especially true for SVs influencing a person's true latent ability. For example, not considering parents' educational background in estimating norm scores for an intelligence test for children may result in a general tendency of over- or underestimation of norm scores, and, therefore, in an over- or underestimation of a child's true intelligence (Hernandez et al., 2017). Since norm scores are often used as criterion for far-reaching decisions, like school placement or in the diagnosis of learning disabilities (Gary & Lenhard, 2021; Lenhard, Lenhard & Gary, 2019; Lenhard & Lenhard, 2021), biased norm scores can ultimately lead to disadvantages for the individuals being examined. Therefore, it's necessary to use countermeasures, as for example sample weighting methods, to reduce the non-representativeness of norm samples.
+
+### Post-stratification through iterative proportional fitting
+Raking, also called iterative proportional fitting, is a post-stratification approach targeted to enhance sample representativeness with respect to two or more stratification variables. For this purpose, sample weights are computed for every case in the norm sample based on the ratio between the proportion of the corresponding strata in the target population and the proportion in the actual norm sample (Lumley, 2011). The procedure can be described as an iterative post-stratification with respect to one variable in each step. For example, let's assume a target population containing 49% female as well as 51% male persons, while the resulting norm sample contains 45% female and 55% male subjects. To enhance the representativeness of the norm sample with respect to the SV sex (female/male), every single female case would be weighted with $w_{female}=\frac{49\%}{45\%}=1.09$ and every single male case with $w_{male}=\frac{55\%}{51\%}=0.93$. 
+For stratifying a norm sample with respect to two or more variables, for example sex(female/male) and education(low/medium/high), the before described adaptation is applied several times regarding the marginals of one variable by time iteratively. For example, if the weights are adapted with respect to the variable sex first, the weights would be adapted regarding education in the second step. Since the weights no longer represent the population with respect to variable sex after the second step, the weights are computed to SV sex in the third step respectively to education in the fourth step and so on until the corresponding raking weights are converged. Finally, the resulting raking weights respectively the weighted norm sample represents the target population with respect to the marginal proportions of the used SVs.
+Finally, each case is assigned with an according weight in a way that the proportions of the strata in the norm sample aligns with the composition of the representative population.
+
+### Integration of raking weights in regression-based norming in cNORM
+The integration of raking weights in *cNORM* is accomplished in three steps.
+* Computation and standardization of raking weights
+* Initial ranking of test raw scores using standardized raking weights with weighted percentile estimation
+* Regression-based norming with standardized regression weights
+
+#### Step 1: Computation and standardization of raking weights
+Based on the *'rake()'* function of the R package survey, raking weights are computed regarding the proportions of the SVs in the target population and the actual norm sample. Afterwards, the resulting raking weights are standardized by dividing every weight by the smallest resulting raking weight, i.e., the smallest weight is set to 1.0, while the ratio between one weight and each other remains the same. Consequently, underrepresented cases in the sample are weighted with a factor larger 1.0. To compute the weights, please provide a data frame with three columns to specify the population marginals. The first column specifies the stratification variable, the second the factor level of the stratification variable and the third the proportion for the representative population. The function 'computeWeights()' is used to retrieve the weights. The original data and the marginals have to be passed as function parameters.
+
+#### Step 2: Weighted percentile estimation
+Secondly, the norm sample is ranked with respect to the raking weights using weighted percentile. This step is the actual start of the further regression-based norming approach and it is automatically applied in the 'cnorm()' function, as soon as weights are specified.
+
+#### Step 3: Regression-based norming with standardized regression weights
+Finally, the standardized raking weights are used in the weighted best-subset regression to obtain an adequate norm model. While the former steps can be seen as kind of data preparation, the computation of the regression-based norm model represents the actual norming process, since the resulting regression model is used for the actual mapping between achieved raw score and assigned norm score. By using the standardized raking weights in weighted regression, an overfit of the regression model with respect to overrepresented data points should be reduced. This third step is as well applied automatically when using the 'cnorm()' function.
+
+### Example
+In the following, the usage of raking weights in regression-based norming with *cNORM* is illustrated in detail based the on a not representative norm sample for the German version of the *Peabody Picture Vocabulary Test* (PPVT-IV)
+```{r message = FALSE}
+library(cNORM)
+# Assign data to object norm.data
+norm.data <- ppvt
+head(norm.data)
+```
+For the post-stratification, we need population marginals for the relevant stratification variables as a data frame, with each level of each stratification variable in a row. The data frame must contain the names of the SVs (column 1), the single levels (column 2) and the corresponding proportion in the target population (column 3).
+
+```{r}
+# Generate population marginals
+marginals <- data.frame(var = c("sex", "sex", "migration", "migration"),
+                             level = c(1,2,0,1),
+                             prop = c(0.51, 0.49, 0.65, 0.35))
+head(marginals)
+```
+
+To caclulate raking weights, the cNORM's 'computeWeights()' function is used, with the norm sample data and the population marginals as function parameters. 
+```{r message=FALSE}
+weights <- computeWeights(data = norm.data, population.margins = marginals)
+```
+
+Using the 'cnorm()' function passing the raking weights by function parameter 'weights', the intial weighted ranking and the actual norming process is started.
+```{r message = FALSE, results = 'hide', fig.show = 'hide', warning=FALSE}
+norm.model <- cnorm(raw = norm.data$raw, group = norm.data$group,
+					weights = weights)
+```
+The resulting model contains four predictors with a RMSE of 3.54212.
+
+```{r}
+summary(norm.model)
+```
+Moreover, the percentile plot reveals no hints on model violation, like intersecting percentile curves. It reaches a high multiple R2 with only few terms.
+```{r fig0, fig.height = 4, fig.width = 7}
+plot(norm.model, "percentiles")
+plot(norm.model, "subset")
+plot(norm.model, "norm")
+```
+
+## References 
+
+* Gary, S., & Lenhard, W., (2021). In norming we trust - Verfahren zur statistischen Modellierung kontinuierlicher Testnormen auf dem Prüfstand. *Diagnostica*, 67(2), 75 - 86.
+* Hernandez, A., Aguilar, C., Paradell, È., Munoz, M., Vannier, L.C., & Vallar, F. (2017). The effect of demographic variables on the assesment of cognitive ability. *Psicothema*. *29*(4), 469 - 474.
+* Kruskal, W., & Mosteller, F. (1979). Representative sampling, III: The current statistical literature. *International Statistical Review/Revue Internationale de Statistique*, 245 - 265
+* Lenhard, A., Lenhard, W., Segerer, R., & Suggate, S. (2015). *Peabody Picture Vocbulary Test (PPVT-4)*. Frankfurt: Pearson Clinical Assesment. 
+* Lenhard, A., Lenhard, W., & Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. *PloS one*, *14*(9), e0222279.
+* Lenhard, W., & Lenhard, A. (2021). Improvement of norm score quality via regression-based continuous norming. *Educational and Psychological Measurement*, *81*(2), 229 - 261.
+* Lumley, T. (2011). *Complex surveys: A guide to analysis using R* (Vol. 565); John Wiley & Sons.
+* Mercer, A., Lau, A., & Kennedy, C. (2018). For weighting online opt-in samples, what matters most. *Pew Research Center*.
+
+
+

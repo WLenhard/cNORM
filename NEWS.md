@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.0
-Date: 2022.03.23
+Date: 2022.03.25
 
 
 Changes:
@@ -14,6 +14,8 @@ Changes:
      marginal means factor levels of stratification variables in the population
      New function: computeWeights()
 *    Newly developed, highly performant and biasless weighted ranking procedure
+*    New vignette: 'WeightedRanking'
+*    Modelling returns info on range of weights if post stratification is used
 *    automatically remove  cases with missings in 'cnorm' function
 *    ppvt dataset exchanged with unstratified sample with additional background
      variables (migration, region, sex)

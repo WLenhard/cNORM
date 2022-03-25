@@ -22,11 +22,10 @@ The method stems from psychometric test construction and was developed to create
 
 The package estimates percentile curves in dependence of the explanatory variable (e. g. schooling duration, age ...) via Taylor polynomials, thus offering several advantages:
 
-*   By optimizing the model on the basis of the total sample, small deviations from the representativeness of individual subsamples, for example due to incomplete data stratification, are minimized.
+*   By optimizing the model on the basis of the total sample, small deviations from the representativeness of individual subsamples, for example due to incomplete data stratification, are minimized. Further, it can automatically post-stratify samples to approximate representativeness.
 *   Gaps between different discrete levels of the explanatory variable are closed. For example, in school performance tests, norm tables can be created not only for the discrete measurement point of the norm sample collection (e.g. midyear or end of the year), but also at any time of the school year with the desired accuracy.
 *   The total sample size for the norm data collection is reduced because all norm tables are determined on the basis of the entire sample.
 *   The limits of the model fit can be evaluated graphically and analytically. For example, it is possible to determine where the model deviates strongly from the manifest data or where strong floor or ceiling effects occur. This makes it possible to specify at which points the test scores can no longer be interpreted in a meaningful way.
-*   cNORM does not require any distribution assumptions. If floor or ceiling effects occur, the data can therefore often be modeled much more precisely, than with parametric methods. This is particularly true for those areas that deviate relatively strongly from the population average, but often represent precisely those areas that have the highest relevance in diagnostic practice.
 *   cNORM does not require any distribution assumptions. Therefore, in most use cases the data can be modeled more precisely than with parametric methods (A. Lenhard, Lenhard, & Gary, 2019). This is particularly true for small samples (< 150 per age group or grade) and skewed raw score distributions. Moreover, it applies in particular to those areas that deviate rather strongly from the population average, but often represent precisely those areas that have the highest relevance in diagnostic practice.
 
 The rationale of the approach is to rank the results in the different age cohorts (or use a sliding window in case the data is distributed over a large age interval) and thus to determine the observed norm scores (= location). Afterwards, powers of the age specific location and of the age are computed, as well as all linear interactions. Finally, the data is fitted by a hyperplane via multiple regression and the most relevant terms are identified:
@@ -69,12 +68,12 @@ If, when using cNORM, you initially only have the continuous age variable availa
 
 ```
 # Creates a grouping variable for a fictitious age variable
-# for children age 2 to 18. That way, the age variable is recoded
-# into a discrete group variable, each group comprising a year.
+# for children age 2 to 18 for the ppvt dataset. That way, the age 
+# variable is recoded into a discrete group variable with 12 distinct
+# groups. The resulting vector specifies the mean age
+# of each group.
 
-data$group <- c(3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18)
-   [findInterval(data$age, c(-Inf, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-   13, 14, 15, 16, 17))]
+data$group <- getGroups(ppvt$age, 12)
 ```
 
 Of course, it is also possible to use a data set for which standard scores already exist for individual age groups. Please pay attention, that the grouping variable corresponds to the group mean in case, you use a continuous age variable later on.

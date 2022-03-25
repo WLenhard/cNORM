@@ -1,5 +1,5 @@
 ## Resubmission
-This is a minor release of an existing package. In this version I have:
+This is a major release of an existing package. In this version I have:
 
 * corrected bugs
 * added functionality for modeling, cross validation and output generation
