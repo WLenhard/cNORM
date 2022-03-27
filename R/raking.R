@@ -138,11 +138,19 @@ computeWeights <- function(data, population.margins, standardized = TRUE ){
   if(standardized)
     weights <- standardizeRakingWeights(weights)
 
-  x <- match(do.call("paste", data[, sv]), do.call("paste", props[, sv]))
   stratification.weights <- rep(1, length.out=nrow(data))
-  for(i in 1:length(weights)){
-    stratification.weights[x == i] <- weights[i]
+  if(length(sv)>1){
+    x <- match(do.call("paste", data[, sv]), do.call("paste", props[, sv]))
+    for(i in 1:length(weights)){
+      stratification.weights[x == i] <- weights[i]
+    }
   }
+  else{
+    for(i in 1:length(weights)){
+      stratification.weights[data[, sv[1]] == i] <- weights[i]
+    }
+  }
+
 
   return(stratification.weights)
 }
