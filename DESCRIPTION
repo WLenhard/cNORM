@@ -31,7 +31,6 @@ Suggests:
     foreign,
     readxl,
     rmarkdown,
-    survey,
     testthat
 License: AGPL-3
 VignetteBuilder: knitr

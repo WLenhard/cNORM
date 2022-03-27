@@ -4,14 +4,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.0
-Date: 2022.03.25
+Date: 2022.03.27
 
 
 Changes:
 
-*    Major version: Includes weighting functions to overcome biased norm samples
-     Weights are built through the survey package. it is necessary to provide
-     marginal means factor levels of stratification variables in the population
+*    Major version: Includes weighting functions to overcome biased norm samples,
+     by providing marginal means factor levels of stratification variables in the 
+     population as a data frame
      New function: computeWeights()
 *    Newly developed, highly performant and biasless weighted ranking procedure
 *    New vignette: 'WeightedRanking'

@@ -1,7 +1,7 @@
 
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+importFrom(stats, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text)
 importFrom(latticeExtra, panel.2dsmoother)
@@ -44,8 +44,7 @@ export(
 	weighted.quantile.inflation,
 	weighted.quantile.harrell.davis,
 	weighted.quantile.type7,
-	computeWeights,
-	standardizeRakingWeights
+	computeWeights
 )
 
 

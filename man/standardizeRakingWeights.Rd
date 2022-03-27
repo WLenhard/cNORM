@@ -12,6 +12,9 @@ standardizeRakingWeights(weights)
 \arguments{
 \item{weights}{Raking weights computed by computeWeights()}
 }
+\value{
+the standardized weights
+}
 \description{
 Function for standardizing raking weights
 Raking weights get divided by the smallest weight. Thereby, all weights
