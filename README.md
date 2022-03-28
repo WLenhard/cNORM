@@ -154,7 +154,7 @@ The package includes data from two large test norming projects, namely ELFE 1-6 
 ## Terms of use, license and declaration of interest
 cNORM is licensed under GNU Affero General Public License v3 (AGPL-3.0). This means that copyrighted parts of cNORM can be used free of charge for commercial and non-commercial purposes that run under this same license, retain the copyright notice, provide their source code and correctly cite cNORM. Copyright protection includes, for example, the reproduction and distribution of source code or parts of the source code of cNORM or of graphics created with cNORM. The integration of the package into a server environment in order to access the functionality of the software (e.g. for online delivery of norm scores) is also subject to this license. However, a regression function determined with cNORM is not subject to copyright protection and may be used freely without preconditions. If you want to apply cNORM in a way that is not compatible with the terms of the AGPL 3.0 license, please do not hesitate to contact us to negotiate individual conditions. If you want to use cNORM for scientific publications, we would also ask you to quote the source.
 
-The authors would like to thank WPS (<https://www.wpspublish.com/>) for providing funding for developing,integrating and evaluating weighting and post stratification in the cNORM package. The research project was conducted in 2022. 
+The authors would like to thank WPS (<https://www.wpspublish.com/>) for providing funding for developing, integrating and evaluating weighting and post stratification in the cNORM package. The research project was conducted in 2022. 
 
 ## References
 *   Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
