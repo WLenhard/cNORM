@@ -3,9 +3,10 @@ Type: Package
 Title: Continuous Norming
 Version: 3.0.0
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2022-03-27
+Date: 2022-03-28
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
-    email="lenhard@psychometrica.de"), 
+    email="lenhard@psychometrica.de",
+    comment=c("<https://orcidorg/0000-0001-8680-4381>")), 
     person("Wolfgang", "Lenhard", role = c("cre","aut"), 
     email="wolfgang.lenhard@uni-wuerzburg.de", 
     comment=c("<https://orcid.org/0000-0002-8184-6889>")), 

@@ -31,7 +31,7 @@ getNormCurve <-
              maxRaw = NULL,
            covariate = NULL) {
 
-    if(class(model)=="cnorm"){
+    if(inherits(model, "cnorm")){
       model <- model$model
     }
 
@@ -130,7 +130,7 @@ predictRaw <-
              maxRaw = Inf,
            covariate = NULL) {
 
-    if(class(coefficients)=="cnorm"){
+    if(inherits(coefficients, "cnorm")){
       coefficients <- coefficients$model$coefficients
     }
 
@@ -257,7 +257,7 @@ normTable <- function(A,
                       reliability = NULL,
                       pretty = T) {
 
-  if(class(model)=="cnorm"){
+  if(inherits(model, "cnorm")){
     model <- model$model
   }
 
@@ -435,7 +435,7 @@ rawTable <- function(A,
                      reliability = NULL,
                      pretty = TRUE) {
 
-  if(class(model)=="cnorm"){
+  if(inherits(model, "cnorm")){
     model <- model$model
   }
 
@@ -600,7 +600,7 @@ derivationTable <-
              maxNorm = NULL,
              step = 0.1, covariate = NULL) {
 
-    if(class(model)=="cnorm"){
+    if(inherits(model, "cnorm")){
       model <- model$model
     }
 
@@ -689,7 +689,7 @@ predictNorm <-
       return(NULL)
     }
 
-    if(class(model)=="cnorm"){
+    if(inherits(model, "cnorm")){
       if(is.null(minNorm)){
         minNorm <- attributes(model$data)$scaleMean - (attributes(model$data)$scaleSD * 2.5)
       }

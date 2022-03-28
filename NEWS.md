@@ -3,8 +3,8 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 3.0.0
-Date: 2022.03.27
+### Version in 3.0.0 (Release candidate)
+Date: 2022.03.28
 
 
 Changes:
@@ -20,6 +20,10 @@ Changes:
 *    ppvt dataset exchanged with unstratified sample with additional background
      variables (migration, region, sex)
 *    Documentation updated
+*    Author sequence changed. Alex is now first and corresponding author. Please
+     direct questions to lenhard@psychometrica.de
+*    minor changes: if(class(x) == "cnorm") exchanged with if(inherts(x, "cnorm"))
+     throughout package
 
 
 
