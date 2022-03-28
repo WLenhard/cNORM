@@ -1,16 +1,17 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 3.0.0
+Version: 3.0.1
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2022-03-28
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
-    email="lenhard@psychometrica.de",
-    comment=c("<https://orcidorg/0000-0001-8680-4381>")), 
+    email="lenhard@psychometrica.de", comment=c(ORCID = "0000-0001-8680-4381")), 
     person("Wolfgang", "Lenhard", role = c("cre","aut"), 
     email="wolfgang.lenhard@uni-wuerzburg.de", 
-    comment=c("<https://orcid.org/0000-0002-8184-6889>")), 
-    person("Sebastian", "Gary", role=c("aut")))
+    comment=c(ORCID = "0000-0002-8184-6889")), 
+    person("Sebastian", "Gary", role=c("aut")),
+    person("WPS publisher", role = c("fnd"),
+    comment=c("<https://www.wpspublish.com/">)))
 Description: Conventional methods for producing standard scores or percentiles 
     in psychometrics or biometrics are often plagued with 'jumps' or 'gaps' 
     (i.e., discontinuities) in norm tables and low confidence for assessing 
