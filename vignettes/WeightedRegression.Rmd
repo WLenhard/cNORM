@@ -28,9 +28,10 @@ For stratifying a norm sample with respect to two or more variables, for example
 
 ### Integration of raking weights in regression-based norming in cNORM
 The integration of raking weights in *cNORM* is accomplished in three steps.
-* Computation and standardization of raking weights
-* Initial ranking of test raw scores using standardized raking weights with weighted percentile estimation
-* Regression-based norming with standardized regression weights
+
+*  Computation and standardization of raking weights
+*  Initial ranking of test raw scores using standardized raking weights with weighted percentile estimation
+*  Regression-based norming with standardized regression weights
 
 #### Step 1: Computation and standardization of raking weights
 Raking weights are computed regarding the proportions of the SVs in the target population and the actual norm sample. Afterwards, the resulting raking weights are standardized by dividing every weight by the smallest resulting raking weight, i.e., the smallest weight is set to 1.0, while the ratio between one weight and each other remains the same. Consequently, underrepresented cases in the sample are weighted with a factor larger 1.0. To compute the weights, please provide a data frame with three columns to specify the population marginals. The first column specifies the stratification variable, the second the factor level of the stratification variable and the third the proportion for the representative population. The function 'computeWeights()' is used to retrieve the weights. The original data and the marginals have to be passed as function parameters.
@@ -79,6 +80,18 @@ Moreover, the percentile plot reveals no hints on model violation, like intersec
 plot(norm.model, "subset")
 plot(norm.model, "norm")
 ```
+
+### Caveats and recommendation for use
+We extensively simulated biased distributions and assessed, if our approach can mitigate the effects of unrepresentative samples. cNORM itself already corrects for several types of sampling eror, namely if deviations occur in specific age groups or if joint probabilities of stratification variables are unbalanced (while preserving the marginals). Weighted Continuous Norming as well works very well in most, but not all use cases. Please note the following: 
+
+*  Non-representativeness in most cases leads to (moderately) increased error of the normed scores. It is - of  course - always better to ensure the highest feasible degree of representativeness in the data collection.
+*  The data collection should be as random as possible.
+*  In most but not in all cases, Weighted Continuous Norming reduces negative effects of non-representative norm samples. If the mean of the standardized weights exceeds a value of $m_{weights}=2$, this is an indication to rather not use weighting.  
+*  With cNORM, representativeness need not necessarily be established in every single age group. If the marginals are more or less correct, weighting is unnecessary.
+*  Only use stratification for variables with considerable influence on the dependent variable.
+*  If available, the probabilities of cross-classifications of the stratification variables can be used. You can recode several variables into one and directly specify the according population marginals (especially in combination with the next point).
+*  Avoid too many stratification variables with many fine-grained levels. This leads to high weights in specific subgroups. Rather combine different levels of stratification variables, if the according subgroups do not differe in the outcome variable.
+
 
 ## References 
 
