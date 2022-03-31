@@ -13,7 +13,7 @@ cnorm(
   scale = "T",
   method = 4,
   descend = FALSE,
-  k = 4,
+  k = NULL,
   t = NULL,
   terms = 0,
   R2 = NULL
@@ -24,17 +24,18 @@ cnorm(
 
 \item{group}{Numeric vector of grouping variable, e. g. grade}
 
-\item{age}{Numeric vector with chronological age, please additionally specify width of window}
+\item{age}{Numeric vector with chronological age, please additionally specify
+width of window}
 
 \item{width}{Size of the moving window in case an age vector is used}
 
-\item{weights}{Vector or variable name in the dataset with weights for each individual case. It can be used
-to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
-and positive.}
+\item{weights}{Vector or variable name in the dataset with weights for each
+individual case. It can be used to compensate for moderate imbalances due to
+insufficient norm data stratification. Weights should be numerical and positive.}
 
 \item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
-transformation); a double vector with the mean and standard deviation can as well,
-be provided f. e. c(10, 3) for Wechsler scale index points}
+transformation); a double vector with the mean and standard deviation can as
+well, be provided f. e. c(10, 3) for Wechsler scale index points}
 
 \item{method}{Ranking method in case of bindings, please provide an index,
 choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
@@ -47,10 +48,12 @@ for example when norming error scores, where lower scores mean higher
 performance}
 
 \item{k}{The power constant. Higher values result in more detailed approximations
-but have the danger of over-fit (default = 4, max = 6)}
+but have the danger of over-fit (max = 6). If not set, it uses t and if both
+parameters are NULL, k is set to 5.}
 
-\item{t}{The age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-can be used to specify the k to produce rectangular matrices and specify the course of scores per age independently from k}
+\item{t}{The age power parameter (max = 6). If not set, it uses k and if both
+parameters are NULL, k is set to 3, since age trajectories are most often well
+captured by cubic polynomials.}
 
 \item{terms}{Selection criterion for model building. The best fitting model with
 this number of terms is used}
@@ -62,18 +65,21 @@ this number of terms is used}
 cnorm object including the ranked raw data and the regression model
 }
 \description{
-Conducts continuous norming in one step and returns an object including ranked raw data and the continuous norming
-model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
-of the steps in the data preparation and modeling process. In addition to the raw scores, either provide
+Conducts continuous norming in one step and returns an object including ranked
+raw data and the continuous norming model. Please consult the function
+description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
+of the steps in the data preparation and modeling process. In addition to the
+raw scores, either provide
 \itemize{
  \item{a numeric vector for the grouping information (group)}
  \item{a numeric age vector and the width of the sliding window (age, width)}
 }
 for the ranking of the raw scores. You can
-adjust the grade of smoothing of the regression model by setting the k and terms parameter. In general,
-increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
-smoothing. The power parameter for the age trajectory can be specified independently
-by 't'.
+adjust the grade of smoothing of the regression model by setting the k and terms
+parameter. In general, increasing k to more than 4 and the number of terms lead
+to a higher fit, while lower values lead to more smoothing. The power parameter
+for the age trajectory can be specified independently by 't'. If both parameters
+are missing, cnorm uses k = 5 and t = 3 by default.
 }
 \examples{
 \dontrun{
@@ -90,9 +96,9 @@ normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95
 rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 
 
-# Using a continuous age variable instead of distinct groups, using a sliding window for
-# percentile estimation. Please specify continuos variable for age and the sliding window
-# size.
+# Using a continuous age variable instead of distinct groups, using a sliding
+# window for percentile estimation. Please specify continuos variable for age
+# and the sliding window size.
 cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
 
 

@@ -132,25 +132,30 @@ cNORM.GUI <- function(launch.browser=TRUE){
 
 #' Continuous Norming
 #'
-#' Conducts continuous norming in one step and returns an object including ranked raw data and the continuous norming
-#' model. Please consult the function description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
-#' of the steps in the data preparation and modeling process. In addition to the raw scores, either provide
+#' Conducts continuous norming in one step and returns an object including ranked
+#' raw data and the continuous norming model. Please consult the function
+#' description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
+#' of the steps in the data preparation and modeling process. In addition to the
+#' raw scores, either provide
 #' \itemize{
 #'  \item{a numeric vector for the grouping information (group)}
 #'  \item{a numeric age vector and the width of the sliding window (age, width)}
 #' }
 #' for the ranking of the raw scores. You can
-#' adjust the grade of smoothing of the regression model by setting the k and terms parameter. In general,
-#' increasing k to more than 4 and the number of terms lead to a higher fit, while lower values lead to more
-#' smoothing. The power parameter for the age trajectory can be specified independently
-#' by 't'.
+#' adjust the grade of smoothing of the regression model by setting the k and terms
+#' parameter. In general, increasing k to more than 4 and the number of terms lead
+#' to a higher fit, while lower values lead to more smoothing. The power parameter
+#' for the age trajectory can be specified independently by 't'. If both parameters
+#' are missing, cnorm uses k = 5 and t = 3 by default.
+#'
 #' @param raw Numeric vector of raw scores
 #' @param group Numeric vector of grouping variable, e. g. grade
-#' @param age Numeric vector with chronological age, please additionally specify width of window
+#' @param age Numeric vector with chronological age, please additionally specify
+#' width of window
 #' @param width Size of the moving window in case an age vector is used
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
-#' transformation); a double vector with the mean and standard deviation can as well,
-#' be provided f. e. c(10, 3) for Wechsler scale index points
+#' transformation); a double vector with the mean and standard deviation can as
+#' well, be provided f. e. c(10, 3) for Wechsler scale index points
 #' @param method Ranking method in case of bindings, please provide an index,
 #' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
 #' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
@@ -159,17 +164,19 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' ranking order with higher raw scores getting lower norm scores; relevant
 #' for example when norming error scores, where lower scores mean higher
 #' performance
-#' @param weights Vector or variable name in the dataset with weights for each individual case. It can be used
-#' to compensate for moderate imbalances due to insufficient norm data stratification. Weights should be numerical
-#' and positive.
+#' @param weights Vector or variable name in the dataset with weights for each
+#' individual case. It can be used to compensate for moderate imbalances due to
+#' insufficient norm data stratification. Weights should be numerical and positive.
 #' @param terms Selection criterion for model building. The best fitting model with
 #' this number of terms is used
 #' @param R2 Adjusted R square as a stopping criterion for the model building
 #' (default R2 = 0.99)
 #' @param k The power constant. Higher values result in more detailed approximations
-#' but have the danger of over-fit (default = 4, max = 6)
-#' @param t The age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-#' can be used to specify the k to produce rectangular matrices and specify the course of scores per age independently from k
+#' but have the danger of over-fit (max = 6). If not set, it uses t and if both
+#' parameters are NULL, k is set to 5.
+#' @param t The age power parameter (max = 6). If not set, it uses k and if both
+#' parameters are NULL, k is set to 3, since age trajectories are most often well
+#' captured by cubic polynomials.
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
@@ -188,9 +195,9 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
 #'
 #'
-#' # Using a continuous age variable instead of distinct groups, using a sliding window for
-#' # percentile estimation. Please specify continuos variable for age and the sliding window
-#' # size.
+#' # Using a continuous age variable instead of distinct groups, using a sliding
+#' # window for percentile estimation. Please specify continuos variable for age
+#' # and the sliding window size.
 #' cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
 #'
 #'
@@ -228,10 +235,19 @@ cnorm <- function(raw = NULL,
                   scale = "T",
                   method = 4,
                   descend = FALSE,
-                  k = 4,
+                  k = NULL,
                   t = NULL,
                   terms = 0,
                   R2 = NULL){
+
+  if(is.null(k)&&is.null(t)){
+    k <- 5
+    t <- 3
+  }else if(!is.null(k)&&is.null(t)){
+     t <- k
+  }else if(is.null(k)&&!is.null(t)){
+    k <- t
+  }
 
   if(is.numeric(raw)&&is.numeric(group)){
     if(length(raw)!=length(group)){

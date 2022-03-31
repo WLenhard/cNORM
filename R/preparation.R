@@ -841,7 +841,8 @@ computePowers <-
              norm = NULL,
              age = NULL,
              t = NULL,
-             covariate = NULL, silent = FALSE) {
+             covariate = NULL,
+             silent = FALSE) {
     d <- as.data.frame(data)
 
     # check variables, if NULL take attributes from d
@@ -941,12 +942,14 @@ computePowers <-
 
     # check, if it is worthwhile to continue with continuous norming
     if (useAge&&!silent) {
+      cat(paste0("Powers of location: k = ", k))
+      cat(paste0("\nPowers of age:      t = ", t))
       r2 <- summary.lm(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, t, raw=TRUE)))$r.squared
 
       if (r2 < .05 && t>2) {
-        warning(paste0("Multiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable. You can try to reduce the powers of A indepentently from k and/or to reduce the number of age groups. To model a simple linear age effect, this means to reduce the number of groups to 2 and to set t to 1."))
+        warning(paste0("\nMultiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable. You can try to reduce the powers of A indepentently from k and/or to reduce the number of age groups. To model a simple linear age effect, this means to reduce the number of groups to 2 and to set t to 1.\n\n"))
       }else{
-        cat(paste0("Multiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4), "\n"))
+        cat(paste0("\nMultiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4), "\n\n"))
       }
     }
 
