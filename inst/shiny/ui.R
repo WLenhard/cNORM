@@ -78,7 +78,7 @@ shinyUI(fluidPage(
             inputId = "NumberOfPowers",
             label = "Power degree for location",
             choices = c(1:5),
-            selected = 4
+            selected = 5
           ),
           tags$p("This variable specifies the power parameter for the norm score in the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
           tags$br(),
