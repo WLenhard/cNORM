@@ -176,7 +176,7 @@ bestModel <- function(data,
    }
 
   big <- FALSE
-  nvmax <- (t * k)^2 - 1 + length(predictors)
+  nvmax <- (t + 1) * (k + 1) - 1 + length(predictors)
 
   if (nvmax > 25) {
     big <- TRUE
@@ -302,7 +302,11 @@ bestModel <- function(data,
   report[4] <- paste0("Regression function: ", regressionFunction(bestformula, digits = 10))
   report[5] <- paste0("Raw Score RMSE = ", round(rmse, digits = 5))
   if(!is.null(weights)){
-    report[6] <- paste0("Post stratification was applied. The weights range from ", round(min(weights), digits=3), " to ", round(max(weights), digits=3), ".")
+    report[6] <- paste0("Post stratification was applied. The weights range from ",
+                        round(min(weights), digits=3), " to ",
+                        round(max(weights), digits=3), " (m = ",
+                        round(mean(weights), digits=3), ", sd = ",
+                        round(sd(weights), digits=3), ").")
   }
 
   bestformula$report <- report
