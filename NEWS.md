@@ -3,7 +3,21 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 3.0.0 (Release candidate)
+### Version in 3.0.1 (in progress)
+Date: 2022.03.31
+
+
+Changes:
+
+*    t parameter added to data preparation in the shiny GUI
+*    error in shiny GUI corrected: Download data
+*    WeigtedRegression vignette extended
+*    Additional descriptive information in modeling when using weights
+
+
+
+
+### Version in 3.0.0
 Date: 2022.03.28
 
 
