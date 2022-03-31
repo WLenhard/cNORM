@@ -56,7 +56,10 @@ shinyUI(fluidPage(
           uiOutput("RawValues"),
           tags$br(),
           uiOutput("WeightVariable"),
-          tags$p("Optional weighting variable (only positive values allowed)"),
+          tags$div(class = "body", checked = NA,
+          tags$span("Optional weighting variable, please consult vignette on "),
+          tags$a(href="https://cran.r-project.org/web/packages/cNORM/vignettes/WeightedRegression.html", "WeightedRegression"),
+          ),
           tags$br(),
           selectInput("Scale", label = "Norm Scale", choices = c("T", "IQ", "z"), selected = "T"),
           actionButton(inputId = "DoDataPreparation", label = "Prepare Data"),
@@ -73,11 +76,19 @@ shinyUI(fluidPage(
           tags$br(),
           selectInput(
             inputId = "NumberOfPowers",
-            label = "Choose number of powers",
+            label = "Power degree for location",
             choices = c(1:5),
             selected = 4
           ),
-          tags$p("This variable specifies the power parameter for the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
+          tags$p("This variable specifies the power parameter for the norm score in the Taylor polynomial. As default number of power is set to 4. Higher values might lead to a closer fit, but yield the danger of overfitting."),
+          tags$br(),
+          selectInput(
+            inputId = "NumberOfPowersAge",
+            label = "Power degree for age",
+            choices = c(1:5),
+            selected = 3
+          ),
+          tags$p("This variable specifies the power parameter for the explanatory variable in the Taylor polynomial, usually age. Since age trajectories are usually less complex, it can be reduced to 3 or 2 in most use cases, leading to simpler and more robust models."),
           tags$br(),
           selectInput("Method", label = "Ranking method", choices = c("Blom (1985)", "Tukey (1949)", "Van der Warden (1952)", "Rankit (Bliss, 1967)", "Levenbach (1953)", "Filliben (1975)", "Yu & Huang (2001)"), selected = "Rankit (Bliss, 1967)"),
           selectInput(

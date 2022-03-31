@@ -215,6 +215,9 @@ shinyServer(function(input, output, session) {
     return(as.numeric(input$NumberOfPowers))
   })
 
+  chosenNumberOfPowersAge <- reactive({
+    return(as.numeric(input$NumberOfPowersAge))
+  })
 
   # Calculates prepared data by pressing action button
   preparedData <- eventReactive(input$DoDataPreparation, {
@@ -232,7 +235,6 @@ shinyServer(function(input, output, session) {
 
       # Ranky by chosen group
       weights <- NULL
-      print(chosenWeighting())
       if(chosenWeighting()!="---")
         weights <- chosenWeighting()
 
@@ -246,7 +248,9 @@ shinyServer(function(input, output, session) {
                                            weights = weights)
       # Computation of powers and linear combinations
       data_to_output <- cNORM::computePowers(data_to_output,
-                                             k = chosenNumberOfPowers(), age = chosenGrouping(),
+                                             k = chosenNumberOfPowers(),
+                                             t = chosenNumberOfPowersAge(),
+                                             age = chosenGrouping(),
                                              norm = "normValue")
 
       return(data_to_output)
@@ -268,7 +272,7 @@ shinyServer(function(input, output, session) {
       paste(input$dataset, "data.RData", sep = "")
     },
     content = function(file) {
-      data.cnorm <- prepareData()
+      data.cnorm <- preparedData()
       attr(data.cnorm, "descend") <- chosenDescend()
 
       save(data.cnorm, file = file)
@@ -704,7 +708,7 @@ shinyServer(function(input, output, session) {
       MAX_RAW <- currentBestModel$maxRaw
 
       currentNormTable <- cNORM::normTable(currentAgeForNormTable, bestModel(), minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL)
+                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL, pretty = TRUE)
 
       currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
       currentNormTable$percentile <- round(currentNormTable$percentile, digits = 2)
@@ -772,7 +776,7 @@ shinyServer(function(input, output, session) {
       }
 
       currentRawTable <- cNORM::rawTable(currentAgeForRawTable, currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL)
+                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL, pretty = TRUE)
       currentRawTable$norm <- round(currentRawTable$norm, digits = 3)
       currentRawTable$percentile <- round(currentRawTable$percentile, digits = 2)
 
@@ -798,10 +802,11 @@ shinyServer(function(input, output, session) {
 
   output$exportData <- downloadHandler(
     filename = function() {
-      paste("model.RData", sep = "")
+      paste("data.RData", sep = "")
     },
     content = function(file) {
-      save(preparedData(), filename = file)
+      dat <- preparedData()
+      save(dat, filename = file)
     }
   )
 
@@ -822,12 +827,4 @@ shinyServer(function(input, output, session) {
                           minAge = MIN_AGE,
                           maxAge = MAX_AGE)
   })
-
-
-
-
-
-
-
-
 })
