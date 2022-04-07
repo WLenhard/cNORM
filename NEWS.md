@@ -4,15 +4,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.1 (in progress)
-Date: 2022.03.31
+Date: 2022.04.07
 
 
 Changes:
 
 *    t parameter added to data preparation in the shiny GUI
+*    default paremeters in cnorm now k = 5 and t = 3
 *    error in shiny GUI corrected: Download data
 *    WeigtedRegression vignette extended
 *    Additional descriptive information in modeling when using weights
+*    Vignette cNORM-Demo revised
 
 
 
