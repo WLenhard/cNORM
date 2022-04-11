@@ -90,7 +90,7 @@ We extensively simulated biased distributions and assessed, if our approach can 
 *  With cNORM, representativeness need not necessarily be established in every single age group. If the marginals are more or less correct, weighting is unnecessary.
 *  Only use stratification for variables with considerable influence on the dependent variable.
 *  If available, the probabilities of cross-classifications of the stratification variables can be used. You can recode several variables into one and directly specify the according population marginals (especially in combination with the next point).
-*  Avoid too many stratification variables with many fine-grained levels. This leads to high weights in specific subgroups. Rather combine different levels of stratification variables, if the according subgroups do not differe in the outcome variable.
+*  Avoid too many stratification variables with many fine-grained levels. This leads to high weights in specific subgroups. Rather combine different levels of stratification variables, if the according subgroups do not differ in the outcome variable.
 
 
 ## References 
