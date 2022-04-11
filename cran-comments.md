@@ -1,10 +1,9 @@
 ## Resubmission
-This is a major release of an existing package. In this version I have:
+This is a minor release of an existing package. In this version I have:
 
-* implemented a raking procedure for automatic post-stratification
-* developed method for weighted ranking and percentile estimation
-* corrected bugs
-* added documentation and a vignette
+* revised the vignettes
+* optimized default settings
+
 
 ## Test environments
 * local WIN10, 64Bit install, R 4.1.0
