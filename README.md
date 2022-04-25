@@ -62,23 +62,22 @@ cNORM.GUI()
 
 # If you prefer the console, you can use the syntax as well: Rank data within
 # group and compute powers and interactions for the internal dataset 'elfe' and compute model.
-# The resulting object includes the ranked via object$data and model via object$model.
+# The resulting object includes the ranked data via object$data and model via object$model.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Plot R2 of different model solutions in dependence of the number of predictors
 plot(cnorm.elfe, "subset", type=0)        # plot R2
 plot(cnorm.elfe, "subset", type=3)        # plot MSE
 
-# NOTE! At this point, you usually select a good fitting model and rerun the process.
-# with a fixed number of terms, e. g. four. Try avoid models with a high number of terms:
+# NOTE! At this point, you usually select a good fitting model and rerun the process
+# with a fixed number of terms, e. g. four. Avoid models with a high number of terms:
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
-# Per default, the power parameter is set to 4. You can choose a value up to 6, but higher
-# values can lead to overfit. In most cases, 4 is fine or the value can be reduced to 3 by
-# specifying the k prarameter (e. g., k = 3). If you do not want to have a square matrix of
-# powers as depicted above, you can specify the age trajectory via parameter t. In the 
-# following example, the distribution per age is modeled with power parameter k = 3 (= cubic), 
-# while for the age, there is only a quadratic trajectory (-> 't = 2').
+# Per default, the power parameter is set to k = 5 and t = 3. You can choose a value up 
+# to 6, but higher values can lead to overfit. In case of overfit, please reduce these
+# values. In case, only k is specified, cNORM uses this value for both k and t.
+# In the following example, the distribution per age is modeled with power parameter 
+# k = 3 (= cubic), while for the age, there is only a quadratic trajectory (-> 't = 2').
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 3, t = 2)
 
 #  Visual inspection of the percentile curves of the fitted model
@@ -108,7 +107,7 @@ normTable(c(3, 3.2, 3.4, 3.6), cnorm.elfe)
 rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 
 # Get the predicted norm scores for a vector of raw scores and explanatory variable, e. g. age
-predicted <- predictNorm(elfe$raw, elfe$grop, cnorm.elfe)
+predicted <- predictNorm(elfe$raw, elfe$group, cnorm.elfe)
 
 # cNORM can as well be used for conventional norming
 # In this case, the group variable has to be set to FALSE when ranking the data.
@@ -118,7 +117,7 @@ m <- bestModel(d)
 rawTable(0, model = m) # please use an arbitrary value for age when generating the tables
 
 
-# In case of unbalanced datasets, deviating from the census, the norm data
+# In case of unbalanced datasets deviating from the census, the norm data
 # can be weighted by the means of raking / post stratification. Please generate
 # the weights with the computeWeights() function and pass them as the weights
 # parameter. For computing the weights, please specify a data.frame with the
@@ -135,6 +134,7 @@ model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
 
 # start vignette for a complete walk through
 vignette("cNORM-Demo", package = "cNORM")
+vignette("WeightedRegression", package = "cNORM")
 ```
 cNORM offers functions to choose the optimal model, both from a visual inspection of the 
 percentiles, as well as by information criteria and model tests:
