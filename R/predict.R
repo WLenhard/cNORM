@@ -349,13 +349,26 @@ normTable <- function(A,
     }
 
     if(monotonuous){
-      minRawX <- normTable$raw[[1]]
-
+      if(!descend){
+        minRawX <- normTable$raw[[1]]
       for(y in 1:length(normTable$raw)){
         if(normTable$raw[[y]] >= minRawX){
           minRawX <- normTable$raw[[y]]
         }else{
           normTable$raw[[y]] <- NA
+        }
+      }
+      }else{
+        y <- length(normTable$raw)
+        maxRawX <- normTable$raw[[y]]
+        while(y > 0){
+          if(normTable$raw[[y]] >= maxRawX){
+            maxRawX <- normTable$raw[[y]]
+          }else{
+            normTable$raw[[y]] <- NA
+          }
+
+          y <- y -1
         }
       }
     }

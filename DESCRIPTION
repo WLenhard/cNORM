@@ -1,9 +1,9 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 3.0.1
+Version: 3.0.2
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2022-04-11
+Date: 2022-06-10
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
     email="lenhard@psychometrica.de", comment=c(ORCID = "0000-0001-8680-4381")), 
     person("Wolfgang", "Lenhard", role = c("cre","aut"), 
