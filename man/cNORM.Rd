@@ -22,7 +22,8 @@ cnorm(
 \arguments{
 \item{raw}{Numeric vector of raw scores}
 
-\item{group}{Numeric vector of grouping variable, e. g. grade}
+\item{group}{Numeric vector of grouping variable, e. g. grade. If no group
+or age variable is provided, conventional norming is applied}
 
 \item{age}{Numeric vector with chronological age, please additionally specify
 width of window}
@@ -84,7 +85,13 @@ are missing, cnorm uses k = 5 and t = 3 by default.
 \examples{
 \dontrun{
 # Using this function with the example dataset 'elfe'
-# You can use the 'getGroups()' function to set up grouping variable.
+
+# Conventional norming (no modelling over age)
+cnorm(raw=elfe$raw)
+
+# Continuous norming
+# You can use the 'getGroups()' function to set up grouping variable in case,
+# you have a continuous age variable.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # return norm tables including 90\% confidence intervals for a
