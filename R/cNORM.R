@@ -149,7 +149,8 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' are missing, cnorm uses k = 5 and t = 3 by default.
 #'
 #' @param raw Numeric vector of raw scores
-#' @param group Numeric vector of grouping variable, e. g. grade
+#' @param group Numeric vector of grouping variable, e. g. grade. If no group
+#' or age variable is provided, conventional norming is applied
 #' @param age Numeric vector with chronological age, please additionally specify
 #' width of window
 #' @param width Size of the moving window in case an age vector is used
@@ -183,7 +184,13 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @examples
 #' \dontrun{
 #' # Using this function with the example dataset 'elfe'
-#' # You can use the 'getGroups()' function to set up grouping variable.
+#'
+#' # Conventional norming (no modelling over age)
+#' cnorm(raw=elfe$raw)
+#'
+#' # Continuous norming
+#' # You can use the 'getGroups()' function to set up grouping variable in case,
+#' # you have a continuous age variable.
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
 #' # return norm tables including 90% confidence intervals for a
@@ -301,6 +308,40 @@ cnorm <- function(raw = NULL,
     }else{
       data <- computePowers(data, k = k, t = t)
     }
+  }
+
+  # conventional norming
+  else if(is.numeric(raw)&&is.null(group)&&is.null(age)){
+    if(is.null(weights))
+      data <- data.frame(raw = raw)
+    else
+      data <- data.frame(raw = raw, weights = weights)
+
+    data <- rankByGroup(data, raw=data$raw, group=FALSE, scale=scale, weights=data$weights, descend = descend, method = method)
+    data <- computePowers(data, k = k, t = t)
+    model <- bestModel(data, plot=FALSE, k = k, t = t, terms = terms, R2 = R2)
+
+    # plot
+    data1 <- unique(data)
+    data1 <- data1[order(data1$raw),]
+    step = (max(raw) - min(raw))/100
+
+    rt <- rawTable(0, model, minRaw = min(raw), maxRaw = max(raw))
+    plot(normValue ~ raw, data = data1, ylab = "Norm Score", xlab = "Raw Score", col="black",
+         main = "Norm Score Plot",
+         sub = paste0("Solution: ", model$ideal.model , ", RMSE = ", round(model$rmse, digits = 4)))
+
+    lines(norm ~ raw, data = rt, col = "blue")
+    legend(1, 95, legend=c("Manifest Scores", "Regression Model"),
+           col=c("black", "blue"), lty=1:2, cex=0.8)
+
+    # normTable(0, model = model)
+    result <- list(data = data, model = model)
+    class(result) <- "cnorm"
+
+    cat("\nNorm table:\n")
+    print(rt)
+    return(result)
   }
 
   # if no grouping variable is given

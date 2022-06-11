@@ -279,8 +279,19 @@ bestModel <- function(data,
   }else{
     bestformula$useAge <- FALSE
   }
-  bestformula$minA1 <- min(data$A1)
-  bestformula$maxA1 <- max(data$A1)
+
+  # conventional norming
+  if(is.null(data$A1)){
+    bestformula$minA1 <- 0
+    bestformula$maxA1 <- 0
+
+  }
+  # continuous norming
+  else{
+    bestformula$minA1 <- min(data$A1)
+    bestformula$maxA1 <- max(data$A1)
+  }
+
   bestformula$minL1 <- min(data$L1)
   bestformula$maxL1 <- max(data$L1)
   bestformula$minRaw <- min(data[, raw])
@@ -320,10 +331,17 @@ bestModel <- function(data,
     message("\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cv(model$data)' or an inspection of information functions with 'plot.subset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number.")
   }
 
-  message("\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit.")
+  if(!is.null(data$A1)){
+    message("\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit.")
+  }else{
+    message("\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter.")
+  }
 
   if(plot&&attr(data, "useAge")){
     plotPercentiles(data, bestformula)
+  }else{
+    # TODO plot conventional
+
   }
 
   return(bestformula)

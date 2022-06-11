@@ -4,12 +4,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.2
-Date: 2022.06.10
+Date: 2022.06.11
 
 
 Changes:
 
 *    fix for bug in normTable function when ranking order is reversed
+*    added option to apply conventional norming in 'cnorm' by leaving
+     out the grouping variable
 
 
 
