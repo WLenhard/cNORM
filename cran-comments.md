@@ -2,7 +2,7 @@
 This is a minor release of an existing package. In this version I have:
 
 * revised the vignettes
-* optimized default settings
+* added options for conventional norming
 
 
 ## Test environments
@@ -18,7 +18,7 @@ This is a minor release of an existing package. In this version I have:
 
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. There were NOTES on potential misspelled words
+There were no ERRORs or WARNINGs. There were NOTES on potential link and DOI issues
 in DESCRIPTION, which are correct, however.
 
 ## Downstream dependencies
