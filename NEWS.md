@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.2
-Date: 2022.06.11
+Date: 2022.06.12
 
 
 Changes:
@@ -12,6 +12,9 @@ Changes:
 *    fix for bug in normTable function when ranking order is reversed
 *    added option to apply conventional norming in 'cnorm' by leaving
      out the grouping variable
+*    extended plotPercentiles, plotNorm and plotRaw for usage with conventional
+     norming
+*    vignette extend for explaining conventional norming
 
 
 
