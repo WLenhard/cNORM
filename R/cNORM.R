@@ -319,28 +319,11 @@ cnorm <- function(raw = NULL,
 
     data <- rankByGroup(data, raw=data$raw, group=FALSE, scale=scale, weights=data$weights, descend = descend, method = method)
     data <- computePowers(data, k = k, t = t)
-    model <- bestModel(data, plot=FALSE, k = k, t = t, terms = terms, R2 = R2)
+    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2)
 
-    # plot
-    data1 <- unique(data)
-    data1 <- data1[order(data1$raw),]
-    step = (max(raw) - min(raw))/100
-
-    rt <- rawTable(0, model, minRaw = min(raw), maxRaw = max(raw))
-    plot(normValue ~ raw, data = data1, ylab = "Norm Score", xlab = "Raw Score", col="black",
-         main = "Norm Score Plot",
-         sub = paste0("Solution: ", model$ideal.model , ", RMSE = ", round(model$rmse, digits = 4)))
-
-    lines(norm ~ raw, data = rt, col = "blue")
-    legend(1, 95, legend=c("Manifest Scores", "Regression Model"),
-           col=c("black", "blue"), lty=1:2, cex=0.8)
-
-    # normTable(0, model = model)
     result <- list(data = data, model = model)
     class(result) <- "cnorm"
 
-    cat("\nNorm table:\n")
-    print(rt)
     return(result)
   }
 

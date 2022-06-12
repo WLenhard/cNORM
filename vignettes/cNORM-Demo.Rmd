@@ -41,7 +41,13 @@ library(cNORM)
 
 # We will use the internal dataset elfe on reading comprehension
 # that includes raw scores and grade as a grouping variable.
-# The method 'cnorm' prepares the data and establishes a model.
+
+# Most easy example: conventional norming without age or group.
+# Just get the manifest norm scores and as well modelled via polynomial regression.
+model <- cnorm(raw = elfe$raw)
+
+# The method 'cnorm' prepares the data and establishes a model for continuous
+# norming. Please specify a raw score and a grouping vector.
 model <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # Fine tune model selection by checking model fit and by
@@ -69,8 +75,21 @@ In the following, the single steps in detail:
 ## 1. Data Preparation and modelling
 If a sufficiently large and representative sample has been established (missings will be excluded casewise), then the data must first be imported. It is advisable to start with a simply structured data object of type data.frame or numeric vectors containing raw score and grouping or the continuous explanatory variable. This explanatory variable in psychometric performance tests is usually age. We therefore refer to this variable as 'age' in the following. In fact, however, the explanatory variable is not necessarily age. A training or schooling duration or other explanatory variables can also be included in the modeling. However, it must be an interval-scaled (or, as the case may be, dichotomous) variable. Finally, a grouping variable is required to divide the explanatory variable into smaller standardization groups (e.g. grades or age groups). The method is relatively robust against changes in the granularity of the group subdivision. For example, the result of the standardization only marginally depends on whether one chooses half-year or full-year gradations (see A. Lenhard, Lenhard, Suggate & Segerer, 2016). The more the variable to be measured co-varies with the explanatory variable (e. g. a fast development over age in an intelligence test), the more groups should be formed beforehand to capture the trajectories adequately. By standard, we assign the variable name "group" to the grouping variable.
 
+### Conventional norming
+In case, you are not interested in continuously modelling norm scores over age, cNORM can be used for conventional norming as well. It returns the manifest norm scores and percentiles but as well establishes a polynomial regression model that closes all the missings in the norm table, smoothes error variance and can be used for cautiously extrapolating more extreme raw scores.
+
+```
+# Apply conventional norming. You simply have to provide a raw score vector.
+# Additionally, you can specify ranking order (parameter 'descend'), the 
+# degree of the polynomial (parameter 'k') or the number of terms in the model
+# via the parameter 'terms'.
+
+model <- cnorm(raw=elfe$raw, terms=4)
+```
+
+
 ### Recoding Continuous Variables
-If, when using cNORM, you initially only have the continuous age variable available, it is advisable to as well recode it into a discrete grouping variable. Please take care, that the grouping variable aligns with the continuous variable. The values in the grouping variable should represent the group means. The following code could be helpful (another possibility is the'rankBySlidingWindow' function described below):
+No, let's start with a detailed explanation of continuous norming. If, when using cNORM, you initially only have the continuous age variable available, it is advisable to as well recode it into a discrete grouping variable. Please take care, that the grouping variable aligns with the continuous variable. The values in the grouping variable should represent the group means. The following code could be helpful (another possibility is the'rankBySlidingWindow' function described below):
 
 ```
 # Creates a grouping variable for a fictitious age variable
@@ -102,7 +121,9 @@ by(elfe$raw, elfe$group, summary)
 ```
 
 ### Ranking
-The next step is to rank each person in each group using the rankByGroup function. The function returns percentiles and also performs a normal-rank transformation in which T-Scores (M = 50, SD = 10) are returned by default. In principle, our mathematical method also works without normal rank transformation, i.e., the method could theoretically also be carried out with the percentiles. This is useful, for example, if you want to enter a variable that deviates extremely from the normal distribution or follows a completely different distribution. For most psychological or physical scales, however, the distributions are still sufficiently similar to the normal distribution even with strong bottom and ceiling effects. In these cases, the normal-rank transformation usually increases the model fit and facilitates the further processing of the data. In addition to T-Scores, the standard scores can also be expressed as z- or IQ-Scores or specified as desired. For bindings, RankIt (default), Blom, van der Warden, Tukey, Levenbach and Filliben, Yu & Huang is available.
+The next step is to rank each person in each group using the rankByGroup function. It is already done by the cnorm function, so rankByGroup and subsequently computePowers is not necessary, if you use the comprehensive cnorm() function.
+
+The function rankByGroups and as well rankBySlidingWindow return percentiles and also perform a normal-rank transformation in which T-Scores (M = 50, SD = 10) are returned by default. In principle, our mathematical method also works without normal rank transformation, i.e., the method could theoretically also be carried out with the percentiles. This is useful, for example, if you want to enter a variable that deviates extremely from the normal distribution or follows a completely different distribution. For most psychological or physical scales, however, the distributions are still sufficiently similar to the normal distribution even with strong bottom and ceiling effects. In these cases, the normal-rank transformation usually increases the model fit and facilitates the further processing of the data. In addition to T-Scores, the standard scores can also be expressed as z- or IQ-Scores or specified as desired. For bindings, RankIt (default), Blom, van der Warden, Tukey, Levenbach and Filliben, Yu & Huang is available.
 
 ```
 # Determine percentiles by group

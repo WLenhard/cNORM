@@ -337,12 +337,7 @@ bestModel <- function(data,
     message("\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter.")
   }
 
-  if(plot&&attr(data, "useAge")){
-    plotPercentiles(data, bestformula)
-  }else{
-    # TODO plot conventional
-
-  }
+  plotPercentiles(data, bestformula)
 
   return(bestformula)
 }

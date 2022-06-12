@@ -23,9 +23,9 @@ plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
     data <- data$data
   }
 
-  if (!attr(data, "useAge")){
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
-  }
+  #if (!attr(data, "useAge")){
+  #  stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
+  #}
 
   if (is.null(raw)) {
     raw <- attr(data, "raw")
@@ -136,9 +136,9 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
     data <- data$data
   }
 
-  if (!attr(data, "useAge")){
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
-  }
+  #if (!attr(data, "useAge")){
+  #  stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
+  #}
 
   if (is.null(minNorm)) {
     # warning("minNorm not specified, taking absolute minimum norm score from modeling...")
@@ -157,7 +157,11 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
 
   d <- data
   raw <- data[[model$raw]]
-  age <- data[[model$age]]
+  if (attr(data, "useAge"))
+    age <- data[[model$age]]
+  else
+    age <- rep(0, length=nrow(data))
+
   if(!is.null(model$covariate))
     covariate <- data[[attr(data, "covariate")]]
   else
@@ -429,6 +433,28 @@ plotPercentiles <- function(data,
     data <- data$data
   }
 
+
+  if (!model$useAge){
+    # plot
+    data1 <- unique(data)
+    data1 <- data1[order(data1$raw),]
+    step = (model$maxRaw - model$minRaw)/100
+
+    rt <- rawTable(0, model, minRaw = model$minRaw, maxRaw = model$maxRaw)
+    plot(normValue ~ raw, data = data1, ylab = "Norm Score", xlab = "Raw Score", col="black",
+         main = "Norm Score Plot",
+         sub = paste0("Solution: ", model$ideal.model , ", RMSE = ", round(model$rmse, digits = 4)))
+    legend(x = "bottomright", legend=c("Manifest Scores", "Regression Model"),
+           col=c("black", "blue"), lty=1:2, cex=0.8)
+    lines(norm ~ raw, data = rt, col = "blue")
+
+    cat("\nRegresion-based norm table:\n")
+    print(rt)
+
+    return()
+  }
+
+
   if(!is.null(covariate)&&is.null(model$covariate)){
     warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
     covariate = NULL
@@ -458,9 +484,7 @@ plotPercentiles <- function(data,
     data <- d
   }
 
-  if (!model$useAge){
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
-  }
+
 
   if (is.null(group)) {
     group <- attr(data, "group")
