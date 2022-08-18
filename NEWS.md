@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.2
-Date: 2022.06.12
+Date: 2022.08.18
 
 
 Changes:
