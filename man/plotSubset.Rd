@@ -11,7 +11,9 @@ plotSubset(model, type = 0, index = FALSE)
 
 \item{type}{Type of chart with 0 = adjusted R2 by number of predictors,
 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
-Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
+Criterion (BIC) by adjusted R2, 3 = Root Mean Square Error (RMSE),
+4 = Residual Sum of Squares by number, 5 = F-test statistic for consecutive models
+and 6 = p-value for model tests
 of predictors}
 
 \item{index}{add index labels to data points}

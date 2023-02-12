@@ -363,17 +363,21 @@ printSubset <- function(x, ...) {
     x <- x$model
   }
 
-  table <-
-    do.call(rbind, Map(data.frame,
-      R2 = x$subsets$rsq,
-      R2adj = x$subsets$adjr2,
-      RSS = x$subsets$rss,
-      RMSE = sqrt(x$subsets$rss / length(x$fitted.values)),
-      Cp = x$subsets$cp,
-      BIC = x$subsets$bic,
-      Terms = x$subsets$numberOfTerms
-    ))
-  invisible(x)
+  # compute F and significance
+  RSS1 <- c(NA, x$subsets$rss)
+  RSS2 <- c(x$subsets$rss, NA)
+  k1 <- seq(from = 1, to = length(x$subsets$rss) + 1)
+  k2 <- seq(from = 2, to = length(x$subsets$rss) + 2)
+  df1 <- k2 - k1
+  df2 <- length(x$fitted.values) - k2
+  F <- ((RSS1-RSS2)/df1)/(RSS2/df2)
+  p <- 1 - pf(F, df1, df2)
+  table <- data.frame(R2adj = x$subsets$adjr2, BIC = x$subsets$bic,
+                      CP = x$subsets$cp, RSS = x$subsets$rss,
+                      RMSE = sqrt(x$subsets$rss / length(x$fitted.values)),
+                      DeltaR2adj = head(c(x$subsets$adjr2, NA) - c(NA, x$subsets$adjr2), -1),
+                      F = head(F, -1), p = head(p, -1),
+                      nr = seq(1, length(x$subsets$adjr2), by = 1))
   return(table)
 }
 

@@ -66,3 +66,17 @@ citEntry(entry = "Article",
   textVersion  =
   paste("Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, Online First, 1-33. https://doi.org/10.1177/0013164420928457")
 )
+
+citEntry(entry = "Article",
+  title        = "Reducing the bias of norm scores in non-representative samples: Weighting as an adjunct to continuous norming methods",
+  author       = personList(as.person("Sebastian Gary"), as.person("Wolfgang Lenhard"), as.person("Alexandra Lenhard")as.person("David S. Herzberg")),
+  journal      = "Assessment",
+  year         = "2023",
+  volume       = "Online First",
+  number       = "",
+  pages        = "1-33",
+  url          = "https://journals.sagepub.com/doi/full/10.1177/0013164420928457",
+
+  textVersion  =
+  paste("Gary, S., Lenhard, A., Lenhard, W. & Herzberg, D. (accepted). Reducing the bias of norm scores in non-representative samples: Weighting as an adjunct to continuous norming methods. Assessment.")
+)

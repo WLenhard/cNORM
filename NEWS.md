@@ -3,6 +3,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 3.0.3
+Date: 2023.02.12
+
+
+Changes:
+
+*    added new references
+*    new results in printSubset and plotSubset: F-tests on consecutive models
+
+
+
 ### Version in 3.0.2
 Date: 2022.08.18
 

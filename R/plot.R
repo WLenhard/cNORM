@@ -875,7 +875,9 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 #' @param model The regression model from the bestModel function or a cnorm object
 #' @param type Type of chart with 0 = adjusted R2 by number of predictors,
 #' 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
-#' Criterion (BIC) by adjusted R2 and 3 = Root Mean Square Error (RMSE) by number
+#' Criterion (BIC) by adjusted R2, 3 = Root Mean Square Error (RMSE),
+#' 4 = Residual Sum of Squares by number, 5 = F-test statistic for consecutive models
+#' and 6 = p-value for model tests
 #' of predictors
 #' @param index add index labels to data points
 #' @seealso bestModel, plotPercentiles, printSubset
@@ -891,7 +893,20 @@ plotSubset <- function(model, type = 0, index = FALSE) {
     model <- model$model
   }
 
-  dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic, cp = model$subsets$cp, RMSE = sqrt(model$subsets$rss / length(model$fitted.values)), nr = seq(1, length(model$subsets$adjr2), by = 1))
+  # compute F and significance
+  RSS1 <- c(NA, model$subsets$rss)
+  RSS2 <- c(model$subsets$rss, NA)
+  k1 <- seq(from = 1, to = length(RSS1))
+  k2 <- seq(from = 2, to = length(RSS1) + 1)
+  df1 <- k2 - k1
+  df2 <- length(model$fitted.values) - k2
+  F <- ((RSS1-RSS2)/df1)/(RSS2/df2)
+  p <- 1 - pf(F, df1, df2)
+  dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic,
+                             cp = model$subsets$cp, RSS = model$subsets$rss,
+                             RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
+                             F = head(F, -1), p = head(p, -1),
+                             nr = seq(1, length(model$subsets$adjr2), by = 1))
   indexLabel <- seq(from = 1, to = nrow(dataFrameTMP))
 
   if (type == 1) {
@@ -971,6 +986,62 @@ plotSubset <- function(model, type = 0, index = FALSE) {
                       if(index)
                         ltext(x = x, y = y, labels = indexLabel, cex=.7)
                     } )
+  } else if(type == 4){
+    xyplot(RSS ~ nr,
+           data = dataFrameTMP, type = "b",
+           col.line = "lightblue", lwd = 1,
+           grid = TRUE,
+           main = "Information Function",
+           ylab = "Residual Sum of Squares (RSS from Raw Score)",
+           xlab = "Number of Predictors", panel = function(x, y, ...) {
+             panel.xyplot(x, y, ...)
+             # add index value to data points
+             if(index)
+               ltext(x = x, y = y, labels = indexLabel, cex=.7)
+           } )
+  } else if(type == 5){
+    xyplot(F ~ nr,
+           data = dataFrameTMP, type = "b",
+           col.line = "lightblue", lwd = 1,
+           grid = TRUE,
+           main = "Information Function",
+           ylab = "F-test statistics for consecutive models",
+           xlab = "Number of Predictors", panel = function(x, y, ...) {
+             panel.xyplot(x, y, ...)
+             # add index value to data points
+             if(index)
+               ltext(x = x, y = y, labels = indexLabel, cex=.7)
+           } )
+  } else if(type == 6){
+    xyplot(p ~ nr,
+           data = dataFrameTMP, type = "b",
+           col.line = "lightblue", lwd = 1,
+           grid = TRUE,
+           main = "Information Function",
+           ylab = "p-values for tests on R2 adj. of consecutive models",
+           ylim = c(-0.005, 0.11),
+           xlab = "Number of Predictors",
+           key = list(
+             corner = c(
+               0.1,
+               0.9
+             ), lines = list(
+               col = c("#9933FF"),
+               lty = c(2), lwd = 2
+             ),
+             text = list(c("p = .05"))
+           ), panel = function(x, y, ...) {
+             panel.abline(
+               h = 0.05,
+               lwd = 2, lty = "longdash",
+               col = "#9933FF", label = model$cutoff
+             )
+             panel.xyplot(x, y, ...)
+             # add index value to data points
+             if(index)
+               ltext(x = x, y = y, labels = indexLabel, cex=.7)
+           }
+           )
   } else {
     xyplot(adjr2 ~ nr,
                     data = dataFrameTMP, type = "b",
