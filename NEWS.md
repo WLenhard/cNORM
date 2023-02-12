@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 3.0.3
+### Version in 3.0.3 (in progress)
 Date: 2023.02.12
 
 
