@@ -69,7 +69,7 @@ citEntry(entry = "Article",
 
 citEntry(entry = "Article",
   title        = "Reducing the bias of norm scores in non-representative samples: Weighting as an adjunct to continuous norming methods",
-  author       = personList(as.person("Sebastian Gary"), as.person("Wolfgang Lenhard"), as.person("Alexandra Lenhard")as.person("David S. Herzberg")),
+  author       = personList(as.person("Sebastian Gary"), as.person("Wolfgang Lenhard"), as.person("Alexandra Lenhard"), as.person("David S. Herzberg")),
   journal      = "Assessment",
   year         = "2023",
   volume       = "Online First",

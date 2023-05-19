@@ -11,7 +11,7 @@
 calcPolyInL <- function(raw, age, model) {
   k <- model$k
   coeff <- model$coefficients
-  return(calcPolyInLBase(raw, age, coeff, k))
+  return(calcPolyInLBase2(raw, age, coeff, k))
 }
 
 #' Internal function for retrieving regression function coefficients at specific age
@@ -29,7 +29,6 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   nam <- names(coeff)
 
   coeff_L <- coeff[grep("L", nam)]
-
   coeff_without_L <- coeff[setdiff(c(1:length(coeff)), grep("L", names(coeff)))]
 
   coefficientPolynom <- c()
@@ -41,7 +40,7 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   if (length(coeff_without_L) > 1) {
     for (i in c(2:length(coeff_without_L))) {
       potA <- as.numeric((strsplit(names(coeff_without_L)[i], ""))[[1]][2])
-      currentCoeff <- as.numeric(currentCoeff) + as.numeric(age)^potA * as.numeric(coeff_without_L[[i]])
+      currentCoeff <- currentCoeff + age^potA * as.numeric(coeff_without_L[[i]])
     }
   }
   coefficientPolynom <- c(coefficientPolynom, currentCoeff)
@@ -74,7 +73,7 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
       if (n_coeff_L_i_with_A > 0) {
         for (j in c(1:n_coeff_L_i_with_A)) {
           potA <- as.numeric((strsplit(names(coeff_L_i_with_A)[j], ""))[[1]][4])
-          currentCoeff <- as.numeric(currentCoeff) + as.numeric(age)^potA * as.numeric(coeff_L_i_with_A[[j]])
+          currentCoeff <- currentCoeff + age^potA * as.numeric(coeff_L_i_with_A[[j]])
         }
       }
 
@@ -89,6 +88,36 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   return(coefficientPolynom)
 }
 
+
+calcPolyInLBase2 <- function(raw, age, coeff, k) {
+  nam <- names(coeff)
+  coeff <- as.numeric(coeff)
+
+  # use regex to identify powers of A
+  positionsA <- regexpr("A\\d", nam)
+  positionsA[positionsA == -1] <- 0
+  powerA <- as.numeric(gsub("A", "", regmatches(nam, positionsA)))
+  powerA[is.na(powerA)] <- 0
+
+  # modify coefficients by powers of A
+  coeff <- coeff * (age^powerA)
+
+  # use regex to identify powers of L
+  positionsL <- rep("", length(nam))
+  indices <- grep("^L", nam)
+  positionsL[indices] <- substr(nam[indices], start=2, stop=2)
+  positionsL[positionsL==""] <- "0"
+  positionsL <- as.numeric(positionsL)
+  coefficients <- rep(0, k + 1)
+
+  # iterate through coefficients
+  for(j in 0:k)
+    coefficients[j + 1] <- sum(coeff[positionsL==j])
+
+  coefficients[1] <-  coefficients[1] - raw
+  return(coefficients)
+}
+
 predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL, force = FALSE, covariate = NULL) {
 
   if(!is.null(covariate)){
@@ -99,7 +128,7 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
   }
 
   if (is.null(polynom)) {
-    polynomForPrediction <- calcPolyInLBase(
+    polynomForPrediction <- calcPolyInLBase2(
       raw = raw,
       age = age,
       coeff = model$coefficients,
