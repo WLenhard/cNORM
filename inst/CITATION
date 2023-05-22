@@ -23,7 +23,7 @@ bibentry(bibtype  = "Article",
   volume       = "25",
   number       = "1",
   pages        = "112--125",
-  url          = "https://journals.sagepub.com/doi/10.1177/1073191116656437",
+  url          = "https://doi.org/10.1177/1073191116656437",
 
   textVersion  =
   paste("Lenhard, A., Lenhard, W., Suggate, S., & Segerer, R. (2018).",
@@ -40,7 +40,7 @@ bibentry(bibtype  = "Article",
   volume       = "14",
   number       = "9",
   pages        = "",
-  url          = "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0222279",
+  url          = "https://doi.org/10.1371/journal.pone.0222279",
 
   textVersion  =
   paste("Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279")
@@ -54,7 +54,7 @@ bibentry(bibtype  = "Article",
   volume       = "Online First",
   number       = "",
   pages        = "1-33",
-  url          = "https://journals.sagepub.com/doi/full/10.1177/0013164420928457",
+  url          = "https://doi.org/10.1177/0013164420928457",
 
   textVersion  =
   paste("Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, Online First, 1-33. https://doi.org/10.1177/0013164420928457")
@@ -68,7 +68,7 @@ bibentry(bibtype = "Article",
   volume       = "Online First",
   number       = "",
   pages        = "1-33",
-  url          = "https://doi.org/10.1177/1073191123115383",
+  url          = "https://doi.org/10.1177/10731911231153832",
 
   textVersion  =
   paste("Gary, S., Lenhard, A., Lenhard, W., & Herzberg, D. S. (2023). Reducing the Bias of Norm Scores in Non-Representative Samples: Weighting as an Adjunct to Continuous Norming Methods. Assessment, 0(0). https://doi.org/10.1177/10731911231153832")
