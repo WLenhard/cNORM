@@ -29,6 +29,7 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   nam <- names(coeff)
 
   coeff_L <- coeff[grep("L", nam)]
+
   coeff_without_L <- coeff[setdiff(c(1:length(coeff)), grep("L", names(coeff)))]
 
   coefficientPolynom <- c()
@@ -40,7 +41,7 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   if (length(coeff_without_L) > 1) {
     for (i in c(2:length(coeff_without_L))) {
       potA <- as.numeric((strsplit(names(coeff_without_L)[i], ""))[[1]][2])
-      currentCoeff <- currentCoeff + age^potA * as.numeric(coeff_without_L[[i]])
+      currentCoeff <- as.numeric(currentCoeff) + as.numeric(age)^potA * as.numeric(coeff_without_L[[i]])
     }
   }
   coefficientPolynom <- c(coefficientPolynom, currentCoeff)
@@ -73,7 +74,7 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
       if (n_coeff_L_i_with_A > 0) {
         for (j in c(1:n_coeff_L_i_with_A)) {
           potA <- as.numeric((strsplit(names(coeff_L_i_with_A)[j], ""))[[1]][4])
-          currentCoeff <- currentCoeff + age^potA * as.numeric(coeff_L_i_with_A[[j]])
+          currentCoeff <- as.numeric(currentCoeff) + as.numeric(age)^potA * as.numeric(coeff_L_i_with_A[[j]])
         }
       }
 
@@ -88,7 +89,18 @@ calcPolyInLBase <- function(raw, age, coeff, k) {
   return(coefficientPolynom)
 }
 
-
+#' Internal function for retrieving regression function coefficients at specific
+#' age (optimized)
+#'
+#' The function is an inline for searching zeros in the inverse regression
+#' function. It collapses the regression function at a specific age and
+#' simplifies the coefficients. Optimized version of the prior 'calcPolyInLBase'
+#' @param raw The raw value (subtracted from the intercept)
+#' @param age The age
+#' @param coeff The cNORM regression model coefficients
+#' @param k The cNORM regression model power parameter
+#'
+#' @return The coefficients
 calcPolyInLBase2 <- function(raw, age, coeff, k) {
   nam <- names(coeff)
   coeff <- as.numeric(coeff)
@@ -145,13 +157,14 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
   # only one real part as a solution within correct range
   if (length(output) == 1 && output >= minNorm && output <= maxNorm) {
     return(output)
-  } else {
-    # not exactly one plausible solution, search for alternative on correct side of distribution
+  }
+
+  # not exactly one plausible solution, search for alternative on correct side of distribution
     median <- predictRaw(model$scaleM, age, model$coefficients, minRaw = model$minRaw, maxRaw = model$maxRaw)
     if (raw > median) {
-      output <- output[output > model$scaleM && output <= maxNorm]
+      output <- output[output > model$scaleM & output <= maxNorm]
     } else if (raw < median) {
-      output <- output[output < model$scaleM && output >= minNorm]
+      output <- output[output < model$scaleM & output >= minNorm]
     } else {
       return(model$scaleM)
     }
@@ -189,7 +202,7 @@ predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL
         return(maxNorm)
       }
     }
-  }
+
 }
 
 simplifyCoefficients <- function(coefficients = coefficients, covariate = covariate){

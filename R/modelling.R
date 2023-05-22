@@ -907,12 +907,12 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
 
     # compute leaps model
     subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
+    if(norms && is.null(formula)){
+      cat(paste0("Cycle ", a, "\n"))
+    }
 
     # retrieve models coefficients for each number of terms
     for (i in min:max) {
-      if(norms && is.null(formula)){
-        cat(paste0("Repetition ", a, ", cycle ", i, "\n"))
-      }
       variables <- names(coef(subsets, id = i))
       variables <- variables[2:length(variables)] # remove '(Intercept)' variable
       reg <- paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
@@ -930,8 +930,8 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
       test.fitted <- predict.lm(model, test)
 
       # store MSE for test and train data
-      train.errors[i] <- train.errors[i] + mean((model$fitted.values - train[, raw])^2)
-      val.errors[i] <- val.errors[i] + mean((test.fitted - test[, raw])^2)
+      train.errors[i] <- train.errors[i] + mean((model$fitted.values - train[, raw])^2, na.rm = T)
+      val.errors[i] <- val.errors[i] + mean((test.fitted - test[, raw])^2, na.rm = T)
 
       # compute R2 for test and training
       if (norms) {
@@ -956,7 +956,7 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
     model <- lm(reg, d)
 
     # mse for the complete data based on number of terms
-    complete.errors[i] <- sqrt(mean((model$fitted.values - d[, raw])^2))
+    complete.errors[i] <- sqrt(mean((model$fitted.values - d[, raw])^2, na.rm = T))
 
     # build the average over repetitions and the root
     train.errors[i] <- sqrt(train.errors[i] / repetitions)

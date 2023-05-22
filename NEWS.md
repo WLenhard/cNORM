@@ -3,14 +3,20 @@ This file documents the development of the package as well as open issues or poi
 
 
 
-### Version in 3.0.3 (in progress)
-Date: 2023.02.12
+### Version in 3.0.3
+Date: 2023.05.22
 
 
 Changes:
 
+*    fixed regression bug in the internal predictNormByRoots-function for R4.3.0
 *    added new references
 *    new results in printSubset and plotSubset: F-tests on consecutive models
+*    internal improvements in calcPolyInLBase2 for retrieving regression function coefficients at specific
+     age. This speeds up norm score retrieval by 40%, leading to vast performance improvements in 
+     large datasets and in cross validation by cnorm.cv
+*    Added WPS publisher as a funder. WPS helped financing the weighting procedure for post stratification 
+     based on iterative proportional fitting ("Raking")
 
 
 
