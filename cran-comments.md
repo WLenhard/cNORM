@@ -14,13 +14,9 @@ This is a minor release of an existing package. In this version I have:
 ## Test environments
 * local WIN10, 64Bit install, R 4.3.0
 * winbuilder release, old release and development
-* rhub: windows-x86_64-release
-				windows-x86_64-oldrel
-				windows-x86_64-devel
-				ubuntu-gcc-release
-				macos-m1-bigsur-release
-				debian-gcc-release
-				fedora-gcc-devel
+* rhub: Windows Server 2022, R-devel, 64 bit
+				Ubuntu Linux 20.04.1 LTS, R-release, GCC
+				Fedora Linux, R-devel, clang, gfortran
 
 
 ## R CMD check results
