@@ -17,7 +17,7 @@ Changes:
      large datasets and in cross validation by cnorm.cv
 *    Added WPS publisher as a funder. WPS helped financing the weighting procedure for post stratification 
      based on iterative proportional fitting ("Raking")
-*    citEntry replaced by bibentry in inst/citation  
+*    citeEntry replaced by bibentry in inst/citation  
 
 
 
