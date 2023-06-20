@@ -145,13 +145,13 @@ bestModel <- function(data,
   }
 
   if (terms < 0) {
-    warning("terms parameter out of bounds. The value has to be positive. Setting to default = 4.")
-    k <- 4
+    warning("terms parameter out of bounds. The value has to be positive. Setting to 4.")
+    terms <- 4
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
     warning("k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 4.")
-    k <- 4
+    k <- 5
   }
 
   if (!(raw %in% colnames(data)) && (!inherits(predictors, "formula"))) {
@@ -822,12 +822,12 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
 
   k <- attr(d, "k")
   if (is.null(k)) {
-    k <- 4
+    k <- 5
   }
 
   t <- attr(d, "t")
   if (is.null(t)) {
-    t <- k
+    t <- 3
   }
 
   n.models <- (t*k)^2 - 1
@@ -1126,35 +1126,31 @@ cnorm.cv <- function(data, formula = NULL, repetitions = 5, norms = TRUE, min = 
 #' @param covariates use covariates
 #'
 #' @return reression function
-  buildFunction <- function(raw, k, t, age, covariates){
-    f <- paste0(raw, " ~ ")
-    if(age){
+buildFunction <- function(raw, k, t, age, covariates) {
+  f <- paste0(raw, " ~ ")
 
-      for(i in 1:k){
-        f <- paste0(f, paste0("L", i), " + ")
-      }
+  if (age) {
+    f <- paste0(f, paste0(paste0("L", 1:k), collapse = " + "), " + ")
+    f <- paste0(f, paste0(paste0("A", 1:t), collapse = " + "), " + ")
 
-      for(i in 1:t){
-        f <- paste0(f, paste0("A", i), " + ")
+    for (i in 1:k) {
+      for (j in 1:t) {
+        f <- paste0(f, paste0("L", i), paste0("A", j), " + ")
       }
+    }
 
-      for(i in 1:k){
-        for(j in 1:t){
-          f <- paste0(f, paste0("L", i), paste0("A", j), " + ")
-        }
-      }
-      if(covariates)
-        return(formula(paste0(f, "COV + L1COV + A1COV + L1A1COV")))
-      else
-        return(formula(substr(f, 1 , nchar(f)  - 3)))
-    }else{
-      for(i in 1:k){
-        f <- paste0(f, paste0("L", i), " + ")
-      }
+    if (covariates) {
+      return(formula(paste0(f, "COV + L1COV + A1COV + L1A1COV")))
+    } else {
+      return(formula(substr(f, 1, nchar(f) - 3)))
+    }
+  } else {
+    f <- paste0(f, paste0(paste0("L", 1:k), collapse = " + "), " + ")
 
-      if(covariates)
-        return(formula(paste0(f, "COV + L1COV")))
-      else
-        return(formula(substr(f, 1 , nchar(f)  - 3)))
+    if (covariates) {
+      return(formula(paste0(f, "COV + L1COV")))
+    } else {
+      return(formula(substr(f, 1, nchar(f) - 3)))
     }
   }
+}
