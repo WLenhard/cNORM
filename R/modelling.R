@@ -131,7 +131,7 @@ bestModel <- function(data,
 
   if (is.null(t)){
     if(is.null(attr(data, "t"))){
-      t <- k
+      t <- 3
     }else if(!is.null(attr(data, "t"))){
       t <- attr(data, "t")
     }
@@ -150,7 +150,7 @@ bestModel <- function(data,
   }
 
   if ((k < 1 || k > 6) & is.null(predictors)) {
-    warning("k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 4.")
+    warning("k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 5.")
     k <- 5
   }
 
