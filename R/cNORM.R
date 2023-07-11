@@ -247,6 +247,10 @@ cnorm <- function(raw = NULL,
                   terms = 0,
                   R2 = NULL){
 
+  if(!is.null(group)&&!is.null(age)){
+    warning("Specifying both 'group' as well as 'age' is discouraged.")
+  }
+
   if(is.null(k)&&is.null(t)){
     k <- 5
     t <- 3

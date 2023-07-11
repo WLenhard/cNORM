@@ -3,6 +3,16 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 3.0.4
+Date: in progress
+
+
+Changes:
+
+*    Added warning in 'cnorm' in case, both age and group is specified
+
+
+
 ### Version in 3.0.3
 Date: 2023.05.22
 
