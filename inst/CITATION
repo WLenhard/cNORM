@@ -71,19 +71,19 @@ bibentry(bibtype = "Article",
   url          = "https://doi.org/10.1177/10731911231153832",
 
   textVersion  =
-  paste("Gary, S., Lenhard, A., Lenhard, W., & Herzberg, D. S. (2023). Reducing the Bias of Norm Scores in Non-Representative Samples: Weighting as an Adjunct to Continuous Norming Methods. Assessment, 0(0). https://doi.org/10.1177/10731911231153832")
+  paste("Gary, S., Lenhard, A., Lenhard, W., & Herzberg, D. S. (2023). Reducing the Bias of Norm Scores in Non-Representative Samples: Weighting as an Adjunct to Continuous Norming Methods. Assessment. https://doi.org/10.1177/10731911231153832")
 )
 
 bibentry(bibtype = "Article",
   title        = "A tutorial on automatic post-stratification and weighting in conventional and regression-based norming of psychometric tests",
   author       = c(as.person("Sebastian Gary"), as.person("Wolfgang Lenhard"), as.person("Alexandra Lenhard"), as.person("David S. Herzberg")),
   journal      = "Behavioral Research Methods",
-  year         = "submitted",
+  year         = "2023",
   volume       = "Online First",
   number       = "",
   pages        = "",
-  url          = "",
+  url          = "https://doi.org/10.3758/s13428-023-02207-0",
 
   textVersion  =
-  paste("Gary, S., Lenhard, W., Lenhard, A. & Herzberg, D. (submitted). A tutorial on automatic post-stratification and weighting in conventional and regression-based norming of psychometric tests. Behavioral Research Methods.")
+  paste("Gary, S., Lenhard, W., Lenhard, A. et al. A tutorial on automatic post-stratification and weighting in conventional and regression-based norming of psychometric tests. Behav Res (2023). https://doi.org/10.3758/s13428-023-02207-0")
 )

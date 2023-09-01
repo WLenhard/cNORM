@@ -29,10 +29,10 @@ Description: Conventional methods for producing standard scores or percentiles
     and to mitigate violations of representativeness. An online demonstration is 
     available via <https://cnorm.shinyapps.io/cNORM/>.
 Depends:
-    R (>= 4.0.0)
+    R (>= 4.3.1)
 Imports:
-    lattice (>= 0.20),
-    leaps (>= 3.0), latticeExtra (>= 0.6)
+    lattice (>= 0.21),
+    leaps (>= 3.1), latticeExtra (>= 0.6)
 Suggests: 
     knitr,
     shiny,
