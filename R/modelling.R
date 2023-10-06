@@ -1113,7 +1113,7 @@ cnorm.cv <-
           d <- d[sample(nrow(d)), ]
           number <- nrow(d) / 10 * 8
           train <- d[1:number,]
-          test <- d[number + 1:nrow(d),]
+          test <- d[(number + 1):nrow(d),]
 
 
           p.value <- t.test(train[, age], test[, age])$p.value
@@ -1128,7 +1128,8 @@ cnorm.cv <-
               age = age,
               raw = raw,
               weights = weights,
-              width = width
+              width = width,
+              silent = TRUE
             )
           test <-
             rankBySlidingWindow(
@@ -1136,20 +1137,13 @@ cnorm.cv <-
               age = age,
               raw = raw,
               weights = weights,
-              width = width
+              width = width,
+              silent = TRUE
             )
 
           train <-
             computePowers(
               train,
-              age = age,
-              k = k,
-              t = t,
-              silent = TRUE
-            )
-          test <-
-            computePowers(
-              test,
               age = age,
               k = k,
               t = t,
@@ -1219,13 +1213,15 @@ cnorm.cv <-
                         train[, age],
                         model,
                         min(train$normValue),
-                        max(train$normValue))
+                        max(train$normValue),
+                        silent = TRUE)
           test$T <-
             predictNorm(test[, raw],
                         test[, age],
                         model,
                         min(train$normValue),
-                        max(train$normValue))
+                        max(train$normValue),
+                        silent = TRUE)
 
           r2.train[i] <-
             r2.train[i] + (cor(train$normValue, train$T, use = "pairwise.complete.obs") ^
@@ -1252,6 +1248,27 @@ cnorm.cv <-
         nvmax = n.models,
         really.big = n.models > 25
       )
+
+    if (is.null(weights))
+      complete <-
+      regsubsets(
+        lmX,
+        data = d,
+        nbest = 1,
+        nvmax = n.models,
+        really.big = n.models > 25
+      )
+    else
+      complete <-
+      regsubsets(
+        lmX,
+        data = d,
+        nbest = 1,
+        nvmax = n.models,
+        really.big = n.models > 25,
+        weights = weights
+      )
+
     for (i in 1:max) {
       variables <- names(coef(complete, id = i))
       variables <- variables[2:length(variables)]

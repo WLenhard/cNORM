@@ -198,6 +198,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
+#' @param silent set to TRUE to suppress messages
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
@@ -226,7 +227,8 @@ rankByGroup <-
            descend = FALSE,
            descriptives = TRUE,
            covariate = NULL,
-           na.rm = TRUE) {
+           na.rm = TRUE,
+           silent = FALSE) {
 
     # experimental code to include covariates
     # covariate <- NULL
@@ -269,13 +271,15 @@ rankByGroup <-
       if(is.character(weights)){
 
         if(!(weights %in% colnames(d))){
-          warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+          if(!silent)
+            warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+
           weights <- NULL
           }else{
           weighting <- d[, weights]
         }
         }else{
-          if(length(weights)!=nrow(d)){
+          if(length(weights)!=nrow(d) &  !silent){
             warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
 
           }else{
@@ -296,7 +300,9 @@ rankByGroup <-
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
-      cat("Missing values found in grouping or raw score variable... excluding from dataset\n")
+      if(!silent)
+        cat("Missing values found in grouping or raw score variable... excluding from dataset\n")
+
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]
     }
@@ -312,19 +318,19 @@ rankByGroup <-
     }
 
     # check if columns exist
-    if ((typeof(group) != "logical") && !(group %in% colnames(d))) {
+    if ((typeof(group) != "logical") & !(group %in% colnames(d)) & !silent) {
       stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
     }
 
-    if (!(raw %in% colnames(d))) {
+    if (!(raw %in% colnames(d)) & !silent) {
       stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
     }
 
-    if ((typeof(group) != "logical") && !is.numeric(d[, group])) {
+    if ((typeof(group) != "logical") & !is.numeric(d[, group]) & !silent) {
       warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
     }
 
-    if (!is.numeric(d[, raw])) {
+    if (!is.numeric(d[, raw]) & !silent) {
       warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
     }
 
@@ -374,12 +380,13 @@ rankByGroup <-
         }
       }
     } else {
-      variance <- cor(d$raw, d$COV, method="kendall")^2
-      if(variance < .1){
+      variance <- cor(d$raw, d$COV)^2
+      if(variance < .1 & !silent){
         warning(paste0("The covariate explains only a share of ", round(variance, digits = 4) ," of the variance of the raw score variable. This share is likely not relevant enough to be included in the modeling."))
       }
 
-      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
+      if(!silent)
+        warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
 
       if (typeof(group) == "logical" && !group) {
             cat("No grouping variable specified. Ranking without grouping ...")
@@ -469,12 +476,14 @@ rankByGroup <-
     if(na.rm){
       naPerc <- sum(is.na(d$percentile))
       if(naPerc>0){
-        message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+        if(!silent)
+          message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+
         d <- d[!is.na(d$percentile), ]
       }
     }
 
-    if (descriptives && min(d$n) < 30) {
+    if (descriptives & min(d$n) < 30 & !silent) {
       warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modeling, it might help to reduce the 'k' parameter."))
     }
 
@@ -544,6 +553,7 @@ rankByGroup <-
 #' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
+#' @param silent set to TRUE to suppress messages
 #' @return the dataset with the individual percentiles and norm scores
 #'
 #' @examples
@@ -571,7 +581,8 @@ rankBySlidingWindow <- function(data = NULL,
                                 nGroup = 0,
                                 group = NA,
                                 covariate = NULL,
-                                na.rm = TRUE) {
+                                na.rm = TRUE,
+                                silent = FALSE) {
 
   # experimental code to include covariates
   # covariate <- NULL
@@ -602,13 +613,15 @@ rankBySlidingWindow <- function(data = NULL,
     if(is.character(weights)){
 
       if(!(weights %in% colnames(d))){
-        warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+        if(!silent)
+          warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+
         weights <- NULL
       }else{
         weighting <- d[, weights]
       }
     }else{
-      if(length(weights)!=nrow(data)){
+      if(length(weights)!=nrow(data)  & !silent){
         warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
 
       }else{
@@ -622,14 +635,18 @@ rankBySlidingWindow <- function(data = NULL,
   if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
     d$COV <- covariate
     covariate <- "COV"
-    warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
+
+    if(!silent)
+      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
   }else if (!is.null(covariate)&&!is.numeric(covariate)) {
     d$COV <- d[, covariate]
     covariate <- "COV"
   }
 
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
-    cat("Missing values found in raw score or age variable... excluding from dataset\n")
+    if(!silent)
+      cat("Missing values found in raw score or age variable... excluding from dataset\n")
+
     d <- d[!is.na(d[, raw]), ]
     d <- d[!is.na(d[, age]), ]
   }
@@ -643,11 +660,11 @@ rankBySlidingWindow <- function(data = NULL,
     stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
   }
 
-  if (!is.numeric(d[, age])) {
+  if (!is.numeric(d[, age]) & !silent) {
     warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
   }
 
-  if (!is.numeric(d[, raw])) {
+  if (!is.numeric(d[, raw]) & !silent) {
     warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
   }
 
@@ -779,12 +796,14 @@ rankBySlidingWindow <- function(data = NULL,
   if(na.rm){
     naPerc <- sum(is.na(d$percentile))
     if(naPerc>0){
-      message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+      if(!silent)
+        message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+
       d <- d[!is.na(d$percentile), ]
     }
   }
 
-  if (descriptives && min(d$n) < 30) {
+  if (descriptives & min(d$n) < 30 & !silent) {
     warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."))
   }
   return(d)

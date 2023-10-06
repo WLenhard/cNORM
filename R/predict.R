@@ -662,6 +662,7 @@ derivationTable <-
 #' @param force Try to resolve missing norm scores in case of inconsistent models
 #' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
 #' the specific value here.
+#' @param silent set to TRUE to suppress messages
 #' @return The predicted norm score for a raw score, either single value or vector
 #' @examples
 #' # Generate cnorm object from example data
@@ -680,7 +681,9 @@ predictNorm <-
              A,
              model,
              minNorm = NULL,
-             maxNorm = NULL, force = FALSE, covariate = NULL) {
+             maxNorm = NULL, force = FALSE,
+             covariate = NULL,
+             silent = FALSE) {
 
     if(length(raw)==1&&is.na(raw)){
       return(rep(NA, times=length(A)))
@@ -720,7 +723,8 @@ predictNorm <-
 
 
     if(!is.null(covariate)&&is.null(model$covariate)){
-      warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
+      if(!silent)
+        warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
       covariate = NULL
     }else if(is.null(covariate)&&!is.null(model$covariate)){
       stop("Covariate specified in the model, but no function parameter available.")
@@ -767,7 +771,8 @@ predictNorm <-
       normTable <- normTable[!duplicated(normTable[,c('hash')]),]
 
       if(nrow(normTable)>500){
-        cat("Retrieving norm scores, please stand by ...\n")
+        if(!silent)
+          cat("Retrieving norm scores, please stand by ...\n")
       }
       raw2 <- normTable$raw
       A2 <- normTable$A

@@ -17,7 +17,8 @@ rankBySlidingWindow(
   nGroup = 0,
   group = NA,
   covariate = NULL,
-  na.rm = TRUE
+  na.rm = TRUE,
+  silent = FALSE
 )
 }
 \arguments{
@@ -65,6 +66,8 @@ Not all subsequent functions are already prepared for it.  It is an experimental
 
 \item{na.rm}{remove values, where the percentiles could not be estimated,
 most likely happens in the context of weighting}
+
+\item{silent}{set to TRUE to suppress messages}
 }
 \value{
 the dataset with the individual percentiles and norm scores

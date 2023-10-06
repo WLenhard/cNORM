@@ -11,7 +11,8 @@ predictNorm(
   minNorm = NULL,
   maxNorm = NULL,
   force = FALSE,
-  covariate = NULL
+  covariate = NULL,
+  silent = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ predictNorm(
 
 \item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
 the specific value here.}
+
+\item{silent}{set to TRUE to suppress messages}
 }
 \value{
 The predicted norm score for a raw score, either single value or vector

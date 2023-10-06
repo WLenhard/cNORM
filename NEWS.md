@@ -11,6 +11,7 @@ Changes:
 
 *    Added warning in 'cnorm' in case, both age and group is specified
 *    extended cnorm.cv for use of weights and sliding window
+*    added silent option to several functions to reduced the number of messages
 
 
 
