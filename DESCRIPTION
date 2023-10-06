@@ -3,7 +3,7 @@ Type: Package
 Title: Continuous Norming
 Version: 3.0.4
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Date: 2023-07-11
+Date: 2023-10-06
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
     email="lenhard@psychometrica.de", comment=c(ORCID = "0000-0001-8680-4381")), 
     person("Wolfgang", "Lenhard", role = c("cre","aut"), 
@@ -29,7 +29,7 @@ Description: Conventional methods for producing standard scores or percentiles
     and to mitigate violations of representativeness. An online demonstration is 
     available via <https://cnorm.shinyapps.io/cNORM/>.
 Depends:
-    R (>= 4.3.1)
+    R (>= 4.2.0)
 Imports:
     lattice (>= 0.21),
     leaps (>= 3.1), latticeExtra (>= 0.6)

@@ -10,6 +10,7 @@ Date: in progress
 Changes:
 
 *    Added warning in 'cnorm' in case, both age and group is specified
+*    extended cnorm.cv for use of weights and sliding window
 
 
 

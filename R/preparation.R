@@ -296,7 +296,7 @@ rankByGroup <-
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
-      cat("Missing values found in grouping or raw score variable... excluding from dataset")
+      cat("Missing values found in grouping or raw score variable... excluding from dataset\n")
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]
     }
@@ -629,7 +629,7 @@ rankBySlidingWindow <- function(data = NULL,
   }
 
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
-    cat("Missing values found in raw score or age variable... excluding from dataset")
+    cat("Missing values found in raw score or age variable... excluding from dataset\n")
     d <- d[!is.na(d[, raw]), ]
     d <- d[!is.na(d[, age]), ]
   }
@@ -837,10 +837,10 @@ rankBySlidingWindow <- function(data = NULL,
 #' @family prepare
 computePowers <-
   function(data,
-             k = 4,
+             k = 5,
              norm = NULL,
              age = NULL,
-             t = NULL,
+             t = 3,
              covariate = NULL,
              silent = FALSE) {
     d <- as.data.frame(data)

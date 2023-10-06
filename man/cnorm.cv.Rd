@@ -16,7 +16,8 @@ cnorm.cv(
   width = NA,
   raw = NA,
   group = NA,
-  age = NA
+  age = NA,
+  weights = NULL
 )
 }
 \arguments{
@@ -51,6 +52,8 @@ has to reach at least. To minimize beta error, the value is set to .2 per defaul
 \item{group}{Name of the grouping variable}
 
 \item{age}{Name of the age variable}
+
+\item{weights}{an optional weighting parameter}
 }
 \value{
 table with results per term number, including RMSE for raw scores in training, validation and complete

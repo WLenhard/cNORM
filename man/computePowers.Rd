@@ -7,10 +7,10 @@ location l (data preparation)}
 \usage{
 computePowers(
   data,
-  k = 4,
+  k = 5,
   norm = NULL,
   age = NULL,
-  t = NULL,
+  t = 3,
   covariate = NULL,
   silent = FALSE
 )
