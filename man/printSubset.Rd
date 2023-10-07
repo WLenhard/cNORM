@@ -2,25 +2,24 @@
 % Please edit documentation in R/modelling.R
 \name{printSubset}
 \alias{printSubset}
-\title{Convenience method for printing model selection information}
+\title{Print Model Selection Information}
 \usage{
 printSubset(x, ...)
 }
 \arguments{
-\item{x}{The model from the 'bestModel' function or a cnorm object}
+\item{x}{Model output from 'bestModel' or a cnorm object.}
 
-\item{...}{additional parameters}
+\item{...}{Additional parameters.}
 }
 \value{
-A table with information criteria
+Table with model information criteria.
 }
 \description{
-After conducting the model fitting procedure on the data set, the best fitting
-model has to be chosen. The print function shows the R2 and other information
-on the different best fitting models with increasing number of predictors.
+Displays R^2 and other metrics for models with varying predictors, aiding in choosing the best-fitting model
+after model fitting.
 }
 \examples{
-# Generate cnorm object from example data
+# Using cnorm object from sample data
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 printSubset(result)
 }

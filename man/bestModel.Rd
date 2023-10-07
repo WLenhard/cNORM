@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelling.R
 \name{bestModel}
 \alias{bestModel}
-\title{Retrieve the best fitting regression model based on powers of A, L and interactions}
+\title{Best-fitting Regression Model Based on Powers and Interactions}
 \usage{
 bestModel(
   data,
@@ -18,108 +18,65 @@ bestModel(
 )
 }
 \arguments{
-\item{data}{The preprocessed dataset, which should include the variables 'raw'
-and the powers and interactions of the norm score (L = Location; usually T scores)
-and an explanatory variably (usually age = A)}
+\item{data}{Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).}
 
-\item{raw}{the name of the raw score variable (default raw)}
+\item{raw}{Name of the raw score variable (default: 'raw').}
 
-\item{R2}{Adjusted R square as a stopping criterion for the model building
-(default R2 = 0.99)}
+\item{R2}{Adjusted R^2 stopping criterion for model building (default: 0.99).}
 
-\item{k}{The power constant. Higher values result in more detailed approximations
-but have the danger of over-fit (default = 4, max = 6)}
+\item{k}{Power constant influencing model complexity (default: 4, max: 6).}
 
-\item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k}
+\item{t}{Age power parameter. If unset, defaults to `k`.}
 
-\item{predictors}{List of the names of predictors or regression formula to use for the model selection.
-The parameter overrides the 'k' parameter and it can be used to preselect the
-variables entering the regression, or even to add variables like sex, that are
-not part of the original model building. Please note, that adding other variables
-than those based on L and A, plotting, prediction and normTable function will most
-likely not work, but at least the regression formula can be obtained that way.
-The parameter as well accepts a formula object, f. e. when applying a pre computed
-model to a new dataset. In this case, k is as well overridden. In order to include all
-predictors in the regression, you might want to adjust the terms parameter to the number
-of predictors as well.}
+\item{predictors}{List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.}
 
-\item{terms}{Selection criterion for model building. The best fitting model with
-this number of terms is used}
+\item{terms}{Desired number of terms in the model.}
 
-\item{weights}{Optional vector with weights for the single cases. By default, if data has been
-weighting in ranking, these weights are reused here as well. Please set to FALSE to deactivate
-this behavior. All weights have to be positive and no missings are allowed. Otherwise
-the weights will be ignored.}
+\item{weights}{Optional case weights. If set to FALSE, default weights (if any) are ignored.}
 
-\item{force.in}{List of variable names forced into the regression function. This option
-can be used to force the regression to include covariates like sex or other background
-variables. This can be used to model separate norm scales for different groups in order
-the sample. Variables specified here, that are not part of the initial regression function
-resp. list of predictors, are ignored without further notice and thus do not show up in
-the final result. Additionally, all other functions like norm table generation and plotting
-are so far not yet prepared to handle covariates.}
+\item{force.in}{Variables forcibly included in the regression.}
 
-\item{plot}{If set to TRUE (default), the percentile plot of the model is shown}
+\item{plot}{If TRUE (default), displays a percentile plot of the model.}
 }
 \value{
-The model meeting the R2 criteria with coefficients and variable selection
-in model$coefficients. Use \code{plotSubset(model)} and
-\code{plotPercentiles(data, model)} to inspect model
+The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 }
 \description{
-The function computes a series of regressions with an increasing number of predictors and
-takes the best fitting model per step. The aim is to find a model with as few predictors
-as possible, which at the same time manages to explain as much variance as possible from
-the original data. In psychometric test construction, this approach can be used to smooth
-the data and eliminate noise from norm sample stratification, while preserving the overall
-diagnostic information. Values around R2 = .99 usually show excellent results. The selection
-of the model can either be based on the number of terms in the regression functions or the
-share of explained variance of the model (R2). If both are specified, first the method tries
-to select the model based on the number of terms and in case, this does not work, use R2
-instead. Pushing R2 by setting the number of terms, the R2 cut off and k to high values
-might lead to on over-fit, so be careful! These parameters depend on the distribution of
-the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
-for the analyses.
-\code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
-Use \code{checkConsistency(model)} to check the model for violations. \code{cnorm.cv} can help
-in identifying the ideal number of predictors.
+Computes and selects the best-fitting regression model by evaluating a series of models with increasing predictors.
+It aims to find a parsimonious model that effectively captures the variance in the data. This can be useful in
+psychometric test construction to smooth out data and reduce noise while retaining key diagnostic information.
+Model selection can be based on the number of terms or the explained variance (R^2). Setting high values for the
+number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended starting points are `terms = 5`,
+`R^2 = .99`, and `k = 4`.
+}
+\details{
+Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
 }
 \examples{
 \dontrun{
-# Standard example with sample data
+# Example with sample data
 normData <- prepareData(elfe)
 model <- bestModel(normData)
 plotSubset(model)
 plotPercentiles(normData, model)
 
-# It is possible to specify the variables explicitly - useful to smuggle
-# in variables like sex
+# Specifying variables explicitly
 preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 print(regressionFunction(preselectedModel))
 
-# Example for modeling based on continuous age variable and raw variable,
-# based on the CDC data. We use the default k=4 parameter; raw variable has
-# to be set to "bmi".
+# Modeling based on the CDC data
 bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
 bmi.model <- bestModel(bmi.data, raw = "bmi")
 printSubset(bmi.model)
 
-# Use the formula of the pre calculated bmi data to compute models for girls and
-# boys seperately
+# Using a precomputed model formula for gender-specific models
 bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
 bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
 
-
-# Custom list of predictors (based on k = 3) and forcing in the sex variable
-# While calculating the regression model works well, all other functions like
-# plotting and norm table generation are not yet prepared to use covariates
+# Using a custom list of predictors and incorporating the 'sex' variable
 bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
-  "L1", "L2", "L3",
-  "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-  "L2A3", "L3A1", "L3A2", "L3A3", "sex"
-), force.in = c("sex"))
+  "L1", "L3", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+  "L2A3", "L3A1", "L3A2", "L3A3", "sex", force.in = c("sex"))
 }
 }
 \seealso{

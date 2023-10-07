@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelling.R
 \name{cnorm.cv}
 \alias{cnorm.cv}
-\title{Cross validation for term selection}
+\title{Cross-validation for Term Selection in cNORM}
 \usage{
 cnorm.cv(
   data,
@@ -21,101 +21,85 @@ cnorm.cv(
 )
 }
 \arguments{
-\item{data}{data frame of norm sample with ranking, powers and interaction of L and A or a cnorm object}
+\item{data}{Data frame of norm sample or a cnorm object. Should have ranking, powers, and interaction of L and A.}
 
-\item{formula}{prespecified formula, e. g. from an existing regression model; min and max functions will be ignored
-In case a cnorm object is used, this functions automatically draws on the formula of the inbuilt regression
-function}
+\item{formula}{Formula from an existing regression model; min/max functions ignored. If using a cnorm object, this is automatically fetched.}
 
-\item{repetitions}{number of repetitions for cross validation}
+\item{repetitions}{Number of repetitions for cross-validation.}
 
-\item{norms}{determine norm score crossfit and R2 (if set to TRUE). The option is
-computationally intensive and duration increases with sample size, number of
-repetitions and maximum number of terms (max option).}
+\item{norms}{If TRUE, computes norm score crossfit and R^2. Note: Computationally intensive.}
 
-\item{min}{Minimum number of terms to start from, default = 1}
+\item{min}{Start with a minimum number of terms (default = 1).}
 
-\item{max}{Maximum number of terms in model up to 2*k + k^2}
+\item{max}{Maximum terms in model, up to (k + 1) * (t + 1) - 1.}
 
-\item{cv}{If set to full (default), the data is split into training and validation data and ranked afterwards,
-otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
-only the modeling, but not the ranking is independent)}
+\item{cv}{"full" (default) splits data into training/validation, then ranks. Otherwise, expects a pre-ranked dataset.}
 
-\item{pCutoff}{The function checks the stratification for unbalanced data sampling.
-It performs a t-test per group. pCutoff specifies the p-value per group that the test result
-has to reach at least. To minimize beta error, the value is set to .2 per default}
+\item{pCutoff}{Checks stratification for unbalanced data. Performs a t-test per group. Default set to 0.2 to minimize beta error.}
 
-\item{width}{If provided, ranking is done via rankBySlidingWindow, otherwise by group}
+\item{width}{If provided, ranking done via `rankBySlidingWindow`. Otherwise, by group.}
 
-\item{raw}{Name of the raw variable}
+\item{raw}{Name of the raw score variable.}
 
-\item{group}{Name of the grouping variable}
+\item{group}{Name of the grouping variable.}
 
-\item{age}{Name of the age variable}
+\item{age}{Name of the age variable.}
 
-\item{weights}{Name of the weighting parameter}
+\item{weights}{Name of the weighting parameter.}
 }
 \value{
-table with results per term number, including RMSE for raw scores in training, validation and complete
-sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
+Table with results per term number: RMSE for raw scores, R^2 for norm scores, and crossfit measure.
 }
 \description{
-This function helps in selecting the number of terms for the model by doing repeated
-Monte Carlo cross validation with 80 percent of the data as training data and 20 percent as
-the validation data. The cases are drawn randomly but stratified by norm group. Successive
-models are retrieved with increasing number of terms and the RMSE of raw scores (fitted by
-the regression model) is plotted for the training, validation and the complete dataset.
-Additionally to this analysis on the raw score level, it is possible (default) to estimate
-the mean norm score reliability and crossfit measures. For this, please set the norms parameter
-to TRUE. Due to the high computational load when computing norm scores, it takes time to finish
-when doing repeated cv or comparing models up to the maximum number of terms. When using
-the cv = "full" option, the ranking is done for the test and validation dataset
-separately (always based on T scores), resulting in a complete cross validation. In
-order to only validate the modeling, you as well can use a pre-ranked data set with
-prepareData(elfe) already applied. In this case, the training and validation data is
-drawn from the already ranked data and the scores for the validation set should improve.
-It is however no independent test, as the ranking between both samples is interlinked.
-In the output, you will get RMSE for the raw score models, norm score R2 and delta R2, the crossfit
-and the norm score SE sensu Oosterhuis, van der Ark, & Sijtsma (2016).
-For assessing, if a model over-fits the data and to what extent, we need cross-validation. We assumed
-that an overfitting occurred when a model captures more variance of the observed norm scores of the
-training sample compared to the captured variance of the norm scores of the validation sample. The
-overfit can therefore be described as:
+Assists in determining the optimal number of terms for the regression model using repeated Monte Carlo
+cross-validation. It leverages an 80-20 split between training and validation data, with stratification by norm group
+or random sample in case of using sliding window ranking.
+}
+\details{
+Successive models, with an increasing number of terms, are evaluated, and the RMSE for raw scores plotted. This
+encompasses the training, validation, and entire dataset. If `norms` is set to TRUE (default), the function will also
+calculate the mean norm score reliability and crossfit measures. Note that due to the computational requirements
+of norm score calculations, execution can be slow, especially with numerous repetitions or terms.
+
+When `cv` is set to "full" (default), both test and validation datasets are ranked separately, providing comprehensive
+cross-validation. For a more streamlined validation process focused only on modeling, a pre-ranked dataset can be used.
+The output comprises RMSE for raw score models, norm score R^2, delta R^2, crossfit, and the norm score SE according
+to Oosterhuis, van der Ark, & Sijtsma (2016).
+
+For assessing overfitting:
 \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
-A CROSSFIT higher than 1 is a sign of overfitting. Value lower than 1 indicate an underfit due to a
-suboptimal modeling procedure, i. e. the method may not have captured all the variance of the observed
-data it could possibly capture. Values around 1 are ideal, as long as the raw score RMSE is low and the
-norm score validation R2 reaches high levels. As a suggestion for real tests:
+A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and values around 1 are optimal,
+given a low raw score RMSE and high norm score validation R^2.
+
+Suggestions for ideal model selection:
 \itemize{
-  \item Use visual inspection of the percentiles with plotPercentiles or plotPercentileSeries
-  \item Combine the visual inspection of the percentiles with a repeated cross validation (e. g. 10 repetitions)
-  \item Focus on low raw score RMSE, high norm score R2 in the validation dataset and
-avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
+  \item Visual inspection of percentiles with `plotPercentiles` or `plotPercentileSeries`.
+  \item Pair visual inspection with repeated cross-validation (e.g., 10 repetitions).
+  \item Aim for low raw score RMSE and high norm score R^2, avoiding terms with significant overfit (e.g., crossfit > 1.1).
 }
 }
 \examples{
-# plot cross validation RMSE by number of terms up to 9 with three repetitions
+# Example: Plot cross-validation RMSE by number of terms (up to 9) with three repetitions.
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 
-# Applying the function to a cnorm object only investigates the already
-# determined formula
+# Using a cnorm object examines the predefined formula.
 cnorm.cv(result, repetitions = 1)
 
-# To use the cross validation without a cnorm model, please rank data first and
-# compute powers:
+# For cross-validation without a cnorm model, rank data first and compute powers:
 data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 data <- computePowers(data)
 cnorm.cv(data)
 
-# Formulae can be specified deliberately as well:
+# Specify formulas deliberately:
 data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 data <- computePowers(data)
 cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
 
 }
 \references{
-Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
+and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 }
 \seealso{
 Other model: 

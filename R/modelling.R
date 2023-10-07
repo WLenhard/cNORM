@@ -1,94 +1,50 @@
-#' Retrieve the best fitting regression model based on powers of A, L and interactions
+#' Best-fitting Regression Model Based on Powers and Interactions
 #'
-#' The function computes a series of regressions with an increasing number of predictors and
-#' takes the best fitting model per step. The aim is to find a model with as few predictors
-#' as possible, which at the same time manages to explain as much variance as possible from
-#' the original data. In psychometric test construction, this approach can be used to smooth
-#' the data and eliminate noise from norm sample stratification, while preserving the overall
-#' diagnostic information. Values around R2 = .99 usually show excellent results. The selection
-#' of the model can either be based on the number of terms in the regression functions or the
-#' share of explained variance of the model (R2). If both are specified, first the method tries
-#' to select the model based on the number of terms and in case, this does not work, use R2
-#' instead. Pushing R2 by setting the number of terms, the R2 cut off and k to high values
-#' might lead to on over-fit, so be careful! These parameters depend on the distribution of
-#' the norm data. As a rule of thumb, terms = 5 or R2 = .99 and k = 4 is a good starting point
-#' for the analyses.
-#' \code{plotSubset(model)} can be used to weigh up R2 and information criteria (Cp, an AIC like measure)
-#' and fitted versus manifest scores can be plotted with 'plotRaw', 'plotNorm' and 'plotPercentiles'.
-#' Use \code{checkConsistency(model)} to check the model for violations. \code{cnorm.cv} can help
-#' in identifying the ideal number of predictors.
+#' Computes and selects the best-fitting regression model by evaluating a series of models with increasing predictors.
+#' It aims to find a parsimonious model that effectively captures the variance in the data. This can be useful in
+#' psychometric test construction to smooth out data and reduce noise while retaining key diagnostic information.
+#' Model selection can be based on the number of terms or the explained variance (R^2). Setting high values for the
+#' number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended starting points are `terms = 5`,
+#' `R^2 = .99`, and `k = 4`.
 #'
-#' @param data The preprocessed dataset, which should include the variables 'raw'
-#'  and the powers and interactions of the norm score (L = Location; usually T scores)
-#'  and an explanatory variably (usually age = A)
-#' @param raw the name of the raw score variable (default raw)
-#' @param terms Selection criterion for model building. The best fitting model with
-#' this number of terms is used
-#' @param R2 Adjusted R square as a stopping criterion for the model building
-#' (default R2 = 0.99)
-#' @param k The power constant. Higher values result in more detailed approximations
-#' but have the danger of over-fit (default = 4, max = 6)
-#' @param t the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-#' can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k
-#' @param predictors List of the names of predictors or regression formula to use for the model selection.
-#' The parameter overrides the 'k' parameter and it can be used to preselect the
-#' variables entering the regression, or even to add variables like sex, that are
-#' not part of the original model building. Please note, that adding other variables
-#' than those based on L and A, plotting, prediction and normTable function will most
-#' likely not work, but at least the regression formula can be obtained that way.
-#' The parameter as well accepts a formula object, f. e. when applying a pre computed
-#' model to a new dataset. In this case, k is as well overridden. In order to include all
-#' predictors in the regression, you might want to adjust the terms parameter to the number
-#' of predictors as well.
-#' @param force.in List of variable names forced into the regression function. This option
-#' can be used to force the regression to include covariates like sex or other background
-#' variables. This can be used to model separate norm scales for different groups in order
-#' the sample. Variables specified here, that are not part of the initial regression function
-#' resp. list of predictors, are ignored without further notice and thus do not show up in
-#' the final result. Additionally, all other functions like norm table generation and plotting
-#' are so far not yet prepared to handle covariates.
-#' @param weights Optional vector with weights for the single cases. By default, if data has been
-#' weighting in ranking, these weights are reused here as well. Please set to FALSE to deactivate
-#' this behavior. All weights have to be positive and no missings are allowed. Otherwise
-#' the weights will be ignored.
-#' @param plot If set to TRUE (default), the percentile plot of the model is shown
-#' @return The model meeting the R2 criteria with coefficients and variable selection
-#' in model$coefficients. Use \code{plotSubset(model)} and
-#' \code{plotPercentiles(data, model)} to inspect model
+#' Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
+#'
+#' @param data Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).
+#' @param raw Name of the raw score variable (default: 'raw').
+#' @param terms Desired number of terms in the model.
+#' @param R2 Adjusted R^2 stopping criterion for model building (default: 0.99).
+#' @param k Power constant influencing model complexity (default: 4, max: 6).
+#' @param t Age power parameter. If unset, defaults to `k`.
+#' @param predictors List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.
+#' @param force.in Variables forcibly included in the regression.
+#' @param weights Optional case weights. If set to FALSE, default weights (if any) are ignored.
+#' @param plot If TRUE (default), displays a percentile plot of the model.
+#' @return The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
 #' \dontrun{
-#' # Standard example with sample data
+#' # Example with sample data
 #' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' plotSubset(model)
 #' plotPercentiles(normData, model)
 #'
-#' # It is possible to specify the variables explicitly - useful to smuggle
-#' # in variables like sex
+#' # Specifying variables explicitly
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
 #'
-#' # Example for modeling based on continuous age variable and raw variable,
-#' # based on the CDC data. We use the default k=4 parameter; raw variable has
-#' # to be set to "bmi".
+#' # Modeling based on the CDC data
 #' bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
 #' bmi.model <- bestModel(bmi.data, raw = "bmi")
 #' printSubset(bmi.model)
 #'
-#' # Use the formula of the pre calculated bmi data to compute models for girls and
-#' # boys seperately
+#' # Using a precomputed model formula for gender-specific models
 #' bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
 #' bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
 #'
-#'
-#' # Custom list of predictors (based on k = 3) and forcing in the sex variable
-#' # While calculating the regression model works well, all other functions like
-#' # plotting and norm table generation are not yet prepared to use covariates
+#' # Using a custom list of predictors and incorporating the 'sex' variable
 #' bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
-#'   "L1", "L2", "L3",
-#'   "A1", "A2", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-#'   "L2A3", "L3A1", "L3A2", "L3A3", "sex"
-#' ), force.in = c("sex"))
+#'   "L1", "L3", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
+#'   "L2A3", "L3A1", "L3A2", "L3A3", "sex", force.in = c("sex"))
 #' }
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
@@ -407,18 +363,17 @@ bestModel <- function(data,
 }
 
 
-#' Convenience method for printing model selection information
+#' Print Model Selection Information
 #'
-#' After conducting the model fitting procedure on the data set, the best fitting
-#' model has to be chosen. The print function shows the R2 and other information
-#' on the different best fitting models with increasing number of predictors.
-#' @param x The model from the 'bestModel' function or a cnorm object
-#' @param ... additional parameters
-#' @return A table with information criteria
+#' Displays R^2 and other metrics for models with varying predictors, aiding in choosing the best-fitting model
+#' after model fitting.
+#' @param x Model output from 'bestModel' or a cnorm object.
+#' @param ... Additional parameters.
+#' @return Table with model information criteria.
 #' @export
 #'
 #' @examples
-#' # Generate cnorm object from example data
+#' # Using cnorm object from sample data
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' printSubset(result)
 #' @family model
@@ -848,86 +803,71 @@ rangeCheck <-
     return(summary)
   }
 
-#' Cross validation for term selection
+#' Cross-validation for Term Selection in cNORM
 #'
-#' This function helps in selecting the number of terms for the model by doing repeated
-#' Monte Carlo cross validation with 80 percent of the data as training data and 20 percent as
-#' the validation data. The cases are drawn randomly but stratified by norm group. Successive
-#' models are retrieved with increasing number of terms and the RMSE of raw scores (fitted by
-#' the regression model) is plotted for the training, validation and the complete dataset.
-#' Additionally to this analysis on the raw score level, it is possible (default) to estimate
-#' the mean norm score reliability and crossfit measures. For this, please set the norms parameter
-#' to TRUE. Due to the high computational load when computing norm scores, it takes time to finish
-#' when doing repeated cv or comparing models up to the maximum number of terms. When using
-#' the cv = "full" option, the ranking is done for the test and validation dataset
-#' separately (always based on T scores), resulting in a complete cross validation. In
-#' order to only validate the modeling, you as well can use a pre-ranked data set with
-#' prepareData(elfe) already applied. In this case, the training and validation data is
-#' drawn from the already ranked data and the scores for the validation set should improve.
-#' It is however no independent test, as the ranking between both samples is interlinked.
-#' In the output, you will get RMSE for the raw score models, norm score R2 and delta R2, the crossfit
-#' and the norm score SE sensu Oosterhuis, van der Ark, & Sijtsma (2016).
-#' For assessing, if a model over-fits the data and to what extent, we need cross-validation. We assumed
-#' that an overfitting occurred when a model captures more variance of the observed norm scores of the
-#' training sample compared to the captured variance of the norm scores of the validation sample. The
-#' overfit can therefore be described as:
+#' Assists in determining the optimal number of terms for the regression model using repeated Monte Carlo
+#' cross-validation. It leverages an 80-20 split between training and validation data, with stratification by norm group
+#' or random sample in case of using sliding window ranking.
+#'
+#' Successive models, with an increasing number of terms, are evaluated, and the RMSE for raw scores plotted. This
+#' encompasses the training, validation, and entire dataset. If `norms` is set to TRUE (default), the function will also
+#' calculate the mean norm score reliability and crossfit measures. Note that due to the computational requirements
+#' of norm score calculations, execution can be slow, especially with numerous repetitions or terms.
+#'
+#' When `cv` is set to "full" (default), both test and validation datasets are ranked separately, providing comprehensive
+#' cross-validation. For a more streamlined validation process focused only on modeling, a pre-ranked dataset can be used.
+#' The output comprises RMSE for raw score models, norm score R^2, delta R^2, crossfit, and the norm score SE according
+#' to Oosterhuis, van der Ark, & Sijtsma (2016).
+#'
+#' For assessing overfitting:
 #' \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
-#' A CROSSFIT higher than 1 is a sign of overfitting. Value lower than 1 indicate an underfit due to a
-#' suboptimal modeling procedure, i. e. the method may not have captured all the variance of the observed
-#' data it could possibly capture. Values around 1 are ideal, as long as the raw score RMSE is low and the
-#' norm score validation R2 reaches high levels. As a suggestion for real tests:
+#' A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and values around 1 are optimal,
+#' given a low raw score RMSE and high norm score validation R^2.
+#'
+#' Suggestions for ideal model selection:
 #' \itemize{
-#'   \item Use visual inspection of the percentiles with plotPercentiles or plotPercentileSeries
-#'   \item Combine the visual inspection of the percentiles with a repeated cross validation (e. g. 10 repetitions)
-#'   \item Focus on low raw score RMSE, high norm score R2 in the validation dataset and
-#' avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
+#'   \item Visual inspection of percentiles with `plotPercentiles` or `plotPercentileSeries`.
+#'   \item Pair visual inspection with repeated cross-validation (e.g., 10 repetitions).
+#'   \item Aim for low raw score RMSE and high norm score R^2, avoiding terms with significant overfit (e.g., crossfit > 1.1).
 #' }
 #'
-#' @param data data frame of norm sample with ranking, powers and interaction of L and A or a cnorm object
-#' @param formula prespecified formula, e. g. from an existing regression model; min and max functions will be ignored
-#' In case a cnorm object is used, this functions automatically draws on the formula of the inbuilt regression
-#' function
-#' @param repetitions number of repetitions for cross validation
-#' @param norms determine norm score crossfit and R2 (if set to TRUE). The option is
-#' computationally intensive and duration increases with sample size, number of
-#' repetitions and maximum number of terms (max option).
-#' @param min Minimum number of terms to start from, default = 1
-#' @param max Maximum number of terms in model up to (k + 1) * (t + 1) + 1
-#' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
-#' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
-#' only the modeling, but not the ranking is independent)
-#' @param pCutoff The function checks the stratification for unbalanced data sampling.
-#' It performs a t-test per group. pCutoff specifies the p-value per group that the test result
-#' has to reach at least. To minimize beta error, the value is set to .2 per default
-#' @param width If provided, ranking is done via rankBySlidingWindow, otherwise by group
-#' @param raw Name of the raw variable
-#' @param age Name of the age variable
-#' @param group Name of the grouping variable
-#' @param weights Name of the weighting parameter
-#' @return table with results per term number, including RMSE for raw scores in training, validation and complete
-#' sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
+#' @param data Data frame of norm sample or a cnorm object. Should have ranking, powers, and interaction of L and A.
+#' @param formula Formula from an existing regression model; min/max functions ignored. If using a cnorm object, this is automatically fetched.
+#' @param repetitions Number of repetitions for cross-validation.
+#' @param norms If TRUE, computes norm score crossfit and R^2. Note: Computationally intensive.
+#' @param min Start with a minimum number of terms (default = 1).
+#' @param max Maximum terms in model, up to (k + 1) * (t + 1) - 1.
+#' @param cv "full" (default) splits data into training/validation, then ranks. Otherwise, expects a pre-ranked dataset.
+#' @param pCutoff Checks stratification for unbalanced data. Performs a t-test per group. Default set to 0.2 to minimize beta error.
+#' @param width If provided, ranking done via `rankBySlidingWindow`. Otherwise, by group.
+#' @param raw Name of the raw score variable.
+#' @param age Name of the age variable.
+#' @param group Name of the grouping variable.
+#' @param weights Name of the weighting parameter.
+#'
+#' @return Table with results per term number: RMSE for raw scores, R^2 for norm scores, and crossfit measure.
 #' @export
+#'
 #' @examples
-#' # plot cross validation RMSE by number of terms up to 9 with three repetitions
+#' # Example: Plot cross-validation RMSE by number of terms (up to 9) with three repetitions.
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 #'
-#' # Applying the function to a cnorm object only investigates the already
-#' # determined formula
+#' # Using a cnorm object examines the predefined formula.
 #' cnorm.cv(result, repetitions = 1)
 #'
-#' # To use the cross validation without a cnorm model, please rank data first and
-#' # compute powers:
+#' # For cross-validation without a cnorm model, rank data first and compute powers:
 #' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 #' data <- computePowers(data)
 #' cnorm.cv(data)
 #'
-#' # Formulae can be specified deliberately as well:
+#' # Specify formulas deliberately:
 #' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 #' data <- computePowers(data)
 #' cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
 #'
-#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
+#' and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @family model
 cnorm.cv <-
   function(data,
