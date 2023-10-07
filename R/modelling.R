@@ -915,6 +915,13 @@ rangeCheck <-
 #' # Applying the function to a cnorm object only investigates the already
 #' # determined formula
 #' cnorm.cv(result, repetitions = 1)
+#'
+#' To use the cross validation without a cnorm model, please rank data first and
+#' compute powers:
+#' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
+#' data <- computePowers(data)
+#' cnorm.cv(data)
+#'
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @family model
 cnorm.cv <-
@@ -943,9 +950,9 @@ cnorm.cv <-
         pCutoff = .1
     }
 
-    if (!attr(data, "useAge")) {
-      stop("Age variable set to FALSE in dataset. No cross validation possible.")
-    }
+    #if (!attr(data, "useAge")) {
+    #  stop("Age variable set to FALSE in dataset. No cross validation possible.")
+    #}
 
     ## TODO
     if (!is.null(attr(data, "covariate"))) {
@@ -979,11 +986,11 @@ cnorm.cv <-
       age <- attr(d, "age")
     }
 
-    if (is.na(width)) {
+    if (is.na(width) & !is.null(attr(d, "width"))) {
       width <- attr(d, "width")
     }
 
-    if (is.null(group) || (is.na(age) & is.na(width))) {
+    if (is.null(group) || (is.null(age) & is.na(width))) {
       stop(
         "Please provide either a grouping variable or age and width. They are neither available as parameters nor as attributes from data object."
       )
@@ -1441,7 +1448,8 @@ cnorm.cv <-
       ))
       if (norms) {
         best.norm <- which.max(r2.test)
-        best.norm2 <- best.norm + 1
+        FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
+
         cat(paste0(
           "\nNumber of terms with best norm validation R2: ",
           best.norm,
@@ -1451,9 +1459,9 @@ cnorm.cv <-
         cat(
           paste0(
             "Choosing a model with ",
-            best.norm, " or ", best.norm2,
+            FirstNegative,
             " terms might be a good choice. For this, use the parameter 'terms = ",
-            best.norm,
+            FirstNegative,
             "' in the bestModel-function.\n"
           )
         )
