@@ -12,11 +12,11 @@ cnorm.cv(
   min = 1,
   max = 12,
   cv = "full",
-  pCutoff = NA,
+  pCutoff = NULL,
   width = NA,
-  raw = NA,
-  group = NA,
-  age = NA,
+  raw = NULL,
+  group = NULL,
+  age = NULL,
   weights = NULL
 )
 }
@@ -53,7 +53,7 @@ has to reach at least. To minimize beta error, the value is set to .2 per defaul
 
 \item{age}{Name of the age variable}
 
-\item{weights}{an optional weighting parameter}
+\item{weights}{Name of the weighting parameter}
 }
 \value{
 table with results per term number, including RMSE for raw scores in training, validation and complete
@@ -95,14 +95,12 @@ avoid a number of terms with a high overfit (e. g. crossfit > 1.1).
 }
 \examples{
 # plot cross validation RMSE by number of terms up to 9 with three repetitions
-data <- prepareData(elfe)
-cnorm.cv(data, min = 3, max = 7, norms = FALSE)
+result <- cnorm(raw = elfe$raw, group = elfe$group)
+cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 
-# cross validate prespecified formula
-# here, we will use the formula from a model to cross validate it and to retrieve norm RMSE
-# own regression functions can of course be used as well
-# result <- cnorm(raw = efe$raw, group = elfe$group)
-# cnorm.cv(result, repetitions = 5)
+# Applying the function to a cnorm object only investigates the already
+# determined formula
+cnorm.cv(result, repetitions = 1)
 }
 \references{
 Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638

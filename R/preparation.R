@@ -247,22 +247,22 @@ rankByGroup <-
       d <- as.data.frame(data)
 
 
-    # check data types
-    if (is.numeric(group) && (length(group) == nrow(d))) {
-      d$group <- group
-      group <- "group"
-    }else if(is.character(group)){
-      d$group <- d[, group]
-      group <- "group"
-    }
+      # check data types
+      if (is.numeric(group) && (length(group) == nrow(d))) {
+        d$group <- group
+        group <- "group"
+      }else if(is.character(group)){
+        d$group <- d[, group]
+        group <- "group"
+      }
 
-    if (is.numeric(raw) && (length(raw) == nrow(d))) {
-      d$raw <- raw
-      raw <- "raw"
-    }else if(is.character(raw)){
-      d$raw <- d[, raw]
-      raw <- "raw"
-    }
+      if (is.numeric(raw) && (length(raw) == nrow(d))) {
+        d$raw <- raw
+        raw <- "raw"
+      }else if(is.character(raw)){
+        d$raw <- d[, raw]
+        raw <- "raw"
+      }
     }
 
 
@@ -275,21 +275,21 @@ rankByGroup <-
             warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
 
           weights <- NULL
-          }else{
+        }else{
           weighting <- d[, weights]
         }
+      }else{
+        if(length(weights)!=nrow(d) &  !silent){
+          warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+
         }else{
-          if(length(weights)!=nrow(d) &  !silent){
-            warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
-
-          }else{
-            d$weights <- as.numeric(weights)
-            weighting <- as.numeric(weights)
-            weights <- "weights"
-          }
+          d$weights <- as.numeric(weights)
+          weighting <- as.numeric(weights)
+          weights <- "weights"
         }
-
       }
+
+    }
 
     if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
       d$COV <- covariate
@@ -361,8 +361,8 @@ rankByGroup <-
       } else {
         d <- d[order(d$group), ]
         d$percentile <- unlist(by(d, d$group, function(x) {
-            (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
-          }))
+          (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
+        }))
 
         if (descriptives) {
           d$n <- ave(d[, raw], d[, group], FUN = function(x) {
@@ -389,31 +389,31 @@ rankByGroup <-
         warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
 
       if (typeof(group) == "logical" && !group) {
-            cat("No grouping variable specified. Ranking without grouping ...")
-            d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-            })
+        cat("No grouping variable specified. Ranking without grouping ...")
+        d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
+          (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
+        })
 
-          if (descriptives) {
-            d$n <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              length(x)
-            })
-            d$m <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              mean(x)
-            })
-            d$md <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              median(x)
-            })
-            d$sd <- ave(d[, raw], d[, covariate], FUN = function(x) {
-              sd(x)
-            })
-          }
-      } else {
-          # TODO weighting and covariates. Switch to unlist(by(..))
-          warning("Currently, it is not possible to use both covariates and weights. Ignoring weights in ranking.")
-          d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
+        if (descriptives) {
+          d$n <- ave(d[, raw], d[, covariate], FUN = function(x) {
+            length(x)
           })
+          d$m <- ave(d[, raw], d[, covariate], FUN = function(x) {
+            mean(x)
+          })
+          d$md <- ave(d[, raw], d[, covariate], FUN = function(x) {
+            median(x)
+          })
+          d$sd <- ave(d[, raw], d[, covariate], FUN = function(x) {
+            sd(x)
+          })
+        }
+      } else {
+        # TODO weighting and covariates. Switch to unlist(by(..))
+        warning("Currently, it is not possible to use both covariates and weights. Ignoring weights in ranking.")
+        d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
+          (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
+        })
 
         if (descriptives) {
           d$n <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
@@ -594,16 +594,16 @@ rankBySlidingWindow <- function(data = NULL,
   }else{
     d <- as.data.frame(data)
 
-  # check data types
-  if (is.numeric(raw) && (length(raw) == nrow(d))) {
-    d$raw <- raw
-    raw <- "raw"
-  }
+    # check data types
+    if (is.numeric(raw) && (length(raw) == nrow(d))) {
+      d$raw <- raw
+      raw <- "raw"
+    }
 
-  if (is.numeric(age) && (length(age) == nrow(d))) {
-    d$age <- age
-    age <- "age"
-  }
+    if (is.numeric(age) && (length(age) == nrow(d))) {
+      d$age <- age
+      age <- "age"
+    }
   }
 
 
@@ -715,11 +715,11 @@ rankBySlidingWindow <- function(data = NULL,
       maxAge <- MAX.AGE
     }
 
-  if(useCov){
-    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge & d[, covariate] == d[i, covariate]), ]
-  }else{
-    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
-  }
+    if(useCov){
+      observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge & d[, covariate] == d[i, covariate]), ]
+    }else{
+      observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
+    }
     nObs <- nrow(observations)
 
     sign <- 1
@@ -856,12 +856,12 @@ rankBySlidingWindow <- function(data = NULL,
 #' @family prepare
 computePowers <-
   function(data,
-             k = 5,
-             norm = NULL,
-             age = NULL,
-             t = 3,
-             covariate = NULL,
-             silent = FALSE) {
+           k = 5,
+           norm = NULL,
+           age = NULL,
+           t = 3,
+           covariate = NULL,
+           silent = FALSE) {
     d <- as.data.frame(data)
 
     # check variables, if NULL take attributes from d

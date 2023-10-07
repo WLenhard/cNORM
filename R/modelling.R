@@ -1,7 +1,3 @@
-
-
-
-
 #' Retrieve the best fitting regression model based on powers of A, L and interactions
 #'
 #' The function computes a series of regressions with an increasing number of predictors and
@@ -907,20 +903,18 @@ rangeCheck <-
 #' @param raw Name of the raw variable
 #' @param age Name of the age variable
 #' @param group Name of the grouping variable
-#' @param weights an optional weighting parameter
+#' @param weights Name of the weighting parameter
 #' @return table with results per term number, including RMSE for raw scores in training, validation and complete
 #' sample, R2 for the norm scores and the crossfit measure (1 = ideal, <1 = underfit, >1 = overfit)
 #' @export
 #' @examples
 #' # plot cross validation RMSE by number of terms up to 9 with three repetitions
-#' data <- prepareData(elfe)
-#' cnorm.cv(data, min = 3, max = 7, norms = FALSE)
+#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 #'
-#' # cross validate prespecified formula
-#' # here, we will use the formula from a model to cross validate it and to retrieve norm RMSE
-#' # own regression functions can of course be used as well
-#' # result <- cnorm(raw = efe$raw, group = elfe$group)
-#' # cnorm.cv(result, repetitions = 5)
+#' # Applying the function to a cnorm object only investigates the already
+#' # determined formula
+#' cnorm.cv(result, repetitions = 1)
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @family model
 cnorm.cv <-
@@ -931,18 +925,18 @@ cnorm.cv <-
            min = 1,
            max = 12,
            cv = "full",
-           pCutoff = NA,
+           pCutoff = NULL,
            width = NA,
-           raw = NA,
-           group = NA,
-           age = NA,
+           raw = NULL,
+           group = NULL,
+           age = NULL,
            weights = NULL) {
     if (inherits(data, "cnorm")) {
       formula <- data$model$terms
       data <- data$data
     }
 
-    if (is.na(pCutoff)) {
+    if (is.null(pCutoff)) {
       if (nrow(data) < 10000)
         pCutoff = .2
       else
@@ -960,15 +954,28 @@ cnorm.cv <-
 
     d <- data
 
-    if (is.na(raw)) {
+    if (is.null(raw)) {
       raw <- attr(d, "raw")
     }
 
-    if (is.na(group)) {
+    if (is.null(raw)) {
+      stop(
+        "Please provide a raw score variable name. It is neither available as a parameter nor a an attribute from data object."
+      )
+    }
+
+    if(!is.null(raw) & is.null(data[, raw])){
+      stop(paste0(
+          "The specified raw score variable ", raw, " is not present in the dataset."
+        )
+      )
+    }
+
+    if (is.null(group)) {
       group <- attr(d, "group")
     }
 
-    if (is.na(age)) {
+    if (is.null(age)) {
       age <- attr(d, "age")
     }
 
@@ -976,9 +983,25 @@ cnorm.cv <-
       width <- attr(d, "width")
     }
 
-    if (is.na(raw) & (is.na(group) || is.na(age))) {
+    if (is.null(group) || (is.na(age) & is.na(width))) {
       stop(
-        "Variables raw, age and group neither available as function parameters nor as attributes from data object. Please provide according information."
+        "Please provide either a grouping variable or age and width. They are neither available as parameters nor as attributes from data object."
+      )
+    }
+
+    if (is.null(weights)) {
+      weights <- attr(d, "weights")
+    }
+
+    if(!is.null(weights) & is.null(data[, weights])){
+      warning(
+        "Name of the weighting variable provided, but not found in the dataset. Continuing without weighting ...\n"
+      )
+
+      weights <- NULL
+    }else if(!is.null(weights) & !is.null(data[, weights])){
+      cat(
+        "Applying weighting ...\n"
       )
     }
 
@@ -1007,6 +1030,7 @@ cnorm.cv <-
       max <- n.models
     }
 
+    lmX <- NA
     # set up regression formulas (from bestModel function)
     if (is.null(formula)) {
       lmX <-
@@ -1040,8 +1064,8 @@ cnorm.cv <-
     Terms <- c()
 
     rankGroup <- TRUE
-    if (!is.na(age) && !is.na(width)) {
-      cat("Age and width parameters available, thus switching to rankBySlidingWindow()\n\n")
+    if (!is.null(age) && !is.na(width)) {
+      cat("Age and width parameters available, thus switching to rankBySlidingWindow() ...\n")
       rankGroup <- FALSE
     }
 
@@ -1050,6 +1074,9 @@ cnorm.cv <-
       # check for imbalances in data and repeat if stratification was unsatisfactory - usually never occurs
       p.value <- .01
       n <- 1 # to avoid a deadlock, define stop criterion
+
+      train <- NA
+      test <- NA
 
       while (p.value < pCutoff) {
         if (n > 100) {
@@ -1152,30 +1179,10 @@ cnorm.cv <-
         }
       }
 
-
-
-
-
-
       # compute leaps model
-      if (is.null(weights))
-        subsets <-
-        regsubsets(
-          lmX,
-          data = train,
-          nbest = 1,
-          nvmax = max,
-          really.big = n.models > 25
-        )
-      else
-        regsubsets(
-          lmX,
-          data = train,
-          nbest = 1,
-          nvmax = max,
-          really.big = n.models > 25,
-          weights = weights
-        )
+      subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
+
+
       if (norms && is.null(formula)) {
         cat(paste0("Cycle ", a, "\n"))
       }
@@ -1240,34 +1247,7 @@ cnorm.cv <-
 
     # now for the complete data the same logic
     norm.rmse.min[1] <- NA
-    complete <-
-      regsubsets(
-        lmX,
-        data = d,
-        nbest = 1,
-        nvmax = n.models,
-        really.big = n.models > 25
-      )
-
-    if (is.null(weights))
-      complete <-
-      regsubsets(
-        lmX,
-        data = d,
-        nbest = 1,
-        nvmax = n.models,
-        really.big = n.models > 25
-      )
-    else
-      complete <-
-      regsubsets(
-        lmX,
-        data = d,
-        nbest = 1,
-        nvmax = n.models,
-        really.big = n.models > 25,
-        weights = weights
-      )
+    complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
 
     for (i in 1:max) {
       variables <- names(coef(complete, id = i))
@@ -1448,9 +1428,6 @@ cnorm.cv <-
       cat("Occurance of selected terms, sorted by frequency:\n")
       print(sort(table(Terms), decreasing = T))
 
-      FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
-      suggest <- FirstNegative - 1
-
       cat("\n")
       cat("The simulation yielded the following optimal settings:\n")
       if (norms) {
@@ -1463,24 +1440,20 @@ cnorm.cv <-
         which.min(tab$RMSE.raw.test)
       ))
       if (norms) {
+        best.norm <- which.max(r2.test)
+        best.norm2 <- best.norm + 1
         cat(paste0(
           "\nNumber of terms with best norm validation R2: ",
-          which.max(r2.test),
+          best.norm,
           "\n"
         ))
+
         cat(
           paste0(
-            "The first model with a negative Delta R2 in norm score cross validation is model ",
-            FirstNegative,
-            "\n"
-          )
-        )
-        cat(
-          paste0(
-            "Thus, choosing a model with ",
-            suggest,
-            " terms might be the best choice. For this, use the parameter 'terms = ",
-            suggest,
+            "Choosing a model with ",
+            best.norm, " or ", best.norm2,
+            " terms might be a good choice. For this, use the parameter 'terms = ",
+            best.norm,
             "' in the bestModel-function.\n"
           )
         )
