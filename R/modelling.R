@@ -892,7 +892,7 @@ rangeCheck <-
 #' computationally intensive and duration increases with sample size, number of
 #' repetitions and maximum number of terms (max option).
 #' @param min Minimum number of terms to start from, default = 1
-#' @param max Maximum number of terms in model up to 2*k + k^2
+#' @param max Maximum number of terms in model up to (k + 1) * (t + 1) + 1
 #' @param cv If set to full (default), the data is split into training and validation data and ranked afterwards,
 #' otherwise, a pre ranked dataset has to be provided, which is then split into train and validation (and thus
 #' only the modeling, but not the ranking is independent)
@@ -916,11 +916,16 @@ rangeCheck <-
 #' # determined formula
 #' cnorm.cv(result, repetitions = 1)
 #'
-#' To use the cross validation without a cnorm model, please rank data first and
-#' compute powers:
+#' # To use the cross validation without a cnorm model, please rank data first and
+#' # compute powers:
 #' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 #' data <- computePowers(data)
 #' cnorm.cv(data)
+#'
+#' # Formulae can be specified deliberately as well:
+#' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
+#' data <- computePowers(data)
+#' cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
 #'
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 #' @family model

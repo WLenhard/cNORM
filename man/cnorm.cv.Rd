@@ -101,6 +101,18 @@ cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 # Applying the function to a cnorm object only investigates the already
 # determined formula
 cnorm.cv(result, repetitions = 1)
+
+# To use the cross validation without a cnorm model, please rank data first and
+# compute powers:
+data <- rankByGroup(data = elfe, raw = "raw", group = "group")
+data <- computePowers(data)
+cnorm.cv(data)
+
+# Formulae can be specified deliberately as well:
+data <- rankByGroup(data = elfe, raw = "raw", group = "group")
+data <- computePowers(data)
+cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
+
 }
 \references{
 Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
