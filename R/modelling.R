@@ -849,6 +849,7 @@ rangeCheck <-
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' # Example: Plot cross-validation RMSE by number of terms (up to 9) with three repetitions.
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
@@ -865,6 +866,7 @@ rangeCheck <-
 #' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 #' data <- computePowers(data)
 #' cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
+#' }
 #'
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
 #' and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
