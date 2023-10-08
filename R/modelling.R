@@ -1401,9 +1401,15 @@ cnorm.cv <-
           "\n"
         ))
 
+        cat(paste0(
+          "First negative norm score R2 delta in validation: ",
+          FirstNegative,
+          "\n"
+        ))
+
         cat(
           paste0(
-            "Choosing a model with ",
+            "\nChoosing a model with ",
             FirstNegative,
             " terms might be a good choice. For this, use the parameter 'terms = ",
             FirstNegative,
