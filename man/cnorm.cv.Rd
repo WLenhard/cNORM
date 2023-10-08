@@ -79,6 +79,7 @@ Suggestions for ideal model selection:
 }
 }
 \examples{
+\dontrun{
 # Example: Plot cross-validation RMSE by number of terms (up to 9) with three repetitions.
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
@@ -95,6 +96,7 @@ cnorm.cv(data)
 data <- rankByGroup(data = elfe, raw = "raw", group = "group")
 data <- computePowers(data)
 cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
+}
 
 }
 \references{
