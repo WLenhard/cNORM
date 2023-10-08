@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.0.4
-Date: in progress
+Date: preparing for release, 08.10.2023
 
 
 Changes:
@@ -12,6 +12,7 @@ Changes:
 *    Added warning in 'cnorm' in case, both age and group is specified
 *    extended cnorm.cv for use of weights and sliding window
 *    added silent option to several functions to reduced the number of messages
+*    revised function documentation
 
 
 
