@@ -2,9 +2,18 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.1.0
+Date: currently under development
+
+
+Changes:
+
+*    Added parametric continuous norming with beta binomial family and new functions
+     betaCoefficients, betaTable, betaByGroup and betaContinuous
+
 
 ### Version in 3.0.4
-Date: preparing for release, 08.10.2023
+Date: 08.10.2023
 
 
 Changes:
