@@ -18,6 +18,6 @@ If no weights are provided (NULL), it falls back to the base quantile function, 
 the quantiles
 }
 \description{
-Computes weighted quantiles; code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+Computes weighted quantiles; code from Andrey Akinshin (2023) "Weighted quantile estimators" arXiv:2304.07265 [stat.ME]
 Code made available via the CC BY-NC-SA 4.0 license
 }

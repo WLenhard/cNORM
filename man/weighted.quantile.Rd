@@ -19,13 +19,13 @@ of the generic quantile function in R, including weighting. The inflation proced
 a numerical, non-parametric solution that gives the same results as Harrel-Davis. It requires less
 ressources with small datasets and always finds a solution (e. g. 1000 cases with
 weights between 1 and 10). If it becomes too resource intense, it switches to Harrell-Davis automatically.
-Harrel-Davis and Type7 code is  based on the work of Akinshin (2020).}
+Harrel-Davis and Type7 code is based on the work of Akinshin (2023).}
 }
 \value{
 the weighted quantiles
 }
 \description{
-Computes weighted quantiles (code from Andrey Akinshin via https://aakinshin.net/posts/weighted-quantiles/
+Computes weighted quantiles (code from Andrey Akinshin (2023) "Weighted quantile estimators" arXiv:2304.07265 [stat.ME]
 Code made available via the CC BY-NC-SA 4.0 license) on the basis of either the weighted Harrell-Davis
 quantile estimator or an adaption of the type 7 quantile estimator of the generic quantile function in
 the base package. Please provide a vector with raw values, the pobabilities for the quantiles and an
@@ -37,7 +37,7 @@ values. Please draw on the computeWeights() function for retrieving weights in p
 \enumerate{
   \item Harrell, F.E. & Davis, C.E. (1982). A new distribution-free quantile estimator. Biometrika, 69(3), 635-640.
   \item Hyndman, R. J. & Fan, Y. (1996). Sample quantiles in statistical packages, American Statistician 50, 361–365.
-  \item Akinshin, A. (2020). Weighted quantile estimators. https://aakinshin.net/posts/weighted-quantiles/
+  \item Akinshin, A. (2023). Weighted quantile estimators arXiv:2304.07265 [stat.ME]
 }
 }
 \seealso{
