@@ -4,7 +4,7 @@
 \alias{betaContinuous}
 \title{Continuous Norming with Beta-Binomial Distribution}
 \usage{
-betaContinuous(param, powerA, powerB)
+betaContinuous(param, powerA = Inf, powerB = Inf)
 }
 \arguments{
 \item{param}{A data frame containing the columns `a`, `b`, `group`, and `n`. Each row should represent

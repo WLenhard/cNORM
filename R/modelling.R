@@ -357,7 +357,8 @@ bestModel <- function(data,
     )
   }
 
-  plotPercentiles(data, bestformula)
+  if(plot)
+    plotPercentiles(data, bestformula)
 
   return(bestformula)
 }

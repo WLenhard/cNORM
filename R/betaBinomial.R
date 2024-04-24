@@ -82,10 +82,17 @@ betaTable <- function(a, b, n, m = NULL){
   cum <- Px
   perc <- Px
 
+  Px[Px < 0] <- 0
+  Px[Px > 1] <- 1
+
   for(i in 1:length(Px)){ cum[i] <- sum(Px[1:i]) }
 
+  cum[cum > 1] <- 1
+
   perc[1] <- Px[1]/2
-  for(i in 2:length(Px)){ perc[i] <- cum[i-1] + (Px[i]/2) }
+  if(m>0) {
+    for(i in 2:length(Px)){ perc[i] <- cum[i-1] + (Px[i]/2) }
+  }
 
   z <- qnorm(perc)
 
@@ -167,15 +174,35 @@ betaByGroup <- function(x, group, n){
 #' powerB <- 2
 #' betaContinuous(param, powerA, powerB)
 #' @export
-betaContinuous <- function(param, powerA, powerB){
+betaContinuous <- function(param, powerA = Inf, powerB = Inf){
   aMod <- lm(a ~ poly(group, powerA, raw=TRUE), param)
   bMod <- lm(b ~ poly(group, powerB, raw=TRUE), param)
+
+  if(powerA >= nrow(param))
+    powerA <- nrow(param) - 1
+
+  if(powerB >= nrow(param))
+    powerB <- nrow(param) - 1
 
   param$aPred <- predict(aMod, param)
   param$bPred <- predict(bMod, param)
   n <- unique(param$n)
 
-  result <- list(manifestParameters = param, powerA = powerA, powerB = powerB, modA = aMod, modB = bMod)
+  df1 <- data.frame(x = numeric(),
+                    Px = numeric(),
+                    Pcum = numeric(),
+                    Percentile = numeric(),
+                    z = numeric(),
+                    group = numeric())
+
+  for(i in 1:nrow(param)){
+    tab <- betaTable(param$aPred[i], param$bPred[i], n)
+    tab$group <- rep(param[i, 6], nrow(tab))
+    df1 <- rbind(df1, tab)
+  }
+
+
+  result <- list(beta.parameters = param, powerA = powerA, powerB = powerB, modA = aMod, modB = bMod, norms = df1)
   class(result) <- "cnormBetaBinomial"
   return(result)
 }
@@ -186,21 +213,13 @@ betaContinuous <- function(param, powerA, powerB){
 #' density, percentiles, and z-scores) for a specified group, using alpha (`a`) and beta (`b`) parameters
 #' predicted by a model created with the `betaContinuous` function.
 #'
-#' @param model A list containing the components from a `betaContinuous` model output, including
-#' `modA` and `modB` for the polynomial regression models of `a` and `b` parameters, respectively,
-#' and `param` containing the original parameters and group identifiers.
-#' @param group A data frame or vector specifying the group variables for which predictions and
-#' subsequent beta-binomial distribution calculations are desired. This should match the format and
-#' structure of the group variable used in `betaContinuous`.
+#' @param model A list containing the components from a `betaContinuous` model output.
+#' @param group A number specifying the group variable for which predictions and
+#' subsequent beta-binomial distribution calculations are desired.
 #' @param m An optional stop criterion in table generation. Positive integer lower than n
 #' @return A data frame with columns representing the number of successes (`x`), the probability mass
 #' function values (`Px`), cumulative probabilities (`Pcum`), percentiles (`Percentile`), and
 #' z-scores (`z`) for the specified group based on the predicted `a` and `b` parameters.
-#' @details
-#' The function utilizes the `predict.lm` method to predict `a` and `b` values for the specified group
-#' using the models stored in `modell`. It assumes the number of trials (`n`) is constant across groups
-#' and uses the first `n` value found in `modell$param`. This table is useful for comparing the predicted
-#' distribution of outcomes across different groups or conditions.
 #' @examples
 #' # Determies beta parameters and models these continuously
 #' param <- betaByGroup(elfe$raw, elfe$group, 26)
@@ -218,7 +237,7 @@ betaNormTable <- function(model, group, m = NULL){
   df1 <- data.frame(group = group)
   a <- predict.lm(model$modA, df1)
   b <- predict.lm(model$modB, df1)
-  n <- unique(model$manifestParameters$n)
+  n <- unique(model$beta.parameters$n)
 
   if(is.null(m))
     m <- n
@@ -226,4 +245,42 @@ betaNormTable <- function(model, group, m = NULL){
     m <- n
 
   return(betaTable(a, b, n, m))
+}
+
+
+#'
+#' @param model An `betaContinuous` model output
+#' @param x A vector specifying the raw scores
+#' @param group A vector specifying the group variables for each raw score
+#' @return A data.frame with z scores and percentiles as well as predicted a and b values for the specific group
+#' @examples
+#' # Determies beta parameters and models these continuously
+#' param <- betaByGroup(elfe$raw, elfe$group, 26)
+#' beta.model <- betaContinuous(param, 4, 4)
+#'
+#' # Calculates z scores
+#' x <- c(15, 8, 11, 18)
+#' newGroup <- c(3.9, 1.2, 4.5, 6.3)
+#'
+#' predictBeta(beta.model, x, newGroup)
+#' @export
+predictBeta <- function(model, x, group){
+  if (!inherits(model, "cnormBetaBinomial")) {
+    stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  }
+
+  n <- unique(model$beta.parameters$n)
+  df1 <- data.frame(x = x, group = group)
+  df1$a <- predict.lm(model$modA, df1)
+  df1$b <- predict.lm(model$modB, df1)
+  df1$z <- rep(NA, length(x))
+  df1$Percentile <- rep(NA, length(x))
+
+  for(i in 1:length(x)){
+    tab <- betaTable(df1$a[i], df1$b[i], n, x[i])
+    df1$Percentile[i] <- tab[nrow(tab), 4]
+    df1$z[i] <- tab[nrow(tab), 5]
+  }
+
+  return(df1)
 }

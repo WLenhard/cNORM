@@ -7,13 +7,10 @@
 betaNormTable(model, group, m = NULL)
 }
 \arguments{
-\item{model}{A list containing the components from a `betaContinuous` model output, including
-`modA` and `modB` for the polynomial regression models of `a` and `b` parameters, respectively,
-and `param` containing the original parameters and group identifiers.}
+\item{model}{A list containing the components from a `betaContinuous` model output.}
 
-\item{group}{A data frame or vector specifying the group variables for which predictions and
-subsequent beta-binomial distribution calculations are desired. This should match the format and
-structure of the group variable used in `betaContinuous`.}
+\item{group}{A number specifying the group variable for which predictions and
+subsequent beta-binomial distribution calculations are desired.}
 
 \item{m}{An optional stop criterion in table generation. Positive integer lower than n}
 }
@@ -26,12 +23,6 @@ z-scores (`z`) for the specified group based on the predicted `a` and `b` parame
 This function generates a table of beta-binomial distribution properties (cumulative probabilities,
 density, percentiles, and z-scores) for a specified group, using alpha (`a`) and beta (`b`) parameters
 predicted by a model created with the `betaContinuous` function.
-}
-\details{
-The function utilizes the `predict.lm` method to predict `a` and `b` values for the specified group
-using the models stored in `modell`. It assumes the number of trials (`n`) is constant across groups
-and uses the first `n` value found in `modell$param`. This table is useful for comparing the predicted
-distribution of outcomes across different groups or conditions.
 }
 \examples{
 # Determies beta parameters and models these continuously

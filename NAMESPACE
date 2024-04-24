@@ -13,6 +13,7 @@ export(
 	betaByGroup,
 	betaContinuous,
 	betaNormTable,
+	predictBeta,
 	checkConsistency,
 	cNORM.GUI,
 	cnorm.cv,
