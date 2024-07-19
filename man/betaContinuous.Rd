@@ -2,7 +2,7 @@
 % Please edit documentation in R/betaBinomial.R
 \name{betaContinuous}
 \alias{betaContinuous}
-\title{Continuous Norming with Beta-Binomial Distribution}
+\title{Continuous Norming with Beta-Binomial Distribution (experimental)}
 \usage{
 betaContinuous(param, powerA = Inf, powerB = Inf)
 }
