@@ -248,6 +248,7 @@ betaNormTable <- function(model, group, m = NULL){
 }
 
 
+#' Predicts beta coefficients in dependence of age
 #'
 #' @param model An `betaContinuous` model output
 #' @param x A vector specifying the raw scores

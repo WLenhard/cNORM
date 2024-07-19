@@ -2,18 +2,19 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.1.0
-Date: currently under development
+### Version in 3.1.0, preparing release
+Date: 2023.07.19
 
 
 Changes:
 
 *    Added parametric continuous norming with beta binomial family and new functions
-     betaCoefficients, betaTable, betaByGroup and betaContinuous
+     betaCoefficients, betaTable, betaByGroup and betaContinuous; beware - still experimental
+*    Fixed bug in bestModels function when predictors are specified     
 
 
 ### Version in 3.0.4
-Date: 08.10.2023
+Date: 2023.10.08
 
 
 Changes:
