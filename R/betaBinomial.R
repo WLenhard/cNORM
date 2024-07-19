@@ -143,7 +143,7 @@ betaByGroup <- function(x, group, n){
   return(results)
 }
 
-#' Continuous Norming with Beta-Binomial Distribution
+#' Continuous Norming with Beta-Binomial Distribution (experimental)
 #'
 #' This function models the alpha (`a`) and beta (`b`) parameters of the beta-binomial distribution
 #' across groups using polynomial regression. It then calculates the distribution's properties
