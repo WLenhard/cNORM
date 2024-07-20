@@ -1468,7 +1468,7 @@ getNormScoreSE <- function(model, type = 2) {
     stop("Please provide cnorm object as the model parameter")
   }
 
-  if (type != 1 || type != 2) {
+  if (type != 1 && type != 2) {
     type <- 2
   }
 
