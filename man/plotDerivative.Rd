@@ -58,8 +58,8 @@ checkConsistency, bestModel, derive
 Other plot: 
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
-\code{\link{plotNormCurves}()},
 \code{\link{plotNorm}()},
+\code{\link{plotNormCurves}()},
 \code{\link{plotPercentileSeries}()},
 \code{\link{plotPercentiles}()},
 \code{\link{plotRaw}()},

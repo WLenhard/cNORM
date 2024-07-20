@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 3.1.0
+Version: 3.1.1
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Date: 2024-07-19
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
@@ -43,7 +43,7 @@ Suggests:
     testthat
 License: AGPL-3
 VignetteBuilder: knitr
-RoxygenNote: 7.3.0
+RoxygenNote: 7.3.2
 NeedsCompilation: no
 Repository: CRAN
 Encoding: UTF-8

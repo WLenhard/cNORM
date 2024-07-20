@@ -2,7 +2,17 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.1.0, preparing release
+### Version in 3.1.1,
+Date: in preparation
+
+
+Changes:
+
+*    Fixed input validation in getNormScoreSE    
+
+
+
+### Version in 3.1.0,
 Date: 2023.07.19
 
 

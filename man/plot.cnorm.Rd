@@ -22,8 +22,8 @@ S3 function for plotting cnorm objects
 Other plot: 
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
-\code{\link{plotNormCurves}()},
 \code{\link{plotNorm}()},
+\code{\link{plotNormCurves}()},
 \code{\link{plotPercentileSeries}()},
 \code{\link{plotPercentiles}()},
 \code{\link{plotRaw}()},
