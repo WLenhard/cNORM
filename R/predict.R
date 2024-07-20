@@ -57,31 +57,14 @@ getNormCurve <-
     if (is.null(maxRaw)) {
       maxRaw <- model$maxRaw
     }
-    raw <- vector("list", (maxAge - minAge) / step)
-    age <- vector("list", (maxAge - minAge) / step)
-    normList <- vector("list", (maxAge - minAge) / step)
 
-    i <- 1
-    while (minAge <= maxAge) {
-      r <-
-        predictRaw(norm, minAge, model$coefficients, minRaw, maxRaw, covariate)
+    ages <- seq(minAge, maxAge, by = step)
+    results <- lapply(ages, function(age) {
+      r <- predictRaw(norm, age, model$coefficients, minRaw, maxRaw, covariate)
+      data.frame(norm = paste(norm, "T"), age = age, raw = r)
+    })
+    curve <- do.call(rbind, results)
 
-      raw[[i]] <- r
-      age[[i]] <- minAge
-      normList[[i]] <- paste(norm, "T")
-      minAge <- minAge + step
-      i <- i + 1
-    }
-    curve <-
-      do.call(
-        rbind,
-        Map(
-          data.frame,
-          norm = normList,
-          age = age,
-          raw = raw
-        )
-      )
     return(curve)
   }
 
