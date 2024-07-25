@@ -1,7 +1,7 @@
 
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+importFrom(stats, optim, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text, lines)
 importFrom(latticeExtra, panel.2dsmoother)
@@ -9,21 +9,18 @@ importFrom(utils, tail, menu, head)
 export(
 	bestModel,
 	betaCoefficients,
-	betaTable,
-	betaByGroup,
-	betaContinuous,
-	betaNormTable,
-	predictBeta,
 	checkConsistency,
 	cNORM.GUI,
 	cnorm.cv,
 	cnorm,
+	cnorm.betabinomial,
 	computePowers,
 	derivationTable,
 	derive,
 	getNormCurve,
 	getGroups,
 	normTable,
+	normTable.betabinomial,
 	plotDensity,
 	plotDerivative,
 	plotNormCurves,
@@ -34,6 +31,7 @@ export(
 	plotNorm,
 	plotCnorm,
 	predictNorm,
+	predictNorm.betabinomial,
 	predictRaw,
 	prepareData,
 	printSubset,
@@ -43,6 +41,7 @@ export(
 	rawTable,
 	regressionFunction,
 	simulateRasch,
+	standardize,
 	modelSummary,
 	getNormScoreSE,
 	weighted.rank,

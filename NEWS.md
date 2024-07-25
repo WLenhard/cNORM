@@ -2,13 +2,14 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.1.1,
+### Version in 3.2.0,
 Date: in preparation
 
 
 Changes:
 
 *    Fixed input validation in getNormScoreSE    
+*    Started intesive work and validation of parametric modelling with beta binomial functions
 
 
 

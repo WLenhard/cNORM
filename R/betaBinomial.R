@@ -1,3 +1,200 @@
+#' Calculate the negative log-likelihood for a heteroscedastic regression model
+#'
+#' This function computes the negative log-likelihood for a heteroscedastic regression model
+#' where both the mean and standard deviation are modeled as functions of predictors.
+#'
+#' @param params A numeric vector containing all model parameters. The first n_beta elements
+#'               are coefficients for the mean model, and the remaining elements are
+#'               coefficients for the log-standard deviation model.
+#' @param X A matrix of predictors for the mean model.
+#' @param Z A matrix of predictors for the log-standard deviation model.
+#' @param y A numeric vector of response values.
+#'
+#' @return The negative log-likelihood of the model.
+#' @keywords internal
+log_likelihood <- function(params, X, Z, y) {
+  n_beta <- ncol(X)
+  beta <- params[1:n_beta]
+  gamma <- params[(n_beta+1):length(params)]
+
+  mu <- X %*% beta
+  log_sigma <- Z %*% gamma
+  sigma <- exp(log_sigma)
+
+  ll <- sum(dnorm(y, mean = mu, sd = sigma, log = TRUE))
+  return(-ll)  # Return negative log-likelihood for minimization
+}
+
+
+#' Fit a heteroscedastic regression model
+#'
+#' This function fits a heteroscedastic regression model where both the mean and
+#' standard deviation of the response variable are modeled as polynomial functions
+#' of the predictor variable.
+#'
+#' @param time A numeric vector of predictor values (e.g., age or time).
+#' @param score A numeric vector of response values.
+#' @param mu Integer specifying the degree of the polynomial for the mean model. Default is 2.
+#' @param sigma Integer specifying the degree of the polynomial for the standard deviation model. Default is 1.
+#' @param control A list of control parameters to be passed to the `optim` function.
+#'   If NULL, default values are used.
+#' @param n Number of items in the test, resp. maximum score to be achieved
+#' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
+#' transformation); a double vector with the mean and standard deviation can as
+#' well, be provided f. e. c(10, 3) for Wechsler scale index points
+#' @param descend ranking order (default descent = FALSE): inverses the
+#' ranking order with higher raw scores getting lower norm scores; relevant
+#' for example when norming error scores, where lower scores mean higher
+#' performance
+#'
+#' @return A list of class "hetero_model" containing:
+#'   \item{beta_est}{Estimated coefficients for the mean model}
+#'   \item{gamma_est}{Estimated coefficients for the log-standard deviation model}
+#'   \item{se}{Standard errors of the estimated coefficients}
+#'   \item{mu}{Degree of the polynomial for the mean model}
+#'   \item{sigma}{Degree of the polynomial for the standard deviation model}
+#'   \item{result}{Full result from the optimization procedure}
+#'
+#' @details
+#' The function standardizes the input variables, fits polynomial models for both
+#' the mean and standard deviation, and uses maximum likelihood estimation to
+#' find the optimal parameters. The optimization is performed using the BFGS method.
+#'
+#' @examples
+#' # Fit a heteroscedastic regression model to the PPVT data
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+#' summary(model)
+#'
+#'
+#' @export
+cnorm.betabinomial <- function(time, score, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", descend = FALSE) {
+  # Standardize inputs
+  time_std <- standardize(time)
+  score_std <- standardize(score)
+
+  # Set up 'data' object containing both variables
+  data <- data.frame(time = time_std, score = score_std)
+
+  # Prepare the data matrices for mu and sigma, including intercept
+  X <- cbind(1, poly(data$time, degree = mu, raw = TRUE))
+  Z <- cbind(1, poly(data$time, degree = sigma, raw = TRUE))
+  y <- data$score
+
+  # Initial parameters: use some sensible starting values
+  initial_params <- c(mean(y), rep(0, mu), log(sd(y)), rep(0, sigma))
+
+  # Optimize to find parameter estimates. If control is NULL, set default
+  if(is.null(control))
+    control = list(reltol = 1e-8, maxit = 1000)
+
+  result <- optim(initial_params, log_likelihood, X = X, Z = Z, y = y,
+                  method = "BFGS", hessian = TRUE,
+                  control = control)
+
+  # Extract results and calculate standard errors
+  beta_est <- result$par[1:(mu + 1)]
+  gamma_est <- result$par[(mu + 2):length(result$par)]
+  se <- sqrt(diag(solve(result$hessian)))
+
+  # Store original mean and sd for unstandardizing later
+  # add attributes for usage in other functions
+  scaleM <- NA
+  scaleSD <- NA
+
+  # descriptives
+  if ((typeof(scale) == "double" && length(scale) == 2)) {
+    scaleM <- scale[1]
+    scaleSD <- scale[2]
+  } else if (scale == "IQ") {
+    scaleM <- 100
+    scaleSD <- 15
+  } else if (scale == "z") {
+    scaleM <- 0
+    scaleSD <- 1
+  } else if (scale == "T") {
+    scaleM <- 50
+    scaleSD <- 10
+  }
+
+  if(is.null(n))
+    n <- max(score)
+
+  attr(result, "time_mean") <- mean(time)
+  attr(result, "time_sd") <- sd(time)
+  attr(result, "score_mean") <- mean(score)
+  attr(result, "score_sd") <- sd(score)
+  attr(result, "max") <- n
+  attr(result, "scaleMean") <- scaleM
+  attr(result, "scaleSD") <- scaleSD
+  attr(result, "descend") <- descend
+  attr(result, "descend") <- descend
+
+  model <- list(beta_est = beta_est, gamma_est = gamma_est, se = se,
+                mu = mu, sigma = sigma,
+                result = result)
+  class(model) <- "cnormBetaBinomial"
+  return(model)
+}
+
+#' Predict mean and standard deviation for a heteroscedastic regression model
+#'
+#' This function generates predictions from a fitted heteroscedastic regression model
+#' for new time points.
+#'
+#' @param model An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.
+#' @param times A numeric vector of time points at which to make predictions.
+#'
+#' @return A data frame with columns:
+#'   \item{time}{The input time points}
+#'   \item{mu}{Predicted mean values}
+#'   \item{sigma}{Predicted standard deviation values}
+#'
+#' @details
+#' This function takes a fitted heteroscedastic regression model and generates predictions
+#' for new time points. It applies the same standardization used in model fitting,
+#' generates predictions on the standardized scale, and then transforms these back
+#' to the original scale.
+#'
+#' @keywords internal
+predict.cnormBetaBinomial <- function(model, times, n = NULL) {
+  if (!inherits(model, "cnormBetaBinomial")) {
+    stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  }
+
+  # Standardize new times
+  times_std <- (times - attr(model$result, "time_mean")) / attr(model$result, "time_sd")
+
+  # Create design matrices including intercept
+  X_new <- cbind(1, poly(times_std, degree = model$mu, raw = TRUE))
+  Z_new <- cbind(1, poly(times_std, degree = model$sigma, raw = TRUE))
+
+  predicted_mu_std <- X_new %*% model$beta_est
+  predicted_sigma_std <- exp(Z_new %*% model$gamma_est)
+
+  # Unstandardize predictions
+  predicted_mu <- predicted_mu_std * attr(model$result, "score_sd") + attr(model$result, "score_mean")
+  predicted_sigma <- predicted_sigma_std * attr(model$result, "score_sd")
+
+  if(is.null(n))
+    n <- attr(model$result, "max")
+
+  m <- predicted_mu
+  var <- predicted_sigma^2
+
+  m2 <- m*m
+  m3 <- m2*m
+
+  a <- (m2*n - m3 - m*var)/(n*var - n*m + m2)
+  b <- a*((n - m)/m)
+
+  predicted <- data.frame(time = times,
+                          mu = as.vector(predicted_mu),
+                          sigma = as.vector(predicted_sigma),
+                          a = a,
+                          b = b)
+  return(predicted)
+}
+
 #' Compute Parameters of a Beta Binomial Distribution
 #'
 #' This function calculates the \eqn{\alpha} (a) and \eqn{\beta} (b) parameters of a beta binomial
@@ -13,20 +210,26 @@
 #' the test has a fixed number of items.
 #'
 #' @param x A numeric vector of non-negative integers representing observed counts.
-#' @param n The maximum number or the maximum possible value of `x`.
+#' @param n The maximum number or the maximum possible value of `x`. If not specified, uses max(x) instead.
 #'
 #' @return A numeric vector containing the calculated parameters in the following order:
-#' alpha (a), beta (b), mean (m), variance (var), and the maximum number (n).
+#' alpha (a), beta (b), mean (m), standard deviation (sd), and the maximum number (n).
 #'
 #' @examples
 #' x <- c(1, 2, 3, 4, 5)
 #' n <- 5
-#' betaCoefficients(x, n)
+#'
+#' betaCoefficients(x, n) # or, to set n to max(x)
+#' betaCoefficients(x)
 #'
 #' @export
-betaCoefficients <- function(x, n){
+betaCoefficients <- function(x, n = NULL){
+  if(is.null(n))
+    n <- max(x)
+
   m <- mean(x)
-  var <- sd(x)^2
+  sd <- sd(x)
+  var <- sd^2
 
   m2 <- m*m
   m3 <- m2*m
@@ -34,254 +237,151 @@ betaCoefficients <- function(x, n){
   a <- (m2*n - m3 - m*var)/(n*var - n*m + m2)
   b <- a*((n - m)/m)
 
-  return(c(a, b, m, var, n))
+  return(c(a, b, m, sd, n))
 }
-
 
 #' Calculate Cumulative Probabilities, Density, Percentiles, and Z-Scores for
 #' Beta-Binomial Distribution
 #'
-#' This function computes the cumulative probabilities, the density (probability mass
-#' function values), the percentiles, and the corresponding z-scores based on the specified
-#' parameters of a beta-binomial distribution. The beta-binomial distribution is used to model
-#' the number of successes in a fixed number of trials with success probability varying from
-#' trial to trial, described by beta distribution parameters \eqn{\alpha} (alpha)
-#' and \eqn{\beta} (beta).
-#'
-#' @param a The \eqn{\alpha} parameter of the beta distribution, indicating the shape parameter associated with successes.
-#' @param b The \eqn{\beta} parameter of the beta distribution, indicating the shape parameter associated with failures.
-#' @param n The number of trials in the beta-binomial distribution.
+#' @param model The model, which was fitted using the `optimized.model` function.
+#' @param times A numeric vector of time points at which to make predictions.
+#' @param n The number of items resp. the maximum score.
 #' @param m An optional stop criterion in table generation. Positive integer lower than n.
-#' @return A data frame with columns:
-#' \describe{
-#'   \item{x}{The number of successes (0 to n).}
-#'   \item{Px}{The density (probability mass function value) for each number of successes.}
-#'   \item{Pcum}{The cumulative probability up to each number of successes.}
-#'   \item{Percentile}{The percentile corresponding to each number of successes.}
-#'   \item{z}{The z-score corresponding to each percentile.}
-#' }
-#' @details
-#' The function utilizes the gamma function to calculate factorial terms needed for the probability mass function (PMF)
-#' and cumulative distribution function (CDF) calculations of the beta-binomial distribution. It iterates over the range
-#' of possible successes (0 to n) to compute the PMF values (\eqn{Px}), cumulative probabilities (\eqn{Pcum}), and
-#' mid-percentiles. These percentiles are then used to calculate the corresponding z-scores, which indicate how many
-#' standard deviations an element is from the mean.
-#' @examples
-#' betaTable(2, 2, 45, 20)
+#' @return A data frame with columns: x, Px, Pcum, Percentile, z, norm score
 #' @export
-betaTable <- function(a, b, n, m = NULL){
+normTable.betabinomial <- function(model, times, n = NULL, m = NULL){
+  if (!inherits(model, "cnormBetaBinomial")) {
+    stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  }
+
+  if(is.null(n))
+    n <- attr(model$result, "max")
+
   if(is.null(m))
     m <- n
   else if(m > n)
     m <- n
 
-  fac1 <- gamma(a + b)/(gamma(a)*gamma(b)*gamma(a+b+n))
-  comb <- choose(n, 0:m)
-  x <- seq(from = 0, to = m)
-  Px <- comb*fac1*gamma(a + x)*gamma(b+n-x)
-  cum <- Px
-  perc <- Px
+  predictions <- predict.cnormBetaBinomial(model, times, n)
+  a <- predictions$a
+  b <- predictions$b
 
-  Px[Px < 0] <- 0
-  Px[Px > 1] <- 1
+  result <- list()
 
-  for(i in 1:length(Px)){ cum[i] <- sum(Px[1:i]) }
+  for(k in 1:length(a)){
+    x <- seq(from = 0, to = m)
 
-  cum[cum > 1] <- 1
+    # Calculate probabilities using log-space to avoid overflow
+    log_pmf <- lchoose(n, x) + lbeta(x + a[k], n - x + b[k]) - lbeta(a[k], b[k])
+    Px <- exp(log_pmf)
 
-  perc[1] <- Px[1]/2
-  if(m>0) {
-    for(i in 2:length(Px)){ perc[i] <- cum[i-1] + (Px[i]/2) }
+    # Normalize to ensure sum to 1
+    Px <- Px / sum(Px)
+
+    # Calculate cumulative probabilities
+    cum <- cumsum(Px)
+
+    # Calculate percentiles
+    perc <- cum - 0.5 * Px
+
+    # Calculate z-scores
+    z <- qnorm(perc)
+    mScale <- attr(model$result, "scaleMean")
+    sdScale <- attr(model$result, "scaleSD")
+    norm <- rep(NA, length(z))
+
+    if(!is.na(mScale) && !is.na(sdScale)){
+      norm <- mScale + sdScale * z
+    }
+
+    df <- data.frame(x = x, Px = Px, Pcum = cum, Percentile = perc, z = z, norm = norm)
+    result[[k]] <- df
   }
 
-  z <- qnorm(perc)
-
-  df <- data.frame(x = x, Px = Px, Pcum = cum, Percentile = perc, z = z)
-
-  return(df)
-}
-
-#' Estimate Beta-Binomial Parameters by Group
-#'
-#' This function calculates the beta-binomial distribution parameters (alpha, beta, mean, variance)
-#' for subsets of data grouped by a specified factor. It applies the `betaCoefficients` function
-#' to each group separately, aggregating the results into a single data frame. This is particularly
-#' useful for analyzing heterogeneity in success probabilities across different groups within a dataset.
-#'
-#' @param x A vector of non-negative integers representing the number of successes in trials for the entire dataset.
-#' @param group A factor or similar object that divides `x` into groups. Each element of `x` is associated
-#' with a group indicated by the corresponding element in `group`.
-#' @param n The maximum number of trials, assumed to be the same for all groups.
-#' @return A data frame where each row contains the beta-binomial distribution parameters (alpha `a`, beta `b`,
-#' mean `m`, variance `var`) for a group, along with the group identifier. The columns are named `a`, `b`, `m`,
-#' `var`, `n`, and `group`, with each row corresponding to a distinct group in the input.
-#' @details
-#' The function first identifies unique groups in the `group` argument and then iterates over these groups.
-#' For each group, it extracts the subset of `x` corresponding to that group and computes the beta-binomial
-#' distribution parameters using the `betaCoefficients` function. The results are compiled into a matrix that is
-#' then converted into a data frame for easier manipulation and interpretation.
-#' @examples
-#' x <- elfe$raw
-#' group <- elfe$group
-#' n <- 26
-#' betaByGroup(x, group, n)
-#' @export
-betaByGroup <- function(x, group, n){
-  results <- matrix(data = NA, nrow = 0, ncol = 5)
-  disctintGroups <- sort(unique(group))
-
-  for(i in 1:length(disctintGroups)){
-    x1 <- x[group==disctintGroups[i]]
-    results <- rbind(results, betaCoefficients(x1, n))
-  }
-
-  results <- as.data.frame(results)
-  colnames(results) <- c("a", "b", "m", "var", "n")
-  results$group <- disctintGroups
-  rownames(results) <- seq(from=1, to = nrow(results))
-
-  return(results)
-}
-
-#' Continuous Norming with Beta-Binomial Distribution (experimental)
-#'
-#' This function models the alpha (`a`) and beta (`b`) parameters of the beta-binomial distribution
-#' across groups using polynomial regression. It then calculates the distribution's properties
-#' (cumulative probabilities, density, percentiles, and z-scores) for these modeled parameters.
-#' The modeling of `a` and `b` allows for the investigation of how these parameters vary with a continuous
-#' group variable, allowing for continuous norming.
-#'
-#' @param param A data frame containing the columns `a`, `b`, `group`, and `n`. Each row should represent
-#' a distinct group with its corresponding beta-binomial parameters and the group identifier. These
-#' parameters can be obtained with the 'betaByGroup' function.
-#' @param powerA The degree of the polynomial used to model the `a` parameter across groups. Please choose
-#' \eqn{powerA \leq k} with k being the number of groups.
-#' @param powerB The degree of the polynomial used to model the `b` parameter across groups. Please choose
-#' \eqn{powerB \leq k} with k being the number of groups.
-#' @return A list containing several components:
-#' `manifestParameters` with the input parameters,
-#' `powerA` and `powerB` showing the polynomial degrees used,
-#' `modA` and `modB` with the polynomial regression models for `a` and `b` parameters.
-#' @details
-#' The function first fits polynomial regression models for `a` and `b` against a continuous group variable,
-#' allowing for non-linear trends in how the shape parameters of the beta-binomial distribution change with the group.
-#' It then predicts `a` and `b` for each group, using these predicted values to calculate the beta-binomial
-#' distribution's properties for each group. This approach facilitates understanding the variability and
-#' dynamics of the distribution across different conditions or groups.
-#' @examples
-#' param <- data.frame(a = c(1,2,3), b = c(2,3,4), group = c(1,2,3), n = c(30,30,30))
-#' powerA <- 2
-#' powerB <- 2
-#' betaContinuous(param, powerA, powerB)
-#' @export
-betaContinuous <- function(param, powerA = Inf, powerB = Inf){
-  aMod <- lm(a ~ poly(group, powerA, raw=TRUE), param)
-  bMod <- lm(b ~ poly(group, powerB, raw=TRUE), param)
-
-  if(powerA >= nrow(param))
-    powerA <- nrow(param) - 1
-
-  if(powerB >= nrow(param))
-    powerB <- nrow(param) - 1
-
-  param$aPred <- predict(aMod, param)
-  param$bPred <- predict(bMod, param)
-  n <- unique(param$n)
-
-  df1 <- data.frame(x = numeric(),
-                    Px = numeric(),
-                    Pcum = numeric(),
-                    Percentile = numeric(),
-                    z = numeric(),
-                    group = numeric())
-
-  for(i in 1:nrow(param)){
-    tab <- betaTable(param$aPred[i], param$bPred[i], n)
-    tab$group <- rep(param[i, 6], nrow(tab))
-    df1 <- rbind(df1, tab)
-  }
-
-
-  result <- list(beta.parameters = param, powerA = powerA, powerB = powerB, modA = aMod, modB = bMod, norms = df1)
-  class(result) <- "cnormBetaBinomial"
   return(result)
 }
 
-#' Generate norm table from parametric continuous norming with Beta-Binomial Parameters
+#' Predict Norm Scores from Raw Scores
 #'
-#' This function generates a table of beta-binomial distribution properties (cumulative probabilities,
-#' density, percentiles, and z-scores) for a specified group, using alpha (`a`) and beta (`b`) parameters
-#' predicted by a model created with the `betaContinuous` function.
+#' This function calculates norm scores based on raw scores, age, and a fitted cnormBetaBinomial model.
 #'
-#' @param model A list containing the components from a `betaContinuous` model output.
-#' @param group A number specifying the group variable for which predictions and
-#' subsequent beta-binomial distribution calculations are desired.
-#' @param m An optional stop criterion in table generation. Positive integer lower than n
-#' @return A data frame with columns representing the number of successes (`x`), the probability mass
-#' function values (`Px`), cumulative probabilities (`Pcum`), percentiles (`Percentile`), and
-#' z-scores (`z`) for the specified group based on the predicted `a` and `b` parameters.
+#' @param raw A numeric vector of raw scores.
+#' @param age A numeric vector of ages, same length as raw.
+#' @param model A fitted model object of class "cnormBetaBinomial".
+#' @param n The number of items resp. the maximum score.
+#'
+#' @return A numeric vector of norm scores.
+#'
+#' @details
+#' The function first predicts the alpha and beta parameters of the beta-binomial distribution
+#' for each age using the provided model. It then calculates the cumulative probability for
+#' each raw score given these parameters. Finally, it converts these probabilities to the
+#' norm scale specified in the model.
+#'
 #' @examples
-#' # Determies beta parameters and models these continuously
-#' param <- betaByGroup(elfe$raw, elfe$group, 26)
-#' beta.model <- betaContinuous(param, 4, 4)
+#' # Assuming you have a fitted model named 'bb_model':
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+#' raw <- c(100, 121, 97, 180)
+#' ages <- c(7, 8, 9, 10)
+#' norm_scores <- predictNorm.betabinomial(raw, ages, model)
 #'
-#' # Calculates table for new group
-#' newGroup <- 3.9
-#' betaNormTable(beta.model, newGroup)
 #' @export
-betaNormTable <- function(model, group, m = NULL){
+predictNorm.betabinomial <- function(raw, age, model, n = NULL) {
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
   }
 
-  df1 <- data.frame(group = group)
-  a <- predict.lm(model$modA, df1)
-  b <- predict.lm(model$modB, df1)
-  n <- unique(model$beta.parameters$n)
-
-  if(is.null(m))
-    m <- n
-  else if(m > n)
-    m <- n
-
-  return(betaTable(a, b, n, m))
-}
-
-
-#' Predicts beta coefficients in dependence of age
-#'
-#' @param model An `betaContinuous` model output
-#' @param x A vector specifying the raw scores
-#' @param group A vector specifying the group variables for each raw score
-#' @return A data.frame with z scores and percentiles as well as predicted a and b values for the specific group
-#' @examples
-#' # Determies beta parameters and models these continuously
-#' param <- betaByGroup(elfe$raw, elfe$group, 26)
-#' beta.model <- betaContinuous(param, 4, 4)
-#'
-#' # Calculates z scores
-#' x <- c(15, 8, 11, 18)
-#' newGroup <- c(3.9, 1.2, 4.5, 6.3)
-#'
-#' predictBeta(beta.model, x, newGroup)
-#' @export
-predictBeta <- function(model, x, group){
-  if (!inherits(model, "cnormBetaBinomial")) {
-    stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  if (length(age) != length(raw)) {
+    stop("The lengths of 'ages' and 'raw' must be the same.")
   }
 
-  n <- unique(model$beta.parameters$n)
-  df1 <- data.frame(x = x, group = group)
-  df1$a <- predict.lm(model$modA, df1)
-  df1$b <- predict.lm(model$modB, df1)
-  df1$z <- rep(NA, length(x))
-  df1$Percentile <- rep(NA, length(x))
-
-  for(i in 1:length(x)){
-    tab <- betaTable(df1$a[i], df1$b[i], n, x[i])
-    df1$Percentile[i] <- tab[nrow(tab), 4]
-    df1$z[i] <- tab[nrow(tab), 5]
+  if(is.null(n)) {
+    n <- attr(model$result, "max")
   }
 
-  return(df1)
+  predictions <- predict.cnormBetaBinomial(model, age, n)
+  a <- predictions$a
+  b <- predictions$b
+
+  z_scores <- numeric(length(age))
+
+  for (i in 1:length(age)) {
+    x <- seq(from = 0, to = n)
+
+    # Calculate probabilities using log-space to avoid overflow
+    log_pmf <- lchoose(n, x) + lbeta(x + a[i], n - x + b[i]) - lbeta(a[i], b[i])
+    Px <- exp(log_pmf)
+
+    # Normalize to ensure sum to 1
+    Px <- Px / sum(Px)
+
+    # Calculate cumulative probabilities
+    cum <- cumsum(Px)
+
+    # Calculate percentiles
+    perc <- cum - 0.5 * Px
+
+    # Find the index of the raw score
+    score_index <- which(x == raw[i])
+
+    if (length(score_index) == 0) {
+      warning(paste("Raw score", raw[i], "not found for age", age[i], ". Returning NA."))
+      z_scores[i] <- NA
+    } else {
+      # Calculate z-score
+      z_scores[i] <- qnorm(perc[score_index])
+    }
+  }
+
+  mScale <- attr(model$result, "scaleMean")
+  sdScale <- attr(model$result, "scaleSD")
+
+  if(!is.na(mScale) && !is.na(sdScale)){
+    # scale z scores to scale
+    z_scores <- mScale + sdScale * z_scores
+    return(z_scores)
+  }else{
+    # percentile
+    return(pnorm(z_scores)*100)
+  }
 }

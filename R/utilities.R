@@ -1,3 +1,24 @@
+#' Standardize a numeric vector
+#'
+#' This function standardizes a numeric vector by subtracting the mean
+#' and dividing by the standard deviation. The resulting vector will have
+#' a mean of 0 and a standard deviation of 1.
+#'
+#' @param x A numeric vector to be standardized.
+#'
+#' @return A numeric vector of the same length as x, containing the standardized values.
+#'
+#' @examples
+#' data <- c(1, 2, 3, 4, 5)
+#' standardized_data <- standardize(data)
+#' print(standardized_data)
+#'
+#' @export
+standardize <- function(x) {
+  (x - mean(x)) / sd(x)
+}
+
+
 #' Weighted rank estimation
 #'
 #' Conducts weighted ranking on the basis of sums of weights per unique raw score.
@@ -383,6 +404,7 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   return(list(data = dat, sim = sim, theta = theta))
 }
 
+#' @keywords internal
 simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
   group1 <- data.frame(group=rep(1, length.out = n1), raw=rnorm(n1, mean=m1, sd=sd1), weights=rep(weight1, length.out = n1))
   group2 <- data.frame(group=rep(2, length.out = n2), raw=rnorm(n2, mean=m2, sd=sd2), weights=rep(weight2, length.out = n2))

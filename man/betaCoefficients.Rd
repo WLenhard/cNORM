@@ -4,16 +4,16 @@
 \alias{betaCoefficients}
 \title{Compute Parameters of a Beta Binomial Distribution}
 \usage{
-betaCoefficients(x, n)
+betaCoefficients(x, n = NULL)
 }
 \arguments{
 \item{x}{A numeric vector of non-negative integers representing observed counts.}
 
-\item{n}{The maximum number or the maximum possible value of `x`.}
+\item{n}{The maximum number or the maximum possible value of `x`. If not specified, uses max(x) instead.}
 }
 \value{
 A numeric vector containing the calculated parameters in the following order:
-alpha (a), beta (b), mean (m), variance (var), and the maximum number (n).
+alpha (a), beta (b), mean (m), standard deviation (sd), and the maximum number (n).
 }
 \description{
 This function calculates the \eqn{\alpha} (a) and \eqn{\beta} (b) parameters of a beta binomial
@@ -32,6 +32,8 @@ the test has a fixed number of items.
 \examples{
 x <- c(1, 2, 3, 4, 5)
 n <- 5
-betaCoefficients(x, n)
+
+betaCoefficients(x, n) # or, to set n to max(x)
+betaCoefficients(x)
 
 }
