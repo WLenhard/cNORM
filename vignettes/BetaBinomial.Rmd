@@ -1,0 +1,131 @@
+---
+title: "Modeling Psychometric Data with Beta Binomial Functions"
+author: "Wolfgang Lenhard"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Modeling Psychometric Data with Beta Binomial Functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+In this vignette, we demonstrate how to model psychometric data over age using beta binomial functions. We'll cover the theoretical background, provide practical examples, and showcase the capabilities of our package through a simulation study.
+
+The beta-binomial distribution can be a powerful approach for modeling psychometric test scores, particularly suited to tests with a fixed maximum score and discrete outcomes. In psychometric testing, we often encounter situations where individuals answer a set number of questions or items, resulting in whole-number scores bounded by zero and the maximum possible score. However, the probability of answering each question correctly can vary among individuals due to factors like ability, item difficulty, or testing conditions.
+
+This is where the beta-binomial distribution shines. It combines the binomial distribution, which models the count of correct answers in a fixed number of trials, with the beta distribution, which accounts for the variability in the probability of success. This combination allows for a more nuanced and realistic representation of test score distributions. The beta-binomial distribution offers a sophisticated yet intuitive way to analyze and interpret psychometric test results.
+
+## Mathematical Derivation
+
+The beta-binomial distribution arises as a compound distribution of the binomial and beta distributions. For a test with n items, let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
+
+\[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}\]
+
+where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
+
+In our approach, we model the mean ($\mu$) and standard deviation ($\sigma$) of the beta-binomial distribution as functions of age (or time) using polynomial regression. Specifically:
+\[\mu(t) = \beta_0 + \beta_1t + \beta_2t^2 + ... + \beta_mt^m\]
+
+\[\log(\sigma(t)) = \gamma_0 + \gamma_1t + \gamma_2t^2 + ... + \gamma_st^s\]
+
+where t is age, and m and s are the degrees of the polynomials for $\mu$ and $\sigma$ respectively.
+
+We use the log of $\sigma$ to ensure positivity of the standard deviation.
+The parameters $\alpha$ and $\beta$ of the beta-binomial distribution are then derived from $\mu$ and $\sigma$ using the method of moments:
+
+\[\alpha = \left(\frac{1 - \mu}{\sigma^2} - \frac{1}{\mu}\right) \mu^2\]
+
+\[\beta = \alpha \left(\frac{1}{\mu} - 1\right)\]
+
+To estimate the parameters ($\beta_0, ..., \beta_m, \gamma_0, ..., \gamma_s$), we use maximum likelihood estimation. The log-likelihood function for N observations is:
+
+\[L(\beta, \gamma | X, T) = \sum_{i=1}^N \log[P(X_i | n, \alpha(T_i), \beta(T_i))]\]
+
+where $X_i$ is the score and $T_i$ is the age for the i-th observation.
+
+This log-likelihood is jointly optimized over all parameters using numerical optimization techniques (specifically, the BFGS algorithm of the $optim$ function). The optimization process finds the values of $\beta$ and $\gamma$ that maximize the log-likelihood, thereby providing the best fit to the observed data.
+
+## Prerequisites
+Before applying beta-binomial modeling to psychometric data over age, several key prerequisites should be met:
+
+- **Systematic development**: The scores must show a systematic, but not necessarily monotonic development over age. By default, the modelling can capture curvilinear relationships. In case of more complex trajectories, increase the polynomial degree for mean and/or standard deviation. This however affords larger sample sizes and entails the danger of overfit.
+
+- **Discrete outcomes**: The test scores must be distinct, whole number values. For example scores like 0, 1, 2, ..., n are appropriate. Fractional or continuous scores are not suitable for the beta binomial model.
+
+- **Fixed maximum score**: The test must have a predetermined maximum score or a fixed number of items with a consistent upper bound across all age groups.
+
+- **Item difficulty distribution**: The difficulty of the test items should ideally be normally distributed.
+
+Before we begin, ensure you have the following packages installed and loaded:
+
+```{r}
+library(cNORM)
+```
+
+## Example
+
+Let's walk through a practical example using the ppvt dataset, included in cNORM.
+
+### Data Preparation
+
+```{r}
+# Code to load or simulate your data
+```
+
+### Model Fitting
+
+```{r}
+# Code to fit the beta binomial model
+```
+
+### Interpretation of Results
+
+[Explain the output, coefficients, and their interpretations]
+
+### Visualization
+
+```{r}
+# Code to create plots
+```
+
+[Explain the visualizations and what they reveal about the data]
+
+### Post stratification and weighting
+
+
+## Simulation Study
+
+To demonstrate the robustness and accuracy of our beta binomial modeling approach, we'll conduct a simulation study.
+
+### Simulation Setup
+
+```{r}
+# Code to set up the simulation parameters
+```
+
+### Running the Simulation
+
+```{r}
+# Code to run the simulation
+```
+
+### Analysis of Simulation Results
+
+[Discuss the findings from the simulation study]
+
+## Conclusion
+
+[Summarize the key points and potential applications of the beta binomial modeling approach in psychometrics]
+
+## References
+
+[List any references used in the vignette]
