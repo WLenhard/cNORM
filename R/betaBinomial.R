@@ -9,10 +9,11 @@
 #' @param X A matrix of predictors for the mean model.
 #' @param Z A matrix of predictors for the log-standard deviation model.
 #' @param y A numeric vector of response values.
+#' @param weights A numeric vector of weights for each observation.
 #'
 #' @return The negative log-likelihood of the model.
 #' @keywords internal
-log_likelihood <- function(params, X, Z, y) {
+log_likelihood <- function(params, X, Z, y, weights) {
   n_beta <- ncol(X)
   beta <- params[1:n_beta]
   gamma <- params[(n_beta+1):length(params)]
@@ -21,7 +22,7 @@ log_likelihood <- function(params, X, Z, y) {
   log_sigma <- Z %*% gamma
   sigma <- exp(log_sigma)
 
-  ll <- sum(dnorm(y, mean = mu, sd = sigma, log = TRUE))
+  ll <- sum(weights * dnorm(y, mean = mu, sd = sigma, log = TRUE))
   return(-ll)  # Return negative log-likelihood for minimization
 }
 
@@ -34,6 +35,7 @@ log_likelihood <- function(params, X, Z, y) {
 #'
 #' @param time A numeric vector of predictor values (e.g., age or time).
 #' @param score A numeric vector of response values.
+#' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
 #' @param mu Integer specifying the degree of the polynomial for the mean model. Default is 2.
 #' @param sigma Integer specifying the degree of the polynomial for the standard deviation model. Default is 1.
 #' @param control A list of control parameters to be passed to the `optim` function.
@@ -42,10 +44,7 @@ log_likelihood <- function(params, X, Z, y) {
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as
 #' well, be provided f. e. c(10, 3) for Wechsler scale index points
-#' @param descend ranking order (default descent = FALSE): inverses the
-#' ranking order with higher raw scores getting lower norm scores; relevant
-#' for example when norming error scores, where lower scores mean higher
-#' performance
+#' @param plot Logical indicating whether to plot the model. Default is TRUE.
 #'
 #' @return A list of class "hetero_model" containing:
 #'   \item{beta_est}{Estimated coefficients for the mean model}
@@ -65,9 +64,25 @@ log_likelihood <- function(params, X, Z, y) {
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 #' summary(model)
 #'
+#' # In modelling with the beta binomial function, just like in \code{\link{cnorm}}, weights
+#' # can be applied as a means for post stratification. Please use the raking function
+#' # \code{\link{computeWeightsl}}. Here an example for the ppvt dataset:
+#' margins <- data.frame(variables = c("sex", "sex",
+#'                                     "migration", "migration"),
+#'                       levels = c(1, 2, 0, 1),
+#'                       share = c(.52, .48, .7, .3))
+#' weights <- computeWeights(ppvt, margins)
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
 #'
 #' @export
-cnorm.betabinomial <- function(time, score, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", descend = FALSE) {
+cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", plot = T) {
+  # If weights are not provided, use equal weights
+  if (is.null(weights)) {
+    weights <- rep(1, length(time))
+  } else if (length(weights) != length(time)) {
+    stop("Length of weights must match length of time and score")
+  }
+
   # Standardize inputs
   time_std <- standardize(time)
   score_std <- standardize(score)
@@ -87,7 +102,7 @@ cnorm.betabinomial <- function(time, score, mu = 3, sigma = 3, n = NULL, control
   if(is.null(control))
     control = list(reltol = 1e-8, maxit = 1000)
 
-  result <- optim(initial_params, log_likelihood, X = X, Z = Z, y = y,
+  result <- optim(initial_params, log_likelihood, X = X, Z = Z, y = y, weights = weights,
                   method = "BFGS", hessian = TRUE,
                   control = control)
 
@@ -126,13 +141,17 @@ cnorm.betabinomial <- function(time, score, mu = 3, sigma = 3, n = NULL, control
   attr(result, "max") <- n
   attr(result, "scaleMean") <- scaleM
   attr(result, "scaleSD") <- scaleSD
-  attr(result, "descend") <- descend
-  attr(result, "descend") <- descend
 
   model <- list(beta_est = beta_est, gamma_est = gamma_est, se = se,
                 mu = mu, sigma = sigma,
                 result = result)
   class(model) <- "cnormBetaBinomial"
+
+  if(plot){
+    p <- plot.betabinomial(model, time, score)
+    print(p)
+  }
+
   return(model)
 }
 
@@ -384,4 +403,77 @@ predictNorm.betabinomial <- function(raw, age, model, n = NULL) {
     # percentile
     return(pnorm(z_scores)*100)
   }
+}
+
+#' Plot cnormBetaBinomial Model with Data and Percentile Lines
+#'
+#' This function creates a ggplot visualization of a fitted cnormBetaBinomial model,
+#' including the original data points and specified percentile lines.
+#'
+#' @param model A fitted model object of class "cnormBetaBinomial".
+#' @param time A vector the time/age data.
+#' @param score A vector of the score data.
+#' @param percentiles A numeric vector of percentiles to plot (between 0 and 1).
+#'
+#' @return A ggplot object.
+#'
+#' @export
+plot.betabinomial <- function(model, time, score,
+                              percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)) {
+  if (!inherits(model, "cnormBetaBinomial")) {
+    stop("Model must be of class 'cnormBetaBinomial'")
+  }
+
+  if(length(time) != length(score)){
+    stop("Length of 'time' and 'score' must be the same.")
+  }
+
+  # Generate prediction points
+  n_points <- 100
+  data <- data.frame(time = time, score = score)
+  time_range <- range(time)
+  pred_times <- seq(time_range[1], time_range[2], length.out = n_points)
+
+
+  # Get predictions
+  preds <- predict(model, pred_times)
+
+  # Calculate percentile lines
+  percentile_lines <- lapply(percentiles, function(p) {
+    qbeta(p, shape1 = preds$a, shape2 = preds$b) * attr(model$result, "max")
+  })
+
+  percentile_data <- do.call(cbind, percentile_lines)
+  colnames(percentile_data) <- paste0("P", percentiles * 100)
+
+  plot_data <- data.frame(time = pred_times,
+                          mu = preds$mu,
+                          sigma = preds$sigma,
+                          percentile_data)
+
+  # Create the plot
+  p <- ggplot() +
+    geom_point(data = data, aes_string(x = "time", y = "score"), alpha = 0.2, size = 0.6)
+
+  # Add percentile lines
+  colors <- rainbow(length(percentiles))
+  for (i in seq_along(percentiles)) {
+    p <- p + geom_line(data = plot_data,
+                       aes_string(x = "time", y = paste0("P", percentiles[i] * 100)),
+                       color = colors[i], size = 0.6)
+  }
+
+  # Customize the plot
+  p <- p +
+    theme_minimal() +
+    labs(title = "Percentile Plot (Beta-Binomial Model)",
+         x = "Time/Age",
+         y = "Score",
+         color = "Percentile") +
+    scale_y_continuous(limits = c(0, attr(model$result, "max"))) +
+    scale_color_manual(values = colors,
+                       breaks = paste0(percentiles * 100, "%"),
+                       labels = paste0(percentiles * 100, "%"))
+
+  return(p)
 }

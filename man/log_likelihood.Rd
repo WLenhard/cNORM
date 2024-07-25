@@ -4,7 +4,7 @@
 \alias{log_likelihood}
 \title{Calculate the negative log-likelihood for a heteroscedastic regression model}
 \usage{
-log_likelihood(params, X, Z, y)
+log_likelihood(params, X, Z, y, weights)
 }
 \arguments{
 \item{params}{A numeric vector containing all model parameters. The first n_beta elements
@@ -16,6 +16,8 @@ coefficients for the log-standard deviation model.}
 \item{Z}{A matrix of predictors for the log-standard deviation model.}
 
 \item{y}{A numeric vector of response values.}
+
+\item{weights}{A numeric vector of weights for each observation.}
 }
 \value{
 The negative log-likelihood of the model.

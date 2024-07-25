@@ -7,18 +7,21 @@
 cnorm.betabinomial(
   time,
   score,
+  weights = NULL,
   mu = 3,
   sigma = 3,
   n = NULL,
   control = NULL,
   scale = "T",
-  descend = FALSE
+  plot = T
 )
 }
 \arguments{
 \item{time}{A numeric vector of predictor values (e.g., age or time).}
 
 \item{score}{A numeric vector of response values.}
+
+\item{weights}{A numeric vector of weights for each observation. Default is NULL (equal weights).}
 
 \item{mu}{Integer specifying the degree of the polynomial for the mean model. Default is 2.}
 
@@ -33,10 +36,7 @@ If NULL, default values are used.}
 transformation); a double vector with the mean and standard deviation can as
 well, be provided f. e. c(10, 3) for Wechsler scale index points}
 
-\item{descend}{ranking order (default descent = FALSE): inverses the
-ranking order with higher raw scores getting lower norm scores; relevant
-for example when norming error scores, where lower scores mean higher
-performance}
+\item{plot}{Logical indicating whether to plot the model. Default is TRUE.}
 }
 \value{
 A list of class "hetero_model" containing:
@@ -62,5 +62,14 @@ find the optimal parameters. The optimization is performed using the BFGS method
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 summary(model)
 
+# In modelling with the beta binomial function, just like in \code{\link{cnorm}}, weights
+# can be applied as a means for post stratification. Please use the raking function
+# \code{\link{computeWeightsl}}. Here an example for the ppvt dataset:
+margins <- data.frame(variables = c("sex", "sex",
+                                    "migration", "migration"),
+                      levels = c(1, 2, 0, 1),
+                      share = c(.52, .48, .7, .3))
+weights <- computeWeights(ppvt, margins)
+model <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
 
 }
