@@ -4,17 +4,12 @@
 \alias{plot.betabinomial}
 \title{Plot cnormBetaBinomial Model with Data and Percentile Lines}
 \usage{
-\method{plot}{betabinomial}(
-  model,
-  time,
-  score,
-  percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
-)
+\method{plot}{betabinomial}(model, age, score, percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95))
 }
 \arguments{
 \item{model}{A fitted model object of class "cnormBetaBinomial".}
 
-\item{time}{A vector the time/age data.}
+\item{age}{A vector the age data.}
 
 \item{score}{A vector of the score data.}
 

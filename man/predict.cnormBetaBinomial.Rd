@@ -4,28 +4,28 @@
 \alias{predict.cnormBetaBinomial}
 \title{Predict mean and standard deviation for a heteroscedastic regression model}
 \usage{
-\method{predict}{cnormBetaBinomial}(model, times, n = NULL)
+\method{predict}{cnormBetaBinomial}(model, ages, n = NULL)
 }
 \arguments{
 \item{model}{An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.}
 
-\item{times}{A numeric vector of time points at which to make predictions.}
+\item{ages}{A numeric vector of age points at which to make predictions.}
 
 \item{n}{The maximum score to be achieved.}
 }
 \value{
 A data frame with columns:
-  \item{time}{The input time points}
+  \item{age}{The input age points}
   \item{mu}{Predicted mean values}
   \item{sigma}{Predicted standard deviation values}
 }
 \description{
 This function generates predictions from a fitted heteroscedastic regression model
-for new time points.
+for new age points.
 }
 \details{
 This function takes a fitted heteroscedastic regression model and generates predictions
-for new time points. It applies the same standardization used in model fitting,
+for new age points. It applies the same standardization used in model fitting,
 generates predictions on the standardized scale, and then transforms these back
 to the original scale.
 }

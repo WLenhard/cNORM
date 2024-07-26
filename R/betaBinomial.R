@@ -33,7 +33,7 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' standard deviation of the response variable are modeled as polynomial functions
 #' of the predictor variable.
 #'
-#' @param time A numeric vector of predictor values (e.g., age or time).
+#' @param age A numeric vector of predictor values (e.g., age).
 #' @param score A numeric vector of response values.
 #' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
 #' @param mu Integer specifying the degree of the polynomial for the mean model. Default is 2.
@@ -75,24 +75,24 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
 #'
 #' @export
-cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", plot = T) {
+cnorm.betabinomial <- function(age, score, weights = NULL, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", plot = T) {
   # If weights are not provided, use equal weights
   if (is.null(weights)) {
-    weights <- rep(1, length(time))
-  } else if (length(weights) != length(time)) {
-    stop("Length of weights must match length of time and score")
+    weights <- rep(1, length(age))
+  } else if (length(weights) != length(age)) {
+    stop("Length of weights must match length of age and score")
   }
 
   # Standardize inputs
-  time_std <- standardize(time)
+  age_std <- standardize(age)
   score_std <- standardize(score)
 
   # Set up 'data' object containing both variables
-  data <- data.frame(time = time_std, score = score_std)
+  data <- data.frame(age = age_std, score = score_std)
 
   # Prepare the data matrices for mu and sigma, including intercept
-  X <- cbind(1, poly(data$time, degree = mu, raw = TRUE))
-  Z <- cbind(1, poly(data$time, degree = sigma, raw = TRUE))
+  X <- cbind(1, poly(data$age, degree = mu, raw = TRUE))
+  Z <- cbind(1, poly(data$age, degree = sigma, raw = TRUE))
   y <- data$score
 
   # Initial parameters: use some sensible starting values
@@ -134,8 +134,8 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
   if(is.null(n))
     n <- max(score)
 
-  attr(result, "time_mean") <- mean(time)
-  attr(result, "time_sd") <- sd(time)
+  attr(result, "age_mean") <- mean(age)
+  attr(result, "age_sd") <- sd(age)
   attr(result, "score_mean") <- mean(score)
   attr(result, "score_sd") <- sd(score)
   attr(result, "max") <- n
@@ -151,7 +151,7 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
 
 
   if(plot){
-    p <- plot.betabinomial(model, time, score)
+    p <- plot.betabinomial(model, age, score)
     print(p)
   }
 
@@ -161,35 +161,35 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
 #' Predict mean and standard deviation for a heteroscedastic regression model
 #'
 #' This function generates predictions from a fitted heteroscedastic regression model
-#' for new time points.
+#' for new age points.
 #'
 #' @param model An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.
-#' @param times A numeric vector of time points at which to make predictions.
+#' @param ages A numeric vector of age points at which to make predictions.
 #' @param n The maximum score to be achieved.
 #'
 #' @return A data frame with columns:
-#'   \item{time}{The input time points}
+#'   \item{age}{The input age points}
 #'   \item{mu}{Predicted mean values}
 #'   \item{sigma}{Predicted standard deviation values}
 #'
 #' @details
 #' This function takes a fitted heteroscedastic regression model and generates predictions
-#' for new time points. It applies the same standardization used in model fitting,
+#' for new age points. It applies the same standardization used in model fitting,
 #' generates predictions on the standardized scale, and then transforms these back
 #' to the original scale.
 #'
 #' @keywords export
-predict.cnormBetaBinomial <- function(model, times, n = NULL) {
+predict.cnormBetaBinomial <- function(model, ages, n = NULL) {
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
   }
 
-  # Standardize new times
-  times_std <- (times - attr(model$result, "time_mean")) / attr(model$result, "time_sd")
+  # Standardize new ages
+  ages_std <- (ages - attr(model$result, "age_mean")) / attr(model$result, "age_sd")
 
   # Create design matrices including intercept
-  X_new <- cbind(1, poly(times_std, degree = model$mu, raw = TRUE))
-  Z_new <- cbind(1, poly(times_std, degree = model$sigma, raw = TRUE))
+  X_new <- cbind(1, poly(ages_std, degree = model$mu, raw = TRUE))
+  Z_new <- cbind(1, poly(ages_std, degree = model$sigma, raw = TRUE))
 
   predicted_mu_std <- X_new %*% model$beta_est
   predicted_sigma_std <- exp(Z_new %*% model$gamma_est)
@@ -210,7 +210,7 @@ predict.cnormBetaBinomial <- function(model, times, n = NULL) {
   a <- (m2*n - m3 - m*var)/(n*var - n*m + m2)
   b <- a*((n - m)/m)
 
-  predicted <- data.frame(time = times,
+  predicted <- data.frame(age = ages,
                           mu = as.vector(predicted_mu),
                           sigma = as.vector(predicted_sigma),
                           a = a,
@@ -271,7 +271,7 @@ betaCoefficients <- function(x, n = NULL){
 #' reliability is specified, confidence intervals are computed for the true score
 #' estimates, including a correction for regression to the mean (Eid & Schmidt, 2012, p. 272).
 #' @param model The model, which was fitted using the `optimized.model` function.
-#' @param times A numeric vector of time points at which to make predictions.
+#' @param ages A numeric vector of age points at which to make predictions.
 #' @param n The number of items resp. the maximum score.
 #' @param m An optional stop criterion in table generation. Positive integer lower than n.
 #' @param range The range of the norm scores in standard deviations. Default is 3. Thus, scores in the
@@ -282,7 +282,7 @@ betaCoefficients <- function(x, n = NULL){
 #' @return A list of data frames with columns: x, Px, Pcum, Percentile, z, norm score
 #' and possibly confidence interval
 #' @export
-normTable.betabinomial <- function(model, times, n = NULL, m = NULL, range = 3,
+normTable.betabinomial <- function(model, ages, n = NULL, m = NULL, range = 3,
                                    CI = .9,
                                    reliability = NULL){
   if (!inherits(model, "cnormBetaBinomial")) {
@@ -313,7 +313,7 @@ normTable.betabinomial <- function(model, times, n = NULL, m = NULL, range = 3,
   else if(m > n)
     m <- n
 
-  predictions <- predict.cnormBetaBinomial(model, times, n)
+  predictions <- predict.cnormBetaBinomial(model, ages, n)
   a <- predictions$a
   b <- predictions$b
 
@@ -362,7 +362,7 @@ normTable.betabinomial <- function(model, times, n = NULL, m = NULL, range = 3,
     }
     result[[k]] <- df
   }
-  names(result) <- times
+  names(result) <- ages
   return(result)
 }
 
@@ -457,32 +457,32 @@ predictNorm.betabinomial <- function(raw, age, model, n = NULL) {
 #' including the original data points and specified percentile lines.
 #'
 #' @param model A fitted model object of class "cnormBetaBinomial".
-#' @param time A vector the time/age data.
+#' @param age A vector the age data.
 #' @param score A vector of the score data.
 #' @param percentiles A numeric vector of percentiles to plot (between 0 and 1).
 #'
 #' @return A ggplot object.
 #'
 #' @export
-plot.betabinomial <- function(model, time, score,
+plot.betabinomial <- function(model, age, score,
                               percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)) {
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Model must be of class 'cnormBetaBinomial'")
   }
 
-  if(length(time) != length(score)){
-    stop("Length of 'time' and 'score' must be the same.")
+  if(length(age) != length(score)){
+    stop("Length of 'age' and 'score' must be the same.")
   }
 
   # Generate prediction points
   n_points <- 100
-  data <- data.frame(time = time, score = score)
-  time_range <- range(time)
-  pred_times <- seq(time_range[1], time_range[2], length.out = n_points)
+  data <- data.frame(age = age, score = score)
+  age_range <- range(age)
+  pred_ages <- seq(age_range[1], age_range[2], length.out = n_points)
 
 
   # Get predictions
-  preds <- predict(model, pred_times)
+  preds <- predict(model, pred_ages)
 
   # Calculate percentile lines
   percentile_lines <- lapply(percentiles, function(p) {
@@ -492,20 +492,20 @@ plot.betabinomial <- function(model, time, score,
   percentile_data <- do.call(cbind, percentile_lines)
   colnames(percentile_data) <- paste0("P", percentiles * 100)
 
-  plot_data <- data.frame(time = pred_times,
+  plot_data <- data.frame(age = pred_ages,
                           mu = preds$mu,
                           sigma = preds$sigma,
                           percentile_data)
 
   # Create the plot
   p <- ggplot() +
-    geom_point(data = data, aes_string(x = "time", y = "score"), alpha = 0.2, size = 0.6)
+    geom_point(data = data, aes_string(x = "age", y = "score"), alpha = 0.2, size = 0.6)
 
   # Add percentile lines
   colors <- rainbow(length(percentiles))
   for (i in seq_along(percentiles)) {
     p <- p + geom_line(data = plot_data,
-                       aes_string(x = "time", y = paste0("P", percentiles[i] * 100)),
+                       aes_string(x = "age", y = paste0("P", percentiles[i] * 100)),
                        color = colors[i], size = 0.6)
   }
 
@@ -513,7 +513,7 @@ plot.betabinomial <- function(model, time, score,
   p <- p +
     theme_minimal() +
     labs(title = "Percentile Plot (Beta-Binomial Model)",
-         x = "Time/Age",
+         x = "Age",
          y = "Score",
          color = "Percentile") +
     scale_y_continuous(limits = c(0, attr(model$result, "max"))) +

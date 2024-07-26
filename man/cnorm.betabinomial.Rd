@@ -5,7 +5,7 @@
 \title{Fit a heteroscedastic regression model}
 \usage{
 cnorm.betabinomial(
-  time,
+  age,
   score,
   weights = NULL,
   mu = 3,
@@ -17,7 +17,7 @@ cnorm.betabinomial(
 )
 }
 \arguments{
-\item{time}{A numeric vector of predictor values (e.g., age or time).}
+\item{age}{A numeric vector of predictor values (e.g., age).}
 
 \item{score}{A numeric vector of response values.}
 

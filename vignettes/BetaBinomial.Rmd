@@ -21,24 +21,24 @@ knitr::opts_chunk$set(
 
 In this vignette, we demonstrate how to model psychometric data over age using beta binomial distributions. We'll cover the theoretical background, provide practical examples, and showcase the capabilities through a simulation study.
 
-The beta-binomial distribution is a powerful approach for modeling psychometric test scores, particularly suited to tests with a fixed maximum score and discrete outcomes. In psychometric testing, we often encounter situations where individuals answer a set number of questions or items, resulting in whole-number scores bounded by zero and the maximum possible score. The probability of answering each question correctly varies among individuals due to factors like ability or personal traits. 
+The beta-binomial distribution is a powerful approach for modeling psychometric test scores with a fixed maximum score and discrete outcomes. In psychometric testing, we often encounter situations where individuals answer a set number of questions or items, resulting in whole-number scores bounded by zero and the maximum possible score. The probability of answering each question correctly varies among individuals due to factors like ability or personal traits. 
 
 To quantify this ability or trait, norm scores are used to express the relative location of an individual's score within a reference population. This allows for meaningful interpretation and comparison of test results across different age groups or populations. The beta-binomial distribution combines the binomial distribution, which models the count of correct answers in a fixed number of trials, with the beta distribution, which accounts for the variability in the probability of success. 
 
 ## Mathematical Derivation
 
-The beta-binomial distribution arises as a compound distribution of the binomial and beta distributions. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
+The beta-binomial distribution arises as a compound distribution of the binomial and beta distribution. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
 
 \[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}\]
 
 where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
 
-In our approach, we model the mean ($\mu$) and standard deviation ($\sigma$) of the beta-binomial distribution as functions of age (or time) using polynomial regression. Specifically:
-\[\mu(t) = \beta_0 + \beta_1t + \beta_2t^2 + ... + \beta_mt^m\]
+In our approach, we model the mean ($\mu$) and standard deviation ($\sigma$) of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically:
+\[\mu(age) = \beta_0 + \beta_1age + \beta_2age^2 + ... + \beta_mage^m\]
 
-\[\log(\sigma(t)) = \gamma_0 + \gamma_1t + \gamma_2t^2 + ... + \gamma_st^s\]
+\[\log(\sigma(age)) = \gamma_0 + \gamma_1age + \gamma_2age^2 + ... + \gamma_sage^s\]
 
-where t is age, and m and s are the degrees of the polynomials for $\mu$ and $\sigma$ respectively.
+where m and s are the degrees of the polynomials for $\mu$ and $\sigma$ respectively.
 
 We use the log of $\sigma$ to ensure positivity of the standard deviation, as standard deviation cannot be negative. This transformation also helps in stabilizing the variance and improving the optimization process.
 
@@ -50,16 +50,16 @@ The parameters $\alpha$ and $\beta$ of the beta-binomial distribution are then d
 
 To estimate the parameters ($\beta_0, ..., \beta_m, \gamma_0, ..., \gamma_s$), we use maximum likelihood estimation. The log-likelihood function for N observations is:
 
-\[L(\beta, \gamma | X, T) = \sum_{i=1}^N \log[P(X_i | n, \alpha(T_i), \beta(T_i))]\]
+\[L(\beta, \gamma | X, Age) = \sum_{i=1}^N \log[P(X_i | n, \alpha(Age_i), \beta(Age_i))]\]
 
-where $X_i$ is the score and $T_i$ is the age for the i-th observation.
+where $X_i$ is the score and $Age_i$ is the age for the i-th observation.
 
-This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the BFGS (Broyden–Fletcher–Goldfarb–Shanno) algorithm of the `optim` function. The BFGS algorithm is a quasi-Newton method for solving unconstrained nonlinear optimization problems. It's particularly effective for our problem as it approximates the Hessian matrix, allowing for efficient optimization of the many parameters in our model. The optimization process finds the values of $\beta$ and $\gamma$ that maximize the log-likelihood, thereby providing the best fit to the observed data.
+This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the BFGS (Broyden–Fletcher–Goldfarb–Shanno) algorithm of the `optim` function. The BFGS algorithm is a quasi-Newton method for solving unconstrained nonlinear optimization problems. It's particularly effective for our problem as it approximates the Hessian matrix, allowing for efficient optimization of the parameters in our model. The optimization process finds the values of $\beta$ and $\gamma$ that maximize the log-likelihood, thereby providing the best fit to the observed data.
 
 ## Prerequisites
 Before applying beta-binomial modeling to psychometric data over age, several key prerequisites should be met:
 
-- **Systematic development over time or age**: The scores must show a systematic, but not necessarily monotonic development over time or age. By default, the modeling can capture curvilinear relationships for both $\mu$ and $\sigma$. In case of more complex trajectories, the polynomial degrees for both parameters can be increased. This however requires larger sample sizes and entails the danger of overfitting.
+- **Systematic development over age resp. the explanatory variable**: The scores must show a systematic, but not necessarily monotonic development over age (resp. the explanatory variable). By default, the modeling can capture curvilinear relationships for both $\mu$ and $\sigma$. In case of more complex trajectories, the polynomial degrees for both parameters can be increased. This however requires larger sample sizes and entails the danger of overfitting.
 
 - **Discrete outcomes**: The test scores must be distinct, whole number values. For example, scores like 0, 1, 2, ..., n are appropriate. Fractional or continuous scores are not suitable for the beta binomial model.
 
@@ -73,7 +73,7 @@ Before applying beta-binomial modeling to psychometric data over age, several ke
 
 ## Example
 
-Let's walk through a practical example using the ppvt dataset, included in cNORM. Before we begin, ensure you have the following packages installed and loaded:
+Let's walk through a practical example using the ppvt dataset, included in cNORM. Before we begin, ensure you have installed the cNORM package.
 
 ### Data Preparation
 The ppvt dataset included in cNORM contains data on vocabulary development over age, specifically scores from the Peabody Picture Vocabulary Test. This test measures receptive vocabulary and is widely used in psychological and educational assessments. Let's load the data and examine its structure:
@@ -96,13 +96,18 @@ To fit the beta-binomial model to the data, we use the `cnorm.betabinomial` func
 # has a maximum score of 228, which is however not reached in the sample:
 model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 
-# In order to use different optimization functions, you can specify different control parameters,
-# e.g., including methods from the optimx package. The default is the BFGS algorithm.
+# In order to use different optimization functions, you can specify different 
+# control parameters, # e.g., including methods from the optimx package. 
+# The default is the BFGS algorithm.
+
+# To retrieve fit indices, use the diagnostic.betabinomial function
+diagnostics.betabinomial(model.betabinomial)
+
 ```
 
 By default, the function fits a polynomial of degree 3 for both $\mu$ and $\sigma$. You can specify the degrees of the polynomials using the `degree_mu` and `degree_sigma` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
 
-`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot.betabinomial` function. Observe if the percentile trajectories exhibit plausible forms. To predict $\mu$ and $\sigma$ for specific ages or times, as well as the $\alpha$ and $\beta$ parameters, you can use the `predict.cnormBetaBinomial` method:
+`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot.betabinomial` function. Observe if the percentile trajectories exhibit plausible forms. To predict $\mu$ and $\sigma$ for specific ages, as well as the $\alpha$ and $\beta$ parameters, you can use the `predict.cnormBetaBinomial` method:
 
 ```{r}
 # Predict parameters depending on age
@@ -110,6 +115,15 @@ predict.cnormBetaBinomial(model.betabinomial, c(5, 10, 15))
 ```
 
 These predicted values show the estimated mean ($\mu$) and standard deviation ($\sigma$) of the raw scores, as well as the $\alpha$ and $\beta$ parameters of the beta-binomial distribution, for ages 5, 10, and 15. For example, at age 10, the model predicts a mean raw score of about 168, with a standard deviation of about 21. The $\alpha$ and $\beta$ parameters define the shape of the beta-binomial distribution at each age.
+
+To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
+
+```{r}
+# Predict norm scores for new data. Since we used the default T-score scaling,
+# the output will as well be a vector with T-scores. 
+predictNorm.betabinomial(c(123, 98, 201, 165), c(8.9, 10.1, 9.3, 8.7), model.betabinomial)
+```
+
 
 ### Norm table generation
 Norm tables can be generated with the `normTable.betabinomial` function. The function takes the model object and a vector of ages for which you want to generate norm scores. If available, reliability can be specified to compute confidence intervals as well. By default, the function limits the results to +/- 3 standard deviations.
@@ -186,3 +200,5 @@ In conclusion, while both cNORM with Taylor polynomials and beta-binomial models
 * Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, 81(2), 229–261. https://doi.org/10.1177/0013164420928457
 * Timmerman, M. E., Voncken, L., & Albers, C. J. (2021). A tutorial on regression-based norming of psychological tests with GAMLSS. Psychological Methods, 26(3), 357–373. https://doi.org/10.1037/met0000348
 * Urban, J., Scherrer, V., Strobel, A., & Preckel, F. (2023). Continuous norming approaches: A systematic review and real data example. doi:10.31234/osf.io/5azep
+
+

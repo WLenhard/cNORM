@@ -7,7 +7,7 @@ Beta-Binomial Distribution}
 \usage{
 normTable.betabinomial(
   model,
-  times,
+  ages,
   n = NULL,
   m = NULL,
   range = 3,
@@ -18,7 +18,7 @@ normTable.betabinomial(
 \arguments{
 \item{model}{The model, which was fitted using the `optimized.model` function.}
 
-\item{times}{A numeric vector of time points at which to make predictions.}
+\item{ages}{A numeric vector of age points at which to make predictions.}
 
 \item{n}{The number of items resp. the maximum score.}
 
