@@ -9,7 +9,8 @@ Date: in preparation
 Changes:
 
 *    Fixed input validation in getNormScoreSE    
-*    Started intesive work and validation of parametric modelling with beta binomial functions
+*    Started intensive work and validation of parametric modelling with beta binomial functions
+*    Vignette on modelling with beta binomial distribution
 
 
 
@@ -20,7 +21,7 @@ Date: 2023.07.19
 Changes:
 
 *    Added parametric continuous norming with beta binomial family and new functions
-     betaCoefficients, betaTable, betaByGroup and betaContinuous; beware - still experimental
+     betaCoefficients, betaTable, betaByGroup and betaContinuous; beware - still experimental (Jan. 2024)
 *    Fixed bug in bestModels function when predictors are specified     
 
 

@@ -162,6 +162,7 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
 #'
 #' @param model An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.
 #' @param times A numeric vector of time points at which to make predictions.
+#' @param n The maximum score to be achieved.
 #'
 #' @return A data frame with columns:
 #'   \item{time}{The input time points}
@@ -174,7 +175,7 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
 #' generates predictions on the standardized scale, and then transforms these back
 #' to the original scale.
 #'
-#' @keywords internal
+#' @keywords export
 predict.cnormBetaBinomial <- function(model, times, n = NULL) {
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
@@ -262,15 +263,43 @@ betaCoefficients <- function(x, n = NULL){
 #' Calculate Cumulative Probabilities, Density, Percentiles, and Z-Scores for
 #' Beta-Binomial Distribution
 #'
+#' This function generates a norm table for a specific ages based on the beta binomial
+#' regression model. In case a confidence coefficient (CI, default .9) and the
+#' reliability is specified, confidence intervals are computed for the true score
+#' estimates, including a correction for regression to the mean (Eid & Schmidt, 2012, p. 272).
 #' @param model The model, which was fitted using the `optimized.model` function.
 #' @param times A numeric vector of time points at which to make predictions.
 #' @param n The number of items resp. the maximum score.
 #' @param m An optional stop criterion in table generation. Positive integer lower than n.
-#' @return A data frame with columns: x, Px, Pcum, Percentile, z, norm score
+#' @param range The range of the norm scores in standard deviations. Default is 3. Thus, scores in the
+#' range of +/- 3 standard deviations are considered.
+#' @param CI confidence coefficient, ranging from 0 to 1, default .9
+#' @param reliability coefficient, ranging between  0 to 1
+
+#' @return A list of data frames with columns: x, Px, Pcum, Percentile, z, norm score
+#' and possibly confidence interval
 #' @export
-normTable.betabinomial <- function(model, times, n = NULL, m = NULL){
+normTable.betabinomial <- function(model, times, n = NULL, m = NULL, range = 3,
+                                   CI = .9,
+                                   reliability = NULL){
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  }
+
+  if(is.null(CI)||is.na(CI)){
+    reliability <- NULL
+  }else if (CI > .99999 || CI < .00001){
+    stop("Confidence coefficient (CI) out of range. Please specify value between 0 and 1.")
+  }
+
+  rel <- FALSE
+  if(!is.null(reliability)){
+    if(reliability > .9999 || reliability < .0001){
+      stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
+    }else{
+      se <- qnorm(1 - ((1 - CI)/2)) * sqrt(reliability * (1 - reliability));
+      rel <- TRUE
+    }
   }
 
   if(is.null(n))
@@ -301,10 +330,15 @@ normTable.betabinomial <- function(model, times, n = NULL, m = NULL){
     cum <- cumsum(Px)
 
     # Calculate percentiles
-    perc <- cum - 0.5 * Px
+    perc <- (cum - 0.5 * Px)
 
     # Calculate z-scores
     z <- qnorm(perc)
+    z[z < -range] <- -range
+    z[z > range] <- range
+
+
+
     mScale <- attr(model$result, "scaleMean")
     sdScale <- attr(model$result, "scaleSD")
     norm <- rep(NA, length(z))
@@ -313,10 +347,19 @@ normTable.betabinomial <- function(model, times, n = NULL, m = NULL){
       norm <- mScale + sdScale * z
     }
 
-    df <- data.frame(x = x, Px = Px, Pcum = cum, Percentile = perc, z = z, norm = norm)
+    df <- data.frame(x = x, Px = Px, Pcum = cum, Percentile = perc * 100, z = z, norm = norm)
+
+    if(rel){
+      zPredicted <- reliability * z
+      df$lowerCI <- (zPredicted - se) * sdScale + mScale
+      df$upperCI <- (zPredicted + se) * sdScale + mScale
+      df$lowerCI_PR <- pnorm(zPredicted - se) * 100
+      df$upperCI_PR <- pnorm(zPredicted + se) * 100
+
+    }
     result[[k]] <- df
   }
-
+  names(result) <- times
   return(result)
 }
 

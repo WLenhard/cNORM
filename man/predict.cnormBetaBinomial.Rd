@@ -10,6 +10,8 @@
 \item{model}{An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.}
 
 \item{times}{A numeric vector of time points at which to make predictions.}
+
+\item{n}{The maximum score to be achieved.}
 }
 \value{
 A data frame with columns:
@@ -27,4 +29,4 @@ for new time points. It applies the same standardization used in model fitting,
 generates predictions on the standardized scale, and then transforms these back
 to the original scale.
 }
-\keyword{internal}
+\keyword{export}

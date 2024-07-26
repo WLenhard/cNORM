@@ -5,7 +5,15 @@
 \title{Calculate Cumulative Probabilities, Density, Percentiles, and Z-Scores for
 Beta-Binomial Distribution}
 \usage{
-normTable.betabinomial(model, times, n = NULL, m = NULL)
+normTable.betabinomial(
+  model,
+  times,
+  n = NULL,
+  m = NULL,
+  range = 3,
+  CI = 0.9,
+  reliability = NULL
+)
 }
 \arguments{
 \item{model}{The model, which was fitted using the `optimized.model` function.}
@@ -15,11 +23,21 @@ normTable.betabinomial(model, times, n = NULL, m = NULL)
 \item{n}{The number of items resp. the maximum score.}
 
 \item{m}{An optional stop criterion in table generation. Positive integer lower than n.}
+
+\item{range}{The range of the norm scores in standard deviations. Default is 3. Thus, scores in the
+range of +/- 3 standard deviations are considered.}
+
+\item{CI}{confidence coefficient, ranging from 0 to 1, default .9}
+
+\item{reliability}{coefficient, ranging between  0 to 1}
 }
 \value{
-A data frame with columns: x, Px, Pcum, Percentile, z, norm score
+A list of data frames with columns: x, Px, Pcum, Percentile, z, norm score
+and possibly confidence interval
 }
 \description{
-Calculate Cumulative Probabilities, Density, Percentiles, and Z-Scores for
-Beta-Binomial Distribution
+This function generates a norm table for a specific ages based on the beta binomial
+regression model. In case a confidence coefficient (CI, default .9) and the
+reliability is specified, confidence intervals are computed for the true score
+estimates, including a correction for regression to the mean (Eid & Schmidt, 2012, p. 272).
 }

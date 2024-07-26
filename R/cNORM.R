@@ -2,9 +2,10 @@
 #'
 #' The package provides methods for generating regression based continuous standard
 #' scores, as f. e. for psychometric test development, biometrics (e. g. physiological
-#' growth curves), and screenings in the medical domain. Contrary to parametric
-#' approaches, it does not rely on distribution assumptions of the initial norm data
-#' and is thus a very robust approach in generating norm tables.
+#' growth curves), and screenings in the medical domain. It includes a distribution free approach
+#' on the basis of Taylor polynomials and parametric modelling with beta binomial distributions.
+#' Both approaches can generate robust norm data models and alleviate the computation of norm scores
+#' and norm tables.
 #'
 #' Conventional methods for producing test norm score tables are often plagued with
 #' "jumps" or "gaps" (i.e., discontinuities) in norm tables and low confidence for
@@ -15,7 +16,8 @@
 #' by modeling the latter ones as a function  of both percentile scores and an explanatory
 #' variable (e.g., age). The method minimizes bias arising from sampling and measurement
 #' error, while handling marked deviations from normality - such as are commonplace in
-#' clinical samples.
+#' clinical samples. For pre-requisites and use cases of the beta binomial modelling, please
+#' consult the vignette 'Beta Binomial'.
 #'
 #' Conducting the analysis consists of four steps and cNORM offers all according functions
 #' for preparing data, conducting the  regression, selecting the best model and generating

@@ -19,15 +19,17 @@ Description: Conventional methods for producing standard scores or percentiles
     2021 <doi: 10.1177/0013164420928457>) estimates percentile development 
     (e. g. over age) and generates continuous test norm scores on the basis of 
     the raw data from standardization samples, without requiring assumptions 
-    about the distribution of the raw data: Norm scores are directly established 
+    about the distribution of the raw data: Norm scores are directly established  
     from raw data by modeling the latter ones as a function of both percentile 
     scores and an explanatory variable (e.g., age). The method minimizes bias 
-    arising from sampling and measurement error, while handling marked deviations 
+    arising from sampling and measurement error, while handling marked deviations  
     from normality, addressing bottom or ceiling effects and capturing almost 
-    all of the variance in the original norm data sample. It includes procedures 
-    for post stratification of norm samples to overcome bias in data collection 
-    and to mitigate violations of representativeness. An online demonstration is 
-    available via <https://cnorm.shinyapps.io/cNORM/>.
+    all of the variance in the original norm data sample. The package as well 
+    includes parametric modelling through beta binomial distributions, which is 
+    especially favorable in case of tests with discrete scores with a maximum. 
+    The package includes procedures for post stratification of norm samples to 
+    overcome bias in data collection and to mitigate violations of representativeness. 
+    An online demonstration is available via <https://cnorm.shinyapps.io/cNORM/>.
 Depends:
     R (>= 4.0.0)
 Imports:

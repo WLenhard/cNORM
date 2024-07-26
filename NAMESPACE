@@ -6,7 +6,7 @@ importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text, lines)
 importFrom(latticeExtra, panel.2dsmoother)
 importFrom(utils, tail, menu, head)
-importFrom(ggplot2, geom_point, aes_string, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
+importFrom(ggplot2, geom_point, aes, aes_string, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
 export(
 	bestModel,
 	betaCoefficients,
@@ -32,6 +32,7 @@ export(
 	plotNorm,
 	plotCnorm,
 	plot.betabinomial,
+	predict.cnormBetaBinomial,
 	predictNorm,
 	predictNorm.betabinomial,
 	predictRaw,
