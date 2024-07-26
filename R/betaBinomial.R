@@ -139,6 +139,7 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
   attr(result, "score_mean") <- mean(score)
   attr(result, "score_sd") <- sd(score)
   attr(result, "max") <- n
+  attr(result, "N") <- length(score)
   attr(result, "scaleMean") <- scaleM
   attr(result, "scaleSD") <- scaleSD
 
@@ -146,6 +147,8 @@ cnorm.betabinomial <- function(time, score, weights = NULL, mu = 3, sigma = 3, n
                 mu = mu, sigma = sigma,
                 result = result)
   class(model) <- "cnormBetaBinomial"
+
+
 
   if(plot){
     p <- plot.betabinomial(model, time, score)
@@ -519,4 +522,79 @@ plot.betabinomial <- function(model, time, score,
                        labels = paste0(percentiles * 100, "%"))
 
   return(p)
+}
+
+#' Diagnostic Information for Beta-Binomial Model
+#'
+#' This function provides diagnostic information for a fitted beta-binomial model
+#' from the cnorm.betabinomial function. It returns various metrics related to
+#' model convergence, fit, and complexity.
+#'
+#' @param model An object of class "cnormBetaBinomial", typically the result of a call to cnorm.betabinomial().
+#'
+#' @return A list containing the following diagnostic information:
+#' \itemize{
+#'   \item converged: Logical indicating whether the optimization algorithm converged.
+#'   \item n_evaluations: Number of function evaluations performed during optimization.
+#'   \item n_gradient: Number of gradient evaluations performed during optimization.
+#'   \item final_value: Final value of the objective function (negative log-likelihood).
+#'   \item message: Any message returned by the optimization algorithm.
+#'   \item AIC: Akaike Information Criterion.
+#'   \item BIC: Bayesian Information Criterion.
+#'   \item max_gradient: Maximum absolute gradient at the solution (if available).
+#' }
+#'
+#' @details
+#' The AIC and BIC are calculated as:
+#' AIC = 2k - 2ln(L)
+#' BIC = ln(n)k - 2ln(L)
+#' where k is the number of parameters, L is the maximum likelihood, and n is the number of observations.
+#'
+#' @examples
+#' # Fit a beta-binomial model
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+#'
+#' # Get diagnostic information
+#' diag_info <- diagnostics.betabinomial(model)
+#'
+#' # Print the diagnostic information
+#' print(diag_info)
+#'
+#' # Check if the model converged
+#' if(diag_info$converged) {
+#'   cat("Model converged successfully.\n")
+#' } else {
+#'   cat("Warning: Model did not converge.\n")
+#' }
+#'
+#' # Compare AIC and BIC
+#' cat("AIC:", diag_info$AIC, "\n")
+#' cat("BIC:", diag_info$BIC, "\n")
+#'
+#' @export
+diagnostics.betabinomial <- function(model) {
+  if (!inherits(model, "cnormBetaBinomial")) {
+    stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
+  }
+
+  opt_results <- model$result
+  n_params <- length(model$beta_est) + length(model$gamma_est)
+  n_obs <- attr(model$result, "N")
+  convergence <- opt_results$convergence==0
+
+  max_gradient <- NA
+
+  if(is.numeric(opt_results$gradient) && length(opt_results$gradient) > 0)
+    max(abs(opt_results$gradient))
+
+  list(
+    converged = convergence,
+    n_evaluations = opt_results$counts["function"],
+    n_gradient = opt_results$counts["gradient"],
+    final_value = opt_results$value,
+    message = opt_results$message,
+    AIC = 2 * n_params + 2 * opt_results$value,
+    BIC = log(n_obs) * n_params + 2 * opt_results$value,
+    max_gradient = max_gradient
+  )
 }
