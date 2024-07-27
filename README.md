@@ -130,10 +130,17 @@ margins <- data.frame(variables = c("sex", "sex",
 weights <- computeWeights(ppvt, margins)
 model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
 
+# cNORM can as well model norm data with beta binomial distributions, 
+# which works especially well with discrete scores and a maximum 
+# score. There it can outperform modelling with Taylor polynomials.
+model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+predictNorm.betabinomial(c(123, 98), c(8.9, 10.1), model.betabinomial)
+tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4), reliability=0.9)
 
 # start vignette for a complete walk through
 vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
+vignette("BetaBinomial", package = "cNORM")
 ```
 cNORM offers functions to choose the optimal model, both from a visual inspection of the 
 percentiles, as well as by information criteria and model tests:
