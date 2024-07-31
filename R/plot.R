@@ -167,7 +167,7 @@ plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, ty
   else
     covariate <- NULL
 
-  d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
+    d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
 
   d$diff <- d$fitted - data$normValue
   d <- d[!is.na(d$fitted), ]
@@ -434,7 +434,7 @@ plotPercentiles <- function(data,
   }
 
 
-  if (!model$useAge){
+  if (!inherits(model, "cnormBetaBinomial")&&!model$useAge){
     # plot
     data1 <- unique(data)
     data1 <- data1[order(data1$raw),]

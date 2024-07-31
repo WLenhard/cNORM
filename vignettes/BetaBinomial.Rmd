@@ -26,35 +26,24 @@ The beta-binomial distribution is a powerful approach for modeling psychometric 
 To quantify this ability or trait, norm scores are used to express the relative location of an individual's score within a reference population. This allows for meaningful interpretation and comparison of test results across different age groups or populations. The beta-binomial distribution combines the binomial distribution, which models the count of correct answers in a fixed number of trials, with the beta distribution, which accounts for the variability in the probability of success. 
 
 ## Mathematical Derivation
-
 The beta-binomial distribution arises as a compound distribution of the binomial and beta distribution. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
-
-\[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}\]
-
+[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}]
 where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
 
-In our approach, we model the mean ($\mu$) and standard deviation ($\sigma$) of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically:
-\[\mu(age) = \beta_0 + \beta_1age + \beta_2age^2 + ... + \beta_mage^m\]
-
-\[\log(\sigma(age)) = \gamma_0 + \gamma_1age + \gamma_2age^2 + ... + \gamma_sage^s\]
-
-where m and s are the degrees of the polynomials for $\mu$ and $\sigma$ respectively.
-
-We use the log of $\sigma$ to ensure positivity of the standard deviation, as standard deviation cannot be negative. This transformation also helps in stabilizing the variance and improving the optimization process.
-
-The parameters $\alpha$ and $\beta$ of the beta-binomial distribution are then derived from $\mu$ and $\sigma$ using the method of moments:
-
-\[\alpha = \left(\frac{1 - \mu}{\sigma^2} - \frac{1}{\mu}\right) \mu^2\]
-
-\[\beta = \alpha \left(\frac{1}{\mu} - 1\right)\]
-
-To estimate the parameters ($\beta_0, ..., \beta_m, \gamma_0, ..., \gamma_s$), we use maximum likelihood estimation. The log-likelihood function for N observations is:
-
-\[L(\beta, \gamma | X, Age) = \sum_{i=1}^N \log[P(X_i | n, \alpha(Age_i), \beta(Age_i))]\]
-
+We directly model the $\alpha$ and $\beta$ parameters of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically:
+[\log(\alpha(age)) = a_0 + a_1age + a_2age^2 + ... + a_mage^m]
+[\log(\beta(age)) = b_0 + b_1age + b_2age^2 + ... + b_sage^s]
+where m and s are the degrees of the polynomials for $\alpha$ and $\beta$ respectively.
+We use the log of $\alpha$ and $\beta$ to ensure positivity of these parameters, as they must be positive for the beta-binomial distribution. This transformation also helps in stabilizing the variance and improving the optimization process.
+The mean ($\mu$) and variance ($\sigma^2$) of the beta-binomial distribution can be derived from $\alpha$ and $\beta$ as follows:
+[\mu = \frac{n\alpha}{\alpha + \beta}]
+[\sigma^2 = \frac{n\alpha\beta(\alpha + \beta + n)}{(\alpha + \beta)^2(\alpha + \beta + 1)}]
+To estimate the parameters ($a_0, ..., a_m, b_0, ..., b_s$), we use maximum likelihood estimation. The log-likelihood function for N observations is:
+[L(a, b | X, Age) = \sum_{i=1}^N \log[P(X_i | n, \alpha(Age_i), \beta(Age_i))]]
 where $X_i$ is the score and $Age_i$ is the age for the i-th observation.
+This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the L-BFGS-B (Limited-memory BFGS) algorithm of the optim function. The L-BFGS-B algorithm is a quasi-Newton method for solving large nonlinear optimization problems with simple bounds. It's particularly effective for our problem as it can handle a large number of parameters and allows for bound constraints, which can be useful to ensure the positivity of $\alpha$ and $\beta$. The optimization process finds the values of $a$ and $b$ that maximize the log-likelihood through approximating the Hessian matrix, thereby providing the best fit to the observed data.
 
-This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the BFGS (Broyden–Fletcher–Goldfarb–Shanno) algorithm of the `optim` function. The BFGS algorithm is a quasi-Newton method for solving unconstrained nonlinear optimization problems. It's particularly effective for our problem as it approximates the Hessian matrix, allowing for efficient optimization of the parameters in our model. The optimization process finds the values of $\beta$ and $\gamma$ that maximize the log-likelihood, thereby providing the best fit to the observed data.
+This direct modeling of $\alpha$ and $\beta$ allows for flexibly capturing the shape of the beta-binomial distribution across different ages, potentially leading to the best fit for complex data patterns.
 
 ## Prerequisites
 Before applying beta-binomial modeling to psychometric data over age, several key prerequisites should be met:
