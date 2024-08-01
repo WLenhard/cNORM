@@ -4,21 +4,32 @@
 \alias{plot.betabinomial}
 \title{Plot cnormBetaBinomial Model with Data and Percentile Lines}
 \usage{
-\method{plot}{betabinomial}(model, age, score, percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95))
+\method{plot}{betabinomial}(
+  model,
+  age,
+  score,
+  weights = NULL,
+  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+  points = TRUE
+)
 }
 \arguments{
-\item{model}{A fitted model object of class "cnormBetaBinomial".}
+\item{model}{A fitted model object of class "cnormBetaBinomial" or "cnormBetaBinomial2".}
 
 \item{age}{A vector the age data.}
 
 \item{score}{A vector of the score data.}
 
-\item{percentiles}{A numeric vector of percentiles to plot (between 0 and 1).}
+\item{weights}{A vector of weights for each observation. Default is NULL (equal weights).}
+
+\item{percentiles}{A vector with the percentiles to plot}
+
+\item{points}{Logical indicating whether to plot the data points. Default is TRUE.}
 }
 \value{
 A ggplot object.
 }
 \description{
-This function creates a ggplot visualization of a fitted cnormBetaBinomial model,
-including the original data points and specified percentile lines.
+This function creates a visualization of a fitted cnormBetaBinomial model,
+including the original data points manifest percentiles and specified percentile lines.
 }

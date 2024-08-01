@@ -62,23 +62,8 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' the mean and standard deviation, and uses maximum likelihood estimation to
 #' find the optimal parameters. The optimization is performed using the BFGS method.
 #'
-#' @examples
-#' # Fit a heteroscedastic regression model to the PPVT data
-#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
-#' summary(model)
-#'
-#' # In modelling with the beta binomial function, just like in \code{\link{cnorm}}, weights
-#' # can be applied as a means for post stratification. Please use the raking function
-#' # \code{\link{computeWeightsl}}. Here an example for the ppvt dataset:
-#' margins <- data.frame(variables = c("sex", "sex",
-#'                                     "migration", "migration"),
-#'                       levels = c(1, 2, 0, 1),
-#'                       share = c(.52, .48, .7, .3))
-#' weights <- computeWeights(ppvt, margins)
-#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
-#'
-#' @export
-cnorm.betabinomial <- function(age, score, weights = NULL, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", plot = T) {
+#' @keywords internal
+cnorm.betabinomial1 <- function(age, score, weights = NULL, mu = 3, sigma = 3, n = NULL, control = NULL, scale = "T", plot = T) {
   # If weights are not provided, use equal weights
   if (is.null(weights)) {
     weights <- rep(1, length(age))
@@ -181,7 +166,7 @@ cnorm.betabinomial <- function(age, score, weights = NULL, mu = 3, sigma = 3, n 
 #' generates predictions on the standardized scale, and then transforms these back
 #' to the original scale.
 #'
-#' @keywords export
+#' @keywords internal
 predict.cnormBetaBinomial <- function(model, ages, n = NULL) {
   if (!inherits(model, "cnormBetaBinomial")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial'.")
@@ -470,24 +455,22 @@ predictNorm.betabinomial <- function(raw, age, model, n = NULL, range = 3) {
 
 #' Plot cnormBetaBinomial Model with Data and Percentile Lines
 #'
-#' This function creates a ggplot visualization of a fitted cnormBetaBinomial model,
-#' including the original data points and specified percentile lines.
+#' This function creates a visualization of a fitted cnormBetaBinomial model,
+#' including the original data points manifest percentiles and specified percentile lines.
 #'
-#' @param model A fitted model object of class "cnormBetaBinomial".
+#' @param model A fitted model object of class "cnormBetaBinomial" or "cnormBetaBinomial2".
 #' @param age A vector the age data.
 #' @param score A vector of the score data.
-#' @param percentiles A numeric vector of percentiles to plot (between 0 and 1).
+#' @param weights A vector of weights for each observation. Default is NULL (equal weights).
+#' @param percentiles A vector with the percentiles to plot
+#' @param points Logical indicating whether to plot the data points. Default is TRUE.
 #'
 #' @return A ggplot object.
 #'
 #' @export
-plot.betabinomial <- function(model, age, score,
-                              percentiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
-                              manifestPercentiles = NULL) {
-
-  # Load required packages
-  require(dplyr)
-  require(ggplot2)
+plot.betabinomial <- function(model, age, score, weights = NULL,
+                              percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+                              points = TRUE) {
 
   if (!(inherits(model, "cnormBetaBinomial") || inherits(model, "cnormBetaBinomial2"))) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'.")
@@ -497,9 +480,17 @@ plot.betabinomial <- function(model, age, score,
     stop("Length of 'age' and 'score' must be the same.")
   }
 
+  if(!is.null(weights) && length(weights) != length(age)){
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
+  }
+
   # Generate prediction points
   n_points <- 100
   data <- data.frame(age = age, score = score)
+  if(!is.null(weights)){
+    data$w <- weights
+  }
+
   age_range <- range(age)
   pred_ages <- seq(age_range[1], age_range[2], length.out = n_points)
 
@@ -524,47 +515,38 @@ plot.betabinomial <- function(model, age, score,
                           percentile_data)
 
   # Create the plot
-  p <- ggplot() +
-    geom_point(data = data, aes(x = age, y = score), alpha = 0.2, size = 0.6)
+  p <- ggplot()
 
-  # Add percentile lines
-  colors <- rainbow(length(percentiles))
-  for (i in seq_along(percentiles)) {
-    p <- p + geom_line(data = plot_data,
-                       aes_string(x = "age", y = paste0("P", percentiles[i] * 100)),
-                       color = colors[i], size = 0.6)
-  }
+  if(points)
+    p <- p + geom_point(data = data, aes(x = age, y = score), alpha = 0.2, size = 0.6)
 
   # Calculate and add manifest percentiles
-  if (is.null(manifestPercentiles)) {
-    if (length(unique(age)) < 20) {
-      # Distinct age groups
-      data$group <- age
-    } else {
-      # Use getGroups function
-      data$group <- getGroups(age)
-    }
-
-    manifest_data <- data %>%
-      dplyr::group_by(group) %>%
-      dplyr::summarize(age = mean(age),
-                       dplyr::across(score,
-                                     list(P5 = ~quantile(., probs = 0.05),
-                                          P10 = ~quantile(., probs = 0.10),
-                                          P25 = ~quantile(., probs = 0.25),
-                                          P50 = ~quantile(., probs = 0.50),
-                                          P75 = ~quantile(., probs = 0.75),
-                                          P90 = ~quantile(., probs = 0.90),
-                                          P95 = ~quantile(., probs = 0.95))))
+  if (length(unique(age)) < 20) {
+    # Distinct age groups
+    data$group <- age
   } else {
-    manifest_data <- manifestPercentiles
+    # Use getGroups function
+    data$group <- getGroups(age)
   }
 
-  # Add manifest percentiles to the plot
+  # get actual percentiles
+  NAMES <- paste("PR", percentiles * 100, sep = "")
+  percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data$group), function(df){
+    c(age = mean(df$age),
+      weighted.quantile(df$score, probs = percentiles, weights = df$w))
+  })))
+  colnames(percentile.actual) <- c("age", NAMES)
+  manifest_data <- percentile.actual
+
+  # Add percentile lines and points with proper legend
   for (i in seq_along(percentiles)) {
-    p <- p + geom_point(data = manifest_data,
-                        aes_string(x = "age", y = paste0("score_P", percentiles[i] * 100)),
-                        color = colors[i], size = 2, shape = 18)
+    p <- p +
+      geom_line(data = plot_data,
+                aes_string(x = "age", y = paste0("P", percentiles[i] * 100), color = shQuote(NAMES[i])),
+                size = 0.6) +
+      geom_point(data = manifest_data,
+                 aes_string(x = "age", y = NAMES[i], color = shQuote(NAMES[i])),
+                 size = 2, shape = 18)
   }
 
   # Customize the plot
@@ -575,9 +557,13 @@ plot.betabinomial <- function(model, age, score,
          y = "Score",
          color = "Percentile") +
     scale_y_continuous(limits = c(0, attr(model$result, "max"))) +
-    scale_color_manual(values = colors,
-                       breaks = paste0(percentiles * 100, "%"),
-                       labels = paste0(percentiles * 100, "%"))
+    scale_color_manual(values = setNames(rainbow(length(percentiles)), NAMES),
+                       breaks = NAMES,
+                       labels = paste0(percentiles * 100, "%")) +
+    guides(color = guide_legend(override.aes = list(
+      linetype = rep("solid", length(NAMES)),
+      shape = rep(18, length(NAMES))
+    )))
 
   return(p)
 }
@@ -662,7 +648,7 @@ diagnostics.betabinomial <- function(model, age = NULL, raw = NULL, weights = NU
     data <- data.frame(age = age, raw = raw)
     if(length(unique(age))<20){
       names(data) <- c("group", "raw")
-      data <- rankByGroup(data = data, raw="raw", group="group", weights = weights, plot = FALSE, scale = "T", plot = FALSE, plotCI = FALSE, plotPercentiles = FALSE, plotNorm = FALSE, plotDerivative = FALSE, plotSeries = FALSE, plotCurves = FALSE, plotSubset = FALSE, plotResiduals = FALSE, plotWeights = FALSE, plotGroups = FALSE, plotMarginals = FALSE, plotNormTable = FALSE, plotNormTableCI = FALSE, plotNormTablePercentiles = FALSE, plotNormTableZ = FALSE, plotNormTableNorm = FALSE, plotNormTableLowerCI = FALSE, plotNormTableUpperCI = FALSE, plotNormTableLowerCI_PR = FALSE, plotNormTableUpperCI_PR = FALSE, plotNormTableLowerCI_Z = FALSE, plotNormTableUpperCI_Z = FALSE, plotNormTableLowerCI_Norm = FALSE, plotNormTableUpperCI_Norm = FALSE, plotNormTableLowerCI_Norm_PR = FALSE, plotNormTableUpperCI_Norm_PR = FALSE, plotNormTableLowerCI_Norm_Z = FALSE, plotNormTableUpperCI_Norm_Z = FALSE, plotNormTableLowerCI_Norm_Norm = FALSE, plotNormTableUpperCI_Norm_Norm = FALSE, plotNormTableLowerCI_Norm_Norm_PR = FALSE, plotNormTableUpperCI_Norm_Norm_PR = FALSE, plotNormTableLowerCI_Norm_Norm_Z = FALSE, plotNormTableUpperCI_Norm_Norm_Z = FALSE, plotNormTableLowerCI_Norm_Norm_Norm = FALSE, plotNormTableUpperCI_Norm_Norm_Norm = FALSE, plotNormTableLowerCI_Norm_Norm_Norm_PR = FALSE, plotNormTableUpperCI_Norm_Norm_Norm_PR = FALSE, plotNormTableLowerCI_Norm_Norm_Norm_Z = FALSE, plotNormTableUpperCI_Norm_Norm_Norm_Z = FALSE, plotNormTableLowerCI_Norm_Norm_Norm_Norm = FALSE, plotNormTableUpperCI_Norm_Norm_Norm_Norm = FALSE, plotNormTableLowerCI_Norm_Norm_Norm_Norm_PR = FALSE, plotNormTableUpperCI_Norm_Norm_Norm_Norm_PR = FALSE, plotNormTableLowerCI_Norm_Norm_Norm_Norm_Z = FALSE, plotNormTableUpperCI_Norm_Norm_Norm_Norm_Z = FALSE, plotNormTableLowerCI)
+      data <- rankByGroup(data = data, raw="raw", group="group", weights = weights)
     }else{
       data$groups <- getGroups(age)
       width <- (max(age) - min(age))/length(unique(data$groups))
@@ -674,7 +660,7 @@ diagnostics.betabinomial <- function(model, age = NULL, raw = NULL, weights = NU
 
     bias <- mean(norm_beta - norm_manifest)
     R2 <- cor(norm_beta, norm_manifest, use = "complete.obs")^2
-    rmse <- sqrt(mean((norm_beta - norm_manifest)^2), na.rm = TRUE)
+    rmse <- sqrt(mean((norm_beta - norm_manifest)^2))
   } else {
     message <- "No age and raw scores provided. Cannot calculate R2, RMSE, and bias."
     rmse <- NA
@@ -703,4 +689,297 @@ diagnostics.betabinomial <- function(model, age = NULL, raw = NULL, weights = NU
     R2Norm = R2,
     rmseNorm = rmse
   )
+}
+
+#' Calculate the negative log-likelihood for a beta-binomial regression model
+#'
+#' This function computes the negative log-likelihood for a beta-binomial regression model
+#' where both the alpha and beta parameters are modeled as functions of predictors.
+#'
+#' @param params A numeric vector containing all model parameters. The first n_alpha elements
+#'               are coefficients for the alpha model, and the remaining elements are
+#'               coefficients for the beta model.
+#' @param X A matrix of predictors for the alpha model.
+#' @param Z A matrix of predictors for the beta model.
+#' @param y A numeric vector of response values.
+#' @param n The maximum score (number of trials in the beta-binomial distribution).
+#' @param weights A numeric vector of weights for each observation. If NULL, equal weights are used.
+#'
+#' @return The negative log-likelihood of the model.
+#'
+#' @details
+#' This function uses a numerically stable implementation of the beta-binomial log-probability.
+#' It allows for weighted observations, which can be useful for various modeling scenarios.
+#'
+#' @keywords internal
+log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
+  n_alpha <- ncol(X)
+  alpha_coef <- params[1:n_alpha]
+  beta_coef <- params[(n_alpha+1):length(params)]
+
+  log_alpha <- X %*% alpha_coef
+  log_beta <- Z %*% beta_coef
+  alpha <- exp(log_alpha)
+  beta <- exp(log_beta)
+
+  # More numerically stable implementation of beta-binomial log-probability
+  dbetabinom <- function(x, size, alpha, beta, log = FALSE) {
+    logp <- lchoose(size, x) +
+      lgamma(size + 1) +
+      lgamma(alpha + x) +
+      lgamma(beta + size - x) +
+      lgamma(alpha + beta) -
+      lgamma(x + 1) -
+      lgamma(size - x + 1) -
+      lgamma(size + alpha + beta) -
+      lgamma(alpha) -
+      lgamma(beta)
+
+    if (log) return(logp) else return(exp(logp))
+  }
+
+  # If weights are not provided, use equal weights
+  if (is.null(weights)) {
+    weights <- rep(1, length(y))
+  }
+
+  ll <- sum(weights * dbetabinom(y, size = n, alpha = alpha, beta = beta, log = TRUE))
+  return(-ll)  # Return negative log-likelihood for minimization
+}
+
+
+#' Fit a beta-binomial regression model for continuous norming
+#'
+#' This function fits a beta-binomial regression model where both the alpha and beta
+#' parameters of the beta-binomial distribution are modeled as polynomial functions
+#' of the predictor variable (typically age). While 'cnorm-betabinomial' fits a beta-binomial model
+#' on the basis of /$mu$ and /$sigma$, this function fits a beta-binomial model directly on the basis
+#' of /$alpha$ and /$beta$.
+#'
+#' @param age A numeric vector of predictor values (e.g., age).
+#' @param score A numeric vector of response values.
+#' @param n The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.
+#' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
+#' @param alpha_degree Integer specifying the degree of the polynomial for the alpha model. Default is 3.
+#' @param beta_degree Integer specifying the degree of the polynomial for the beta model. Default is 3.
+#' @param control A list of control parameters to be passed to the `optim` function.
+#'   If NULL, default values are used.
+#' @param scale Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.
+#' @param plot Logical indicating whether to plot the model. Default is TRUE.
+#'
+#' @return A list of class "cnormBetaBinomial2" containing:
+#'   \item{alpha_est}{Estimated coefficients for the alpha model}
+#'   \item{beta_est}{Estimated coefficients for the beta model}
+#'   \item{se}{Standard errors of the estimated coefficients}
+#'   \item{alpha_degree}{Degree of the polynomial for the alpha model}
+#'   \item{beta_degree}{Degree of the polynomial for the beta model}
+#'   \item{result}{Full result from the optimization procedure}
+#'
+#' @details
+#' The function standardizes the input variables, fits polynomial models for both
+#' the alpha and beta parameters, and uses maximum likelihood estimation to
+#' find the optimal parameters. The optimization is performed using the L-BFGS-B method.
+#'
+#' @keywords internal
+cnorm.betabinomial2 <- function(age, score, n = NULL, weights = NULL, alpha_degree = 3, beta_degree = 3, control = NULL, scale = "T", plot = T) {
+  # Standardize inputs
+  age_std <- standardize(age)
+
+  # Set up 'data' object containing both variables
+  data <- data.frame(age = age_std, score = score)
+  if(is.null(n))
+    n <- max(score)
+
+  # Prepare the data matrices for alpha and beta, including intercept
+  X <- cbind(1, poly(data$age, degree = alpha_degree, raw = TRUE))
+  Z <- cbind(1, poly(data$age, degree = beta_degree, raw = TRUE))
+  y <- data$score
+
+  # Initial parameters: use some sensible starting values
+  initial_alpha <- log(mean(y) / (n - mean(y)) + 1e-6)  # Add small constant
+  initial_beta <- log(1 + 1e-6)  # Add small constant
+  initial_params <- c(initial_alpha, rep(0, alpha_degree), initial_beta, rep(0, beta_degree))
+
+  # Optimize to find parameter estimates. If control is NULL, set default
+  if(is.null(control))
+    control = list(factr = 1e-8, maxit = 1000)
+
+  result <- optim(initial_params, log_likelihood2, X = X, Z = Z, y = y, n = n, weights = weights,
+                  method = "L-BFGS-B", hessian = TRUE,
+                  control = control)
+
+  # Extract results and calculate standard errors
+  alpha_est <- result$par[1:(alpha_degree + 1)]
+  beta_est <- result$par[(alpha_degree + 2):length(result$par)]
+  se <- sqrt(diag(solve(result$hessian)))
+
+  # Store original mean and sd for unstandardizing later
+  # add attributes for usage in other functions
+  scaleM <- NA
+  scaleSD <- NA
+
+  # descriptives
+  if ((typeof(scale) == "double" && length(scale) == 2)) {
+    scaleM <- scale[1]
+    scaleSD <- scale[2]
+  } else if (scale == "IQ") {
+    scaleM <- 100
+    scaleSD <- 15
+  } else if (scale == "z") {
+    scaleM <- 0
+    scaleSD <- 1
+  } else if (scale == "T") {
+    scaleM <- 50
+    scaleSD <- 10
+  }
+
+  attr(result, "age_mean") <- mean(age)
+  attr(result, "age_sd") <- sd(age)
+  attr(result, "score_mean") <- mean(score)
+  attr(result, "score_sd") <- sd(score)
+  attr(result, "max") <- n
+  attr(result, "N") <- length(score)
+  attr(result, "scaleMean") <- scaleM
+  attr(result, "scaleSD") <- scaleSD
+
+  model <- list(alpha_est = alpha_est, beta_est = beta_est, se = se,
+                alpha_degree = alpha_degree, beta_degree = beta_degree,
+                result = result)
+
+  class(model) <- "cnormBetaBinomial2"
+  if(plot){
+    p <- plot.betabinomial(model, age, score)
+    print(p)
+  }
+
+  return(model)
+}
+
+
+#' Predict alpha and beta parameters for a beta-binomial regression model
+#'
+#' This function generates predictions from a fitted beta-binomial regression model
+#' for new age points.
+#'
+#' @param model An object of class "cnormBetaBinomial2", typically the result of a call to cnorm.betabinomial2().
+#' @param ages A numeric vector of age points at which to make predictions.
+#' @param n The maximum score to be achieved.
+#'
+#' @return A data frame with columns:
+#'   \item{age}{The input age points}
+#'   \item{a}{Predicted alpha values}
+#'   \item{b}{Predicted beta values}
+#'   \item{mu}{Predicted mean values}
+#'   \item{sigma}{Predicted standard deviation values}
+#'
+#' @details
+#' This function takes a fitted beta-binomial regression model and generates predictions
+#' for new age points. It applies the same standardization used in model fitting,
+#' generates predictions on the standardized scale, and then transforms these back
+#' to the original scale.
+#'
+#' @export
+predict.cnormBetaBinomial2 <- function(model, ages, n = NULL) {
+  if (!inherits(model, "cnormBetaBinomial2")) {
+    stop("Wrong object. Please provide object from class 'cnormBetaBinomial2'.")
+  }
+
+  # Standardize new ages
+  ages_std <- (ages - attr(model$result, "age_mean")) / attr(model$result, "age_sd")
+
+  # Create design matrices including intercept
+  X_new <- cbind(1, poly(ages_std, degree = model$alpha_degree, raw = TRUE))
+  Z_new <- cbind(1, poly(ages_std, degree = model$beta_degree, raw = TRUE))
+
+  log_alpha <- X_new %*% model$alpha_est
+  log_beta <- Z_new %*% model$beta_est
+
+  alpha <- exp(log_alpha)
+  beta <- exp(log_beta)
+
+  if(is.null(n))
+    n <- attr(model$result, "max")
+
+  # Calculate mean and variance of beta-binomial distribution
+  mu <- n * alpha / (alpha + beta)
+  var <- (n * alpha * beta * (alpha + beta + n)) / ((alpha + beta)^2 * (alpha + beta + 1))
+  sigma <- sqrt(var)
+
+  predicted <- data.frame(age = ages,
+                          a = as.vector(alpha),
+                          b = as.vector(beta),
+                          mu = as.vector(mu),
+                          sigma = as.vector(sigma))
+  return(predicted)
+}
+
+#' Fit a beta-binomial regression model for continuous norming
+#'
+#' This function fits a beta-binomial regression model where both the /$alpha$ and /$beta$
+#' parameters of the beta-binomial distribution are modeled as polynomial functions
+#' of the predictor variable (typically age). Setting mode to 1 fits a beta-binomial
+#' model on the basis of /$mu$ and /$sigma$, setting it to 2 (default) fits a beta-binomial
+#' model directly on the basis of /$alpha$ and /$beta$.
+#'
+#' @param age A numeric vector of predictor values (e.g., age).
+#' @param score A numeric vector of response values.
+#' @param n The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.
+#' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
+#' @param mode Integer specifying the mode of the model. Default is 2 (direct modelling of /$alpha$ and /$beta$).
+#'             If set to 1, the model is fitted on the basis of /$mu$ and /$sigma$, the predicted
+#'             mean and standard deviation over age.
+#' @param alpha Integer specifying the degree of the polynomial for the alpha model.
+#'              Default is 3. If mode is set to 1, this parameter is used to specify the degree
+#'              of the polynomial for the /$mu$ model.
+#' @param beta Integer specifying the degree of the polynomial for the beta model. Default is 3.
+#'             If mode is set to 1, this parameter is used to specify the degree of the polynomial
+#'             for the /$sigma$ model.
+#' @param control A list of control parameters to be passed to the `optim` function.
+#'   If NULL, default values are used, namely control = list(reltol = 1e-8, maxit = 1000)
+#'   for mode 1 and control = list(factr = 1e-8, maxit = 1000) for mode 2.
+#'   and
+#' @param scale Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.
+#' @param plot Logical indicating whether to plot the model. Default is TRUE.
+#'
+#' @return A list of class "cnormBetaBinomial" or "cnormBetaBinomial2". In case of mode 2
+#'         containing:
+#'   \item{alpha_est}{Estimated coefficients for the alpha model}
+#'   \item{beta_est}{Estimated coefficients for the beta model}
+#'   \item{se}{Standard errors of the estimated coefficients}
+#'   \item{alpha_degree}{Degree of the polynomial for the alpha model}
+#'   \item{beta_degree}{Degree of the polynomial for the beta model}
+#'   \item{result}{Full result from the optimization procedure}
+#'
+#' @details
+#' The function standardizes the input variables, fits polynomial models for both
+#' the alpha and beta parameters, and uses maximum likelihood estimation to
+#' find the optimal parameters. The optimization is performed using the L-BFGS-B method.
+#'
+#' @examples
+#' # Fit a beta-binomial regression model to the PPVT data
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
+#' summary(model)
+#'
+#' # Use weights for post-stratification
+#' # weights <- computeWeights(ppvt, margins)
+#' # model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
+#'
+#' @keywords internal
+cnorm.betabinomial <- function(age, score, n = NULL, weights = NULL, mode = 2, alpha = 3, beta = 3, control = NULL, scale = "T", plot = T) {
+  if(length(age) != length(score)){
+    stop("Length of 'age' and 'score' must be the same.")
+  }
+
+  if(is.null(n)){
+    n <- max(score)
+    warning("n parameter is NULL: Maximum score not specified. Using maximum score in data.")
+  }
+
+  if(mode == 2){
+    model <- cnorm.betabinomial2(age, score, n, weights, alpha, beta, control, scale, plot)
+  }else{
+    model <- cnorm.betabinomial1(age, score, n, weights, alpha, beta, control, scale, plot)
+  }
+
+  return(model)
 }

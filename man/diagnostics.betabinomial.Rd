@@ -4,10 +4,16 @@
 \alias{diagnostics.betabinomial}
 \title{Diagnostic Information for Beta-Binomial Model}
 \usage{
-diagnostics.betabinomial(model)
+diagnostics.betabinomial(model, age = NULL, raw = NULL, weights = NULL)
 }
 \arguments{
 \item{model}{An object of class "cnormBetaBinomial", typically the result of a call to cnorm.betabinomial().}
+
+\item{age}{An optional vector with age values}
+
+\item{raw}{An optional vector with raw values}
+
+\item{weights}{An optional vector with weights}
 }
 \value{
 A list containing the following diagnostic information:
@@ -25,7 +31,9 @@ A list containing the following diagnostic information:
 \description{
 This function provides diagnostic information for a fitted beta-binomial model
 from the cnorm.betabinomial function. It returns various metrics related to
-model convergence, fit, and complexity.
+model convergence, fit, and complexity. In case, age and raw scores are provided,
+the function as well computes R2, rmse and bias for the norm scores based on
+the manifest and predicted norm scores
 }
 \details{
 The AIC and BIC are calculated as:

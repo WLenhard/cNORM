@@ -1,12 +1,11 @@
-
 import(lattice)
 importFrom(leaps, regsubsets)
-importFrom(stats, qbeta, optim, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+importFrom(stats, setNames, qbeta, optim, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text, lines)
 importFrom(latticeExtra, panel.2dsmoother)
 importFrom(utils, tail, menu, head)
-importFrom(ggplot2, geom_point, aes, aes_string, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
+importFrom(ggplot2, geom_point, guides, guide_legend, aes, aes_string, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
 export(
 	bestModel,
 	betaCoefficients,
@@ -15,7 +14,6 @@ export(
 	cnorm.cv,
 	cnorm,
 	cnorm.betabinomial,
-	cnorm.betabinomial2,
 	computePowers,
 	diagnostics.betabinomial,
 	derivationTable,
@@ -34,8 +32,6 @@ export(
 	plotNorm,
 	plotCnorm,
 	plot.betabinomial,
-	predict.cnormBetaBinomial,
-	predict.cnormBetaBinomial2,
 	predictNorm,
 	predictNorm.betabinomial,
 	predictRaw,

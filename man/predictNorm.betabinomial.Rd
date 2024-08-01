@@ -4,7 +4,7 @@
 \alias{predictNorm.betabinomial}
 \title{Predict Norm Scores from Raw Scores}
 \usage{
-predictNorm.betabinomial(raw, age, model, n = NULL)
+predictNorm.betabinomial(raw, age, model, n = NULL, range = 3)
 }
 \arguments{
 \item{raw}{A numeric vector of raw scores.}
@@ -14,6 +14,9 @@ predictNorm.betabinomial(raw, age, model, n = NULL)
 \item{model}{A fitted model object of class "cnormBetaBinomial".}
 
 \item{n}{The number of items resp. the maximum score.}
+
+\item{range}{The range of the norm scores in standard deviations. Default is 3. Thus, scores in the
+range of +/- 3 standard deviations are considered.}
 }
 \value{
 A numeric vector of norm scores.

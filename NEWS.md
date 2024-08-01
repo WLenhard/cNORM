@@ -8,8 +8,10 @@ Date: in preparation
 
 Changes:
 
+*    Parametric modelling with beta binomial functions
 *    Fixed input validation in getNormScoreSE    
-*    Started intensive work and validation of parametric modelling with beta binomial functions
+*    Started intensive work on regularization in regression
+     models (planned for v4.0)
 *    Vignette on modelling with beta binomial distribution
 
 

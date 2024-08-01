@@ -27,23 +27,34 @@ To quantify this ability or trait, norm scores are used to express the relative 
 
 ## Mathematical Derivation
 The beta-binomial distribution arises as a compound distribution of the binomial and beta distribution. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
-[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}]
+
+\[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}\]
+
 where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
 
 We directly model the $\alpha$ and $\beta$ parameters of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically:
-[\log(\alpha(age)) = a_0 + a_1age + a_2age^2 + ... + a_mage^m]
-[\log(\beta(age)) = b_0 + b_1age + b_2age^2 + ... + b_sage^s]
+
+\[\log(\alpha(age)) = a_0 + a_1age + a_2age^2 + ... + a_mage^m\]
+\[\log(\beta(age)) = b_0 + b_1age + b_2age^2 + ... + b_sage^s\]
+
 where m and s are the degrees of the polynomials for $\alpha$ and $\beta$ respectively.
 We use the log of $\alpha$ and $\beta$ to ensure positivity of these parameters, as they must be positive for the beta-binomial distribution. This transformation also helps in stabilizing the variance and improving the optimization process.
+
 The mean ($\mu$) and variance ($\sigma^2$) of the beta-binomial distribution can be derived from $\alpha$ and $\beta$ as follows:
-[\mu = \frac{n\alpha}{\alpha + \beta}]
-[\sigma^2 = \frac{n\alpha\beta(\alpha + \beta + n)}{(\alpha + \beta)^2(\alpha + \beta + 1)}]
+
+\[\mu = \frac{n\alpha}{\alpha + \beta}\]
+\[\sigma^2 = \frac{n\alpha\beta(\alpha + \beta + n)}{(\alpha + \beta)^2(\alpha + \beta + 1)}\]
+
 To estimate the parameters ($a_0, ..., a_m, b_0, ..., b_s$), we use maximum likelihood estimation. The log-likelihood function for N observations is:
-[L(a, b | X, Age) = \sum_{i=1}^N \log[P(X_i | n, \alpha(Age_i), \beta(Age_i))]]
+
+\[L(a, b | X, Age) = \sum_{i=1}^N \log[P(X_i | n, \alpha(Age_i), \beta(Age_i))]\]
+
 where $X_i$ is the score and $Age_i$ is the age for the i-th observation.
+
 This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the L-BFGS-B (Limited-memory BFGS) algorithm of the optim function. The L-BFGS-B algorithm is a quasi-Newton method for solving large nonlinear optimization problems with simple bounds. It's particularly effective for our problem as it can handle a large number of parameters and allows for bound constraints, which can be useful to ensure the positivity of $\alpha$ and $\beta$. The optimization process finds the values of $a$ and $b$ that maximize the log-likelihood through approximating the Hessian matrix, thereby providing the best fit to the observed data.
 
 This direct modeling of $\alpha$ and $\beta$ allows for flexibly capturing the shape of the beta-binomial distribution across different ages, potentially leading to the best fit for complex data patterns.
+
 
 ## Prerequisites
 Before applying beta-binomial modeling to psychometric data over age, several key prerequisites should be met:
@@ -96,16 +107,7 @@ diagnostics.betabinomial(model.betabinomial)
 
 By default, the function fits a polynomial of degree 3 for both $\mu$ and $\sigma$. You can specify the degrees of the polynomials using the `degree_mu` and `degree_sigma` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
 
-`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot.betabinomial` function. Observe if the percentile trajectories exhibit plausible forms. To predict $\mu$ and $\sigma$ for specific ages, as well as the $\alpha$ and $\beta$ parameters, you can use the `predict.cnormBetaBinomial` method:
-
-```{r}
-# Predict parameters depending on age
-predict.cnormBetaBinomial(model.betabinomial, c(5, 10, 15))
-```
-
-These predicted values show the estimated mean ($\mu$) and standard deviation ($\sigma$) of the raw scores, as well as the $\alpha$ and $\beta$ parameters of the beta-binomial distribution, for ages 5, 10, and 15. For example, at age 10, the model predicts a mean raw score of about 168, with a standard deviation of about 21. The $\alpha$ and $\beta$ parameters define the shape of the beta-binomial distribution at each age.
-
-To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
+`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot.betabinomial` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
 
 ```{r}
 # Predict norm scores for new data. Since we used the default T-score scaling,
@@ -135,7 +137,7 @@ margins <- data.frame(variables = c("sex", "sex",
                       levels = c(1, 2, 0, 1),
                       share = c(.52, .48, .7, .3))
 weights <- computeWeights(ppvt, margins)
-model_weighted <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
+model_weighted <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
 
 ```
 
@@ -146,7 +148,7 @@ Please consult the vignette on `WeightedRegression` for more information on post
 
 ## Simulation Study
 
-Recent research by Timmermann et al. (2021) and Urban et al. (2023) has demonstrated that regression-based modeling with beta-binomial distributions can effectively approximate norm scores of psychological tests in many scenarios. Our study replicates and extends the work of Lenhard & Lenhard (2021), which assessed the performance of semi-parametric regression models for norm score estimation as applied in cNORM, comparing it with conventional norming methods. cNORM demonstrated superior performance even with small sample sizes. The simulated scales in this study were constructed to align with scenarios where beta-binomial modeling is expected to perform well, particularly given the normal distribution of item difficulties. Thus, we wanted to replicate our results, including beta binomial distributions as outlined above.
+Recent research by Urban et al. (2024) has demonstrated that regression-based modeling with beta-binomial distributions can effectively approximate norm scores of psychological tests in many scenarios. Our study replicates and extends the work of Lenhard & Lenhard (2021), which assessed the performance of semi-parametric regression models for norm score estimation as applied in cNORM, comparing it with conventional norming methods. cNORM demonstrated superior performance even with small sample sizes. The simulated scales in this study were constructed to align with scenarios where beta-binomial modeling is expected to perform well, particularly given the normal distribution of item difficulties. Thus, we wanted to replicate our results, including beta binomial distributions as outlined above.
 
 The complete simulation code and detailed results are available in our [OSF repository](https://osf.io/hcg7v/). Our methodology involves simulating scales of varying difficulty and item numbers, applying these to norming samples of different sizes. The resulting models are then tested against an ideal, large population where the latent ability and true T-score are known, based on the IRT simulation process. This approach allows us to assess model quality while minimizing the noise inherent in real-world norming studies. Furthermore, with all person parameters known, we can evaluate the models in terms of bias, Root Mean Square Error (RMSE), and coefficient of determination ($R^2$).
 
@@ -166,7 +168,7 @@ In the results data, SCPM refers to cNORM with Taylor polynomials, numeric value
 
 Our findings demonstrate that beta-binomial models perform robustly in terms of bias, RMSE, and $R^2$, even with relatively small sample sizes. Their performance is comparable to or better than Taylor polynomials and significantly superior to conventional norming methods:
 
-<img src="beta.png" style="border:0;">
+<img src="beta.png" style="border:0;" height=400>
 
 
 
@@ -187,7 +189,6 @@ In conclusion, while both cNORM with Taylor polynomials and beta-binomial models
 
 ## References
 * Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, 81(2), 229–261. https://doi.org/10.1177/0013164420928457
-* Timmerman, M. E., Voncken, L., & Albers, C. J. (2021). A tutorial on regression-based norming of psychological tests with GAMLSS. Psychological Methods, 26(3), 357–373. https://doi.org/10.1037/met0000348
-* Urban, J., Scherrer, V., Strobel, A., & Preckel, F. (2023). Continuous norming approaches: A systematic review and real data example. doi:10.31234/osf.io/5azep
+* Urban, J., Scherrer, V., Strobel, A., & Preckel, F. (2024). Continuous Norming Approaches: A Systematic Review and Real Data Example. Assessment. https://doi.org/10.1177/10731911241260545
 
 
