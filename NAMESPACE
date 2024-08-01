@@ -59,3 +59,7 @@ export(
 S3method(plot, cnorm)
 S3method(print, cnorm)
 S3method(summary, cnorm)
+S3method(predict, cnormBetaBinomial)
+S3method(predict, cnormBetaBinomial2)
+S3method(plot, betabinomial)
+S3method(plot, betabinomial)

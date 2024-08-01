@@ -2,7 +2,7 @@
 This is a minor release of an existing package. In this version I have:
 
 *    corrected a bug in 'bestModel'
-*    added new features on parametric modelling via beta binomial functions
+*    finished new features on parametric modelling via beta binomial functions
 
 
 ## Test environments
