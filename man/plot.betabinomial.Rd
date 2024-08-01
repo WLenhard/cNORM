@@ -33,3 +33,16 @@ A ggplot object.
 This function creates a visualization of a fitted cnormBetaBinomial model,
 including the original data points manifest percentiles and specified percentile lines.
 }
+\seealso{
+Other plot: 
+\code{\link{plot.cnorm}()},
+\code{\link{plotDensity}()},
+\code{\link{plotDerivative}()},
+\code{\link{plotNorm}()},
+\code{\link{plotNormCurves}()},
+\code{\link{plotPercentileSeries}()},
+\code{\link{plotPercentiles}()},
+\code{\link{plotRaw}()},
+\code{\link{plotSubset}()}
+}
+\concept{plot}

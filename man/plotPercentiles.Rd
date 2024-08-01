@@ -80,6 +80,7 @@ plotPercentiles(result)
 plotNormCurves, plotPercentileSeries
 
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},

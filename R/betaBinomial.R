@@ -379,13 +379,16 @@ normTable.betabinomial <- function(model, ages, n = NULL, m = NULL, range = 3,
 #' norm scale specified in the model.
 #'
 #' @examples
+#' \dontrun{
 #' # Assuming you have a fitted model named 'bb_model':
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 #' raw <- c(100, 121, 97, 180)
 #' ages <- c(7, 8, 9, 10)
 #' norm_scores <- predictNorm.betabinomial(raw, ages, model)
+#' }
 #'
 #' @export
+#' @family predict
 predictNorm.betabinomial <- function(raw, age, model, n = NULL, range = 3) {
   if (!(inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2"))) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'.")
@@ -468,6 +471,7 @@ predictNorm.betabinomial <- function(raw, age, model, n = NULL, range = 3) {
 #' @return A ggplot object.
 #'
 #' @export
+#' @family plot
 plot.betabinomial <- function(model, age, score, weights = NULL,
                               percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                               points = TRUE) {
@@ -600,6 +604,7 @@ plot.betabinomial <- function(model, age, score, weights = NULL,
 #' where k is the number of parameters, L is the maximum likelihood, and n is the number of observations.
 #'
 #' @examples
+#' \dontrun{
 #' # Fit a beta-binomial model
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 #'
@@ -619,6 +624,7 @@ plot.betabinomial <- function(model, age, score, weights = NULL,
 #' # Compare AIC and BIC
 #' cat("AIC:", diag_info$AIC, "\n")
 #' cat("BIC:", diag_info$BIC, "\n")
+#' }
 #'
 #' @export
 diagnostics.betabinomial <- function(model, age = NULL, raw = NULL, weights = NULL) {
@@ -878,7 +884,7 @@ cnorm.betabinomial2 <- function(age, score, n = NULL, weights = NULL, alpha_degr
 #' generates predictions on the standardized scale, and then transforms these back
 #' to the original scale.
 #'
-#' @export
+#' @keywords internal
 predict.cnormBetaBinomial2 <- function(model, ages, n = NULL) {
   if (!inherits(model, "cnormBetaBinomial2")) {
     stop("Wrong object. Please provide object from class 'cnormBetaBinomial2'.")
@@ -956,15 +962,19 @@ predict.cnormBetaBinomial2 <- function(model, ages, n = NULL) {
 #' find the optimal parameters. The optimization is performed using the L-BFGS-B method.
 #'
 #' @examples
+#' \dontrun{
 #' # Fit a beta-binomial regression model to the PPVT data
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 #' summary(model)
 #'
 #' # Use weights for post-stratification
-#' # weights <- computeWeights(ppvt, margins)
-#' # model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
-#'
-#' @keywords internal
+#' marginals <- data.frame(var = c("sex", "sex", "migration", "migration"),
+#'                         level = c(1,2,0,1),
+#'                         prop = c(0.51, 0.49, 0.65, 0.35))
+#' weights <- computeWeights(ppvt, marginals)
+#' model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
+#' }
+#' @export
 cnorm.betabinomial <- function(age, score, n = NULL, weights = NULL, mode = 2, alpha = 3, beta = 3, control = NULL, scale = "T", plot = T) {
   if(length(age) != length(score)){
     stop("Length of 'age' and 'score' must be the same.")

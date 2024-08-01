@@ -41,6 +41,7 @@ plotSubset(cnorm.model)
 bestModel, plotPercentiles, printSubset
 
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},

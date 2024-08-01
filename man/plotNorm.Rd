@@ -35,6 +35,7 @@ plotNorm(result, group="group", minNorm=25, maxNorm=75)
 }
 \seealso{
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},

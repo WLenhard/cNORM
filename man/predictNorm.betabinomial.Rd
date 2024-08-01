@@ -31,10 +31,22 @@ each raw score given these parameters. Finally, it converts these probabilities 
 norm scale specified in the model.
 }
 \examples{
+\dontrun{
 # Assuming you have a fitted model named 'bb_model':
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 raw <- c(100, 121, 97, 180)
 ages <- c(7, 8, 9, 10)
 norm_scores <- predictNorm.betabinomial(raw, ages, model)
+}
 
 }
+\seealso{
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()}
+}
+\concept{predict}

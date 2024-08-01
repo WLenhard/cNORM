@@ -20,6 +20,7 @@ S3 function for plotting cnorm objects
 }
 \seealso{
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNorm}()},

@@ -56,6 +56,7 @@ plotDerivative(result, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, step
 checkConsistency, bestModel, derive
 
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotNorm}()},

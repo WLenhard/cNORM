@@ -56,6 +56,7 @@ Other predict:
 \code{\link{derivationTable}()},
 \code{\link{getNormCurve}()},
 \code{\link{normTable}()},
+\code{\link{predictNorm.betabinomial}()},
 \code{\link{predictRaw}()},
 \code{\link{rawTable}()}
 }

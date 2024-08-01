@@ -70,13 +70,16 @@ the alpha and beta parameters, and uses maximum likelihood estimation to
 find the optimal parameters. The optimization is performed using the L-BFGS-B method.
 }
 \examples{
+\dontrun{
 # Fit a beta-binomial regression model to the PPVT data
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 summary(model)
 
 # Use weights for post-stratification
-# weights <- computeWeights(ppvt, margins)
-# model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
-
+marginals <- data.frame(var = c("sex", "sex", "migration", "migration"),
+                        level = c(1,2,0,1),
+                        prop = c(0.51, 0.49, 0.65, 0.35))
+weights <- computeWeights(ppvt, marginals)
+model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
 }
-\keyword{internal}
+}

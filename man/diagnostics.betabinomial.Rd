@@ -42,6 +42,7 @@ BIC = ln(n)k - 2ln(L)
 where k is the number of parameters, L is the maximum likelihood, and n is the number of observations.
 }
 \examples{
+\dontrun{
 # Fit a beta-binomial model
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 
@@ -61,5 +62,6 @@ if(diag_info$converged) {
 # Compare AIC and BIC
 cat("AIC:", diag_info$AIC, "\n")
 cat("BIC:", diag_info$BIC, "\n")
+}
 
 }

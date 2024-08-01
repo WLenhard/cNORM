@@ -54,6 +54,7 @@ plotPercentileSeries(result, start=1, end=5, group="group")
 plotPercentiles
 
 Other plot: 
+\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
