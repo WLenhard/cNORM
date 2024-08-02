@@ -8,10 +8,10 @@ Date: 2023.08.01
 
 Changes:
 
-*    Parametric modelling with beta binomial functions
+*    Parametric modelling with beta binomial functions now fully implemented
+*    S3 functions predict, plot and summary added for bet a binomial models
 *    Fixed input validation in getNormScoreSE    
-*    Started intensive work on regularization in regression
-     models (planned for v4.0)
+*    Started intensive work on regularization in Taylor models (planned for v4.0)
 *    Vignette on modelling with beta binomial distribution
 
 

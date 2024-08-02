@@ -100,19 +100,22 @@ model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 # control parameters, # e.g., including methods from the optimx package. 
 # The default is the BFGS algorithm.
 
-# To retrieve fit indices, use the diagnostic.betabinomial function
-diagnostics.betabinomial(model.betabinomial)
+# To retrieve fit indices, use the 'diagnostic.betabinomial' or the 'summary' function
+# If age and raw scores are provided, R2, RMSE and bias are computed in comparison
+# to manifest norm scores.
+summary(model.betabinomial)
 
 ```
 
 By default, the function fits a polynomial of degree 3 for both $\mu$ and $\sigma$. You can specify the degrees of the polynomials using the `degree_mu` and `degree_sigma` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
 
-`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot.betabinomial` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
+`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot(model, age, score)` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
 
 ```{r}
 # Predict norm scores for new data. Since we used the default T-score scaling,
-# the output will as well be a vector with T-scores. 
-predictNorm.betabinomial(c(123, 98, 201, 165), c(8.9, 10.1, 9.3, 8.7), model.betabinomial)
+# the output will as well be a vector with T-scores.
+# Usage: predict(model, age, raw)
+predict(model.betabinomial, c(8.9, 10.1, 9.3, 8.7), c(123, 98, 201, 165))
 ```
 
 

@@ -31,8 +31,9 @@ plotRaw(result)
 }
 \seealso{
 Other plot: 
-\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
+\code{\link{plot.cnormBetaBinomial}()},
+\code{\link{plot.cnormBetaBinomial2}()},
 \code{\link{plotDensity}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNorm}()},

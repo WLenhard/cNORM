@@ -2,33 +2,50 @@
 % Please edit documentation in R/betaBinomial.R
 \name{predict.cnormBetaBinomial2}
 \alias{predict.cnormBetaBinomial2}
-\title{Predict alpha and beta parameters for a beta-binomial regression model}
+\title{Predict Norm Scores from Raw Scores}
 \usage{
-\method{predict}{cnormBetaBinomial2}(model, ages, n = NULL)
+\method{predict}{cnormBetaBinomial2}(object, ...)
 }
 \arguments{
-\item{model}{An object of class "cnormBetaBinomial2", typically the result of a call to cnorm.betabinomial2().}
+\item{object}{A fitted model object of class 'cnormBetaBinomial' or 'cnormBetaBinomial2'.}
 
-\item{ages}{A numeric vector of age points at which to make predictions.}
-
-\item{n}{The maximum score to be achieved.}
+\item{...}{Additional arguments passed to the prediction method:
+\itemize{
+   \item age A numeric vector of ages, same length as raw.
+   \item score A numeric vector of raw scores.
+   \item range The range of the norm scores in standard deviations. Default is 3. Thus, scores in the range of +/- 3 standard deviations are considered.
+ }}
 }
 \value{
-A data frame with columns:
-  \item{age}{The input age points}
-  \item{a}{Predicted alpha values}
-  \item{b}{Predicted beta values}
-  \item{mu}{Predicted mean values}
-  \item{sigma}{Predicted standard deviation values}
+A numeric vector of norm scores.
 }
 \description{
-This function generates predictions from a fitted beta-binomial regression model
-for new age points.
+This function calculates norm scores based on raw scores, age, and a fitted cnormBetaBinomial model.
 }
 \details{
-This function takes a fitted beta-binomial regression model and generates predictions
-for new age points. It applies the same standardization used in model fitting,
-generates predictions on the standardized scale, and then transforms these back
-to the original scale.
+The function first predicts the alpha and beta parameters of the beta-binomial distribution
+for each age using the provided model. It then calculates the cumulative probability for
+each raw score given these parameters. Finally, it converts these probabilities to the
+norm scale specified in the model.
 }
-\keyword{internal}
+\examples{
+\dontrun{
+# Assuming you have a fitted model named 'bb_model':
+model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+raw <- c(100, 121, 97, 180)
+ages <- c(7, 8, 9, 10)
+norm_scores <- predict(raw, ages, model)
+}
+
+}
+\seealso{
+Other predict: 
+\code{\link{derivationTable}()},
+\code{\link{getNormCurve}()},
+\code{\link{normTable}()},
+\code{\link{predict.cnormBetaBinomial}()},
+\code{\link{predictNorm}()},
+\code{\link{predictRaw}()},
+\code{\link{rawTable}()}
+}
+\concept{predict}

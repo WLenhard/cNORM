@@ -81,8 +81,9 @@ Other predict:
 \code{\link{derivationTable}()},
 \code{\link{getNormCurve}()},
 \code{\link{normTable}()},
+\code{\link{predict.cnormBetaBinomial}()},
+\code{\link{predict.cnormBetaBinomial2}()},
 \code{\link{predictNorm}()},
-\code{\link{predictNorm.betabinomial}()},
 \code{\link{predictRaw}()}
 }
 \concept{predict}

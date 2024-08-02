@@ -45,8 +45,9 @@ plotDensity(result, group = c (2, 4, 6))
 plotNormCurves, plotPercentiles
 
 Other plot: 
-\code{\link{plot.betabinomial}()},
 \code{\link{plot.cnorm}()},
+\code{\link{plot.cnormBetaBinomial}()},
+\code{\link{plot.cnormBetaBinomial2}()},
 \code{\link{plotDerivative}()},
 \code{\link{plotNorm}()},
 \code{\link{plotNormCurves}()},
