@@ -180,6 +180,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @param t The age power parameter (max = 6). If not set, it uses k and if both
 #' parameters are NULL, k is set to 3, since age trajectories are most often well
 #' captured by cubic polynomials.
+#' @param plot Default TRUE; plot the raw data and the regression model
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
@@ -247,7 +248,8 @@ cnorm <- function(raw = NULL,
                   k = NULL,
                   t = NULL,
                   terms = 0,
-                  R2 = NULL){
+                  R2 = NULL,
+                  plot = TRUE){
 
   if(!is.null(group)&&!is.null(age)){
     warning("Specifying both 'group' as well as 'age' is discouraged.")
@@ -325,7 +327,7 @@ cnorm <- function(raw = NULL,
 
     data <- rankByGroup(data, raw=data$raw, group=FALSE, scale=scale, weights=data$weights, descend = descend, method = method)
     data <- computePowers(data, k = k, t = t)
-    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2)
+    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2, plot = plot)
 
     result <- list(data = data, model = model)
     class(result) <- "cnorm"
@@ -354,7 +356,7 @@ cnorm <- function(raw = NULL,
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }
 
-  model <- bestModel(data, R2=R2, terms=terms, weights = data$weights)
+  model <- bestModel(data, R2=R2, terms=terms, weights = data$weights, plot = plot)
   result <- list(data = data, model = model)
   class(result) <- "cnorm"
   return(result)

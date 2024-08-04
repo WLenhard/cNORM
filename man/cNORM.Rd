@@ -16,7 +16,8 @@ cnorm(
   k = NULL,
   t = NULL,
   terms = 0,
-  R2 = NULL
+  R2 = NULL,
+  plot = TRUE
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ this number of terms is used}
 
 \item{R2}{Adjusted R square as a stopping criterion for the model building
 (default R2 = 0.99)}
+
+\item{plot}{Default TRUE; plot the raw data and the regression model}
 }
 \value{
 cnorm object including the ranked raw data and the regression model

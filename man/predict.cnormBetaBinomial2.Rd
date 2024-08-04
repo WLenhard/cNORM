@@ -34,7 +34,7 @@ norm scale specified in the model.
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 raw <- c(100, 121, 97, 180)
 ages <- c(7, 8, 9, 10)
-norm_scores <- predict(raw, ages, model)
+norm_scores <- predict(model, ages, raw)
 }
 
 }

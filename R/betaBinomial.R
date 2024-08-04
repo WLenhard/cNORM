@@ -424,7 +424,7 @@ normTable.betabinomial <- function(model,
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 #' raw <- c(100, 121, 97, 180)
 #' ages <- c(7, 8, 9, 10)
-#' norm_scores <- predict(raw, ages, model)
+#' norm_scores <- predict(model, ages, raw)
 #' }
 #'
 #' @export
@@ -603,7 +603,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
     )
 
   # Calculate and add manifest percentiles
-  if (length(unique(age)) < 20) {
+  if (length(age) / length(unique(age)) > 50) {
     # Distinct age groups
     data$group <- age
   } else {
@@ -777,7 +777,7 @@ diagnostics.betabinomial <- function(model,
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
     data <- data.frame(age = age, raw = score)
-    if (length(unique(age)) < 20) {
+    if (length(age) / length(unique(age)) > 50) {
       names(data) <- c("group", "raw")
       data <- rankByGroup(
         data = data,
@@ -1166,7 +1166,7 @@ cnorm.betabinomial <- function(age,
 
   if (is.null(n)) {
     n <- max(score)
-    warning("n parameter is NULL: Maximum score not specified. Using maximum score in data.")
+    message("n parameter not specified, using the maximum score in the data instead. Consider to provide n manually.")
   }
 
   if (mode == 2) {
@@ -1355,7 +1355,7 @@ plot.cnormBetaBinomial2 <- plot.cnormBetaBinomial
 #' model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 #' raw <- c(100, 121, 97, 180)
 #' ages <- c(7, 8, 9, 10)
-#' norm_scores <- predict(raw, ages, model)
+#' norm_scores <- predict(model, ages, raw)
 #' }
 #'
 #' @export
