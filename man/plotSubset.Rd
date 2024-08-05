@@ -4,41 +4,66 @@
 \alias{plotSubset}
 \title{Evaluate information criteria for regression model}
 \usage{
-plotSubset(model, type = 0, index = FALSE)
+plotSubset(model, type = 0)
 }
 \arguments{
-\item{model}{The regression model from the bestModel function or a cnorm object}
+\item{model}{The regression model from the bestModel function or a cnorm object.}
 
-\item{type}{Type of chart with 0 = adjusted R2 by number of predictors,
-1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
-Criterion (BIC) by adjusted R2, 3 = Root Mean Square Error (RMSE),
-4 = Residual Sum of Squares by number, 5 = F-test statistic for consecutive models
-and 6 = p-value for model tests
-of predictors}
-
-\item{index}{add index labels to data points}
+\item{type}{Integer specifying the type of plot to generate:
+\itemize{
+  \item 0: Adjusted R² by number of predictors (default)
+  \item 1: Log-transformed Mallow's Cp by adjusted R²
+  \item 2: Bayesian Information Criterion (BIC) by adjusted R²
+  \item 3: Root Mean Square Error (RMSE) by number of predictors
+  \item 4: Residual Sum of Squares (RSS) by number of predictors
+  \item 5: F-test statistic for consecutive models by number of predictors
+  \item 6: p-value for model tests by number of predictors
+}}
+}
+\value{
+A ggplot object representing the selected information criterion plot.
 }
 \description{
-Plots the information criterion - either Cp (default) or BIC - against
-the adjusted R square of the feature selection in the modeling process.
-Both BIC and Mallow's Cp are measures to avoid over-fitting. Please
-choose the model that has a high information criterion, while modeling
-the original data as close as possible. R2 adjusted values of ~ .99 might
-work well, depending on your scenario. In other words: Look out for the
-elbow in the curve and choose th model where the information criterion
-begins to drop. Nonetheless, inspect the according model with \code{plotPercentiles(data, group)}
-to visually inspect the course of the percentiles.
-In the plot, Mallow's Cp is log transformed and the BIC is always highly
-negative. The R2 cutoff that was specified in the bestModel function is
-displayed as a dashed line.
+This function plots various information criteria and model fit statistics against
+the number of predictors or adjusted R-squared, depending on the type of plot selected.
+It helps in model selection by visualizing different aspects of model performance.
+}
+\details{
+The function generates different plots to help in model selection:
+
+- For types 1 and 2 (Mallow's Cp and BIC), look for the "elbow" in the curve where
+  the information criterion begins to drop. This often indicates a good balance
+  between model fit and complexity.
+- For type 0 (Adjusted R2), higher values indicate better fit, but be cautious
+  of overfitting with values approaching 1.
+- For types 3 and 4 (RMSE and RSS), lower values indicate better fit.
+- For type 5 (F-test), higher values suggest significant improvement with added predictors.
+- For type 6 (p-values), values below the significance level (typically 0.05)
+  suggest significant improvement with added predictors.
+
+The R² cutoff specified in the bestModel function is displayed as a dashed line
+where applicable.
+}
+\note{
+It's important to balance statistical measures with practical considerations and
+to visually inspect the model fit using functions like \code{plotPercentiles}.
 }
 \examples{
+\dontrun{
 # Compute model with example data and plot information function
 cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 plotSubset(cnorm.model)
+
+# Plot BIC against adjusted R-squared
+plotSubset(cnorm.model, type = 2)
+
+# Plot RMSE against number of predictors
+plotSubset(cnorm.model, type = 3)
+}
+
 }
 \seealso{
-bestModel, plotPercentiles, printSubset
+\code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
 
 Other plot: 
 \code{\link{plot.cnorm}()},

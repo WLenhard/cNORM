@@ -10,39 +10,55 @@ plotDensity(
   maxRaw = NULL,
   minNorm = NULL,
   maxNorm = NULL,
-  group = NULL,
-  covariate = NULL
+  group = NULL
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function or a cnorm object}
+\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial or cnormBetaBinomial2 object.}
 
-\item{minRaw}{Lower bound of the raw score}
+\item{minRaw}{Lower bound of the raw score. If NULL, it's automatically determined based on the model type.}
 
-\item{maxRaw}{Upper bound of the raw score}
+\item{maxRaw}{Upper bound of the raw score. If NULL, it's automatically determined based on the model type.}
 
-\item{minNorm}{Lower bound of the norm score}
+\item{minNorm}{Lower bound of the norm score. If NULL, it's automatically determined based on the model type.}
 
-\item{maxNorm}{Upper bound of the norm score}
+\item{maxNorm}{Upper bound of the norm score. If NULL, it's automatically determined based on the model type.}
 
-\item{group}{Column of groups to plot}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
+\item{group}{Numeric vector specifying the age groups to plot. If NULL, groups are automatically selected.}
+}
+\value{
+A ggplot object representing the density functions.
 }
 \description{
-The function plots the density  curves based on the regression model against
-the actual percentiles from the raw data. As in 'plotNormCurves',
-please check for inconsistent curves, especially curves showing implausible shapes as f. e.
-violations of biuniqueness.
+This function plots density curves based on the regression model against the raw scores.
+It supports both traditional continuous norming models and beta-binomial models.
+The function allows for customization of the plot range and groups to be displayed.
+}
+\details{
+The function generates density curves for specified age groups, allowing for easy comparison of score distributions
+across different ages.
+
+For beta-binomial models, the density is based on the probability mass function, while for
+traditional models, it uses a normal distribution based on the norm scores.
+}
+\note{
+Please check for inconsistent curves, especially those showing implausible shapes
+such as violations of biuniqueness in the cnorm models.
 }
 \examples{
-# Load example data set, compute model and plot results for age values 2, 4 and 6
+\dontrun{
+# For traditional continuous norming model
 result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotDensity(result, group = c (2, 4, 6))
+plotDensity(result, group = c(2, 4, 6))
+
+# For beta-binomial model
+bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
+plotDensity(bb_model)
+}
+
 }
 \seealso{
-plotNormCurves, plotPercentiles
+\code{\link{plotNormCurves}}, \code{\link{plotPercentiles}}
 
 Other plot: 
 \code{\link{plot.cnorm}()},

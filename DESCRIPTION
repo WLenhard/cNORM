@@ -35,7 +35,8 @@ Depends:
 Imports:
     lattice (>= 0.21),
     leaps (>= 3.1), latticeExtra (>= 0.6),
-    ggplot2 (>= 3.5.1)
+    ggplot2 (>= 3.5.1),
+    rlang
 Suggests: 
     knitr,
     shiny,

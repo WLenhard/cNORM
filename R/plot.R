@@ -4,371 +4,389 @@
 #' the regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
 #' regression line.
-#' @param data The raw data within a data.frame or cnorm object
-#' @param model The regression model (optional)
-#' @param group The grouping variable
-#' @param raw The raw score variable
+#' @param model The regression model from the 'cnorm' function
+#' @param group Should the fit be displayed by group?
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
 #' manifest against difference values
 #' @examples
 #' # Compute model with example dataset and plot results
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotRaw(result)
+#' @import ggplot2
+#' @importFrom rlang .data
 #' @export
 #' @family plot
-plotRaw <- function(data, model, group = NULL, raw = NULL, type = 0) {
+plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 
-  if(inherits(data, "cnorm")){
-    model <- data$model
-    data <- data$data
+  if(inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")){
+    stop("This function is not applicable for beta-binomial models.")
   }
 
-  #if (!attr(data, "useAge")){
-  #  stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
-  #}
-
-  if (is.null(raw)) {
-    raw <- attr(data, "raw")
+  if(!inherits(model, "cnorm")){
+    stop("Please provide a cnorm object.")
   }
 
+  d <- model$data
+  model <- model$model
 
-  if (group != "" && !is.null(group) && !(group %in% colnames(data))) {
-    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variable names and fix 'group' parameter in function call."), collapse = ""))
-    group <- NULL
-  }
-
-  if (!(raw %in% colnames(data))) {
-    stop(paste(c("ERROR: Raw variable '", raw, "' does not exist in data object."), collapse = ""))
-  }
-
-  if(is.null(model$covariate))
-    cov <- NULL
-  else
-    cov <- data[[attr(data, "covariate")]]
-  d <- data
-  d$raw <- data[[raw]]
   d$fitted <- model$fitted.values
   d$diff <- d$fitted - d$raw
   mse <- round(model$rmse, digits=4)
-  r <- round(cor(d$fitted, d$raw,
-                 use = "pairwise.complete.obs"), digits = 4)
+  r <- round(cor(d$fitted, d$raw, use = "pairwise.complete.obs"), digits = 4)
   d <- as.data.frame(d)
-  if (group != "" && !is.null(group)) {
-    d$group <- data[[group]]
-    d$group <- as.factor(d$group)
 
-    if (type == 0) {
-      xyplot(fitted ~ raw | group, d,
-        main = paste("Observed vs. Fitted Raw Scores by ", group, "\nr = ", r, ", RMSE = ", mse),
-        ylab = "Fitted Scores",
-        xlab = "Observed Score",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = cov,
-        abline = c(0, 1), lwd = 1
-      )
+  if (isTRUE(group)) {
+    if("group" %in% colnames(d)){
+      d$group <- as.factor(d$group)
     } else {
-      xyplot(diff ~ raw | group, d,
-        main = paste("Observed Raw Scores vs. Difference Scores by ", group, "\nr = ", r, ", RMSE = ", mse),
-        ylab = "Difference Scores",
-        xlab = "Observed Score",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = cov,
-        panel = function(...) {
-          panel.xyplot(...)
-          panel.abline(h = .0, col = 2, lty = 2)
-        }
-      )
-    }
-  } else {
-    if (type == 0) {
-      xyplot(fitted ~ raw, d,
-        main = paste("Observed vs. Fitted Raw Scores\nr = ", r, ", RMSE = ", mse),
-        ylab = "Fitted Scores",
-        xlab = "Observed Score",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = cov,
-        abline = c(0, 1), lwd = 1
-      )
-    } else {
-      xyplot(diff ~ raw, d,
-        main = paste("Observed Raw Scores vs. Difference Scores\nr = ", r, ", RMSE = ", mse),
-        ylab = "Difference",
-        xlab = "Observed Score",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = cov,
-        panel = function(...) {
-          panel.xyplot(...)
-          panel.abline(h = .0, col = 2, lty = 2)
-        }
-      )
+      d$group <- as.factor(getGroups(d$age))
     }
   }
+
+  if (type == 0) {
+    p <- ggplot(d, aes_string(x = .data$raw, y = .data$fitted)) +
+      geom_point(alpha = 0.5) +
+      geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+      labs(
+        title = if(isTRUE(group)) "Observed vs. Fitted Raw Scores by Group" else "Observed vs. Fitted Raw Scores",
+        subtitle = paste("r =", r, ", RMSE =", mse),
+        x = "Observed Score",
+        y = "Fitted Scores"
+      )
+  } else {
+    p <- ggplot(d, aes(x = .data$raw, y = .data$diff)) +
+      geom_point(alpha = 0.5) +
+      geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+      labs(
+        title = if(isTRUE(group)) "Observed Raw Scores vs. Difference Scores by Group" else "Observed Raw Scores vs. Difference Scores",
+        subtitle = paste("r =", r, ", RMSE =", mse),
+        x = "Observed Score",
+        y = "Difference Scores"
+      )
+  }
+
+  if (isTRUE(group)) {
+    p <- p + facet_wrap(~ group)
+  }
+
+  p <- p + theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 12),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
+  return(p)
 }
 
-#' Plot manifest and fitted norm scores
+#' @title Plot manifest and fitted norm scores
 #'
-#' The function plots the manifest norm score against the fitted norm score from
+#' @description
+#' This function plots the manifest norm score against the fitted norm score from
 #' the inverse regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
-#' regression line.
-#' @param data The raw data within a data.frame or a cnorm object
-#' @param model The regression model (optional)
-#' @param group The grouping variable, use empty string for no group
+#' the regression line. Applicable for Taylor polynomial models.
+#'
+#' @param model The regression model, usually from the 'cnorm' or 'cnorm.betabinomial' function
+#' @param age In case of beta binomial model, please provide the age vector
+#' @param score In case of beta binomial model, please provide the score vector
+#' @param group On optional grouping variable, use empty string for no group, the variable name
+#'              for Taylor polynomial models or a vector with the groups for beta binomial models
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
 #' manifest against difference values
+#'
+#' @return A ggplot object representing the norm scores plot.
+#'
 #' @examples
 #' # Load example data set, compute model and plot results
 #' \dontrun{
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotNorm(result, group="group", minNorm=25, maxNorm=75)
+#' # Taylor polynomial model
+#' model <- cnorm(raw = elfe$raw, group = elfe$group)
+#' plotNorm(model, group="group")
+#'
+#' # Beta binomial models
+#' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+#' plotNorm(model.bb, age = elfe$group, score = elfe$raw)
+#'
 #' }
+#'
+#' @importFrom rlang .data
+#' @import ggplot2
 #' @export
 #' @family plot
-plotNorm <- function(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
-  if(inherits(data, "cnorm")){
-    model <- data$model
-    data <- data$data
+plotNorm <- function(model, age = NULL, score = NULL, weights = NULL, group = "", minNorm = NULL, maxNorm = NULL, type = 0) {
+
+
+    if(inherits(model, "cnorm")) {
+    data <- model$data
+    model <- model$model
+
+    if (is.null(minNorm)) {
+      minNorm <- model$minL1
+    }
+
+    if (is.null(maxNorm)) {
+      maxNorm <- model$maxL1
+    }
+
+    if (group != "" && !is.null(group) && !(group %in% colnames(data))) {
+      warning(paste0("Grouping variable '", group, "' does not exist in data object. Please check variable names and fix 'group' parameter in function call."))
+      group <- NULL
+    }
+
+    d <- data
+    raw <- data[[model$raw]]
+    if (attr(data, "useAge"))
+      age <- data[[model$age]]
+    else
+      age <- rep(0, length=nrow(data))
+
+    d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
+
+    if (group != "" && !is.null(group)) {
+      d$group <- as.factor(d[[group]])
+    }
+
+  } else if(inherits(model, "cnormBetaBinomial") || inherits(model, "cnormBetaBinomial2")) {
+    if(is.null(age) || is.null(score)) {
+      stop("Please provide age and score vectors for beta-binomial models.")
+    }
+
+    d <- data.frame(age = age, score = score)
+    d$groups <- getGroups(age)
+    width <- (max(age) - min(age)) / length(unique(d$groups))
+
+    if(is.null(weights))
+      d <- rankBySlidingWindow(d, "age", "score", width = width)
+    else
+      d <- rankBySlidingWindow(d, "age", "score", weights = weights, width = width)
+
+    d$fitted <- predict.cnormBetaBinomial(model, age, score)
+
+    if (is.numeric(group)) {
+      d$group <- as.factor(group)
+    }
+
+  } else {
+    stop("Please provide an object of type cnorm, cnormBetaBinomial or cnormBetaBinomial2.")
   }
 
-  #if (!attr(data, "useAge")){
-  #  stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
-  #}
-
-  if (is.null(minNorm)) {
-    # warning("minNorm not specified, taking absolute minimum norm score from modeling...")
-    minNorm <- model$minL1
+  if(!"normValue" %in% colnames(d)) {
+    stop("The 'normValue' column is missing from the data. Please ensure it's present for both cnorm and beta-binomial models.")
   }
 
-  if (is.null(maxNorm)) {
-    # warning("maxNorm not specified, taking absolute maximum norm score from modeling...")
-    maxNorm <- model$maxL1
-  }
-
-  if (group != "" && !is.null(group) && !(group %in% colnames(data))) {
-    warning(paste(c("Grouping variable '", group, "' does not exist in data object. Please check variable names and fix 'group' parameter in function call."), collapse = ""))
-    group <- NULL
-  }
-
-  d <- data
-  raw <- data[[model$raw]]
-  if (attr(data, "useAge"))
-    age <- data[[model$age]]
-  else
-    age <- rep(0, length=nrow(data))
-
-  if(!is.null(model$covariate))
-    covariate <- data[[attr(data, "covariate")]]
-  else
-    covariate <- NULL
-
-    d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm, covariate = covariate)
-
-  d$diff <- d$fitted - data$normValue
-  d <- d[!is.na(d$fitted), ]
-  d <- d[!is.na(d$diff), ]
+  d$diff <- d$fitted - d$normValue
+  d <- d[!is.na(d$fitted) & !is.na(d$diff), ]
 
   rmse <- round(sqrt(mean(d$diff^2)), digits = 4)
   r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
 
-  if (group != "" && !is.null(group)) {
-    d$group <- d[[group]]
-    d$group <- as.factor(d$group)
-    if (type == 0) {
-      xyplot(fitted ~ normValue | group, d,
-        main = paste("Observed vs. Fitted Norm Scores by ", group, "\nr = ",
-                     r, ", RMSE = ", rmse),
-        ylab = "Fitted Scores",
-        xlab = "Observed Scores",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = covariate,
-        abline = c(0, 1), lwd = 1
-      )
-    } else {
-      xyplot(diff ~ normValue | group, d,
-        main = paste("Observed Norm Scores vs. Difference Scores by ", group, "\nr = ",
-                     r, ", RMSE = ", rmse),
-        ylab = "Difference",
-        xlab = "Observed Scores",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = covariate,
-        abline = c(0, 1), lwd = 1,
-        panel = function(...) {
-          panel.xyplot(...)
-          panel.abline(h = .0, col = 2, lty = 2)
-        }
-      )
+  if (type == 0) {
+    if(inherits(model, "cnorm")) {
+      title <- if(group != "" && !is.null(group)) paste("Observed vs. Fitted Norm Scores by", group) else "Observed vs. Fitted Norm Scores"
+    }else{
+      title <- if(is.numeric(group)) paste("Observed vs. Fitted Norm Scores by group") else "Observed vs. Fitted Norm Scores"
     }
+
+    p <- ggplot(d, aes(x = .data$normValue, y = .data$fitted)) +
+      geom_point(alpha = 0.5) +
+      geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+      labs(
+        title = title,
+        subtitle = paste("r =", r, ", RMSE =", rmse),
+        x = "Observed Scores",
+        y = "Fitted Scores"
+      )
   } else {
-    if (type == 0) {
-      xyplot(fitted ~ normValue, d,
-        main = paste("Observed vs. Fitted Norm Scores\nr = ",
-                     r, ", RMSE = ", rmse),
-        ylab = "Fitted Scores",
-        xlab = "Observed Scores",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = covariate,
-        abline = c(0, 1), lwd = 1
+    if(inherits(model, "cnorm")) {
+      title <- if(group != "" && !is.null(group)) paste("Observed Norm Scores vs. Difference Scores by", group) else "Observed Norm Scores vs. Difference Scores"
+    }else{
+      title <- if(is.numeric(group)) paste("Observed Norm Scores vs. Difference Scores by group") else "Observed Norm Scores vs. Difference Scores"
+    }
+
+    p <- ggplot(d, aes(x = .data$normValue, y = .data$diff)) +
+      geom_point(alpha = 0.5) +
+      geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+      labs(
+        title = title,
+        subtitle = paste("r =", r, ", RMSE =", rmse),
+        x = "Observed Scores",
+        y = "Difference"
       )
-    } else {
-      xyplot(diff ~ normValue, d,
-        main = paste("Observed Norm Scores vs. Difference Scores\nr = ",
-                     r, ", RMSE = ", rmse),
-        ylab = "Difference",
-        xlab = "Observed Scores",
-        grid = TRUE,
-        auto.key = TRUE,
-        group = covariate,
-        abline = c(0, 1), lwd = 1,
-        panel = function(...) {
-          panel.xyplot(...)
-          panel.abline(h = .0, col = 2, lty = 2)
-        }
-      )
+  }
+
+  if(inherits(model, "cnorm")) {
+    if (group != "" && !is.null(group)) {
+      p <- p + facet_wrap(~ group)
+    }
+  }else{
+    if (is.numeric(group)) {
+      p <- p + facet_wrap(~ group)
     }
   }
+
+
+
+  p <- p + theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 12),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
+  return(p)
 }
 
-#' Plot norm curves
-#'
-#' The function plots the norm curves based on the regression model.
-#' Please check the function for inconsistent curves: The different
-#' curves should not intersect. Violations of this assumption are a strong
-#' indication for violations of model assumptions in modeling the relationship between raw
-#' and norm scores. There are several reasons, why this might occur:
-#' \enumerate{
-#'   \item Vertical extrapolation: Choosing extreme norm scores, e. g. scores
-#'   -3 <= x and x >= 3 In order to model these extreme scores, a large sample
-#'   dataset is necessary.
-#'   \item Horizontal extrapolation: Taylor polynomials converge in a certain
-#'   radius. Using the model scores outside the original dataset may
-#'   lead to inconsistent results.
-#'   \item The data cannot be modeled with Taylor polynomials, or you need
-#'   another power parameter (k) or R2 for the model.
-#'  }
-#' In general, extrapolation (point 1 and 2) can carefully be done to a
-#' certain degree outside the original sample, but it should in general
-#' be handled with caution.
-#' checkConsistency and derivationPlot can be used to further inspect the model.
-#' @param model The model from the bestModel function or a cnorm object
-#' @param normList Vector with norm scores to display
-#' @param minAge Age to start with checking
-#' @param maxAge Upper end of the age check
-#' @param step Stepping parameter for the age check, usually 1 or 0.1; lower
-#' scores indicate higher precision / closer checks
-#' @param minRaw Lower end of the raw score range, used for clipping implausible results
-#' (default = 0)
-#' @param maxRaw Upper end of the raw score range, used for clipping implausible results
-#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
-#' the specific value here.
-#' @seealso checkConsistency, derivationPlot, plotPercentiles
-#' @examples
-#' # Load example data set, compute model and plot results
-#' normData <- prepareData(elfe)
-#' m <- bestModel(data = normData)
-#' plotNormCurves(m, minAge=2, maxAge=5)
+
+#' @importFrom rlang .data
+#' @import ggplot2
 #' @export
 #' @family plot
-plotNormCurves <- function(model, normList = NULL,
+#'
+#' @title Plot norm curves
+#'
+#' @description
+#' This function plots the norm curves based on the regression model. It supports both
+#' Taylor polynomial models and beta-binomial models.
+#'
+#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 object.
+#' @param normList Vector with norm scores to display. If NULL, default values are used.
+#' @param minAge Age to start with checking. If NULL, it's automatically determined from the model.
+#' @param maxAge Upper end of the age check. If NULL, it's automatically determined from the model.
+#' @param step Stepping parameter for the age check, usually 1 or 0.1; lower scores indicate higher precision.
+#' @param minRaw Lower end of the raw score range, used for clipping implausible results. If NULL, it's automatically determined from the model.
+#' @param maxRaw Upper end of the raw score range, used for clipping implausible results. If NULL, it's automatically determined from the model.
+#'
+#' @details
+#' Please check the function for inconsistent curves: The different curves should not intersect.
+#' Violations of this assumption are a strong indication of violations of model assumptions in
+#' modeling the relationship between raw and norm scores.
+#'
+#' Common reasons for inconsistencies include:
+#' 1. Vertical extrapolation: Choosing extreme norm scores (e.g., scores <= -3 or >= 3).
+#' 2. Horizontal extrapolation: Using the model scores outside the original dataset.
+#' 3. The data cannot be modeled with the current approach, or you need another power parameter (k) or R2 for the model.
+#'
+#' @return A ggplot object representing the norm curves.
+#'
+#' @seealso \code{\link{checkConsistency}}, \code{\link{plotDerivative}}, \code{\link{plotPercentiles}}
+#'
+#' @examples
+#' \dontrun{
+#' # For Taylor continuous norming model
+#' m <- cnorm(raw = ppvt$raw, group = ppvt$group)
+#' plotNormCurves(m, minAge=2, maxAge=5)
+#'
+#' # For beta-binomial model
+#' bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
+#' plotNormCurves(bb_model)
+#' }
+plotNormCurves <- function(model,
+                           normList = NULL,
                            minAge = NULL,
                            maxAge = NULL,
                            step = 0.1,
                            minRaw = NULL,
-                           maxRaw = NULL,
-                           covariate = NULL) {
+                           maxRaw = NULL) {
 
   if(inherits(model, "cnorm")){
     model <- model$model
   }
 
+  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")
+
+  if(!is_beta_binomial && !model$useAge){
+    stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
+  }
+
+  # Get scale information
+  if(is_beta_binomial) {
+    scaleMean <- attr(model$result, "scaleMean")
+    scaleSD <- attr(model$result, "scaleSD")
+  } else {
+    scaleMean <- model$scaleM
+    scaleSD <- model$scaleSD
+  }
+
   if(is.null(normList)){
-    normList <- c(-2, -1, 0, 1, 2)
-    normList <- normList*model$scaleSD + model$scaleM
-  }
-
-  if(!is.null(covariate)&&is.null(model$covariate)){
-    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
-    covariate = NULL
-  }else if(is.null(covariate)&&!is.null(model$covariate)){
-    stop("Covariate specified in the model, but no function parameter available.")
-  }
-
-  ## TODO plot all degrees of the covariate when providing a list
-
-  if (!model$useAge){
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
+    normList <- c(-2, -1, 0, 1, 2) * scaleSD + scaleMean
   }
 
   if (is.null(minAge)) {
-    minAge <- model$minA1
+    minAge <- if(is_beta_binomial) attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd") else model$minA1
   }
 
   if (is.null(maxAge)) {
-    maxAge <- model$maxA1
+    maxAge <- if(is_beta_binomial) attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd") else model$maxA1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- model$minRaw
+    minRaw <- if(is_beta_binomial) 0 else model$minRaw
   }
 
   if (is.null(maxRaw)) {
-    maxRaw <- model$maxRaw
+    maxRaw <- if(is_beta_binomial) attr(model$result, "max") else model$maxRaw
   }
 
   valueList <- data.frame(n = factor(), raw = double(), age = double())
-  n <- length(normList)
 
-
-  for (i in 1:n) {
-    normCurve <-
-      getNormCurve(
-        normList[[i]],
-        model,
-        minAge = minAge,
-        maxAge = maxAge,
-        step = step,
-        minRaw = minRaw,
-        maxRaw = maxRaw,
-        covariate = covariate
-      )
-
-    currentDataFrame <- data.frame(n = normCurve$norm, raw = normCurve$raw, age = normCurve$age)
+  for (norm in normList) {
+    if(is_beta_binomial) {
+      ages <- seq(minAge, maxAge, by = step)
+      raws <- sapply(ages, function(age) {
+        pred <- predictCoefficients2(model, age, attr(model$result, "max"))
+        qbeta(pnorm((norm - scaleMean) / scaleSD), pred$a, pred$b) * attr(model$result, "max")
+      })
+      currentDataFrame <- data.frame(n = norm, raw = raws, age = ages)
+    } else {
+      normCurve <- getNormCurve(norm, model, minAge = minAge, maxAge = maxAge,
+                                step = step, minRaw = minRaw, maxRaw = maxRaw)
+      currentDataFrame <- data.frame(n = norm, raw = normCurve$raw, age = normCurve$age)
+    }
     valueList <- rbind(valueList, currentDataFrame)
   }
 
-  # generate variable names
-  NAMES <- paste("Norm ", normList, sep = "")
+  # Create rainbow color palette
+  n_colors <- length(unique(valueList$n))
+  color_palette <- rainbow(n_colors)
 
-  # lattice display options
-  COL <- rainbow(length(normList))
-  panelfun <- function(..., type, group.number) {
-    panel.lines(...)
-  }
-
-  xyplot(raw ~ age,
-    data = valueList, groups = n,
-    panel = function(...)
-      panel.superpose(..., panel.groups = panelfun),
-    main = "Norm Curves",
-    ylab = "Raw Score", xlab = "Explanatory Variable",
-    col = COL, lwd = 1.5, grid = TRUE,
-    key = list(
-      corner = c(0.99, 0.1),
-      lines = list(col = COL, lwd = 1.5),
-      text = list(NAMES)
+  # Create ggplot
+  p <- ggplot(valueList, aes(x = .data$age, y = .data$raw, color = factor(.data$n))) +
+    geom_line(size = 1) +
+    scale_color_manual(name = "Norm Score",
+                       values = color_palette,
+                       labels = paste("Norm", normList)) +
+    labs(title = "Norm Curves",
+         x = "Explanatory Variable (Age)",
+         y = "Raw Score") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
     )
-  )
+
+  return(p)
 }
-
-
 
 
 #' Plot norm curves against actual percentiles
@@ -629,23 +647,44 @@ plotPercentiles <- function(data,
 
 #' Plot the density function per group by raw score
 #'
-#' The function plots the density  curves based on the regression model against
-#' the actual percentiles from the raw data. As in 'plotNormCurves',
-#' please check for inconsistent curves, especially curves showing implausible shapes as f. e.
-#' violations of biuniqueness.
-#' @param model The model from the bestModel function or a cnorm object
-#' @param minRaw Lower bound of the raw score
-#' @param maxRaw Upper bound of the raw score
-#' @param minNorm Lower bound of the norm score
-#' @param maxNorm Upper bound of the norm score
-#' @param group Column of groups to plot
-#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
-#' the specific value here.
-#' @seealso plotNormCurves, plotPercentiles
+#' This function plots density curves based on the regression model against the raw scores.
+#' It supports both traditional continuous norming models and beta-binomial models.
+#' The function allows for customization of the plot range and groups to be displayed.
+#'
+#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial or cnormBetaBinomial2 object.
+#' @param minRaw Lower bound of the raw score. If NULL, it's automatically determined based on the model type.
+#' @param maxRaw Upper bound of the raw score. If NULL, it's automatically determined based on the model type.
+#' @param minNorm Lower bound of the norm score. If NULL, it's automatically determined based on the model type.
+#' @param maxNorm Upper bound of the norm score. If NULL, it's automatically determined based on the model type.
+#' @param group Numeric vector specifying the age groups to plot. If NULL, groups are automatically selected.
+#'
+#' @return A ggplot object representing the density functions.
+#'
+#' @details
+#' The function generates density curves for specified age groups, allowing for easy comparison of score distributions
+#' across different ages.
+#'
+#' For beta-binomial models, the density is based on the probability mass function, while for
+#' traditional models, it uses a normal distribution based on the norm scores.
+#'
+#' @note
+#' Please check for inconsistent curves, especially those showing implausible shapes
+#' such as violations of biuniqueness in the cnorm models.
+#'
+#' @seealso \code{\link{plotNormCurves}}, \code{\link{plotPercentiles}}
+#'
 #' @examples
-#' # Load example data set, compute model and plot results for age values 2, 4 and 6
+#' \dontrun{
+#' # For traditional continuous norming model
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotDensity(result, group = c (2, 4, 6))
+#' plotDensity(result, group = c(2, 4, 6))
+#'
+#' # For beta-binomial model
+#' bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
+#' plotDensity(bb_model)
+#' }
+#'
+#' @import ggplot2
 #' @export
 #' @family plot
 plotDensity <- function(model,
@@ -653,82 +692,96 @@ plotDensity <- function(model,
                         maxRaw = NULL,
                         minNorm = NULL,
                         maxNorm = NULL,
-                        group = NULL, covariate = NULL) {
+                        group = NULL) {
 
   if(inherits(model, "cnorm")){
     model <- model$model
   }
 
-  if(!is.null(covariate)&&is.null(model$covariate)){
-    warning("Covariate specified but no covariate available in the model. Setting covariate to NULL.")
-    covariate = NULL
-  }else if(is.null(covariate)&&!is.null(model$covariate)){
-    stop("Covariate specified in the model, but no function parameter available.")
-  }
+  is_beta_binomial <- inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")
 
   if (is.null(minNorm)) {
-    minNorm <- model$minL1
+    minNorm <- if(is_beta_binomial) -3 else model$minL1
   }
 
   if (is.null(maxNorm)) {
-    maxNorm <- model$maxL1
+    maxNorm <- if(is_beta_binomial) 3 else model$maxL1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- model$minRaw
+    minRaw <- if(is_beta_binomial) 0 else model$minRaw
   }
 
   if (is.null(maxRaw)) {
-    maxRaw <- model$maxRaw
+    maxRaw <- if(is_beta_binomial) attr(model$result, "max") else model$maxRaw
   }
 
-  if (is.null(group)&&model$useAge) {
-    group <- round(seq(from = model$minA1, to = model$maxA1, length.out = 4), digits = 3)
-  }else if(!model$useAge){
-    group <- c(1)
+  if (is.null(group)) {
+    if(is_beta_binomial) {
+      age_min <- attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd")
+      age_max <- attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd")
+      group <- round(seq(from = age_min, to = age_max, length.out = 4), digits = 3)
+    } else if(model$useAge) {
+      group <- round(seq(from = model$minA1, to = model$maxA1, length.out = 4), digits = 3)
+    } else {
+      group <- c(1)
+    }
   }
 
   step <- (maxNorm - minNorm) / 100
 
-  i <- 1
-  while (i <= length(group)) {
-    norm <- normTable(group[[i]], model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, covariate = covariate, pretty = F)
-    norm$group <- rep(group[[i]], length.out = nrow(norm))
-
-    if (i == 1) {
-      matrix <- norm
+  matrix_list <- lapply(group, function(g) {
+    if(is_beta_binomial) {
+      norm <- normTable.betabinomial(model, g, attr(model$result, "max"))[[1]]
+      norm$group <- rep(g, length.out = nrow(norm))
+      colnames(norm)[colnames(norm) == "x"] <- "raw"
+      colnames(norm)[colnames(norm) == "norm"] <- "norm1"
+      colnames(norm)[colnames(norm) == "z"] <- "norm"
     } else {
-      matrix <- rbind(matrix, norm)
+      norm <- normTable(g, model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, pretty = FALSE)
+      norm$group <- rep(g, length.out = nrow(norm))
     }
+    return(norm)
+  })
 
-    i <- i + 1
-  }
+  matrix <- do.call(rbind, matrix_list)
   matrix <- matrix[matrix$norm > minNorm & matrix$norm < maxNorm, ]
   matrix <- matrix[matrix$raw > minRaw & matrix$raw < maxRaw, ]
-  matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
 
-  # lattice display options
-  COL <- rainbow(length(group))
-  NAMES <- paste("Group ", group, sep = "")
-  panelfun <- function(..., type, group.number) {
-    panel.lines(...)
+  if(is_beta_binomial) {
+    matrix$density <- matrix$Px
+  } else {
+    matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
   }
 
-  plot <- xyplot(density ~ raw,
-    data = matrix, groups = group,
-    panel = function(...)
-      panel.superpose(..., panel.groups = panelfun),
-    main = "Density functions",
-    ylab = "Density", xlab = "Raw Score",
-    col = COL, lwd = 1.5, grid = TRUE,
-    key = list(
-      corner = c(0, 1),
-      lines = list(col = COL, lwd = 1.5),
-      text = list(NAMES)
+  # Create ggplot
+  title <- ""
+  if(is_beta_binomial) {
+    title <- "Density Functions (Beta-Binomial)"
+  } else {
+    title <- "Density Functions (Taylor Polynomial)"
+  }
+  p <- ggplot(matrix, aes(x = .data$raw, y = .data$density, color = factor(.data$group))) +
+    geom_line(size = 1, na.rm = TRUE) +
+    scale_color_viridis_d(name = "Age",
+                          labels = paste("Age", group),
+                          option = "plasma") +
+    labs(title = title,
+         x = "Raw Score",
+         y = "Density") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
     )
-  )
-  base::print(plot)
-  return(matrix)
+
+  return(p)
 }
 
 
@@ -763,6 +816,12 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  type = 7,
                                  filename = NULL) {
+
+  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
+  if(is_beta_binomial){
+    stop("This function is not applicable for beta-binomial models. Please use the plotDensity function instead.")
+  }
+
   if(inherits(data, "cnorm")){
     model <- data$model
     d <- data$data
@@ -860,40 +919,68 @@ plotPercentileSeries <- function(data, model, start = 1, end = NULL, group = NUL
 
 #' Evaluate information criteria for regression model
 #'
-#' Plots the information criterion - either Cp (default) or BIC - against
-#' the adjusted R square of the feature selection in the modeling process.
-#' Both BIC and Mallow's Cp are measures to avoid over-fitting. Please
-#' choose the model that has a high information criterion, while modeling
-#' the original data as close as possible. R2 adjusted values of ~ .99 might
-#' work well, depending on your scenario. In other words: Look out for the
-#' elbow in the curve and choose th model where the information criterion
-#' begins to drop. Nonetheless, inspect the according model with \code{plotPercentiles(data, group)}
-#' to visually inspect the course of the percentiles.
-#' In the plot, Mallow's Cp is log transformed and the BIC is always highly
-#' negative. The R2 cutoff that was specified in the bestModel function is
-#' displayed as a dashed line.
-#' @param model The regression model from the bestModel function or a cnorm object
-#' @param type Type of chart with 0 = adjusted R2 by number of predictors,
-#' 1 = log transformed Mallow's Cp by adjusted R2, 2 = Bayesian Information
-#' Criterion (BIC) by adjusted R2, 3 = Root Mean Square Error (RMSE),
-#' 4 = Residual Sum of Squares by number, 5 = F-test statistic for consecutive models
-#' and 6 = p-value for model tests
-#' of predictors
-#' @param index add index labels to data points
-#' @seealso bestModel, plotPercentiles, printSubset
+#' This function plots various information criteria and model fit statistics against
+#' the number of predictors or adjusted R-squared, depending on the type of plot selected.
+#' It helps in model selection by visualizing different aspects of model performance.
+#'
+#' @param model The regression model from the bestModel function or a cnorm object.
+#' @param type Integer specifying the type of plot to generate:
+#'   \itemize{
+#'     \item 0: Adjusted R² by number of predictors (default)
+#'     \item 1: Log-transformed Mallow's Cp by adjusted R²
+#'     \item 2: Bayesian Information Criterion (BIC) by adjusted R²
+#'     \item 3: Root Mean Square Error (RMSE) by number of predictors
+#'     \item 4: Residual Sum of Squares (RSS) by number of predictors
+#'     \item 5: F-test statistic for consecutive models by number of predictors
+#'     \item 6: p-value for model tests by number of predictors
+#'   }
+#'
+#' @return A ggplot object representing the selected information criterion plot.
+#'
+#' @details
+#' The function generates different plots to help in model selection:
+#'
+#' - For types 1 and 2 (Mallow's Cp and BIC), look for the "elbow" in the curve where
+#'   the information criterion begins to drop. This often indicates a good balance
+#'   between model fit and complexity.
+#' - For type 0 (Adjusted R2), higher values indicate better fit, but be cautious
+#'   of overfitting with values approaching 1.
+#' - For types 3 and 4 (RMSE and RSS), lower values indicate better fit.
+#' - For type 5 (F-test), higher values suggest significant improvement with added predictors.
+#' - For type 6 (p-values), values below the significance level (typically 0.05)
+#'   suggest significant improvement with added predictors.
+#'
+#' The R² cutoff specified in the bestModel function is displayed as a dashed line
+#' where applicable.
+#'
+#' @note
+#' It's important to balance statistical measures with practical considerations and
+#' to visually inspect the model fit using functions like \code{plotPercentiles}.
+#'
+#' @seealso \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
+#'
 #' @examples
+#' \dontrun{
 #' # Compute model with example data and plot information function
 #' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotSubset(cnorm.model)
+#'
+#' # Plot BIC against adjusted R-squared
+#' plotSubset(cnorm.model, type = 2)
+#'
+#' # Plot RMSE against number of predictors
+#' plotSubset(cnorm.model, type = 3)
+#' }
+#'
+#' @import ggplot2
 #' @export
 #' @family plot
-plotSubset <- function(model, type = 0, index = FALSE) {
-
+plotSubset <- function(model, type = 0) {
   if(inherits(model, "cnorm")){
     model <- model$model
   }
 
-  # compute F and significance
+  # Compute F and significance
   RSS1 <- c(NA, model$subsets$rss)
   RSS2 <- c(model$subsets$rss, NA)
   k1 <- seq(from = 1, to = length(RSS1))
@@ -902,207 +989,148 @@ plotSubset <- function(model, type = 0, index = FALSE) {
   df2 <- length(model$fitted.values) - k2
   F <- ((RSS1-RSS2)/df1)/(RSS2/df2)
   p <- 1 - pf(F, df1, df2)
-  dataFrameTMP <- data.frame(adjr2 = model$subsets$adjr2, bic = model$subsets$bic,
-                             cp = model$subsets$cp, RSS = model$subsets$rss,
-                             RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
-                             F = head(F, -1), p = head(p, -1),
-                             nr = seq(1, length(model$subsets$adjr2), by = 1))
-  indexLabel <- seq(from = 1, to = nrow(dataFrameTMP))
 
+  dataFrameTMP <- data.frame(
+    adjr2 = model$subsets$adjr2,
+    bic = model$subsets$bic,
+    cp = model$subsets$cp,
+    RSS = model$subsets$rss,
+    RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
+    F = head(F, -1),
+    p = head(p, -1),
+    nr = seq(1, length(model$subsets$adjr2), by = 1)
+  )
+
+  # Improved base theme
+  theme_custom <- theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+      axis.title = element_text(face = "bold", size = 12),
+      axis.text = element_text(size = 10),
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
+  # Base plot
+  p <- ggplot(dataFrameTMP) + theme_custom
+
+  # Custom color palette
+  custom_colors <- c("Model in Ascending Order" = "#1f77b4", "Cutoff Value" = "#d62728", "p = .05" = "#d62728")
+
+  # Define plot based on type
   if (type == 1) {
-    xyplot(cp ~ adjr2,
-      data = dataFrameTMP, type = "b",
-      col.line = "lightblue", lwd = 1,
-      grid = TRUE, scales = list(y = list(log = 10)),
-      main = "Information Function",
-      ylab = "log-transformed Mallows's Cp",
-      xlab = "Adjusted R2",
-      key = list(
-        corner = c(
-          0.1,
-          0.1
-        ), lines = list(
-          col = c("lightblue", "#9933FF"),
-          lty = c(1, 2), lwd = 2
-        ),
-        text = list(c(
-          "Model in Ascending Order",
-          "Cutoff Value"
-        ))
-      ), panel = function(x, y, ...) {
-        panel.abline(
-          v = model$cutoff,
-          lwd = 2, lty = "longdash",
-          col = "#9933FF", label = model$cutoff
-        )
-        panel.xyplot(x, y, ...)
-        # add index value to data points
-        if(index)
-          ltext(x = x, y = y, labels = indexLabel, cex=.7)
-      }
-    )
+    p <- p +
+      geom_line(aes(x = .data$adjr2, y = .data$cp, color = "Model in Ascending Order"), size = .75) +
+      geom_point(aes(x = .data$adjr2, y = .data$cp), size = 2.5, color = "#1f77b4") +
+      scale_y_log10() +
+      labs(title = "Information Function: Mallows's Cp",
+           x = "Adjusted R²",
+           y = "log-transformed Mallows's Cp") +
+      geom_vline(aes(xintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
+      scale_color_manual(values = custom_colors)
   } else if (type == 2) {
-    xyplot(bic ~ adjr2,
-      data = dataFrameTMP, type = "b",
-      col.line = "lightblue", lwd = 1,
-      grid = TRUE,
-      main = "Information Function",
-      ylab = "BIC",
-      xlab = "Adjusted R2",
-      key = list(
-        corner = c(
-          0.1,
-          0.1
-        ), lines = list(
-          col = c("lightblue", "#9933FF"),
-          lty = c(1, 2), lwd = 2
-        ),
-        text = list(c(
-          "Model in Ascending Order",
-          "cutoff Value"
-        ))
-      ), panel = function(x, y, ...) {
-        panel.abline(
-          v = model$cutoff,
-          lwd = 2, lty = "longdash",
-          col = "#9933FF", label = model$cutoff
-        )
-        panel.xyplot(x, y, ...)
-        # add index value to data points
-        if(index)
-          ltext(x = x, y = y, labels = indexLabel, cex=.7)
-      }
-    )
-  } else if(type == 3){
-    xyplot(RMSE ~ nr,
-                    data = dataFrameTMP, type = "b",
-                    col.line = "lightblue", lwd = 1,
-                    grid = TRUE,
-                    main = "Information Function",
-                    ylab = "Root Means Square Error (Raw Score)",
-                    xlab = "Number of Predictors", panel = function(x, y, ...) {
-                      panel.xyplot(x, y, ...)
-                      # add index value to data points
-                      if(index)
-                        ltext(x = x, y = y, labels = indexLabel, cex=.7)
-                    } )
-  } else if(type == 4){
-    xyplot(RSS ~ nr,
-           data = dataFrameTMP, type = "b",
-           col.line = "lightblue", lwd = 1,
-           grid = TRUE,
-           main = "Information Function",
-           ylab = "Residual Sum of Squares (RSS from Raw Score)",
-           xlab = "Number of Predictors", panel = function(x, y, ...) {
-             panel.xyplot(x, y, ...)
-             # add index value to data points
-             if(index)
-               ltext(x = x, y = y, labels = indexLabel, cex=.7)
-           } )
-  } else if(type == 5){
-    xyplot(F ~ nr,
-           data = dataFrameTMP, type = "b",
-           col.line = "lightblue", lwd = 1,
-           grid = TRUE,
-           main = "Information Function",
-           ylab = "F-test statistics for consecutive models",
-           xlab = "Number of Predictors", panel = function(x, y, ...) {
-             panel.xyplot(x, y, ...)
-             # add index value to data points
-             if(index)
-               ltext(x = x, y = y, labels = indexLabel, cex=.7)
-           } )
-  } else if(type == 6){
-    xyplot(p ~ nr,
-           data = dataFrameTMP, type = "b",
-           col.line = "lightblue", lwd = 1,
-           grid = TRUE,
-           main = "Information Function",
-           ylab = "p-values for tests on R2 adj. of consecutive models",
-           ylim = c(-0.005, 0.11),
-           xlab = "Number of Predictors",
-           key = list(
-             corner = c(
-               0.1,
-               0.9
-             ), lines = list(
-               col = c("#9933FF"),
-               lty = c(2), lwd = 2
-             ),
-             text = list(c("p = .05"))
-           ), panel = function(x, y, ...) {
-             panel.abline(
-               h = 0.05,
-               lwd = 2, lty = "longdash",
-               col = "#9933FF", label = model$cutoff
-             )
-             panel.xyplot(x, y, ...)
-             # add index value to data points
-             if(index)
-               ltext(x = x, y = y, labels = indexLabel, cex=.7)
-           }
-           )
+    p <- p +
+      geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), size = .75) +
+      geom_point(aes(x = .data$adjr2, y = .data$bic), size = 2.5, color = "#1f77b4") +
+      labs(title = "Information Function: BIC",
+           x = "Adjusted R²",
+           y = "Bayesian Information Criterion (BIC)") +
+      geom_vline(aes(xintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
+      scale_color_manual(values = custom_colors)
+  } else if (type == 3) {
+    p <- p +
+      geom_line(aes(x = .data$nr, y = .data$RMSE, color = "Model in Ascending Order"), size = .75) +
+      geom_point(aes(x = .data$nr, y = .data$RMSE), size = 2.5, color = "#1f77b4") +
+      labs(title = "Information Function: RMSE",
+           x = "Number of Predictors",
+           y = "Root Mean Square Error (Raw Score)") +
+      scale_color_manual(values = custom_colors)
+  } else if (type == 4) {
+    p <- p +
+      geom_line(aes(x = .data$nr, y = .data$RSS, color = "Model in Ascending Order"), size = .75) +
+      geom_point(aes(x = .data$nr, y = .data$RSS), size = 2.5, color = "#1f77b4") +
+      labs(title = "Information Function: RSS",
+           x = "Number of Predictors",
+           y = "Residual Sum of Squares (RSS)") +
+      scale_color_manual(values = custom_colors)
+  } else if (type == 5) {
+    p <- p +
+      geom_line(aes(x = .data$nr, y = .data$F, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_point(aes(x = .data$nr, y = .data$F), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      labs(title = "Information Function: F-test Statistics",
+           x = "Number of Predictors",
+           y = "F-test Statistics for Consecutive Models") +
+      scale_color_manual(values = custom_colors)
+  } else if (type == 6) {
+    p <- p +
+      geom_line(aes(x = .data$nr, y = .data$p, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_point(aes(x = .data$nr, y = .data$p), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      ylim(-0.005, 0.11) +
+      labs(title = "Information Function: p-values",
+           x = "Number of Predictors",
+           y = "p-values for Tests on R² adj. of Consecutive Models") +
+      geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", size = 1) +
+      scale_color_manual(values = custom_colors)
   } else {
-    xyplot(adjr2 ~ nr,
-                    data = dataFrameTMP, type = "b",
-                    col.line = "lightblue", lwd = 1,
-                    grid = TRUE,
-                    main = "Information Function",
-                    ylab = "Adjusted R2",
-                    xlab = "Number of Predictors",
-                    key = list(
-                      corner = c(
-                        0.9,
-                        0.1
-                      ), lines = list(
-                        col = c("#9933FF"),
-                        lty = c(2), lwd = 2
-                      ),
-                      text = list(c("Cutoff Value"))
-                    ), panel = function(x, y, ...) {
-                      panel.abline(
-                        h = model$cutoff,
-                        lwd = 2, lty = "longdash",
-                        col = "#9933FF", label = model$cutoff
-                      )
-                      panel.xyplot(x, y, ...)
-                      # add index value to data points
-                      if(index)
-                        ltext(x = x, y = y, labels = indexLabel, cex=.7)
-                    }
-    )
+    p <- p +
+      geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_point(aes(x = .data$nr, y = .data$adjr2), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      labs(title = "Information Function: Adjusted R²",
+           x = "Number of Predictors",
+           y = "Adjusted R²") +
+      geom_hline(aes(yintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
+      scale_color_manual(values = custom_colors)
   }
+
+  # Add legend title
+  p <- p + labs(color = "")
+
+  return(p)
 }
 
-#' Plot first order derivative of regression model
 #'
-#' Plots the scores obtained via the first order derivative of the regression model
-#' in dependence of the norm score. The results indicate the progression of the
-#' norm scores within each age group. The regression based modeling approach
-#' relies on the assumption of a linear progression of the norm scores.
-#' Negative scores in the first order derivative indicate a violation of this
-#' assumption. Scores near zero are typical for bottom and ceiling effects in the raw data.
-#' The regression models usually converge within the range of the original
-#' values. In case of vertical and horizontal extrapolation, with increasing
-#' distance to the original data, the risk of assumption violation increases
-#' as well.
-#' ATTENTION: plotDerivative is currently still incompatible with reversed raw
-#' score scales ('descent' option)
-#' @param model The model from the bestModel function or a cnorm object
-#' @param minAge Age to start with checking
-#' @param maxAge Upper end of the age check
-#' @param stepAge Stepping parameter for the age check, usually 1 or 0.1; lower
-#' values indicate higher precision / closer checks
-#' @param minNorm Lower end of the norm score range, in case of T scores, 25 might be good
-#' @param maxNorm Upper end of the norm score range, in case of T scores, 25 might be good
-#' @param stepNorm Stepping parameter for norm scores
-#' @param order Degree of the derivative (default = 1)
-
-#' @seealso checkConsistency, bestModel, derive
+#' @title Plot first order derivative of regression model
+#'
+#' @description
+#' This function plots the scores obtained via the first order derivative of the regression model
+#' in dependence of the norm score.
+#'
+#' @param model The model from the bestModel function, a cnorm object.
+#' @param minAge Minimum age to start checking. If NULL, it's automatically determined from the model.
+#' @param maxAge Maximum age for checking. If NULL, it's automatically determined from the model.
+#' @param minNorm Lower end of the norm score range. If NULL, it's automatically determined from the model.
+#' @param maxNorm Upper end of the norm score range. If NULL, it's automatically determined from the model.
+#' @param stepAge Stepping parameter for the age check, usually 1 or 0.1; lower values indicate higher precision.
+#' @param stepNorm Stepping parameter for norm scores.
+#' @param order Degree of the derivative (default = 1).
+#'
+#' @details
+#' The results indicate the progression of the norm scores within each age group. The regression-based
+#' modeling approach relies on the assumption of a linear progression of the norm scores. Negative scores
+#' in the first order derivative indicate a violation of this assumption. Scores near zero are typical
+#' for bottom and ceiling effects in the raw data.
+#'
+#' The regression models usually converge within the range of the original values. In case of vertical
+#' and horizontal extrapolation, with increasing distance to the original data, the risk of assumption
+#' violation increases as well.
+#'
+#' @note
+#' This function is currently incompatible with reversed raw score scales ('descent' option).
+#'
+#' @return A ggplot object representing the derivative of the regression function.
+#'
+#' @seealso \code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
+#'
 #' @examples
-#' # Load example data set, compute model and plot results
+#' # For traditional continuous norming model
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotDerivative(result, minAge=2, maxAge=5, step=.2, minNorm=25, maxNorm=75, stepNorm=1)
+#' plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, stepNorm=1)
+#'
+#'
+#' @import ggplot2
 #' @export
 #' @family plot
 plotDerivative <- function(model,
@@ -1118,10 +1146,14 @@ plotDerivative <- function(model,
     model <- model$model
   }
 
-  if (!model$useAge){
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
+  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
+  if(is_beta_binomial){
+    stop("This function is not applicable for beta-binomial models. Please use the plotDensity function instead.")
   }
 
+  if (!model$useAge){
+    stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
+  }
 
   if (is.null(minAge)) {
     minAge <- model$minA1
@@ -1139,79 +1171,33 @@ plotDerivative <- function(model,
     maxNorm <- model$maxL1
   }
 
-  rowS <- c(seq(minNorm, maxNorm, length.out = 1 + (maxNorm - minNorm) / stepNorm))
-  colS <- c(seq(minAge, maxAge, length.out = 1 + (maxAge - minAge) / stepAge))
+  rowS <- seq(minNorm, maxNorm, by = stepNorm)
+  colS <- seq(minAge, maxAge, by = stepAge)
+
   coeff <- derive(model, order)
   cat(paste0(rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
-  base::print(coeff)
-
-  devFrame <- data.frame(matrix(NA, nrow = length(rowS), ncol = length(colS)))
-  dev2 <- data.frame()
-
-  colnames(devFrame) <- colS
-  rownames(devFrame) <- rowS
-
-  i <- 1
-  while (i <= ncol(devFrame)) {
-    j <- 1
-    while (j <= nrow(devFrame)) {
-      devFrame[j, i] <- predictRaw(rowS[[j]], colS[[i]], coeff)
-      colList <- c(rowS[[j]], colS[[i]], devFrame[j, i])
-      dev2 <- rbind(dev2, colList)
-      j <- j + 1
-    }
-    i <- i + 1
-  }
-  colnames(dev2) <- c("X", "Y", "Z")
-
-  # define range and colors
-  min <- min(dev2$Z)
-  max <- max(dev2$Z)
-  diff <- (max - min) / 10
-  min <- min - diff
-  max <- max + diff
-  step <- (max - min) / 1000
-  regions <- rainbow(1000, end = .8)
-  key <- list(at = seq(min, max, by = step))
-  sequence <- seq(min, max, by = step)
-
-  desc <- "(1st Order Derivative)"
-  if (order == 2) {
-    desc <- "(2nd Order Derivative)"
-  } else if (order == 3) {
-    desc <- "(3rd Order Derivative)"
-  } else if (order > 2) {
-    desc <- paste0(order, "th Order Derivative)")
-  }
+  print(coeff)
 
 
-  if (requireNamespace("latticeExtra", quietly = TRUE)) {
-    p1 <- levelplot(Z ~ Y * X,
-      data = dev2,
-      at = sequence,
-      colorkey = key,
-      region = T,
-      col.regions = regions,
-      panel = panel.2dsmoother,
-      main = paste0("Slope of the Regression Function\n", desc),
-      ylab = "Norm Score",
-      xlab = "Explanatory Variable"
-    )
-  } else {
-    p1 <- levelplot(Z ~ Y * X,
-      data = dev2,
-      at = sequence, region = T,
-      colorkey = key,
-      col.regions = regions,
-      main = paste0("Slope of the Regression Function\n", desc),
-      ylab = "Norm Score",
-      xlab = "Explanatory Variable"
-    )
-  }
-  p2 <- contourplot(Z ~ Y * X, data = dev2)
+  dev2 <- expand.grid(X = rowS, Y = colS)
+  dev2$Z <- mapply(function(norm, age) predictRaw(norm, age, coeff), dev2$X, dev2$Y)
 
-  p3 <- p1 + p2
-  p3
+  desc <- paste0(order, switch(order, "st", "nd", "rd", "th"), " Order Derivative")
+
+  custom_palette <- c("#2D1160", "#3B28B1", "#0C7BDC", "#24C7C7", "#66E64D", "#CFEA44", "#FEFD54")
+
+  p <- ggplot(dev2, aes(x = .data$Y, y = .data$X, z = .data$Z)) +
+    geom_tile(aes(fill = .data$Z)) +
+    geom_contour(color = "white", alpha = 0.5) +
+    scale_fill_gradientn(colors = custom_palette) +
+    labs(title = paste("Slope of the Regression Function - ", desc),
+         x = "Explanatory Variable (Age)",
+         y = "Norm Score",
+         fill = "Derivative") +
+    theme_minimal() +
+    theme(legend.position = "right")
+
+  return(p)
 }
 
 #' General convencience plotting function

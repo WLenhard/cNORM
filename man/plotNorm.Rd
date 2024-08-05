@@ -4,14 +4,26 @@
 \alias{plotNorm}
 \title{Plot manifest and fitted norm scores}
 \usage{
-plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0)
+plotNorm(
+  model,
+  age = NULL,
+  score = NULL,
+  weights = NULL,
+  group = "",
+  minNorm = NULL,
+  maxNorm = NULL,
+  type = 0
+)
 }
 \arguments{
-\item{data}{The raw data within a data.frame or a cnorm object}
+\item{model}{The regression model, usually from the 'cnorm' or 'cnorm.betabinomial' function}
 
-\item{model}{The regression model (optional)}
+\item{age}{In case of beta binomial model, please provide the age vector}
 
-\item{group}{The grouping variable, use empty string for no group}
+\item{score}{In case of beta binomial model, please provide the score vector}
+
+\item{group}{On optional grouping variable, use empty string for no group, the variable name
+for Taylor polynomial models or a vector with the groups for beta binomial models}
 
 \item{minNorm}{lower bound of fitted norm scores}
 
@@ -20,18 +32,28 @@ plotNorm(data, model, group = "", minNorm = NULL, maxNorm = NULL, type = 0)
 \item{type}{Type of display: 0 = plot manifest against fitted values, 1 = plot
 manifest against difference values}
 }
+\value{
+A ggplot object representing the norm scores plot.
+}
 \description{
-The function plots the manifest norm score against the fitted norm score from
+This function plots the manifest norm score against the fitted norm score from
 the inverse regression model per group. This helps to inspect the precision
 of the modeling process. The scores should not deviate too far from
-regression line.
+the regression line. Applicable for Taylor polynomial models.
 }
 \examples{
 # Load example data set, compute model and plot results
 \dontrun{
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotNorm(result, group="group", minNorm=25, maxNorm=75)
+# Taylor polynomial model
+model <- cnorm(raw = elfe$raw, group = elfe$group)
+plotNorm(model, group="group")
+
+# Beta binomial models
+model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+plotNorm(model.bb, age = elfe$group, score = elfe$raw)
+
 }
+
 }
 \seealso{
 Other plot: 

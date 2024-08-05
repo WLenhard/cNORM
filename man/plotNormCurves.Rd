@@ -11,59 +11,54 @@ plotNormCurves(
   maxAge = NULL,
   step = 0.1,
   minRaw = NULL,
-  maxRaw = NULL,
-  covariate = NULL
+  maxRaw = NULL
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function or a cnorm object}
+\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 object.}
 
-\item{normList}{Vector with norm scores to display}
+\item{normList}{Vector with norm scores to display. If NULL, default values are used.}
 
-\item{minAge}{Age to start with checking}
+\item{minAge}{Age to start with checking. If NULL, it's automatically determined from the model.}
 
-\item{maxAge}{Upper end of the age check}
+\item{maxAge}{Upper end of the age check. If NULL, it's automatically determined from the model.}
 
-\item{step}{Stepping parameter for the age check, usually 1 or 0.1; lower
-scores indicate higher precision / closer checks}
+\item{step}{Stepping parameter for the age check, usually 1 or 0.1; lower scores indicate higher precision.}
 
-\item{minRaw}{Lower end of the raw score range, used for clipping implausible results
-(default = 0)}
+\item{minRaw}{Lower end of the raw score range, used for clipping implausible results. If NULL, it's automatically determined from the model.}
 
-\item{maxRaw}{Upper end of the raw score range, used for clipping implausible results}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
+\item{maxRaw}{Upper end of the raw score range, used for clipping implausible results. If NULL, it's automatically determined from the model.}
+}
+\value{
+A ggplot object representing the norm curves.
 }
 \description{
-The function plots the norm curves based on the regression model.
-Please check the function for inconsistent curves: The different
-curves should not intersect. Violations of this assumption are a strong
-indication for violations of model assumptions in modeling the relationship between raw
-and norm scores. There are several reasons, why this might occur:
-\enumerate{
-  \item Vertical extrapolation: Choosing extreme norm scores, e. g. scores
-  -3 <= x and x >= 3 In order to model these extreme scores, a large sample
-  dataset is necessary.
-  \item Horizontal extrapolation: Taylor polynomials converge in a certain
-  radius. Using the model scores outside the original dataset may
-  lead to inconsistent results.
-  \item The data cannot be modeled with Taylor polynomials, or you need
-  another power parameter (k) or R2 for the model.
- }
-In general, extrapolation (point 1 and 2) can carefully be done to a
-certain degree outside the original sample, but it should in general
-be handled with caution.
-checkConsistency and derivationPlot can be used to further inspect the model.
+This function plots the norm curves based on the regression model. It supports both
+Taylor polynomial models and beta-binomial models.
+}
+\details{
+Please check the function for inconsistent curves: The different curves should not intersect.
+Violations of this assumption are a strong indication of violations of model assumptions in
+modeling the relationship between raw and norm scores.
+
+Common reasons for inconsistencies include:
+1. Vertical extrapolation: Choosing extreme norm scores (e.g., scores <= -3 or >= 3).
+2. Horizontal extrapolation: Using the model scores outside the original dataset.
+3. The data cannot be modeled with the current approach, or you need another power parameter (k) or R2 for the model.
 }
 \examples{
-# Load example data set, compute model and plot results
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
+\dontrun{
+# For Taylor continuous norming model
+m <- cnorm(raw = ppvt$raw, group = ppvt$group)
 plotNormCurves(m, minAge=2, maxAge=5)
+
+# For beta-binomial model
+bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
+plotNormCurves(bb_model)
+}
 }
 \seealso{
-checkConsistency, derivationPlot, plotPercentiles
+\code{\link{checkConsistency}}, \code{\link{plotDerivative}}, \code{\link{plotPercentiles}}
 
 Other plot: 
 \code{\link{plot.cnorm}()},
