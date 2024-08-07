@@ -33,14 +33,14 @@ The package estimates percentile curves in dependence of the explanatory variabl
 *   For post-stratification of non-representative samples, cNORM draws on iterative proportional fitting (raking) to approximate representativeness. Please consult the 'WeightedRegression' vignette for further information.
 
 The rationale of the approach is to rank the results in the different age cohorts (or use a sliding window in case the data is distributed over a large age interval) and thus to determine the observed norm scores (= location). Afterwards, powers of the age specific location and of the age are computed, as well as all linear interactions. Thus, we model the raw score $r$ as a function of the location $l$ and age $a$ and their interactions by a Taylor polynomial:
-$$f(r) = \sum_{k=0}^k \sum_{t=0}^t \beta_{k,t} \cdot l^k \cdot a^t$$
+$$f(r) = \sum_{k=0}^K \sum_{t=0}^T \beta_{k,t} \cdot l^k \cdot a^t$$
 
 Where:
 
 - $f(r)$ is the function of the raw score $r$
 - $\beta_{k,t}$ is the coefficient for the k-th power of location and t-th power of age
-- $k$ is the maximum power for location
-- $t$ is the maximum power for age
+- $K$ is the maximum power for location
+- $T$ is the maximum power for age
 
 
 Finally, the data is fitted by a hyperplane via multiple regression and the most relevant terms are identified:
