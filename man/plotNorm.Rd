@@ -8,8 +8,9 @@ plotNorm(
   model,
   age = NULL,
   score = NULL,
+  width = NULL,
   weights = NULL,
-  group = "",
+  group = FALSE,
   minNorm = NULL,
   maxNorm = NULL,
   type = 0
@@ -21,6 +22,12 @@ plotNorm(
 \item{age}{In case of beta binomial model, please provide the age vector}
 
 \item{score}{In case of beta binomial model, please provide the score vector}
+
+\item{width}{In case of beta binomial model, please provide the width for the sliding window.
+If null, the function tries to determine a sensible setting.}
+
+\item{weights}{Vector or variable name in the dataset with weights for each
+individual case. If NULL, no weights are used.}
 
 \item{group}{On optional grouping variable, use empty string for no group, the variable name
 for Taylor polynomial models or a vector with the groups for beta binomial models}
@@ -46,7 +53,7 @@ the regression line. Applicable for Taylor polynomial models.
 \dontrun{
 # Taylor polynomial model
 model <- cnorm(raw = elfe$raw, group = elfe$group)
-plotNorm(model, group="group")
+plot(model, "norm")
 
 # Beta binomial models
 model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)

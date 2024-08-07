@@ -11,9 +11,9 @@ plotSubset(model, type = 0)
 
 \item{type}{Integer specifying the type of plot to generate:
 \itemize{
-  \item 0: Adjusted R² by number of predictors (default)
-  \item 1: Log-transformed Mallow's Cp by adjusted R²
-  \item 2: Bayesian Information Criterion (BIC) by adjusted R²
+  \item 0: Adjusted R2 by number of predictors (default)
+  \item 1: Log-transformed Mallow's Cp by adjusted R2
+  \item 2: Bayesian Information Criterion (BIC) by adjusted R2
   \item 3: Root Mean Square Error (RMSE) by number of predictors
   \item 4: Residual Sum of Squares (RSS) by number of predictors
   \item 5: F-test statistic for consecutive models by number of predictors
@@ -41,7 +41,7 @@ The function generates different plots to help in model selection:
 - For type 6 (p-values), values below the significance level (typically 0.05)
   suggest significant improvement with added predictors.
 
-The R² cutoff specified in the bestModel function is displayed as a dashed line
+The R2 cutoff specified in the bestModel function is displayed as a dashed line
 where applicable.
 }
 \note{

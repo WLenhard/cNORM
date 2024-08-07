@@ -4,15 +4,12 @@
 \alias{derive}
 \title{Derivative of regression model}
 \usage{
-derive(model, order = 1, covariate = NULL)
+derive(model, order = 1)
 }
 \arguments{
 \item{model}{The regression model or a cnorm object}
 
 \item{order}{The degree of the derivate, default: 1}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 }
 \value{
 The derived coefficients
@@ -24,8 +21,7 @@ distribution features as f. e. bottom and ceiling effects, non-progressive norm 
 age group or in general #' intersecting percentile curves.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(normData)
+m <- cnorm(raw = elfe$raw, group = elfe$group)
 derivedCoefficients <- derive(m)
 }
 \seealso{

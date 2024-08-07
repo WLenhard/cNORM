@@ -155,7 +155,7 @@ shinyServer(function(input, output, session) {
 
       output <- readChar("www/introduction.html", file.info("www/introduction.html")$size)
       #output <- textreadr::read_html(file = "www/introduction.html")
-      includeHTML("www/introduction.html")
+      suppressWarnings(includeHTML("www/introduction.html"))
     }
     else{
       return(NULL)
@@ -389,7 +389,7 @@ shinyServer(function(input, output, session) {
     # data <- currentFile()
     # attr(data, "descend") <- chosenDescend()
 
-    cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
+    cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
                              group = chosenGrouping(),
                              minAge = MIN_AGE,
                              maxAge = MAX_AGE)
@@ -398,7 +398,7 @@ shinyServer(function(input, output, session) {
 
   valuesPlot <- eventReactive(input$CalcBestModel, {
 
-    cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
+    cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = chosenGrouping(), raw = chosenRaw())
   })
 
   normScorePlot <- eventReactive(c(input$grouping, input$differences, input$normScoreButton), {
@@ -407,9 +407,9 @@ shinyServer(function(input, output, session) {
       type <- 1
 
     if(input$grouping){
-      cNORM::plotNorm(preparedData(), bestModel(), group = bestModel()$group, type = type)
+      cNORM::plotNorm(buildCnormObject(preparedData(), bestModel()), group = T, type = type)
     }else{
-      cNORM::plotNorm(preparedData(), bestModel(), type = type)
+      cNORM::plotNorm(buildCnormObject(preparedData(), bestModel()), type = type)
     }
   })
 
@@ -433,9 +433,9 @@ shinyServer(function(input, output, session) {
       type <- 1
 
     if(input$grouping1){
-      cNORM::plotRaw(preparedData(), bestModel(), group = bestModel()$group, type = type)
+      cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = bestModel()$group, type = type)
     }else{
-      cNORM::plotRaw(preparedData(), bestModel(), type = type)
+      cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), type = type)
     }
   })
 
@@ -504,7 +504,7 @@ shinyServer(function(input, output, session) {
 
   output$Series <- renderPlot({
 
-    return(cNORM::plotPercentileSeries(preparedData(), bestModel(), start = input$terms, end = input$terms))
+    return(cNORM::plotPercentileSeries(buildCnormObject(preparedData(), bestModel()), start = input$terms, end = input$terms))
 
   })
 
@@ -586,7 +586,7 @@ shinyServer(function(input, output, session) {
     percentileList <- chosenPercentilesForPercentiles()
 
     if(is.null(percentileList)){
-      cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
+      cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
                              group = chosenGrouping(),
                              minAge = MIN_AGE,
                              maxAge = MAX_AGE)
@@ -594,7 +594,7 @@ shinyServer(function(input, output, session) {
     else{
       percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForPercentiles(), "\\, |\\,| ")))/100
 
-      cNORM::plotPercentiles(preparedData(), bestModel(), raw = chosenRaw(),
+      cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
                              group = chosenGrouping(),
                              minAge = MIN_AGE,
                              maxAge = MAX_AGE,
@@ -813,7 +813,7 @@ shinyServer(function(input, output, session) {
   # Generates and plots modelled against actual data values
   output$PlotValues <- renderPlot({
 
-    cNORM::plotRaw(preparedData(), bestModel(), group = chosenGrouping(), raw = chosenRaw())
+    cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = chosenGrouping(), raw = chosenRaw())
   })
 
   # Generates and plots contour plot of first derivation

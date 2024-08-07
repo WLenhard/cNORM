@@ -86,16 +86,6 @@ cnorm.cv(result$data, min = 2, max = 9, repetitions = 3)
 
 # Using a cnorm object examines the predefined formula.
 cnorm.cv(result, repetitions = 1)
-
-# For cross-validation without a cnorm model, rank data first and compute powers:
-data <- rankByGroup(data = elfe, raw = "raw", group = "group")
-data <- computePowers(data)
-cnorm.cv(data)
-
-# Specify formulas deliberately:
-data <- rankByGroup(data = elfe, raw = "raw", group = "group")
-data <- computePowers(data)
-cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
 }
 
 }

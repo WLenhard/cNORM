@@ -4,30 +4,20 @@
 \alias{predictRaw}
 \title{Predict single raw value}
 \usage{
-predictRaw(
-  norm,
-  age,
-  coefficients,
-  minRaw = -Inf,
-  maxRaw = Inf,
-  covariate = NULL
-)
+predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf)
 }
 \arguments{
 \item{norm}{The norm score, e. g. a specific T score or a vector of scores}
 
 \item{age}{The age value or a vector of scores}
 
-\item{coefficients}{The coefficients from the regression model or a cnorm model}
+\item{coefficients}{The a cnorm object or the coefficients from the regression model}
 
 \item{minRaw}{Minimum score for the results; can be used for clipping unrealistic outcomes,
 usually set to the lower bound of the range of values of the test (default: 0)}
 
 \item{maxRaw}{Maximum score for the results; can be used for clipping unrealistic outcomes
 usually set to the upper bound of the range of values of the test}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 }
 \value{
 the predicted raw score or a data.frame of scores in case, lists of norm scores or age is used
@@ -44,19 +34,12 @@ You than have to provide a prepared data frame with the according input variable
 }
 \examples{
 # Prediction of single scores
-normData <- prepareData(elfe)
-m <- bestModel(data = normData)
-predictRaw(35, 3.5, m$coefficients)
+model <- cnorm(raw = elfe$raw, group = elfe$group)
+predictRaw(35, 3.5, model)
 
-# using a cnorm object
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-predictRaw(35, 3.5, result)
+#' or use vectors, here you will get a data.frame
+predictRaw(c(35, 40, 45), c(2, 2.5, 3), model)
 
-# Fitting complete data sets
-fitted.values <- predict(m)
-
-# break up contribution of each predictor variable
-fitted.partial <- predict(m, type = "terms")
 }
 \seealso{
 Other predict: 

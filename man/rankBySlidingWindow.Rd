@@ -2,7 +2,7 @@
 % Please edit documentation in R/preparation.R
 \name{rankBySlidingWindow}
 \alias{rankBySlidingWindow}
-\title{Determine the norm scores of the participants by sliding window (experimental)}
+\title{Determine the norm scores of the participants by sliding window}
 \usage{
 rankBySlidingWindow(
   data = NULL,
@@ -16,7 +16,6 @@ rankBySlidingWindow(
   descriptives = TRUE,
   nGroup = 0,
   group = NA,
-  covariate = NULL,
   na.rm = TRUE,
   silent = FALSE
 )
@@ -60,10 +59,6 @@ overwrites it.}
 \item{group}{Optional parameter for providing the name of the grouping variable (if present; overwritten
 if ngroups is used)}
 
-\item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
-either by specifying the variable name or including the variable itself. BEWARE!
-Not all subsequent functions are already prepared for it.  It is an experimental feature.}
-
 \item{na.rm}{remove values, where the percentiles could not be estimated,
 most likely happens in the context of weighting}
 
@@ -101,6 +96,10 @@ covariates can lead to unstable modeling solutions. The question, if it is reall
 reasonable to include covariates when norming a test is a decision beyond the pure data
 modeling. Please use with care or alternatively split the dataset into the two groups
 beforehand and model them separately.
+
+The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+through other functions like \code{cnorm}.
 }
 
 \examples{

@@ -13,6 +13,10 @@ if(!require(cNORM)){
   require(cNORM)
 }
 
+if(!require(DT)){
+  install.packages("DT")
+  require(cNORM)
+}
 title <- "cNORM-Shiny"
 
 # Define UI for cNORM-Application
@@ -38,7 +42,7 @@ shinyUI(fluidPage(
         tags$li("'ppvt' uses data from the Peabody Picture Vocabulary Test (Revision IV) ranging from age 2.5 to 17.5 with raw scores from 0 to 228"),
         tags$li("'CDC' is a data collection of BMI, weight and growth development from 2 to 18; large sample based on epidemiological studies of the Center of Disease Control (CDC)"))
       ),
-      mainPanel(htmlOutput("introduction"), dataTableOutput("table"))
+      mainPanel(htmlOutput("introduction"), DT::DTOutput("table"))
     )),
 
     # Panel for Data Preparation (choosing and visualizing)
@@ -99,7 +103,7 @@ shinyUI(fluidPage(
           )
         ),
         # Main panel for showing prepared data
-        mainPanel(withSpinner(dataTableOutput("preparedData"), type = 5))
+        mainPanel(withSpinner(DT::DTOutput("preparedData"), type = 5))
       )
     ),
 
@@ -150,7 +154,7 @@ shinyUI(fluidPage(
 
           withSpinner(plotOutput("PlotWL", width = "100%", height = "600px"), type = 5),
           tags$br(),
-          withSpinner(dataTableOutput("PrintSubset"), type = 5),
+          withSpinner(DT::DTOutput("PrintSubset"), type = 5),
           tags$br()
           )
       )
@@ -183,7 +187,7 @@ shinyUI(fluidPage(
         mainPanel(
           withSpinner(plotOutput("PlotCV", width = "100%", height = "800px"), type = 5),
           tags$br(),
-          withSpinner(dataTableOutput("TableCV"), type = 5)
+          withSpinner(DT::DTOutput("TableCV"), type = 5)
         )
       )
     )
@@ -281,8 +285,8 @@ shinyUI(fluidPage(
       "Prediction",
       tabPanel("Norm value prediction", sidebarLayout(sidebarPanel(tags$h3("Prediction of singel norm values"), uiOutput("InputNormValue")), mainPanel(verbatimTextOutput("NormValue")))),
       tabPanel("Raw value prediction", sidebarLayout(sidebarPanel(tags$h3("Prediction of single raw values"), uiOutput("InputRawValue")), mainPanel(verbatimTextOutput("RawValue")))),
-      tabPanel("Norm table", sidebarLayout(sidebarPanel(tags$h3("Norm table compilation"), uiOutput("InputNormTable")), mainPanel(dataTableOutput("NormTable")))),
-      tabPanel("Raw table", sidebarLayout(sidebarPanel(tags$h3("Raw table compilation"), uiOutput("InputRawTable")), mainPanel(dataTableOutput("RawTable"))))
+      tabPanel("Norm table", sidebarLayout(sidebarPanel(tags$h3("Norm table compilation"), uiOutput("InputNormTable")), mainPanel(DT::DTOutput("NormTable")))),
+      tabPanel("Raw table", sidebarLayout(sidebarPanel(tags$h3("Raw table compilation"), uiOutput("InputRawTable")), mainPanel(DT::DTOutput("RawTable"))))
     )
   )
 ))

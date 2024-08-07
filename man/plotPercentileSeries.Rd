@@ -5,20 +5,16 @@
 \title{Generates a series of plots with number curves by percentile for different models}
 \usage{
 plotPercentileSeries(
-  data,
   model,
   start = 1,
   end = NULL,
   group = NULL,
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
-  type = 7,
   filename = NULL
 )
 }
 \arguments{
-\item{data}{The raw data including the percentiles and norm scores or a cnorm object}
-
-\item{model}{The model from the bestModel function (optional)}
+\item{model}{The Taylor polynomial regression model object from the cNORM}
 
 \item{start}{Number of predictors to start with}
 
@@ -28,9 +24,6 @@ plotPercentileSeries(
 determined}
 
 \item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
-
-\item{type}{The type parameter of the quantile function to estimate the percentiles
-of the raw data (default 7)}
 
 \item{filename}{Prefix of the filename. If specified, the plots are saves as
 png files in the directory of the workspace, instead of displaying them}

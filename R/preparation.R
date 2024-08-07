@@ -29,6 +29,11 @@
 #' The function ranks the data within groups, computes norm values, powers of the norm
 #' scores and interactions. Afterwards, you can use these preprocessed data to
 #' determine the best fitting model.
+#'
+#' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+#' through other functions like \code{cnorm}.
+#'
 #' @param data data.frame with a grouping variable named 'group' and a raw score variable
 #' named 'raw'.
 #' @param group grouping variable in the data, e. g. age groups, grades ...
@@ -172,6 +177,10 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' modeling. Please use with care or alternatively split the dataset into the two groups
 #' beforehand and model them separately.
 #'
+#' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+#' through other functions like \code{cnorm}.
+#'
 #' @param data data.frame with norm sample data. If no data.frame is provided, the raw score
 #' and group vectors are directly used
 #' @param group name of the grouping variable (default 'group') or numeric vector, e. g. grade, setting
@@ -193,9 +202,6 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' performance
 #' @param descriptives If set to TRUE (default), information in n, mean, median and
 #' standard deviation per group is added to each observation
-#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
-#' either by specifying the variable name or including the variable itself. BEWARE!
-#' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
 #' @param silent set to TRUE to suppress messages
@@ -226,12 +232,9 @@ rankByGroup <-
            scale = "T",
            descend = FALSE,
            descriptives = TRUE,
-           covariate = NULL,
            na.rm = TRUE,
            silent = FALSE) {
 
-    # experimental code to include covariates
-    # covariate <- NULL
 
     if(is.null(data)){
       d <- data.frame(raw=raw)
@@ -291,30 +294,12 @@ rankByGroup <-
 
     }
 
-    if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
-      d$COV <- covariate
-      covariate <- "COV"
-    }else if (!is.null(covariate)&&!is.numeric(covariate)) {
-      d$COV <- d[, covariate]
-      covariate <- "COV"
-    }
-
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
       if(!silent)
         cat("Missing values found in grouping or raw score variable... excluding from dataset\n")
 
       d <- d[!is.na(d[, group]), ]
       d <- d[!is.na(d[, raw]), ]
-    }
-
-    if (!is.null(covariate)) {
-      attr(d, "covariate") <- covariate
-      degrees <- length(unique(d[, covariate]))
-      if (degrees > 2) {
-        stop(paste0("Covariate has to be binary. Currently, there are ", degrees, " degrees."))
-      }
-    }else{
-      attr(d, "covariate") <- NULL
     }
 
     # check if columns exist
@@ -348,7 +333,6 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-    if (is.null(covariate)) {
       if (typeof(group) == "logical" && !group) {
         cat("No grouping variable specified. Ranking without grouping ...")
         d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
@@ -379,58 +363,7 @@ rankByGroup <-
           })
         }
       }
-    } else {
-      variance <- cor(d$raw, d$COV)^2
-      if(variance < .1 & !silent){
-        warning(paste0("The covariate explains only a share of ", round(variance, digits = 4) ," of the variance of the raw score variable. This share is likely not relevant enough to be included in the modeling."))
-      }
 
-      if(!silent)
-        warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
-
-      if (typeof(group) == "logical" && !group) {
-        cat("No grouping variable specified. Ranking without grouping ...")
-        d$percentile <- ave(d[, raw], d[, covariate], FUN = function(x) {
-          (weighted.rank(sign * x, weights = weighting) + numerator[method]) / (length(x) + denominator[method])
-        })
-
-        if (descriptives) {
-          d$n <- ave(d[, raw], d[, covariate], FUN = function(x) {
-            length(x)
-          })
-          d$m <- ave(d[, raw], d[, covariate], FUN = function(x) {
-            mean(x)
-          })
-          d$md <- ave(d[, raw], d[, covariate], FUN = function(x) {
-            median(x)
-          })
-          d$sd <- ave(d[, raw], d[, covariate], FUN = function(x) {
-            sd(x)
-          })
-        }
-      } else {
-        # TODO weighting and covariates. Switch to unlist(by(..))
-        warning("Currently, it is not possible to use both covariates and weights. Ignoring weights in ranking.")
-        d$percentile <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-          (rank(sign * x) + numerator[method]) / (length(x) + denominator[method])
-        })
-
-        if (descriptives) {
-          d$n <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            length(x)
-          })
-          d$m <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            mean(x)
-          })
-          d$md <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            median(x)
-          })
-          d$sd <- ave(d[, raw], d[, group], d[, covariate], FUN = function(x) {
-            sd(x)
-          })
-        }
-      }
-    }
 
     scaleM <- NA
     scaleSD <- NA
@@ -492,7 +425,7 @@ rankByGroup <-
 
 
 
-#' Determine the norm scores of the participants by sliding window (experimental)
+#' Determine the norm scores of the participants by sliding window
 #'
 #' The function retrieves all individuals in the predefined age range (x +/- width/2)
 #' around each case and ranks that individual based on this individually drawn sample.
@@ -521,6 +454,10 @@ rankByGroup <-
 #' modeling. Please use with care or alternatively split the dataset into the two groups
 #' beforehand and model them separately.
 #'
+#' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+#' through other functions like \code{cnorm}.
+#'
 #' @param data data.frame with norm sample data
 #' @param age the continuous age variable. Setting 'age' to FALSE inhibits computation of
 #' powers of age and the interactions
@@ -548,9 +485,6 @@ rankByGroup <-
 #' overwrites it.
 #' @param group Optional parameter for providing the name of the grouping variable (if present; overwritten
 #' if ngroups is used)
-#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
-#' either by specifying the variable name or including the variable itself. BEWARE!
-#' Not all subsequent functions are already prepared for it.  It is an experimental feature.
 #' @param na.rm remove values, where the percentiles could not be estimated,
 #' most likely happens in the context of weighting
 #' @param silent set to TRUE to suppress messages
@@ -580,7 +514,6 @@ rankBySlidingWindow <- function(data = NULL,
                                 descriptives = TRUE,
                                 nGroup = 0,
                                 group = NA,
-                                covariate = NULL,
                                 na.rm = TRUE,
                                 silent = FALSE) {
 
@@ -632,17 +565,6 @@ rankBySlidingWindow <- function(data = NULL,
     }
   }
 
-  if (is.numeric(covariate) && (length(covariate) == nrow(d))) {
-    d$COV <- covariate
-    covariate <- "COV"
-
-    if(!silent)
-      warning("Using covariates is an EXPERIMENTAL feature in this package currently.")
-  }else if (!is.null(covariate)&&!is.numeric(covariate)) {
-    d$COV <- d[, covariate]
-    covariate <- "COV"
-  }
-
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
     if(!silent)
       cat("Missing values found in raw score or age variable... excluding from dataset\n")
@@ -666,15 +588,6 @@ rankBySlidingWindow <- function(data = NULL,
 
   if (!is.numeric(d[, raw]) & !silent) {
     warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
-  }
-
-  useCov <- !is.null(covariate)
-  if (useCov) {
-    attr(d, "covariate") <- covariate
-    degrees <- unique(d[, covariate])
-    if (length(degrees) > 2) {
-      stop(paste0("Covariate has to be binary. Currently, there are ", length(degrees), " degrees."))
-    }
   }
 
   # define Q-Q-plot algorithm, use rankit as standard
@@ -715,11 +628,8 @@ rankBySlidingWindow <- function(data = NULL,
       maxAge <- MAX.AGE
     }
 
-    if(useCov){
-      observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge & d[, covariate] == d[i, covariate]), ]
-    }else{
-      observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
-    }
+
+    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
     nObs <- nrow(observations)
 
     sign <- 1
@@ -825,6 +735,10 @@ rankBySlidingWindow <- function(data = NULL,
 #' you do not need to use a normal rank transformed scale like T r IQ, but you can
 #' as well use the percentiles for the 'normValue' as well.
 #'
+#' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+#' through other functions like \code{cnorm}.
+#'
 #' @param data data.frame with the norm data
 #' @param k degree
 #' @param norm the variable containing the norm data in the data.frame; might be
@@ -836,11 +750,6 @@ rankBySlidingWindow <- function(data = NULL,
 #' most common field of application.
 #' @param t the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
 #' can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k
-#' @param covariate Include a binary covariate into the preparation and subsequently modeling,
-#' either by specifying the variable name or including the variable itself. If this has already
-#' been done in the ranking, the function uses the according variable. BEWARE!
-#' Not all subsequent functions are already prepared for it. It is an experimental feature and
-#' may lead to unstable models subsequently.
 #' @param silent set to TRUE to suppress messages
 #' @return data.frame with the powers and interactions of location and explanatory variable / age
 #' @seealso bestModel
@@ -860,7 +769,6 @@ computePowers <-
            norm = NULL,
            age = NULL,
            t = 3,
-           covariate = NULL,
            silent = FALSE) {
     d <- as.data.frame(data)
 
@@ -937,19 +845,6 @@ computePowers <-
       for(i in 1:k){
         d[paste0("L", i)] <- L1^i
       }
-    }
-
-    # add linear effects of covariate
-    if (is.null(covariate)) {
-      covariate <- attr(d, "covariate")
-    }
-
-    if (!is.null(covariate)) {
-      COV <- as.numeric(d[[covariate]])
-      d$COV <- COV
-      d$L1COV <- d$L1 * COV
-      d$A1COV <- d$A1 * COV
-      d$L1A1COV <- d$L1 * d$A1 * COV
     }
 
     # attributes

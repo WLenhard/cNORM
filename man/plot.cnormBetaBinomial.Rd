@@ -25,6 +25,17 @@ A ggplot object.
 This function creates a visualization of a fitted cnormBetaBinomial model,
 including the original data points manifest percentiles and specified percentile lines.
 }
+\examples{
+
+\dontrun{
+# Computing beta binomial models already displays plot
+model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+
+# Without data points
+plot(model.bb, age = elfe$group, score = elfe$raw, weights=NULL, points=FALSE)
+
+}
+}
 \seealso{
 Other plot: 
 \code{\link{plot.cnorm}()},

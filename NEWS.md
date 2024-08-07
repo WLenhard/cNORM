@@ -13,6 +13,11 @@ Changes:
 *    Fixed input validation in getNormScoreSE    
 *    Started intensive work on regularization in Taylor models (planned for v4.0)
 *    Vignette on modelling with beta binomial distribution
+*    Transition from lattice to ggplot2
+*    Code on covariates removed from the complete package
+*    cNORM-Demo vignette revised
+*    'buildCnormObject' function added to help with compatibility
+*    cNORM.GUI() updated
 
 
 

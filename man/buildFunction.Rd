@@ -4,7 +4,7 @@
 \alias{buildFunction}
 \title{Build regression function for bestModel}
 \usage{
-buildFunction(raw, k, t, age, covariates)
+buildFunction(raw, k, t, age)
 }
 \arguments{
 \item{raw}{name of the raw score variable}
@@ -14,11 +14,9 @@ buildFunction(raw, k, t, age, covariates)
 \item{t}{the power degree for age}
 
 \item{age}{use age}
-
-\item{covariates}{use covariates}
 }
 \value{
-reression function
+regression function
 }
 \description{
 Build regression function for bestModel

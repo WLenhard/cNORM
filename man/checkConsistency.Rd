@@ -15,8 +15,7 @@ checkConsistency(
   stepAge = 1,
   stepNorm = 1,
   warn = FALSE,
-  silent = FALSE,
-  covariate = NULL
+  silent = FALSE
 )
 }
 \arguments{
@@ -45,9 +44,6 @@ used. With T scores a stepping parameter of 1 is suitable}
 are displayed (default = FALSE)}
 
 \item{silent}{turn off messages}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 }
 \value{
 Boolean, indicating model violations (TRUE) or no problems (FALSE)

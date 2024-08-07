@@ -13,7 +13,6 @@ rankByGroup(
   scale = "T",
   descend = FALSE,
   descriptives = TRUE,
-  covariate = NULL,
   na.rm = TRUE,
   silent = FALSE
 )
@@ -48,10 +47,6 @@ performance}
 \item{descriptives}{If set to TRUE (default), information in n, mean, median and
 standard deviation per group is added to each observation}
 
-\item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
-either by specifying the variable name or including the variable itself. BEWARE!
-Not all subsequent functions are already prepared for it.  It is an experimental feature.}
-
 \item{na.rm}{remove values, where the percentiles could not be estimated,
 most likely happens in the context of weighting}
 
@@ -81,6 +76,10 @@ covariates can lead to unstable modeling solutions. The question, if it is reall
 reasonable to include covariates when norming a test is a decision beyond the pure data
 modeling. Please use with care or alternatively split the dataset into the two groups
 beforehand and model them separately.
+
+The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+through other functions like \code{cnorm}.
 }
 
 \examples{

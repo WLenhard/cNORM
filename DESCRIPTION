@@ -33,16 +33,15 @@ Description: Conventional methods for producing standard scores or percentiles
 Depends:
     R (>= 4.0.0)
 Imports:
-    lattice (>= 0.21),
-    leaps (>= 3.1), latticeExtra (>= 0.6),
-    ggplot2 (>= 3.5.1),
-    rlang
+    leaps (>= 3.1),
+    ggplot2 (>= 3.5.1)
 Suggests: 
     knitr,
     shiny,
     foreign,
     readxl,
     rmarkdown,
+    DT,
     testthat
 License: AGPL-3
 VignetteBuilder: knitr

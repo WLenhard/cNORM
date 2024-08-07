@@ -5,15 +5,7 @@
 \title{Compute powers of the explanatory variable a as well as of the person
 location l (data preparation)}
 \usage{
-computePowers(
-  data,
-  k = 5,
-  norm = NULL,
-  age = NULL,
-  t = 3,
-  covariate = NULL,
-  silent = FALSE
-)
+computePowers(data, k = 5, norm = NULL, age = NULL, t = 3, silent = FALSE)
 }
 \arguments{
 \item{data}{data.frame with the norm data}
@@ -32,12 +24,6 @@ most common field of application.}
 \item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
 can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k}
 
-\item{covariate}{Include a binary covariate into the preparation and subsequently modeling,
-either by specifying the variable name or including the variable itself. If this has already
-been done in the ranking, the function uses the according variable. BEWARE!
-Not all subsequent functions are already prepared for it. It is an experimental feature and
-may lead to unstable models subsequently.}
-
 \item{silent}{set to TRUE to suppress messages}
 }
 \value{
@@ -55,6 +41,11 @@ k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1
 and L2A2 (but k = 2 is usually not sufficient for the modeling). Please note, that
 you do not need to use a normal rank transformed scale like T r IQ, but you can
 as well use the percentiles for the 'normValue' as well.
+}
+\details{
+The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+through other functions like \code{cnorm}.
 }
 \examples{
 # Dataset with grade levels as grouping

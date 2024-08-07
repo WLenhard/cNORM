@@ -11,6 +11,8 @@ plotRaw(model, group = FALSE, raw = NULL, type = 0)
 
 \item{group}{Should the fit be displayed by group?}
 
+\item{raw}{Vector of the observed raw data}
+
 \item{type}{Type of display: 0 = plot manifest against fitted values, 1 = plot
 manifest against difference values}
 }

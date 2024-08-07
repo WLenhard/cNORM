@@ -12,7 +12,6 @@ rawTable(
   minNorm = NULL,
   maxNorm = NULL,
   step = 1,
-  covariate = NULL,
   monotonuous = TRUE,
   CI = 0.9,
   reliability = NULL,
@@ -33,9 +32,6 @@ rawTable(
 \item{maxNorm}{Clipping parameter for the upper bound of norm scores (default 25)}
 
 \item{step}{Stepping parameter for the raw scores (default 1)}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
 

@@ -430,3 +430,29 @@ simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
   legend("bottomright", legend = c("Real percentile", "Weighted", "Unweighted"), col = c("black", "blue", "red"), pch = 19)
 
 }
+
+#' Build cnorm object from data and bestModle model object
+#'
+#' Helper function to build a cnorm object from a data object and
+#' a model object from the bestModel function for compatibility reasons.
+#'
+#'
+#' @param data A data object from 'prepareData', or from 'rankByGroup' and
+#'             'computePower'
+#' @param model Object obtained from the bestModel function
+#'
+#' @return A cnorm object
+#'
+#' @examples
+#' \dontrun{
+#'   data <- prepareData(elfe)
+#'   model <- bestModel(data, k = 4)
+#'   model.cnorm <- buildCnormObject(data, model)
+#' }
+#'
+#' @export
+buildCnormObject <- function(data, model){
+  result <- list(data = data, model = model)
+  class(result) <- "cnorm"
+  return(result)
+}

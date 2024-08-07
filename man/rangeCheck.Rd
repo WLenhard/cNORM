@@ -38,8 +38,7 @@ the original range) or vertically (extreme norm scores) might lead to inconsiste
 results. The function generates a message, indicating extrapolation and the range of the original data.
 }
 \examples{
-normData <- prepareData(elfe)
-m <- bestModel(normData)
+m <- cnorm(raw = elfe$raw, group = elfe$group)
 rangeCheck(m)
 }
 \seealso{

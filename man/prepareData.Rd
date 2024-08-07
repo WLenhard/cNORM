@@ -64,6 +64,11 @@ The function ranks the data within groups, computes norm values, powers of the n
 scores and interactions. Afterwards, you can use these preprocessed data to
 determine the best fitting model.
 }
+\details{
+The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+through other functions like \code{cnorm}.
+}
 \examples{
 # conducts ranking and computation of powers and interactions with the 'elfe' dataset
 data.elfe <- prepareData(elfe)

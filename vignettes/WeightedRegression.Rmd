@@ -1,10 +1,10 @@
 ---
-title: "Weighted regression-based norming"
+title: "Weighted Regression-Based Norming"
 author: "Sebastian Gary, Wolfgang Lenhard, Alexandra Lenhard"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{"Weighted regression-based norming"}
+  %\VignetteIndexEntry{Weighted Regression-Based Norming}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+
+library(cNORM)
+library(ggplot2)
 ```
 
 ## Enhancing Representativeness with Weighted Regression-Based Norming in cNORM

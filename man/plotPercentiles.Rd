@@ -5,7 +5,6 @@
 \title{Plot norm curves against actual percentiles}
 \usage{
 plotPercentiles(
-  data,
   model,
   minRaw = NULL,
   maxRaw = NULL,
@@ -15,15 +14,11 @@ plotPercentiles(
   group = NULL,
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
   scale = NULL,
-  type = 7,
-  title = NULL,
-  covariate = NULL
+  title = NULL
 )
 }
 \arguments{
-\item{data}{The raw data including the percentiles and norm scores or a cnorm object}
-
-\item{model}{The model from the bestModel function (optional)}
+\item{model}{The Taylor polynomial regression model object from the cNORM}
 
 \item{minRaw}{Lower bound of the raw score (default = 0)}
 
@@ -45,13 +40,7 @@ self defined with a double vector with the mean and standard deviation,
 f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
 data preparation is used (default)}
 
-\item{type}{The type parameter of the quantile function to estimate the percentiles
-of the raw data (default 7)}
-
 \item{title}{custom title for plot}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here. If no covariate is specified, both degrees will be plotted.}
 }
 \description{
 The function plots the norm curves based on the regression model against
@@ -66,10 +55,9 @@ be handled with caution.
 The original percentiles are displayed as distinct points in the according
 color, the model based projection of percentiles are drawn as lines.
 Please note, that the estimation of the percentiles of the raw data is done with
-the quantile function with the default settings. Please consult help(quantile)
-and change the 'type' parameter accordingly.
+the quantile function with the default settings.
 In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
-parameter in modeling.
+and/or 't' parameter in modeling.
 }
 \examples{
 # Load example data set, compute model and plot results

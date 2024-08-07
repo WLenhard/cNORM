@@ -4,14 +4,7 @@
 \alias{derivationTable}
 \title{Create a table based on first order derivative of the regression model for specific age}
 \usage{
-derivationTable(
-  A,
-  model,
-  minNorm = NULL,
-  maxNorm = NULL,
-  step = 0.1,
-  covariate = NULL
-)
+derivationTable(A, model, minNorm = NULL, maxNorm = NULL, step = 0.1)
 }
 \arguments{
 \item{A}{the age}
@@ -23,9 +16,6 @@ derivationTable(
 \item{maxNorm}{The upper bound of the norm value range}
 
 \item{step}{Stepping parameter with lower values indicating higher precision}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 }
 \value{
 data.frame with norm scores and the predicted scores based on the

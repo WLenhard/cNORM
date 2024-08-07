@@ -11,7 +11,6 @@ predictNorm(
   minNorm = NULL,
   maxNorm = NULL,
   force = FALSE,
-  covariate = NULL,
   silent = FALSE
 )
 }
@@ -27,9 +26,6 @@ predictNorm(
 \item{maxNorm}{The upper bound of the norm score range}
 
 \item{force}{Try to resolve missing norm scores in case of inconsistent models}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate /
-the specific value here.}
 
 \item{silent}{set to TRUE to suppress messages}
 }

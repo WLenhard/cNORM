@@ -39,7 +39,7 @@
 #' The function \link{cnorm}
 #' For an easy start, you can use the graphical user interface by typing \code{cNORM.GUI()} on the console.
 #' Example datasets with large cohorts are available for demonstration purposes ('elfe',
-#' 'ppvt', 'CDC', 'life' and 'mortality' sample data from the references). Use
+#' 'ppvt', and 'CDC' sample data from the references). Use
 #' \code{model <- cnorm(raw = elfe$raw, group = elfe$group)} to get a first impression.
 #' Use  \code{vignette(cNORM-Demo)} for a walk through on
 #' conducting  the modeling and \url{https://www.psychometrica.de/cNorm_en.html} for a
@@ -62,11 +62,6 @@
 #'   Test - Revision IV (German Adaption). Frankfurt a. M.: Pearson Assessment.
 #'   \item Lenhard, W. & Schneider, W. (2006). ELFE 1-6 - Ein Leseverstaendnistest fuer Erst- bis
 #'   Sechstklässler. Goettingen: Hogrefe.
-#'   \item The World Bank (2018). Mortality rate, infant (per 1,000 live births). Data Source
-#'   available https://data.worldbank.org/indicator/SP.DYN.IMRT.IN (date of retrieval: 02/09/2018)
-#'   \item The World Bank (2018). Life expectancy at birth, total (years). Data Source World
-#'   Development Indicators available https://data.worldbank.org/indicator/sp.dyn.le00.in
-#'   (date of retrieval: 01/09/2018)
 #' }
 #' @author Wolfgang Lenhard, Alexandra Lenhard and Sebastian Gary
 #' @keywords Psychometrics Biometrics Test Development Regression Based Norming
@@ -331,7 +326,7 @@ cnorm <- function(raw = NULL,
 
     result <- list(data = data, model = model)
     class(result) <- "cnorm"
-
+    print(rawTable(0, result))
     return(result)
   }
 

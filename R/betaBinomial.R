@@ -140,6 +140,8 @@ cnorm.betabinomial1 <- function(age,
 
   attr(result, "age_mean") <- mean(age)
   attr(result, "age_sd") <- sd(age)
+  attr(result, "ageMin") <- min(age)
+  attr(result, "ageMax") <- max(age)
   attr(result, "score_mean") <- mean(score)
   attr(result, "score_sd") <- sd(score)
   attr(result, "max") <- n
@@ -528,6 +530,16 @@ predict.cnormBetaBinomial <- function(object, ...) {
 #'
 #' @return A ggplot object.
 #'
+#' @examples
+#'
+#' \dontrun{
+#' # Computing beta binomial models already displays plot
+#' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+#'
+#' # Without data points
+#' plot(model.bb, age = elfe$group, score = elfe$raw, weights=NULL, points=FALSE)
+#'
+#' }
 #' @family plot
 #' @export
 plot.cnormBetaBinomial <- function(x, ...) {
@@ -537,7 +549,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
 
   if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
   if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("weights" %in% names(args)) { weights <- args$weights } else { if(length(args)>2) weights <- args[[3]] else weights <- NULL }
+  if ("weights" %in% names(args)) { weights <- args$weights } else { weights <- NULL }
   if ("percentiles" %in% names(args)) { percentiles <- args$percentiles } else { percentiles <- c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975) }
   if ("points" %in% names(args)) { points <- args$points } else { points <- TRUE }
 
@@ -966,8 +978,10 @@ cnorm.betabinomial2 <- function(age,
                       rep(0, beta_degree))
 
   # Optimize to find parameter estimates. If control is NULL, set default
-  if (is.null(control))
-    control = list(factr = 1e-8, maxit = 1000)
+  if (is.null(control)){
+    n_param <-alpha_degree + beta_degree + 2
+    control = list(factr = 1e-8, maxit = n_param*50)
+  }
 
   result <- optim(
     initial_params,
@@ -1009,6 +1023,8 @@ cnorm.betabinomial2 <- function(age,
 
   attr(result, "age_mean") <- mean(age)
   attr(result, "age_sd") <- sd(age)
+  attr(result, "ageMin") <- min(age)
+  attr(result, "ageMax") <- max(age)
   attr(result, "score_mean") <- mean(score)
   attr(result, "score_sd") <- sd(score)
   attr(result, "max") <- n

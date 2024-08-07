@@ -50,33 +50,24 @@ number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended
 `R^2 = .99`, and `k = 4`.
 }
 \details{
+The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+through other functions like \code{cnorm}.
+
 Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
 }
 \examples{
-\dontrun{
+
 # Example with sample data
+\dontrun{
 normData <- prepareData(elfe)
 model <- bestModel(normData)
 plotSubset(model)
-plotPercentiles(normData, model)
+plotPercentiles(buildCnormObject(normData, model))
 
 # Specifying variables explicitly
 preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 print(regressionFunction(preselectedModel))
-
-# Modeling based on the CDC data
-bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
-bmi.model <- bestModel(bmi.data, raw = "bmi")
-printSubset(bmi.model)
-
-# Using a precomputed model formula for gender-specific models
-bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
-bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
-
-# Using a custom list of predictors and incorporating the 'sex' variable
-bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
-  "L1", "L3", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-  "L2A3", "L3A1", "L3A2", "L3A3", "sex", force.in = c("sex"))
 }
 }
 \seealso{

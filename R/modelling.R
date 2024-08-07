@@ -7,6 +7,10 @@
 #' number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended starting points are `terms = 5`,
 #' `R^2 = .99`, and `k = 4`.
 #'
+#' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
+#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
+#' through other functions like \code{cnorm}.
+#'
 #' Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
 #'
 #' @param data Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).
@@ -21,30 +25,17 @@
 #' @param plot If TRUE (default), displays a percentile plot of the model.
 #' @return The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
-#' \dontrun{
+#'
 #' # Example with sample data
+#' \dontrun{
 #' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' plotSubset(model)
-#' plotPercentiles(normData, model)
+#' plotPercentiles(buildCnormObject(normData, model))
 #'
 #' # Specifying variables explicitly
 #' preselectedModel <- bestModel(normData, predictors = c("L1", "L3", "L1A3", "A2", "A3"))
 #' print(regressionFunction(preselectedModel))
-#'
-#' # Modeling based on the CDC data
-#' bmi.data <- prepareData(CDC, raw = "bmi", group = "group", age = "age")
-#' bmi.model <- bestModel(bmi.data, raw = "bmi")
-#' printSubset(bmi.model)
-#'
-#' # Using a precomputed model formula for gender-specific models
-#' bmi.model.boys <- bestModel(bmi.data[bmi.data$sex == 1, ], predictors = bmi.model$terms)
-#' bmi.model.girls <- bestModel(bmi.data[bmi.data$sex == 2, ], predictors = bmi.model$terms)
-#'
-#' # Using a custom list of predictors and incorporating the 'sex' variable
-#' bmi.sex <- bestModel(bmi.data, raw = "bmi", predictors = c(
-#'   "L1", "L3", "A3", "L1A1", "L1A2", "L1A3", "L2A1", "L2A2",
-#'   "L2A3", "L3A1", "L3A2", "L3A3", "sex", force.in = c("sex"))
 #' }
 #' @seealso plotSubset, plotPercentiles, plotPercentileSeries, checkConsistency
 #' @export
@@ -134,15 +125,13 @@ bestModel <- function(data,
 
   # set up regression function
   if (is.null(predictors)) {
-    useCOV <- !is.null(attr(data, "covariate"))
     useAge <- attr(data, "useAge")
     lmX <-
       buildFunction(
         raw = raw,
         k = k,
         t = t,
-        age = useAge,
-        covariates = useCOV
+        age = useAge
       )
   } else {
     if (inherits(predictors, "formula")) {
@@ -258,13 +247,6 @@ bestModel <- function(data,
   else
     bestformula <- lm(text, data, weights = data$weights)
 
-  if (!is.null(attr(data, "covariate"))) {
-    if (length(grep("COV", names(bestformula$coefficients))) == 0)
-      stop(
-        "No covariate term included in the regression result. The covariates turned out to be irrelevant under the current configuration. No model generated on the basis of the current dataset. Either rerun the bestModel function with different numbers of terms or R2, or do not specify a covariate when ranking the data."
-      )
-  }
-
   # compute rmse
   tab <-
     data.frame(raw = data[, raw], fitted = bestformula$fitted.values)
@@ -308,9 +290,6 @@ bestModel <- function(data,
   bestformula$age <- attributes(data)$age
   bestformula$k <- attributes(data)$k
   bestformula$A <- attributes(data)$A
-  if (!is.null(attr(data, "covariate"))) {
-    bestformula$covariate <- attributes(data)$covariate
-  }
 
   # Print output
   report[4] <-
@@ -357,8 +336,14 @@ bestModel <- function(data,
     )
   }
 
-  if(plot)
-    plotPercentiles(data, bestformula)
+  class(bestformula) <- "cnormModel"
+
+  if(plot&&bestformula$useAge){
+    tmp <- list(data = data, model = bestformula)
+    class(tmp) <- "cnormTemp"
+    plotPercentiles(tmp)
+  }
+
 
   return(bestformula)
 }
@@ -442,8 +427,6 @@ printSubset <- function(x, ...) {
 #' @param warn If set to TRUE, already minor violations of the model assumptions
 #' are displayed (default = FALSE)
 #' @param silent turn off messages
-#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
-#' the specific value here.
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
@@ -464,19 +447,9 @@ checkConsistency <- function(model,
                              stepAge = 1,
                              stepNorm = 1,
                              warn = FALSE,
-                             silent = FALSE,
-                             covariate = NULL) {
+                             silent = FALSE) {
   if (inherits(model, "cnorm")) {
     model <- model$model
-  }
-
-  if (!is.null(covariate) && is.null(model$covariate)) {
-    warning(
-      "Covariate specified but no covariate available in the model. Setting covariate to NULL."
-    )
-    covariate = NULL
-  } else if (is.null(covariate) && !is.null(model$covariate)) {
-    stop("Covariate specified in the model, but no function parameter available.")
   }
 
   if (is.null(minAge)) {
@@ -518,7 +491,6 @@ checkConsistency <- function(model,
         minRaw = minRaw,
         maxRaw = maxRaw,
         step = stepNorm,
-        covariate = covariate,
         monotonuous = FALSE
       )
     correct <- TRUE
@@ -633,37 +605,20 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' age group or in general #' intersecting percentile curves.
 #' @param model The regression model or a cnorm object
 #' @param order The degree of the derivate, default: 1
-#' @param covariate In case, a covariate has been used, please specify the degree of the covariate /
-#' the specific value here.
 #' @return The derived coefficients
 #' @examples
-#' normData <- prepareData(elfe)
-#' m <- bestModel(normData)
+#' m <- cnorm(raw = elfe$raw, group = elfe$group)
 #' derivedCoefficients <- derive(m)
 #' @export
 #' @family model
 derive <- function(model,
-                   order = 1,
-                   covariate = NULL) {
+                   order = 1) {
   if (inherits(model, "cnorm")) {
     model <- model$model
   }
 
-  if (!is.null(covariate) && is.null(model$covariate)) {
-    warning(
-      "Covariate specified but no covariate available in the model. Setting covariate to NULL."
-    )
-    covariate = NULL
-  } else if (is.null(covariate) && !is.null(model$covariate)) {
-    stop("Covariate specified in the model, but no function parameter available.")
-  }
 
   coeff <- model$coefficients[grep("L", names(model$coefficients))]
-
-  if (!is.null(covariate)) {
-    coef <-
-      simplifyCoefficients(coefficients = coeff, covariate = covariate)
-  }
 
   for (o in 1:order) {
     if (o > 1) {
@@ -734,8 +689,7 @@ modelSummary <- function(object, ...) {
 #' @return the report
 #' @export
 #' @examples
-#' normData <- prepareData(elfe)
-#' m <- bestModel(normData)
+#' m <- cnorm(raw = elfe$raw, group = elfe$group)
 #' rangeCheck(m)
 #' @family model
 rangeCheck <-
@@ -857,16 +811,6 @@ rangeCheck <-
 #'
 #' # Using a cnorm object examines the predefined formula.
 #' cnorm.cv(result, repetitions = 1)
-#'
-#' # For cross-validation without a cnorm model, rank data first and compute powers:
-#' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
-#' data <- computePowers(data)
-#' cnorm.cv(data)
-#'
-#' # Specify formulas deliberately:
-#' data <- rankByGroup(data = elfe, raw = "raw", group = "group")
-#' data <- computePowers(data)
-#' cnorm.cv(data, formula = formula(raw ~ L3 + L1A1 + L3A3 + L4 + L5))
 #' }
 #'
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
@@ -896,15 +840,6 @@ cnorm.cv <-
         pCutoff = .2
       else
         pCutoff = .1
-    }
-
-    #if (!attr(data, "useAge")) {
-    #  stop("Age variable set to FALSE in dataset. No cross validation possible.")
-    #}
-
-    ## TODO
-    if (!is.null(attr(data, "covariate"))) {
-      stop("This function is currently not ready for including covariates.")
     }
 
     d <- data
@@ -993,8 +928,7 @@ cnorm.cv <-
           raw = raw,
           k = k,
           t = t,
-          age = TRUE,
-          covariates = FALSE
+          age = TRUE
         )
     } else {
       lmX <- formula
@@ -1152,17 +1086,19 @@ cnorm.cv <-
 
         # run linear regression for specific model
         model <- lm(reg, train)
-        model$k <- k
-        model$minRaw <- min(train[, raw])
-        model$maxRaw <- max(train[, raw])
-        model$scaleM <- scaleM
-        model$scaleSD <- scaleSD
-        Terms <- c(Terms, attr(model$terms, "term.labels"))
 
         # predict values in test data
         test.fitted <- predict.lm(model, test)
 
         # store MSE for test and train data
+        model$k <- k
+        model$minRaw <- min(train[, raw])
+        model$maxRaw <- max(train[, raw])
+        model$scaleM <- scaleM
+        model$scaleSD <- scaleSD
+        class(model) <- "cnormModel"
+        Terms <- c(Terms, attr(model$terms, "term.labels"))
+
         train.errors[i] <-
           train.errors[i] + mean((model$fitted.values - train[, raw]) ^ 2, na.rm = T)
         val.errors[i] <-
@@ -1479,10 +1415,6 @@ getNormScoreSE <- function(model, type = 2) {
   d <- data
   raw <- data[[model$raw]]
   age <- data[[model$age]]
-  if (!is.null(model$covariate))
-    covariate <- data[[attr(data, "covariate")]]
-  else
-    covariate <- NULL
 
   d$fitted <-
     predictNorm(
@@ -1490,8 +1422,7 @@ getNormScoreSE <- function(model, type = 2) {
       age,
       model,
       minNorm = minNorm,
-      maxNorm = maxNorm,
-      covariate = covariate
+      maxNorm = maxNorm
     )
 
   diff <- d$fitted - data$normValue
@@ -1512,10 +1443,9 @@ getNormScoreSE <- function(model, type = 2) {
 #' @param k the power degree for location
 #' @param t the power degree for age
 #' @param age use age
-#' @param covariates use covariates
 #'
-#' @return reression function
-buildFunction <- function(raw, k, t, age, covariates) {
+#' @return regression function
+buildFunction <- function(raw, k, t, age) {
   f <- paste0(raw, " ~ ")
 
   if (age) {
@@ -1529,18 +1459,11 @@ buildFunction <- function(raw, k, t, age, covariates) {
       }
     }
 
-    if (covariates) {
-      return(formula(paste0(f, "COV + L1COV + A1COV + L1A1COV")))
-    } else {
-      return(formula(substr(f, 1, nchar(f) - 3)))
-    }
+
+    return(formula(substr(f, 1, nchar(f) - 3)))
   } else {
     f <- paste0(f, paste0(paste0("L", 1:k), collapse = " + "), " + ")
 
-    if (covariates) {
-      return(formula(paste0(f, "COV + L1COV")))
-    } else {
-      return(formula(substr(f, 1, nchar(f) - 3)))
-    }
+    return(formula(substr(f, 1, nchar(f) - 3)))
   }
 }

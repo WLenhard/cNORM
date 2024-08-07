@@ -11,14 +11,13 @@ getNormCurve(
   maxAge = NULL,
   step = 0.1,
   minRaw = NULL,
-  maxRaw = NULL,
-  covariate = NULL
+  maxRaw = NULL
 )
 }
 \arguments{
 \item{norm}{The specific norm score, e. g. T value}
 
-\item{model}{The model from the regression modeling or a cnorm object}
+\item{model}{The model from the regression modeling obtained with the cnorm function}
 
 \item{minAge}{Age to start from}
 
@@ -30,9 +29,6 @@ values indicate higher precision (default 0.1).}
 \item{minRaw}{lower bound of the range of raw scores (default = 0)}
 
 \item{maxRaw}{upper bound of raw scores}
-
-\item{covariate}{In case, a covariate has been used, please specify the degree of the covariate or
-the specific value here.}
 }
 \value{
 data.frame of the variables raw, age and norm
