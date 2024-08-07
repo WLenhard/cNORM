@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.2.0,
-Date: 2023.08.02
+Date: 2023.08.07
 
 
 Changes:
@@ -16,8 +16,11 @@ Changes:
 *    Transition from lattice to ggplot2
 *    Code on covariates removed from the complete package
 *    cNORM-Demo vignette revised
-*    'buildCnormObject' function added to help with compatibility
+*    code simplification in plotting functions, parameters removed
+*    'buildCnormObject' function added to help with compatibility (joins data and model
+     to cnorm object)
 *    cNORM.GUI() updated
+*    datasets life, mortality and EPM removed
 
 
 
