@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.2.0,
-Date: 2023.08.07
+Date: 2023.08.09
 
 
 Changes:
@@ -17,6 +17,7 @@ Changes:
 *    Code on covariates removed from the complete package
 *    cNORM-Demo vignette revised
 *    code simplification in plotting functions, parameters removed
+*    new parameter to plot raw scores in plotPercentiles (default FALSE)
 *    'buildCnormObject' function added to help with compatibility (joins data and model
      to cnorm object)
 *    cNORM.GUI() updated

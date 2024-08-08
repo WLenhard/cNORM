@@ -422,6 +422,7 @@ plotNormCurves <- function(model,
 #' f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
 #' data preparation is used (default)
 #' @param title custom title for plot
+#' @param points Logical indicating whether to plot the data points. Default is FALSE.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -438,7 +439,8 @@ plotPercentiles <- function(model,
                             group = NULL,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = NULL,
-                            title = NULL) {
+                            title = NULL,
+                            points = F) {
 
   is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
   if(is_beta_binomial){
@@ -460,8 +462,11 @@ plotPercentiles <- function(model,
     group <- attr(data, "group")
   }
 
+  age <- NULL
   if(is.null(data[[group]])){
+    age <- data[, attributes(data)$age]
     data$group <- getGroups(data[, attributes(data)$age])
+    data$age <- data[, attributes(data)$age]
     group <- "group"
   }
 
@@ -610,6 +615,17 @@ plotPercentiles <- function(model,
                        name = NULL) +
     guides(color = guide_legend(override.aes = list(linetype = "solid", shape = NA)))
 
+  # Add raw scores if points is TRUE
+  if (points) {
+    if(is.null(age)){
+      p <- p + geom_point(data = data, aes(x = .data[[group]], y = .data[[raw]]),
+                        color = "black", alpha = 0.2, size = 1)
+    }else{
+      p <- p + geom_point(data = data, aes(x = .data$age, y = .data[[raw]]),
+                          color = "black", alpha = 0.2, size = 1)
+    }
+  }
+
   p <- p + theme_minimal() +
     theme(
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
@@ -622,6 +638,7 @@ plotPercentiles <- function(model,
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
+
 
   print(p)
   return(p)

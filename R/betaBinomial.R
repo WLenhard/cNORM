@@ -65,10 +65,10 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' @keywords internal
 cnorm.betabinomial1 <- function(age,
                                 score,
+                                n = NULL,
                                 weights = NULL,
                                 mu = 3,
                                 sigma = 3,
-                                n = NULL,
                                 control = NULL,
                                 scale = "T",
                                 plot = T) {
@@ -676,6 +676,19 @@ plot.cnormBetaBinomial <- function(x, ...) {
       shape = rep(18, length(NAMES))
     )))
 
+  p <- p +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 12),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
   return(p)
 }
 
@@ -1188,7 +1201,7 @@ cnorm.betabinomial <- function(age,
   if (mode == 2) {
     model <- cnorm.betabinomial2(age, score, n, weights, alpha, beta, control, scale, plot)
   } else{
-    model <- cnorm.betabinomial1(age, score, n, weights, alpha, beta, control, scale, plot)
+    model <- cnorm.betabinomial1(age, score, n, weights, mu = alpha, sigma = beta, control, scale, plot)
   }
 
   return(model)
