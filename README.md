@@ -16,128 +16,114 @@ The package estimates percentiles as a function of the explanatory variable. Thi
 
 A quick guide to distribution-free modeling with the essential cNORM functions:
 ```{r example}
-    ## Basic example code for modeling the sample dataset
+## Basic example code for modeling the sample dataset
+library(cNORM)
 
-    library(cNORM)
+# Start the graphical user interface (needs shiny installed)
+# The GUI includes the most important functions. For specific cases,
+# please use cNORM on the console.
+cNORM.GUI()
 
-    # Start the graphical user interface (needs shiny installed)
-    # The GUI includes the most important functions. For specific cases,
-    # please use cNORM on the console.
+# Using the syntax on the console: The function 'cnorm' performs
+# all steps automatically. Please specify the raw score and the
+# grouping variable. The resulting object contains the ranked data
+# via object$data and the model via object$model.
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
-    cNORM.GUI()
+# Plot different indicators of model fit depending on the number of
+# predictors
+plot(cnorm.elfe, "subset", type=0) # plot R2
+plot(cnorm.elfe, "subset", type=3) # plot MSE
 
-    # Using the syntax on the console: The function 'cnorm' performs
-    # all steps automatically. Please specify the raw score and the
-    # grouping variable. The resulting object contains the ranked data
-    # via object$data and the model via object$model.
+# NOTE! At this point, you usually select a good fitting model and rerun
+# the process with a fixed number of terms, e. g. 4. Avoid models
+# with a high number of terms:
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
-    cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+# Powers of age can be specified via the parameter 't'.
+# Cubic modeling is usually sufficient, i.e., t = 3.
+# In contrast, 'k' specifies the power of the person location.
+# This parameter should be somewhat higher, e.g., k = 5.
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 5, t = 3)
 
-    # Plot different indicators of model fit depending on the number of
-    # predictors
+# Visual inspection of the percentile curves of the fitted model
+plot(cnorm.elfe, "percentiles")
 
-    plot(cnorm.elfe, "subset", type=0) # plot R2
-    plot(cnorm.elfe, "subset", type=3) # plot MSE
+# Visual inspection of the observed and fitted raw and norm scores
+plot(cnorm.elfe, "norm")
+plot(cnorm.elfe, "raw")
 
-    # NOTE! At this point, you usually select a good fitting model and rerun
-    # the process with a fixed number of terms, e. g. 4. Avoid models
-    # with a high number of terms:
+# In order to compare different models, generate a series of percentile
+# plots with an ascending number of predictors, in this example between
+# 5 and 14 predictors.
+plot(cnorm.elfe, "series", start=5, end=14)
 
-    cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
+# Cross validation of number of terms with 80% of the data for training
+# and 20% for validation. Due to the time intensity, the maximum
+# number of terms is restricted to 10 in this example
+# with 3 repetitions.
+cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
 
-    # Powers of age can be specified via the parameter 't'.
-    # Cubic modeling is usually sufficient, i.e., t = 3.
-    # In contrast, 'k' specifies the power of the person location.
-    # This parameter should be somewhat higher, e.g., k = 5.
+# Cross validation with prespecified terms of an already
+# existing model
+cnorm.cv(cnorm.elfe, repetitions=3)
 
-    cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 5, t = 3)
+# Print norm table (in this case: 0, 3 or 6 months at grade level 3)
+normTable(c(3, 3.25, 3.5), cnorm.elfe)
 
-    # Visual inspection of the percentile curves of the fitted model
-
-    plot(cnorm.elfe, "percentiles")
-
-    # Visual inspection of the observed and fitted raw and norm scores
-
-    plot(cnorm.elfe, "norm")
-    plot(cnorm.elfe, "raw")
-
-    # In order to compare different models, generate a series of percentile
-    # plots with an ascending number of predictors, in this example between
-    # 5 and 14 predictors.
-
-    plot(cnorm.elfe, "series", start=5, end=14)
-
-    # Cross validation of number of terms with 80% of the data for training
-    # and 20% for validation. Due to the time intensity, the maximum
-    # number of terms is restricted to 10 in this example
-    # with 3 repetitions.
-
-    cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
-
-    # Cross validation with prespecified terms of an already
-    # existing model
-
-    cnorm.cv(cnorm.elfe, repetitions=3)
-
-    # Print norm table (in this case: 0, 3 or 6 months at grade level 3)
-
-    normTable(c(3, 3.25, 3.5), cnorm.elfe)
-
-    # The other way round: Print raw table (grade level 3; 0 months) together
-    # with 90% confidence intervalls for a test with a reliability of .94
-
-    rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
+# The other way round: Print raw table (grade level 3; 0 months) together
+# with 90% confidence intervalls for a test with a reliability of .94
+rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 ```
 
 
 Modelling norm data using beta-binomial distributions:
 ```{r example}
-    library(cNORM)
-    # cNORM can as well model norm data using the beta-binomial
-    # distribution, which usually performs well on tests with
-    # a fixed number of dichotomous items.
-    model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+library(cNORM)
+# cNORM can as well model norm data using the beta-binomial
+# distribution, which usually performs well on tests with
+# a fixed number of dichotomous items.
+model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 
-    # Adapt the power parameters for α and β to increase or decrease
-    # the fit:
-    model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, alpha = 4)
+# Adapt the power parameters for α and β to increase or decrease
+# the fit:
+model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, alpha = 4)
 
-    # Plot percentile curves and display manifest and modelled norm scores.
-    # Normwerte plotten
-    plot(model.betabinomial, ppvt$age, ppvt$raw)
-    plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
+# Plot percentile curves and display manifest and modelled norm scores.
+# Normwerte plotten
+plot(model.betabinomial, ppvt$age, ppvt$raw)
+plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
 
-    # Display fit statistics:
-    summary(model.betabinomial)
+# Display fit statistics:
+summary(model.betabinomial)
 
-    # Prediction of norm scores for new data and generating norm tables
-    predict(model.betabinomial, c(8.9, 10.1), c(123, 98))
-    tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
-              reliability=0.9)
+# Prediction of norm scores for new data and generating norm tables
+predict(model.betabinomial, c(8.9, 10.1), c(123, 98))
+tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
+                                 reliability=0.9)
 ```
 
 
 Conventional norming:
 ```{r example}
-    library(cNORM)
+library(cNORM)
 
-    # cNORM can as well be used for conventional norming. In this case,
-    # the group variable has to be set to FALSE when ranking the data.
-    # please select an arbitrary value for age when generating the tables.
-
-    d <- rankByGroup(elfe, raw="raw", group=FALSE)
-    d <- computePowers(d)
-    m <- bestModel(d)
-    rawTable(0, model = m)
+# cNORM can as well be used for conventional norming. In this case,
+# the group variable has to be set to FALSE when ranking the data.
+# please select an arbitrary value for age when generating the tables.
+d <- rankByGroup(elfe, raw="raw", group=FALSE)
+d <- computePowers(d)
+m <- bestModel(d)
+rawTable(0, model = m)
 ```
 
 
 Start vignettes in cNORM:
 ```{r example}
-    library(cNORM)
-    vignette("cNORM-Demo", package = "cNORM")
-    vignette("WeightedRegression", package = "cNORM")
-    vignette("BetaBinomial", package = "cNORM")
+library(cNORM)
+vignette("cNORM-Demo", package = "cNORM")
+vignette("WeightedRegression", package = "cNORM")
+vignette("BetaBinomial", package = "cNORM")
 ```
 
 
