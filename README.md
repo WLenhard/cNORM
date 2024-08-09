@@ -121,6 +121,7 @@ rawTable(0, model = m)
 Start vignettes in cNORM:
 ```{r example}
 library(cNORM)
+
 vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
 vignette("BetaBinomial", package = "cNORM")
