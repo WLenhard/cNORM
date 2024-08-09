@@ -3,7 +3,7 @@ importFrom(stats, setNames, qbeta, optim, pf, xtabs, as.formula, summary.lm, pbe
 importFrom(grDevices, rainbow, dev.off)
 importFrom(graphics, par, plot, points, legend, abline, text, lines)
 importFrom(utils, tail, menu, head)
-importFrom(ggplot2, .data, element_rect, unit, geom_tile, ggsave, geom_contour_filled, facet_wrap, geom_contour, scale_fill_gradientn, geom_abline, element_text, element_blank, element_line, scale_color_viridis_d, scale_color_brewer, ylim, geom_text, scale_y_log10, geom_vline, theme, geom_point, guides, guide_legend, aes, aes_string, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
+importFrom(ggplot2, .data, element_rect, unit, geom_tile, ggsave, geom_contour_filled, facet_wrap, geom_contour, scale_fill_gradientn, geom_abline, element_text, element_blank, element_line, scale_color_viridis_d, scale_color_brewer, ylim, geom_text, scale_y_log10, geom_vline, theme, geom_point, guides, guide_legend, aes, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
 export(
 	bestModel,
 	betaCoefficients,

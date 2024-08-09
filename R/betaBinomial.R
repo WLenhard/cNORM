@@ -637,19 +637,19 @@ plot.cnormBetaBinomial <- function(x, ...) {
     p <- p +
       geom_line(
         data = plot_data,
-        aes_string(
-          x = "age",
-          y = paste0("P", percentiles[i] * 100),
-          color = shQuote(NAMES[i])
+        aes(
+          x = .data$age,
+          y = .data[[paste0("P", percentiles[i] * 100)]],
+          color = !!NAMES[i]
         ),
         size = 0.6
       ) +
       geom_point(
         data = manifest_data,
-        aes_string(
-          x = "age",
-          y = NAMES[i],
-          color = shQuote(NAMES[i])
+        aes(
+          x = .data$age,
+          y = .data[[NAMES[i]]],
+          color = !!NAMES[i]
         ),
         size = 2,
         shape = 18

@@ -24,3 +24,4 @@ test_that("plotting works", {
   expect_warning(plot(cnorm.elfe, "curves"), NA)
   expect_warning(plot(cnorm.elfe, "subset"), NA)
 })
+

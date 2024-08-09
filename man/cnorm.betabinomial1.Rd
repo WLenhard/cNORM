@@ -7,10 +7,10 @@
 cnorm.betabinomial1(
   age,
   score,
+  n = NULL,
   weights = NULL,
   mu = 3,
   sigma = 3,
-  n = NULL,
   control = NULL,
   scale = "T",
   plot = T
@@ -21,13 +21,13 @@ cnorm.betabinomial1(
 
 \item{score}{A numeric vector of response values.}
 
+\item{n}{Number of items in the test, resp. maximum score to be achieved}
+
 \item{weights}{A numeric vector of weights for each observation. Default is NULL (equal weights).}
 
 \item{mu}{Integer specifying the degree of the polynomial for the mean model. Default is 2.}
 
 \item{sigma}{Integer specifying the degree of the polynomial for the standard deviation model. Default is 1.}
-
-\item{n}{Number of items in the test, resp. maximum score to be achieved}
 
 \item{control}{A list of control parameters to be passed to the `optim` function.
 If NULL, default values are used.}

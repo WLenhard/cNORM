@@ -41,7 +41,6 @@ Suggests:
     foreign,
     readxl,
     rmarkdown,
-    DT,
     testthat
 License: AGPL-3
 VignetteBuilder: knitr
