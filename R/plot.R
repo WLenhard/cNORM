@@ -45,7 +45,7 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 
   if (type == 0) {
     p <- ggplot(d, aes(x = .data$raw, y = .data$fitted)) +
-      geom_point(alpha = 0.5) +
+      geom_point(alpha = 0.2, color = "#0033AA") +
       geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
       labs(
         title = if(isTRUE(group)) "Observed vs. Fitted Raw Scores by Group" else "Observed vs. Fitted Raw Scores",
@@ -55,7 +55,7 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
       )
   } else {
     p <- ggplot(d, aes(x = .data$raw, y = .data$diff)) +
-      geom_point(alpha = 0.5) +
+      geom_point(alpha = 0.2, color = "#0033AA") +
       geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
       labs(
         title = if(isTRUE(group)) "Observed Raw Scores vs. Difference Scores by Group" else "Observed Raw Scores vs. Difference Scores",
@@ -205,7 +205,7 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
     }
 
     p <- ggplot(d, aes(x = .data$normValue, y = .data$fitted)) +
-      geom_point(alpha = 0.5) +
+      geom_point(alpha = 0.2, color = "#0033AA") +
       geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
       labs(
         title = title,
@@ -221,7 +221,7 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
     }
 
     p <- ggplot(d, aes(x = .data$normValue, y = .data$diff)) +
-      geom_point(alpha = 0.5) +
+      geom_point(alpha = 0.5, color = "#0033AA") +
       geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
       labs(
         title = title,
