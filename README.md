@@ -94,7 +94,7 @@ Modelling norm data using beta-binomial distributions:
 ```{r example}
     library(cNORM)
 
-    cNORM can as well model norm data using the beta-binomial
+    # cNORM can as well model norm data using the beta-binomial
     # distribution, which usually performs well on tests with
     # a fixed number of dichotomous items.
 
