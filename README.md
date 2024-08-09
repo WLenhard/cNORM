@@ -93,32 +93,25 @@ A quick guide to distribution-free modeling with the essential cNORM functions:
 Modelling norm data using beta-binomial distributions:
 ```{r example}
     library(cNORM)
-
     # cNORM can as well model norm data using the beta-binomial
     # distribution, which usually performs well on tests with
     # a fixed number of dichotomous items.
-
     model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 
     # Adapt the power parameters for α and β to increase or decrease
     # the fit:
-
     model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, alpha = 4)
 
     # Plot percentile curves and display manifest and modelled norm scores.
     # Normwerte plotten
-
     plot(model.betabinomial, ppvt$age, ppvt$raw)
     plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
 
     # Display fit statistics:
-
     summary(model.betabinomial)
 
     # Prediction of norm scores for new data and generating norm tables
-
-    predictNorm.betabinomial(c(123, 98), c(8.9, 10.1), model.betabinomial)
-
+    predict(model.betabinomial, c(8.9, 10.1), c(123, 98))
     tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
               reliability=0.9)
 ```
