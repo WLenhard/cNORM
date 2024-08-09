@@ -12,10 +12,6 @@ cNORM was developed specifically for achievement tests (e.g. vocabulary developm
 The package estimates percentiles as a function of the explanatory variable. This is done either parametrically on the basis of the beta-binomial distribution or distribution-free using Taylor polynomials. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and have a look at the vignettes.
 
 
-The package cNORM provides robust methods for generating continuous standard scores, as f. e. for psychometric test development, biometrics (e. g. biological and physiological growth curves), and screenings in the medical domain. Based on the approach by A. Lenhard et al. (2016, 2019), it addresses common issues in conventional norming methods. For an in-depth tutorial please visit the project homepage https://www.psychometrica.de/cNorm_en.html and https://cnorm.shinyapps.io/cNORM/ for an online demonstration.
-
-
-
 ## In a nutshell
 
 A quick guide to distribution-free modeling with the essential cNORM functions:
