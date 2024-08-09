@@ -90,7 +90,7 @@ A quick guide to distribution-free modeling with the essential cNORM functions:
 ```
 
 
-Modelling norm data using the beta-binomial distributions:
+Modelling norm data using beta-binomial distributions:
 ```{r example}
     library(cNORM)
 
