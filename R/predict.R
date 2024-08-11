@@ -207,6 +207,11 @@ predictRaw <-
 #'   minNorm = 25, maxNorm = 75,
 #'   step = 1, minRaw = 0, maxRaw = 26
 #' )
+#'
+#' # conventional norming, set age to arbitrary value
+#' model <- cnorm(raw=elfe$raw)
+#' normTable(0, model)
+#'
 #' @family predict
 #' @export
 normTable <- function(A,
@@ -391,6 +396,11 @@ normTable <- function(A,
 #'
 #' # additionally compute confidence intervals
 #' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+#'
+#' # conventional norming, set age to arbitrary value
+#' model <- cnorm(raw=elfe$raw)
+#' rawTable(0, model)
+#'
 #' @family predict
 #' @export
 rawTable <- function(A,
