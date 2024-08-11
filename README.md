@@ -108,13 +108,8 @@ Conventional norming:
 ```{r example}
 library(cNORM)
 
-# cNORM can as well be used for conventional norming. In this case,
-# the group variable has to be set to FALSE when ranking the data.
-# please select an arbitrary value for age when generating the tables.
-d <- rankByGroup(elfe, raw="raw", group=FALSE)
-d <- computePowers(d)
-m <- bestModel(d)
-rawTable(0, model = m)
+# cNORM can as well be used for conventional norming:
+cnorm(raw=elfe$raw)
 ```
 
 
