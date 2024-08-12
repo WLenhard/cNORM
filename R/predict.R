@@ -226,7 +226,9 @@ normTable <- function(A,
                       reliability = NULL,
                       pretty = T) {
 
-  if(inherits(model, "cnorm")){
+  if(inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")){
+    return(normTable.betabinomial(model, A, CI = CI, reliability = reliability))
+  }else if(inherits(model, "cnorm")){
     model <- model$model
   }else if(!inherits(model, "cnormModel")){
     stop("Please provide a cnorm object.")

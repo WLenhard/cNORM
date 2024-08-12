@@ -1,11 +1,11 @@
 
 ---
-title: "Modeling Psychometric Data with Beta Binomial Functions"
+title: "Modelling Psychometric Data with Beta-Binomial Distributions"
 author: "Wolfgang Lenhard & Alexandra Lenhard"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Modeling Psychometric Data with Beta Binomial Functions}
+  %\VignetteIndexEntry{Modelling Psychometric Data with Beta-Binomial Distributions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -65,8 +65,6 @@ Before applying beta-binomial modeling to psychometric data over age, several ke
 
 - **Fixed maximum score**: The test must have a predetermined maximum score or a fixed number of items with a consistent upper bound across all age groups.
 
-- **Item difficulty distribution**: The difficulty of the test items should ideally be normally distributed. This helps ensure that the test can discriminate well across the entire range of abilities.
-
 - **Size and representativeness of the norm sample**: As always, the result of norm score modeling depends on the quality of the norm sample data. The sample should be large enough to capture the variability in the test scores and representative of the population of interest. In continuous norming, usually a minimum of 100 cases per age cohort is recommended. This recommendation is based on the need to have sufficient data to reliably estimate the parameters of the model, especially when using higher-degree polynomials. Strong deviations from the population will lead to biased norm scores. Mild to moderate deviations can be partly corrected by post-stratification or weighting.
 
 - **Absence of outliers or influential observations**: It's important to check for and handle any outliers or influential observations that could disproportionately affect the model fit. These could be due to data entry errors, unusual testing conditions, or genuinely extreme performances.
@@ -76,7 +74,7 @@ Before applying beta-binomial modeling to psychometric data over age, several ke
 Let's walk through a practical example using the ppvt dataset, included in cNORM. Before we begin, ensure you have installed the cNORM package.
 
 ### Data Preparation
-The ppvt dataset included in cNORM contains data on vocabulary development over age, specifically scores from the Peabody Picture Vocabulary Test. This test measures receptive vocabulary and is widely used in psychological and educational assessments. Let's load the data and examine its structure:
+The ppvt dataset included in cNORM contains data on vocabulary development over age, specifically scores from the Peabody Picture Vocabulary Test (Version 4, German adaption by A. Lenhard et al., 2015). This test measures receptive vocabulary and is widely used in psychological and educational assessments. Let's load the data and examine its structure:
 
 ```{r fig0, fig.height = 4, fig.width = 7}
 library(cNORM)
@@ -85,7 +83,7 @@ max(ppvt$raw)
 plot(ppvt$age, ppvt$raw, main="PPVT Raw Scores by Age", xlab="Age", ylab="Raw Score")
 ```
 
-The development over age shows a strong curvilinear trajectory, which is typical for vocabulary development. We observe a rapid increase in scores during early childhood, followed by a more gradual increase in later years. The dataset contains several columns including background variables, a raw score variable, age, and age group. We will use the continuous age variable for modeling the vocabulary development, initially without using stratification or weighting.
+The development over age shows a strong curvilinear trajectory, which is typical for vocabulary development. We observe a rapid increase in scores during early childhood, followed by a more gradual increase in later years. The data contain several columns including background variables, a raw score variable, age, and age group. We will use the continuous age variable for modeling the vocabulary development, initially without using stratification or weighting.
 
 ### Model Fitting
 To fit the beta-binomial model to the data, we use the `cnorm.betabinomial` function. This function takes the age and raw score variables as input and returns the model object. Here's how you can fit the model:
@@ -97,8 +95,8 @@ To fit the beta-binomial model to the data, we use the `cnorm.betabinomial` func
 model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 
 # In order to use different optimization functions, you can specify different 
-# control parameters, # e.g., including methods from the optimx package. 
-# The default is the BFGS algorithm.
+# control parameters, e.g., including methods from the optimx package. 
+# The default is the L-BFGS algorithm.
 
 # To retrieve fit indices, use the 'diagnostic.betabinomial' or the 'summary' function
 # If age and raw scores are provided, R2, RMSE and bias are computed in comparison
@@ -107,9 +105,9 @@ summary(model.betabinomial)
 
 ```
 
-By default, the function fits a polynomial of degree 3 for both $\mu$ and $\sigma$. You can specify the degrees of the polynomials using the `degree_mu` and `degree_sigma` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
+By default, the function fits a polynomial of degree 3 for both $\alpha$ and $\beta$, but it can as well resort to $\mu$ and $\sigma$ by setting 'mode' to 1. You can specify the degrees of the polynomials using the `alpha` and `beta` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
 
-`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot(model, age, score)` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the predictNorm.betabinomial function and provide the model object together with a vector for age and raw scores:
+`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot(model, age, score)` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the 'predict' function and provide the model object together with a vector for age and raw scores:
 
 ```{r}
 # Predict norm scores for new data. Since we used the default T-score scaling,
@@ -120,19 +118,19 @@ predict(model.betabinomial, c(8.9, 10.1, 9.3, 8.7), c(123, 98, 201, 165))
 
 
 ### Norm table generation
-Norm tables can be generated with the `normTable.betabinomial` function. The function takes the model object and a vector of ages for which you want to generate norm scores. If available, reliability can be specified to compute confidence intervals as well. By default, the function limits the results to +/- 3 standard deviations.
+Norm tables can be generated with the `normTable` or 'normTable.betabinomial' function. The function takes the model object and a vector of ages for which you want to generate norm scores. If available, reliability can be specified to compute confidence intervals as well. By default, the function limits the results to +/- 3 standard deviations.
 
 ```{r}
 # Generate norm tables for age 2, 3 and 4 and compute confidence intervals with a 
 # reliability of .9. The output is by default limited to +/- 3 standard deviations.
-tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4), reliability=0.9)
+tables <- normTable(model = model.betabinomial, A = c(2, 3, 4), reliability=0.9)
 head(tables[[1]]) # head is used to show only the first few rows of the table
 ```
 
 These norm tables provide the raw scores (x), their probabilities (Px), cumulative probabilities (Pcum), percentiles, z-scores, and norm scores (in this case, T-scores) and in this specific case the confidence intervals for the norm score and the percentiles for each age. This allows for the interpretation of an individual's raw score in relation to their age group.
 
 ### Post stratification and weighting
-In modeling with the beta binomial function, just like in `cnorm`, weights can be applied as a means for post-stratification. Post-stratification is a technique used to adjust the sample data to better represent the population, which can help correct for sampling biases. Please use the raking function `computeWeights`. Here's an example for the ppvt dataset:
+In modeling with the beta binomial function, just like in `cnorm`, weights can be applied as a means for post-stratification. Post-stratification is a technique used to adjust the sample data to better represent the population, which can help correct for sampling biases. Please use the raking function `computeWeights`. Here's an example for the 'ppvt' dataset:
 
 ```{r fig2, fig.height = 4, fig.width = 7}
 margins <- data.frame(variables = c("sex", "sex",
