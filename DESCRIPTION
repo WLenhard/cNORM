@@ -20,7 +20,7 @@ Description: A comprehensive toolkit for generating continuous test norms in
     provides several advantages: It minimizes deviations from representativeness 
     in subsamples, interpolates between discrete levels of explanatory variables, 
     and significantly reduces the required sample size compared to conventional 
-    nomring per age group. cNORM enables graphical and analytical evaluation of 
+    norming per age group. cNORM enables graphical and analytical evaluation of 
     model fit, accommodates a wide range of scales including those with negative 
     and descending values, and even supports conventional norming. It generates 
     norm tables including confidence intervals. It also includes methods for 
