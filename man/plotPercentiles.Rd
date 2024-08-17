@@ -43,7 +43,7 @@ data preparation is used (default)}
 
 \item{title}{custom title for plot}
 
-\item{points}{Logical indicating whether to plot the data points. Default is FALSE.}
+\item{points}{Logical indicating whether to plot the data points. Default is TRUE.}
 }
 \description{
 The function plots the norm curves based on the regression model against

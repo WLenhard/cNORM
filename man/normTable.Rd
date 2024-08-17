@@ -69,6 +69,11 @@ norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
   minNorm = 25, maxNorm = 75,
   step = 1, minRaw = 0, maxRaw = 26
 )
+
+# conventional norming, set age to arbitrary value
+model <- cnorm(raw=elfe$raw)
+normTable(0, model)
+
 }
 \references{
 Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.

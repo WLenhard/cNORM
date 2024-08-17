@@ -74,6 +74,8 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       axis.text = element_text(size = 10),
       legend.position = "right",
       legend.title = element_text(size = 12, face = "bold"),
@@ -111,16 +113,15 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 #'
 #' @examples
 #' # Load example data set, compute model and plot results
-#' \dontrun{
+#'
 #' # Taylor polynomial model
 #' model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plot(model, "norm")
 #'
-#' # Beta binomial models
-#' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+#' # Beta binomial models; maximum number of items in elfe is n = 28
+#' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 #' plotNorm(model.bb, age = elfe$group, score = elfe$raw)
 #'
-#' }
 #'
 #' @import ggplot2
 #' @export
@@ -378,6 +379,8 @@ plotNormCurves <- function(model,
     theme(
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       axis.title = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       axis.text = element_text(size = 10),
       legend.position = "right",
       legend.title = element_text(size = 12, face = "bold"),
@@ -422,7 +425,7 @@ plotNormCurves <- function(model,
 #' f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
 #' data preparation is used (default)
 #' @param title custom title for plot
-#' @param points Logical indicating whether to plot the data points. Default is FALSE.
+#' @param points Logical indicating whether to plot the data points. Default is TRUE.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
 #' # Load example data set, compute model and plot results
@@ -619,10 +622,10 @@ plotPercentiles <- function(model,
   if (points) {
     if(is.null(age)){
       p <- p + geom_point(data = data, aes(x = .data[[group]], y = .data[[raw]]),
-                        color = "black", alpha = 0.2, size = 1)
+                        color = "black", alpha = 0.2, size = .6)
     }else{
       p <- p + geom_point(data = data, aes(x = .data$age, y = .data[[raw]]),
-                          color = "black", alpha = 0.2, size = 1)
+                          color = "black", alpha = 0.2, size = .6)
     }
   }
 
@@ -631,6 +634,8 @@ plotPercentiles <- function(model,
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       axis.text = element_text(size = 10),
       legend.position = "right",
       legend.title = element_text(size = 12, face = "bold"),
@@ -775,6 +780,8 @@ plotDensity <- function(model,
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       axis.title = element_text(size = 12, face = "bold"),
       axis.text = element_text(size = 10),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       legend.position = "right",
       legend.title = element_text(size = 12, face = "bold"),
       legend.text = element_text(size = 10),
@@ -808,7 +815,8 @@ plotDensity <- function(model,
 #' @examples
 #' # Load example data set, compute model and plot results
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotPercentileSeries(result, start=1, end=5, group="group")
+#' plotPercentileSeries(result, start=4, end=6)
+#'
 #' @family plot
 plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
@@ -949,9 +957,6 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' - For type 6 (p-values), values below the significance level (typically 0.05)
 #'   suggest significant improvement with added predictors.
 #'
-#' The R2 cutoff specified in the bestModel function is displayed as a dashed line
-#' where applicable.
-#'
 #' @note
 #' It's important to balance statistical measures with practical considerations and
 #' to visually inspect the model fit using functions like \code{plotPercentiles}.
@@ -959,7 +964,6 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' @seealso \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
 #'
 #' @examples
-#' \dontrun{
 #' # Compute model with example data and plot information function
 #' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotSubset(cnorm.model)
@@ -969,7 +973,6 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #'
 #' # Plot RMSE against number of predictors
 #' plotSubset(cnorm.model, type = 3)
-#' }
 #'
 #' @import ggplot2
 #' @export
@@ -1010,8 +1013,10 @@ plotSubset <- function(model, type = 0) {
     theme(
       plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
       axis.title = element_text(face = "bold", size = 12),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       axis.text = element_text(size = 10),
-      legend.position = "bottom",
+      legend.position = "none",
       legend.title = element_blank(),
       legend.text = element_text(size = 10),
       panel.grid.major = element_line(color = "gray90"),
@@ -1033,7 +1038,6 @@ plotSubset <- function(model, type = 0) {
       labs(title = "Information Function: Mallows's Cp",
            x = "Adjusted R2",
            y = "log-transformed Mallows's Cp") +
-      geom_vline(aes(xintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
       scale_color_manual(values = custom_colors)
   } else if (type == 2) {
     p <- p +
@@ -1042,7 +1046,6 @@ plotSubset <- function(model, type = 0) {
       labs(title = "Information Function: BIC",
            x = "Adjusted R2",
            y = "Bayesian Information Criterion (BIC)") +
-      geom_vline(aes(xintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
       scale_color_manual(values = custom_colors)
   } else if (type == 3) {
     p <- p +
@@ -1085,12 +1088,11 @@ plotSubset <- function(model, type = 0) {
       labs(title = "Information Function: Adjusted R2",
            x = "Number of Predictors",
            y = "Adjusted R2") +
-      geom_hline(aes(yintercept = model$cutoff, color = "Cutoff Value"), linetype = "dashed", size = 1) +
       scale_color_manual(values = custom_colors)
   }
 
   # Add legend title
-  p <- p + labs(color = "")
+   p <- p + labs(color = "")
 
   return(p)
 }

@@ -681,6 +681,8 @@ plot.cnormBetaBinomial <- function(x, ...) {
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
       axis.text = element_text(size = 10),
       legend.position = "right",
       legend.title = element_text(size = 12, face = "bold"),
@@ -801,9 +803,9 @@ diagnostics.betabinomial <- function(model,
   rmse <- NA
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
-    data <- data.frame(age = age, raw = score)
+
     if (length(age) / length(unique(age)) > 50) {
-      names(data) <- c("group", "raw")
+      data <- data.frame(group = age, raw = score)
       data <- rankByGroup(
         data = data,
         raw = "raw",
@@ -812,6 +814,7 @@ diagnostics.betabinomial <- function(model,
       )
       norm_scores <- predict(model, data$group, data$raw)
     } else{
+      data <- data.frame(age = age, raw = score)
       data$groups <- getGroups(age)
       width <- (max(age) - min(age)) / length(unique(data$groups))
       data <- rankBySlidingWindow(
@@ -1242,7 +1245,7 @@ cnorm.betabinomial <- function(age,
 #' summary(model)
 #'
 #' # Including R-squared, RMSE, and bias in the summary:
-#' summary(model, age = ppvt$age, raw = ppvt$raw)
+#' summary(model, age = ppvt$age, score = ppvt$raw)
 #' }
 #' @seealso \code{\link{cnorm.betabinomial}}, \code{\link{diagnostics.betabinomial}}
 #'

@@ -62,16 +62,11 @@ getNormCurve <-
     return(curve)
   }
 
-#' Predict single raw value
+#' Predict raw values
 #'
 #' Most elementary function to predict raw score based on Location (L, T score),
 #' Age (grouping variable) and the coefficients from a regression model.
-#' WARNING! This function, and all functions  depending on it, only works with regression
-#' functions including L, A and interactions. Manually adding predictors to bestModel via the
-#' predictors parameter is currently incompatible.
-#' In that case, and if you are primarily interested on fitting a complete data set,
-#' rather user the predict function of the stats:lm package on the ideal model solution.
-#' You than have to provide a prepared data frame with the according input variables.
+#'
 #' @param norm The norm score, e. g. a specific T score or a vector of scores
 #' @param age The age value or a vector of scores
 #' @param coefficients The a cnorm object or the coefficients from the regression model
@@ -85,8 +80,6 @@ getNormCurve <-
 #' model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' predictRaw(35, 3.5, model)
 #'
-#' #' or use vectors, here you will get a data.frame
-#' predictRaw(c(35, 40, 45), c(2, 2.5, 3), model)
 #'
 #' @family predict
 #' @export
@@ -98,73 +91,60 @@ predictRaw <-
              maxRaw = Inf) {
 
     if(inherits(coefficients, "cnorm")){
-      coefficients <- coefficients$model$coefficients
+      coef <- coefficients$model$coefficients
     }else if(inherits(coefficients, "cnormModel")){
-      coefficients <- coefficients$coefficients
+      coef <- coefficients$coefficients
+    }else{
+      coef <- coefficients
     }
 
-    score.matrix <- matrix(nrow = length(norm), ncol = length(age), dimnames = list(norm, age))
-
-
-    for(no in 1:nrow(score.matrix)){
-    # first intercept
-    coef <- coefficients
-    predict <- 0
-
-    i <- 1
-    while (i <= length(coef)) {
-      nam <- strsplit(names(coef[i]), "")
-      p <- coef[[i]][1]
-
-      # first variable, either L or A
-      if (length(nam[[1]]) < 2 | length(nam[[1]]) > 4) {
-        # nothing to do
-      } else if (nam[[1]][1] == "L") {
-        j <- 1
-        while (j <= nam[[1]][2]) {
-          p <- p * norm[[no]]
-          j <- j + 1
-        }
-      } else if (nam[[1]][1] == "A") {
-        j <- 1
-        while (j <= nam[[1]][2]) {
-          p <- p * age
-          j <- j + 1
-        }
-      }
-
-      # in case, second factor is present
-      if (length(nam[[1]]) == 4) {
-        j <- 1
-        while (j <= nam[[1]][4]) {
-          p <- p * age
-          j <- j + 1
-        }
-      }
-
-      # add up
-      predict <- predict + p
-      i <- i + 1
+    if(length(age) == 1 && length(norm) > 1){
+      age <- rep(age, length(norm))
+    }else if(length(norm) == 1 && length(age) > 1){
+      norm <- rep(norm, length(age))
     }
 
 
-    score.matrix[no,] <- predict
-    }
+    k <- max(as.numeric(gsub("L([0-9]+).*", "\\1", names(coef)[grep("^L[0-9]+", names(coef))])))
+    t <- as.numeric(gsub(".*A([0-9]+)$", "\\1", names(coef)[grep("A[0-9]+$", names(coef))]))
+    if(length(t) > 0)
+      t = max(t)
+    else
+      t = 0
 
-    if(nrow(score.matrix)==1&&ncol(score.matrix)==1){
-      if(score.matrix[1, 1] > maxRaw)
-        return(maxRaw)
-      else if(score.matrix[1, 1] < minRaw)
-        return(minRaw)
-      return(score.matrix[1, 1])
-    }   else{
-      score.matrix[score.matrix > maxRaw] <- maxRaw
-      score.matrix[score.matrix < minRaw] <- minRaw
-      return(score.matrix)
-    }
+    # If k or t is -Inf (i.e., no L or A terms), set them to 0
+    k <- if(is.finite(k)) k else 0
+    t <- if(is.finite(t)) t else 0
 
+    # Prepare the matrix for new data
+    X_new <- prepare_matrix(norm, age, k, t)
 
+    # Get all variable names from the model
+    all_vars <- c("Intercept", colnames(X_new))
 
+    # Identify which variables are in the model
+    model_vars <- names(coef)
+    model_vars[[1]] <- "Intercept"
+
+    # Create a matrix with all possible variables, filled with zeros
+    X_new_full <- matrix(0, nrow = nrow(X_new), ncol = length(all_vars))
+    colnames(X_new_full) <- all_vars
+
+    # Fill in the values for the variables that are present in X_new
+    X_new_full[, colnames(X_new)] <- X_new
+
+    # Add the intercept column
+    X_new_full[, "Intercept"] <- 1
+
+    # Subset X_new_full to include only the variables that are in the model
+    X_new_selected <- X_new_full[, model_vars]
+
+    # Make predictions
+    predictions <- as.vector(X_new_selected %*% coef)
+    predictions[predictions < minRaw] <- minRaw
+    predictions[predictions > maxRaw] <- maxRaw
+
+    return(predictions)
   }
 
 #' Create a norm table based on model for specific age
@@ -640,7 +620,7 @@ predictNorm <-
              maxNorm = NULL, force = FALSE,
              silent = FALSE) {
 
-    if(!inherits(model, "cnormModel")&&!inherits(model, "cnorm")){
+    if(!inherits(model, "cnormModel")&&!inherits(model, "cnorm")&&!inherits(model, "cnormLasso")){
       stop("Please provide a cnorm object.")
     }
 
@@ -806,3 +786,5 @@ prettyPrint <- function(table){
 
   return(tab)
 }
+
+

@@ -267,8 +267,8 @@ predictNorm(15, 4.7, model, minNorm = 25, maxNorm = 75)
 # Predict raw score for normal score 55 and age 4.5
 predictRaw(55, 4.5, model)
 
-# ... or a matrix, if you like ...
-predictRaw(c(45, 50, 55), c(2.5, 3, 3.5, 4, 4.5), model)
+# ... or vectors, if you like ...
+predictRaw(c(40, 45, 50, 55, 60), c(2.5, 3, 3.5, 4, 4.5), model)
 
 ```
 

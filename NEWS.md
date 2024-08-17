@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.2.0,
-Date: 2023.08.09
+Date: 2023.08.17
 
 
 Changes:
@@ -22,6 +22,7 @@ Changes:
      to cnorm object)
 *    cNORM.GUI() updated
 *    datasets life, mortality and EPM removed
+*    performance optimization
 
 
 

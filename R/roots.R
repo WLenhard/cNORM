@@ -130,6 +130,7 @@ calcPolyInLBase2 <- function(raw, age, coeff, k) {
   return(coefficients)
 }
 
+
 predictNormByRoots <- function(raw, age, model, minNorm, maxNorm, polynom = NULL, force = FALSE, covariate = NULL) {
 
   if(!is.null(covariate)){

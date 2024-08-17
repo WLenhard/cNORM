@@ -66,6 +66,11 @@ table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28)
 
 # additionally compute confidence intervals
 table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+
+# conventional norming, set age to arbitrary value
+model <- cnorm(raw=elfe$raw)
+rawTable(0, model)
+
 }
 \references{
 Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.

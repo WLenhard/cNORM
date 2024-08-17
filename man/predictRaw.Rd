@@ -2,7 +2,7 @@
 % Please edit documentation in R/predict.R
 \name{predictRaw}
 \alias{predictRaw}
-\title{Predict single raw value}
+\title{Predict raw values}
 \usage{
 predictRaw(norm, age, coefficients, minRaw = -Inf, maxRaw = Inf)
 }
@@ -25,20 +25,12 @@ the predicted raw score or a data.frame of scores in case, lists of norm scores 
 \description{
 Most elementary function to predict raw score based on Location (L, T score),
 Age (grouping variable) and the coefficients from a regression model.
-WARNING! This function, and all functions  depending on it, only works with regression
-functions including L, A and interactions. Manually adding predictors to bestModel via the
-predictors parameter is currently incompatible.
-In that case, and if you are primarily interested on fitting a complete data set,
-rather user the predict function of the stats:lm package on the ideal model solution.
-You than have to provide a prepared data frame with the according input variables.
 }
 \examples{
 # Prediction of single scores
 model <- cnorm(raw = elfe$raw, group = elfe$group)
 predictRaw(35, 3.5, model)
 
-#' or use vectors, here you will get a data.frame
-predictRaw(c(35, 40, 45), c(2, 2.5, 3), model)
 
 }
 \seealso{

@@ -98,7 +98,7 @@ plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
 summary(model.betabinomial)
 
 # Prediction of norm scores for new data and generating norm tables
-predict(model.betabinomial, c(8.9, 10.1), c(123, 98))
+predict(model.betabinomial, c(8.9, 10.1), c(153, 121))
 tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
                                  reliability=0.9)
 ```

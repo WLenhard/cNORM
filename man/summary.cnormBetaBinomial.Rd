@@ -42,7 +42,7 @@ model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 summary(model)
 
 # Including R-squared, RMSE, and bias in the summary:
-summary(model, age = ppvt$age, raw = ppvt$raw)
+summary(model, age = ppvt$age, score = ppvt$raw)
 }
 }
 \seealso{

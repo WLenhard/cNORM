@@ -456,3 +456,69 @@ buildCnormObject <- function(data, model){
   class(result) <- "cnorm"
   return(result)
 }
+
+#' Prepare design matrix for LASSO regression
+#'
+#' @description
+#' This function prepares the design matrix, including powers and interaction terms of location and age.
+#'
+#' @param location Numeric vector of location values (norm scores).
+#' @param age Numeric vector of age values.
+#' @param k Integer. Maximum power for location terms. Default is 5.
+#' @param t Integer. Maximum power for age terms. Default is 3.
+#'
+#' @return A matrix with columns for powers of location and age, and their interactions.
+#'
+#' @details
+#' The function creates a matrix with columns for powers of location (up to k),
+#' powers of age (up to t), and their interactions. The resulting matrix has
+#' (k+1)*(t+1)-1 columns (excluding the intercept term).
+#'
+#' @note
+#' It is recommended to keep k and t below 8 to avoid numerical instability.
+#'
+#' @keywords internal
+#'
+#' @noRd
+prepare_matrix <- function(location, age, k = 5, t = 3) {
+  # Ensure location and age are numeric vectors of the same length
+  if (!is.numeric(location) || !is.numeric(age) || length(location) != length(age)) {
+    stop("location and age must be numeric vectors of the same length")
+  }
+
+  # Ensure k and t are positive integers
+  if (!is.numeric(k) || !is.numeric(t) || k < 0 || t < 0 || k != round(k) || t != round(t)) {
+    stop("k and t must be positive integers and may not exceed 8")
+  }
+
+  if(k>8||t>8)
+    warning("k and t should not exceed 8")
+
+  n <- length(location)
+
+  # Create matrix for powers and interaction terms
+  interaction_matrix <- matrix(NA, nrow = n, ncol = (k + 1)*(t+1) - 1)
+  colnames <- rep("", (k + 1)*(t+1) - 1)
+  col_index <- 1
+  for (i in 0:k) {
+    for (j in 0:t) {
+      if(i==0 && j == 0) next
+
+      interaction_matrix[, col_index] <- location^i * age^j
+
+      if(i>0&&j>0)
+        colnames[col_index] <- paste0("L", i, "A", j)
+      else if(i>0)
+        colnames[col_index] <- paste0("L", i)
+      else
+        colnames[col_index] <- paste0("A", j)
+
+      col_index <- col_index + 1
+    }
+  }
+  colnames(interaction_matrix) <- colnames
+  attr(interaction_matrix, "k") <- k
+  attr(interaction_matrix, "t") <- t
+
+  return(interaction_matrix)
+}
