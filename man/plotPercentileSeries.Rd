@@ -41,7 +41,8 @@ additional model check to determine the best fitting model. Please have a look a
 \examples{
 # Load example data set, compute model and plot results
 result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotPercentileSeries(result, start=1, end=5, group="group")
+plotPercentileSeries(result, start=4, end=6)
+
 }
 \seealso{
 plotPercentiles

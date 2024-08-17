@@ -25,7 +25,7 @@ This is a minor release of an existing package. In this version I have:
 
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. There were NOTES on potential link and DOI issues in DESCRIPTION, which are correct, however.
+There were no ERRORs, WARNINGs or NOTEs.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.

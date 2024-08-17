@@ -50,16 +50,15 @@ the regression line. Applicable for Taylor polynomial models.
 }
 \examples{
 # Load example data set, compute model and plot results
-\dontrun{
+
 # Taylor polynomial model
 model <- cnorm(raw = elfe$raw, group = elfe$group)
 plot(model, "norm")
 
-# Beta binomial models
-model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
+# Beta binomial models; maximum number of items in elfe is n = 28
+model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 plotNorm(model.bb, age = elfe$group, score = elfe$raw)
 
-}
 
 }
 \seealso{

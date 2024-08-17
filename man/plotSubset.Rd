@@ -40,16 +40,12 @@ The function generates different plots to help in model selection:
 - For type 5 (F-test), higher values suggest significant improvement with added predictors.
 - For type 6 (p-values), values below the significance level (typically 0.05)
   suggest significant improvement with added predictors.
-
-The R2 cutoff specified in the bestModel function is displayed as a dashed line
-where applicable.
 }
 \note{
 It's important to balance statistical measures with practical considerations and
 to visually inspect the model fit using functions like \code{plotPercentiles}.
 }
 \examples{
-\dontrun{
 # Compute model with example data and plot information function
 cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 plotSubset(cnorm.model)
@@ -59,7 +55,6 @@ plotSubset(cnorm.model, type = 2)
 
 # Plot RMSE against number of predictors
 plotSubset(cnorm.model, type = 3)
-}
 
 }
 \seealso{
