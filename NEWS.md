@@ -2,6 +2,18 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.3.0,
+Date: in preparation
+
+
+Changes:
+
+*    Starting work for next version
+*    Starting work on inclusion of regularized Taylor models via glmnet
+  
+
+
+
 ### Version in 3.2.0,
 Date: 2023.08.17
 

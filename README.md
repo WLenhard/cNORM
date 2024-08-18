@@ -90,7 +90,6 @@ model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, alpha = 4)
 
 # Plot percentile curves and display manifest and modelled norm scores.
-# Normwerte plotten
 plot(model.betabinomial, ppvt$age, ppvt$raw)
 plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
 
