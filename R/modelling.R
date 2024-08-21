@@ -22,7 +22,8 @@
 #' @param predictors List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.
 #' @param force.in Variables forcibly included in the regression.
 #' @param weights Optional case weights. If set to FALSE, default weights (if any) are ignored.
-#' @param plot If TRUE (default), displays a percentile plot of the model.
+#' @param plot If TRUE (default), displays a percentile plot of the model and information about the
+#'             regression object. FALSE turns off plotting and report.
 #' @return The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
 #'
@@ -145,9 +146,10 @@ bestModel <- function(data,
   big <- FALSE
   nvmax <- (t + 1) * (k + 1) - 1 + length(predictors)
 
-  if (nvmax > 25) {
+  if (nvmax > 40) {
     big <- TRUE
-    message("The computation might take some time ...")
+    if(plot)
+      message("The computation might take some time ...")
   }
 
 
@@ -312,7 +314,11 @@ bestModel <- function(data,
   }
 
   bestformula$report <- report
-  cat(report, sep = "\n")
+
+  if (plot) {
+    cat(report, sep = "\n")
+  }
+
 
   if (anyNA(bestformula$coefficients)) {
     warning(
@@ -326,14 +332,16 @@ bestModel <- function(data,
     )
   }
 
+  if(plot){
   if (!is.null(data$A1)) {
-    message(
+    cat(
       "\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit."
     )
   } else{
-    message(
+    cat(
       "\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter."
     )
+  }
   }
 
   class(bestformula) <- "cnormModel"

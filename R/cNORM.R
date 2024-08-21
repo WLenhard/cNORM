@@ -175,7 +175,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @param t The age power parameter (max = 6). If not set, it uses k and if both
 #' parameters are NULL, k is set to 3, since age trajectories are most often well
 #' captured by cubic polynomials.
-#' @param plot Default TRUE; plot the raw data and the regression model
+#' @param plot Default TRUE; plots the regression model and prints report
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
@@ -259,6 +259,8 @@ cnorm <- function(raw = NULL,
     k <- t
   }
 
+  silent <- !plot
+
   if(is.numeric(raw)&&is.numeric(group)){
     if(length(raw)!=length(group)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
@@ -277,7 +279,9 @@ cnorm <- function(raw = NULL,
       # removing missing cases
       data <- data[complete.cases(data), ]
 
-      message("Ranking data with sliding window ...")
+      if(plot)
+        message("Ranking data with sliding window ...")
+
       data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
 
       # again remove missing cases; might occur due to weighting
@@ -303,13 +307,13 @@ cnorm <- function(raw = NULL,
     if(is.numeric(age)){
       if(length(raw)!=length(age)){
         warning("Length of the age vector does not match the raw score vector, ignoring age information.")
-        data <- computePowers(data, k = k, t = t)
+        data <- computePowers(data, k = k, t = t, silent = silent)
       }else{
         data$age <- age
-        data <- computePowers(data, k = k, t = t, age = age)
+        data <- computePowers(data, k = k, t = t, age = age, silent = silent)
       }
     }else{
-      data <- computePowers(data, k = k, t = t)
+      data <- computePowers(data, k = k, t = t, silent = silent)
     }
   }
 
@@ -321,7 +325,7 @@ cnorm <- function(raw = NULL,
       data <- data.frame(raw = raw, weights = weights)
 
     data <- rankByGroup(data, raw=data$raw, group=FALSE, scale=scale, weights=data$weights, descend = descend, method = method)
-    data <- computePowers(data, k = k, t = t)
+    data <- computePowers(data, k = k, t = t, silent = silent)
     model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2, plot = plot)
 
     result <- list(data = data, model = model)
@@ -346,7 +350,7 @@ cnorm <- function(raw = NULL,
 
     message("Ranking data with sliding window ...")
     data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
-    data <- computePowers(data, k = k, t = t)
+    data <- computePowers(data, k = k, t = t, silent = silent)
   }else{
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }

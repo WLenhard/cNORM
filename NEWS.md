@@ -8,7 +8,8 @@ Date: in preparation
 
 Changes:
 
-*    Starting work for next version
+*    checkConsistency performance improvement; now runs 100 times faster
+*    reduced number of messages
 *    Starting work on inclusion of regularized Taylor models via glmnet
   
 
