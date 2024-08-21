@@ -444,12 +444,16 @@ checkConsistency <- function(model,
                              maxNorm = NULL,
                              minRaw = NULL,
                              maxRaw = NULL,
-                             stepAge = 1,
+                             stepAge = NULL,
                              stepNorm = 1,
                              warn = FALSE,
                              silent = FALSE) {
   if (inherits(model, "cnorm")) {
     model <- model$model
+  }
+
+  if (!inherits(model, "cnormModel")) {
+    stop("Please provide a cnorm model.")
   }
 
   if (is.null(minAge)) {
@@ -475,38 +479,29 @@ checkConsistency <- function(model,
   if (is.null(maxRaw)) {
     maxRaw <- model$maxRaw
   }
+
+  if (is.null(stepAge)) {
+    stepAge <- (maxAge - minAge) / 2
+  }
+
   descend <- model$descend
 
   i <- minAge
   major <- 0
   results <- c()
+  norm <- seq(minNorm, maxNorm, by = stepNorm)
+  tolerance <- (maxRaw - minRaw) / 500
 
   while (i <= maxAge) {
-    norm <-
-      normTable(
-        i,
-        model,
-        minNorm = minNorm,
-        maxNorm = maxNorm,
-        minRaw = minRaw,
-        maxRaw = maxRaw,
-        step = stepNorm,
-        monotonuous = FALSE
-      )
+    raw <- predictRaw(norm, rep(i, length(norm)), model$coefficients)
     correct <- TRUE
+
     if (descend)
-      correct <- !is.unsorted(-norm$raw)
+      correct <- all(diff(raw) < tolerance)
     else
-      correct <- !is.unsorted(norm$raw)
+      correct <- all(diff(raw) > -tolerance)
 
     if (!correct) {
-      if (!silent) {
-        message(paste0(
-          "Violation of monotonicity at age ",
-          round(i, digits = 1),
-          "."
-        ))
-      }
       results <-
         c(results,
           paste0("Violation of monotonicity at age ", round(i, digits = 1), "."))
@@ -518,21 +513,17 @@ checkConsistency <- function(model,
 
   if (major == 0) {
     if (!silent) {
-      message("\nNo violations of model consistency found.")
+      message("No relevant violations of model consistency found.")
     }
     return(FALSE)
   } else {
     if (!silent) {
       message(
         paste0(
-          "\nAt least ",
-          major,
-          " violations of monotonicity found within the specified range of age and norm score.",
-          "Use 'plotNormCurves' to visually inspect the norm curve or 'plotDerivative' to ",
+          "Violations of monotonicity found within the specified range of age and norm score.",
+          "Use 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to ",
           "identify regions violating the consistency. ",
-          "Rerun the modeling with adjusted parameters or restrict the valid value range accordingly. ",
-          "Be careful with horizontal and vertical extrapolation."
-        )
+          "Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.")
       )
       message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
     }
