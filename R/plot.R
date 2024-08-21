@@ -1181,10 +1181,17 @@ plotDerivative <- function(model,
     stepAge <- (maxAge - minAge)/100
   }
 
+  if(order <=0 )
+    stop("Order of derivative must be a positive integer.")
+
   rowS <- seq(minNorm, maxNorm, by = stepNorm)
   colS <- seq(minAge, maxAge, by = stepAge)
 
   coeff <- derive(model, order)
+  if(length(coeff) == 0){
+    stop("Derivative of order ", order, " not available for this model.")
+  }
+
   cat(paste0(rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
   print(coeff)
 
@@ -1197,18 +1204,32 @@ plotDerivative <- function(model,
   custom_palette <- c("#FF0000", "#FF4000", "#FF8000", "#FFBF00", "#FFFF00",
                       "#80FF00", "#00FF00", "#00FF80", "#00FFFF",
                       "#0080FF", "#0000FF", "#4B0082", "#8B00FF")
+  theme_custom <- theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+      axis.title = element_text(face = "bold", size = 12),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
+      axis.text = element_text(size = 8),
+      legend.position = "right",
+      legend.text = element_text(size = 8),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
   p <- ggplot(dev2, aes(x = .data$Y, y = .data$X, z = .data$Z)) +
     geom_tile(aes(fill = .data$Z)) +
     geom_contour(color = "white", alpha = 0.5) +
     scale_fill_gradientn(colors = custom_palette) +
-    labs(title = paste("Slope of the Regression Function - ", desc),
+    labs(title = "Slope of the Regression Function",
          x = "Explanatory Variable (Age)",
-         y = "Norm Score",
+         y = paste("Norm Score - ", desc),
          fill = "Derivative") +
-    theme_minimal() +
+    theme_custom +
     theme(legend.position = "right")
 
-  p <- p + geom_contour(aes(z = .data$Z), color = "black", linewidth = .5, breaks = 0, linetype = "dashed")
+  if(min(dev2$Z)<0 && max(dev2$Z)>0)
+    p <- p + geom_contour(aes(z = .data$Z), color = "black", linewidth = 0.5, breaks = 0, linetype = "dashed")
 
   return(p)
 }
