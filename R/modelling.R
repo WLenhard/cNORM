@@ -29,6 +29,7 @@
 #'
 #' # Example with sample data
 #' \dontrun{
+#' # It is not recommende to use this function. Rather use 'cnorm' instead.
 #' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' plotSubset(model)
@@ -402,8 +403,8 @@ printSubset <- function(x, ...) {
 #' Check the consistency of the norm data model
 #'
 #' While abilities increase and decline over age, within one age group, the
-#' norm scores always have to show a linear increase or decrease with increasing raw
-#' scores. Violations of this assumption are a strong indication for problems
+#' norm scores always have to show a monotonic increase or decrease with increasing raw
+#' scores. Violations of this assumption are an indication for problems
 #' in modeling the relationship between raw and norm scores. There are
 #' several reasons, why this might occur:
 #' \enumerate{
@@ -416,14 +417,18 @@ printSubset <- function(x, ...) {
 #'   \item The data cannot be modeled with Taylor polynomials, or you need
 #'   another power parameter (k) or R2 for the model.
 #'  }
+#'
 #'  In general, extrapolation (point 1 and 2) can carefully be done to a
 #'  certain degree outside the original sample, but it should in general
-#'  be handled with caution.
+#'  be handled with caution. Please note that at extreme values, the models
+#'  most likely become independent and it is thus recommended to restrict the
+#'  norm score range to the relevant range of abilities, e.g. +/- 2.5 SD via
+#'  the minNorm and maxNorm parameter.
 #'
 #' @param model The model from the bestModel function or a cnorm object
 #' @param minAge Age to start with checking
 #' @param maxAge Upper end of the age check
-#' @param stepAge Stepping parameter for the age check, usually 1 or 0.1; lower
+#' @param stepAge Stepping parameter for the age check.
 #' values indicate higher precision / closer checks
 #' @param minNorm Lower end of the norm value range
 #' @param maxNorm Upper end of the norm value range
@@ -437,12 +442,10 @@ printSubset <- function(x, ...) {
 #' @param silent turn off messages
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' modelViolations <- checkConsistency(result,
-#'   minAge = 2, maxAge = 5, stepAge = 0.1,
-#'   minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw = 28, stepNorm = 1
-#' )
-#' plotDerivative(result, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
+#' model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
+#' modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
+#' plotDerivative(model, minNorm = 25, maxNorm = 75)
+#'
 #' @export
 #' @family model
 checkConsistency <- function(model,
@@ -489,51 +492,46 @@ checkConsistency <- function(model,
   }
 
   if (is.null(stepAge)) {
-    stepAge <- (maxAge - minAge) / 2
+    stepAge <- (maxAge - minAge) / 3
   }
 
   descend <- model$descend
 
   i <- minAge
-  major <- 0
   results <- c()
   norm <- seq(minNorm, maxNorm, by = stepNorm)
-  tolerance <- (maxRaw - minRaw) / 500
 
   while (i <= maxAge) {
-    raw <- predictRaw(norm, rep(i, length(norm)), model$coefficients)
+    raw <- predictRaw(norm, rep(i, length(norm)), model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
     correct <- TRUE
 
     if (descend)
-      correct <- all(diff(raw) < tolerance)
+      correct <- all(diff(raw) <= 0)
     else
-      correct <- all(diff(raw) > -tolerance)
+      correct <- all(diff(raw) >= 0)
 
     if (!correct) {
-      results <-
-        c(results,
-          paste0("Violation of monotonicity at age ", round(i, digits = 1), "."))
-      major <- major + 1
+      results <- c(results, round(i, digits = 1))
     }
 
     i <- i + stepAge
   }
 
-  if (major == 0) {
+  if (length(results) == 0) {
     if (!silent) {
-      message("No relevant violations of model consistency found.")
+      cat("No relevant violations of model consistency found.\n")
     }
     return(FALSE)
   } else {
     if (!silent) {
       message(
         paste0(
-          "Violations of monotonicity found within the specified range of age and norm score.",
-          "Use 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to ",
-          "identify regions violating the consistency. ",
-          "Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.")
+          "Violations of monotonicity found within the specified range of age and norm score at age points: ", paste(results, sep=" "),
+          "\n\nUse 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to identify regions violating the consistency. Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.\n")
       )
-      message(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+
+      cat(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
+      cat("\n")
     }
     return(TRUE)
   }

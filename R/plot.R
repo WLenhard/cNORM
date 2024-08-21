@@ -1144,7 +1144,7 @@ plotDerivative <- function(model,
                            maxAge = NULL,
                            minNorm = NULL,
                            maxNorm = NULL,
-                           stepAge = 0.2,
+                           stepAge = NULL,
                            stepNorm = 1,
                            order = 1) {
 
@@ -1177,6 +1177,10 @@ plotDerivative <- function(model,
     maxNorm <- model$maxL1
   }
 
+  if (is.null(stepAge)) {
+    stepAge <- (maxAge - minAge)/100
+  }
+
   rowS <- seq(minNorm, maxNorm, by = stepNorm)
   colS <- seq(minAge, maxAge, by = stepAge)
 
@@ -1203,6 +1207,8 @@ plotDerivative <- function(model,
          fill = "Derivative") +
     theme_minimal() +
     theme(legend.position = "right")
+
+  p <- p + geom_contour(aes(z = .data$Z), color = "black", linewidth = .5, breaks = 0, linetype = "dashed")
 
   return(p)
 }

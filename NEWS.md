@@ -9,6 +9,7 @@ Date: in preparation
 Changes:
 
 *    checkConsistency performance improvement; now runs 100 times faster
+*    visualization improvement in 'plotDerivative'
 *    reduced number of messages
 *    Starting work on inclusion of regularized Taylor models via glmnet
   
