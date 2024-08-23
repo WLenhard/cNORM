@@ -722,6 +722,8 @@ plotDensity <- function(model,
     maxRaw <- if(is_beta_binomial) attr(model$result, "max") else model$maxRaw
   }
 
+
+
   if (is.null(group)) {
     if(is_beta_binomial) {
       age_min <- attr(model$result, "ageMin")
@@ -767,6 +769,8 @@ plotDensity <- function(model,
   } else {
     title <- "Density Functions (Taylor Polynomial)"
   }
+
+  matrix <- matrix[complete.cases(matrix), ]
   p <- ggplot(matrix, aes(x = .data$raw, y = .data$density, color = factor(group))) +
     geom_line(size = 1, na.rm = TRUE) +
     scale_color_viridis_d(name = "Age",
@@ -905,7 +909,7 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                           percentiles = percentiles,
                                           scale = NULL,
                                           group = group,
-                                          title = paste0("Observed and Predicted Percentiles\nModel with ", bestformula$subsets$numberOfTerms[[start]], " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
+                                          title = paste0("Observed and Predicted Percentiles\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
     )
 
     if (!is.null(filename)) {
@@ -1145,7 +1149,7 @@ plotDerivative <- function(model,
                            minNorm = NULL,
                            maxNorm = NULL,
                            stepAge = NULL,
-                           stepNorm = 1,
+                           stepNorm = NULL,
                            order = 1) {
 
   if(inherits(model, "cnorm")){
@@ -1179,6 +1183,10 @@ plotDerivative <- function(model,
 
   if (is.null(stepAge)) {
     stepAge <- (maxAge - minAge)/100
+  }
+
+  if (is.null(stepNorm)) {
+    stepNorm <- (maxNorm - minNorm)/100
   }
 
   if(order <=0 )

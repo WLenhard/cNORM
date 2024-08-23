@@ -10,8 +10,8 @@ plotDerivative(
   maxAge = NULL,
   minNorm = NULL,
   maxNorm = NULL,
-  stepAge = 0.2,
-  stepNorm = 1,
+  stepAge = NULL,
+  stepNorm = NULL,
   order = 1
 )
 }
