@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelling.R
 \name{bestModel}
 \alias{bestModel}
-\title{Best-fitting Regression Model Based on Powers and Interactions}
+\title{Determine Regression Model}
 \usage{
 bestModel(
   data,
@@ -14,7 +14,8 @@ bestModel(
   terms = 0,
   weights = NULL,
   force.in = NULL,
-  plot = TRUE
+  plot = TRUE,
+  extensive = TRUE
 )
 }
 \arguments{
@@ -22,7 +23,7 @@ bestModel(
 
 \item{raw}{Name of the raw score variable (default: 'raw').}
 
-\item{R2}{Adjusted R^2 stopping criterion for model building (default: 0.99).}
+\item{R2}{Adjusted R^2 stopping criterion for model building.}
 
 \item{k}{Power constant influencing model complexity (default: 4, max: 6).}
 
@@ -36,18 +37,22 @@ bestModel(
 
 \item{force.in}{Variables forcibly included in the regression.}
 
-\item{plot}{If TRUE (default), displays a percentile plot of the model.}
+\item{plot}{If TRUE (default), displays a percentile plot of the model and information about the
+regression object. FALSE turns off plotting and report.}
+
+\item{extensive}{If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones}
 }
 \value{
-The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
+The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 }
 \description{
-Computes and selects the best-fitting regression model by evaluating a series of models with increasing predictors.
-It aims to find a parsimonious model that effectively captures the variance in the data. This can be useful in
-psychometric test construction to smooth out data and reduce noise while retaining key diagnostic information.
-Model selection can be based on the number of terms or the explained variance (R^2). Setting high values for the
-number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended starting points are `terms = 5`,
-`R^2 = .99`, and `k = 4`.
+Computes Taylor polynomial regression models by evaluating a series of models with increasing predictors.
+It aims to find a consistent model that effectively captures the variance in the data. It draws on the
+regsubsets function from the leaps package and builds up to 20 models for each number of predictors, evaluates
+tese models regarding model consistency and selects consistent model with the highest R^2.
+This automatic model selection should usually be accompanied with visual inspection of the percentile plots
+and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonuos model,
+if desired.
 }
 \details{
 The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
@@ -60,6 +65,7 @@ Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid i
 
 # Example with sample data
 \dontrun{
+# It is not recommende to use this function. Rather use 'cnorm' instead.
 normData <- prepareData(elfe)
 model <- bestModel(normData)
 plotSubset(model)

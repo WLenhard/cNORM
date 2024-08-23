@@ -12,7 +12,7 @@ checkConsistency(
   maxNorm = NULL,
   minRaw = NULL,
   maxRaw = NULL,
-  stepAge = 1,
+  stepAge = NULL,
   stepNorm = 1,
   warn = FALSE,
   silent = FALSE
@@ -33,7 +33,7 @@ checkConsistency(
 
 \item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
-\item{stepAge}{Stepping parameter for the age check, usually 1 or 0.1; lower
+\item{stepAge}{Stepping parameter for the age check.
 values indicate higher precision / closer checks}
 
 \item{stepNorm}{Stepping parameter for the norm table check within age with lower
@@ -50,8 +50,8 @@ Boolean, indicating model violations (TRUE) or no problems (FALSE)
 }
 \description{
 While abilities increase and decline over age, within one age group, the
-norm scores always have to show a linear increase or decrease with increasing raw
-scores. Violations of this assumption are a strong indication for problems
+norm scores always have to show a monotonic increase or decrease with increasing raw
+scores. Violations of this assumption are an indication for problems
 in modeling the relationship between raw and norm scores. There are
 several reasons, why this might occur:
 \enumerate{
@@ -64,17 +64,20 @@ several reasons, why this might occur:
   \item The data cannot be modeled with Taylor polynomials, or you need
   another power parameter (k) or R2 for the model.
  }
- In general, extrapolation (point 1 and 2) can carefully be done to a
+}
+\details{
+In general, extrapolation (point 1 and 2) can carefully be done to a
  certain degree outside the original sample, but it should in general
- be handled with caution.
+ be handled with caution. Please note that at extreme values, the models
+ most likely become independent and it is thus recommended to restrict the
+ norm score range to the relevant range of abilities, e.g. +/- 2.5 SD via
+ the minNorm and maxNorm parameter.
 }
 \examples{
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-modelViolations <- checkConsistency(result,
-  minAge = 2, maxAge = 5, stepAge = 0.1,
-  minNorm = 25, maxNorm = 75, minRaw = 0, maxRaw = 28, stepNorm = 1
-)
-plotDerivative(result, minAge = 2, maxAge = 5, minNorm = 25, maxNorm = 75)
+model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
+modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
+plotDerivative(model, minNorm = 25, maxNorm = 75)
+
 }
 \seealso{
 Other model: 

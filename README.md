@@ -30,6 +30,12 @@ cNORM.GUI()
 # via object$data and the model via object$model.
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
+# ... and since we love pop music as much as Taylor polynomials, you
+# can also use the taylorSwift function to swiftly compute a distribution-
+# free Taylor polynomial model (which is however identical to cnorm). Here
+# with the sample dataset 'ppvt':
+model <- taylorSwift(ppvt$raw, ppvt$group)
+
 # Plot different indicators of model fit depending on the number of
 # predictors
 plot(cnorm.elfe, "subset", type=0) # plot R2

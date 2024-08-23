@@ -1,11 +1,12 @@
-#' Best-fitting Regression Model Based on Powers and Interactions
+#' Determine Regression Model
 #'
-#' Computes and selects the best-fitting regression model by evaluating a series of models with increasing predictors.
-#' It aims to find a parsimonious model that effectively captures the variance in the data. This can be useful in
-#' psychometric test construction to smooth out data and reduce noise while retaining key diagnostic information.
-#' Model selection can be based on the number of terms or the explained variance (R^2). Setting high values for the
-#' number of terms, R^2 cutoff, or `k` may lead to overfitting. Typical recommended starting points are `terms = 5`,
-#' `R^2 = .99`, and `k = 4`.
+#' Computes Taylor polynomial regression models by evaluating a series of models with increasing predictors.
+#' It aims to find a consistent model that effectively captures the variance in the data. It draws on the
+#' regsubsets function from the leaps package and builds up to 20 models for each number of predictors, evaluates
+#' tese models regarding model consistency and selects consistent model with the highest R^2.
+#' This automatic model selection should usually be accompanied with visual inspection of the percentile plots
+#' and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonuos model,
+#' if desired.
 #'
 #' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
 #' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
@@ -16,7 +17,7 @@
 #' @param data Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).
 #' @param raw Name of the raw score variable (default: 'raw').
 #' @param terms Desired number of terms in the model.
-#' @param R2 Adjusted R^2 stopping criterion for model building (default: 0.99).
+#' @param R2 Adjusted R^2 stopping criterion for model building.
 #' @param k Power constant influencing model complexity (default: 4, max: 6).
 #' @param t Age power parameter. If unset, defaults to `k`.
 #' @param predictors List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.
@@ -24,7 +25,8 @@
 #' @param weights Optional case weights. If set to FALSE, default weights (if any) are ignored.
 #' @param plot If TRUE (default), displays a percentile plot of the model and information about the
 #'             regression object. FALSE turns off plotting and report.
-#' @return The model meeting the R^2 criteria. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
+#' @param extensive If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones
+#' @return The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
 #'
 #' # Example with sample data
@@ -51,7 +53,8 @@ bestModel <- function(data,
                       terms = 0,
                       weights = NULL,
                       force.in = NULL,
-                      plot = TRUE) {
+                      plot = TRUE,
+                      extensive = TRUE) {
   # retrieve attributes
   if (is.null(raw)) {
     raw <- attr(data, "raw")
@@ -88,6 +91,14 @@ bestModel <- function(data,
     }
   }
 
+  if ((k < 1 || k > 6) & is.null(predictors)) {
+    warning(
+      "k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 5."
+    )
+    k <- 5
+  }
+
+  nvmax <- (t + 1) * (k + 1) - 1 + length(predictors)
 
   # check variable range
   if (!is.null(R2) && (R2 <= 0 || R2 >= 1)) {
@@ -95,16 +106,9 @@ bestModel <- function(data,
     R2 <- .99
   }
 
-  if (terms < 0) {
-    warning("terms parameter out of bounds. The value has to be positive. Setting to 4.")
-    terms <- 4
-  }
-
-  if ((k < 1 || k > 6) & is.null(predictors)) {
-    warning(
-      "k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 5."
-    )
-    k <- 5
+  if (terms < 0 || terms > nvmax) {
+    warning("terms parameter out of bounds. Setting to 5.")
+    terms <- 5
   }
 
   if (!(raw %in% colnames(data)) &&
@@ -145,9 +149,7 @@ bestModel <- function(data,
   }
 
   big <- FALSE
-  nvmax <- (t + 1) * (k + 1) - 1 + length(predictors)
-
-  if (nvmax > 40) {
+  if (nvmax > 50) {
     big <- TRUE
     if(plot)
       message("The computation might take some time ...")
@@ -168,80 +170,93 @@ bestModel <- function(data,
     data$weights <- NULL
   }
 
+  nbest <- 1
+  if(extensive)
+    nbest <- 20
+
   # determine best subset
   if (is.null(weights))
     subsets <-
     regsubsets(
       lmX,
       data = data,
-      nbest = 1,
+      nbest = nbest,
       nvmax = nvmax,
       force.in = index,
-      really.big = big
+      really.big = big,
+      method = "exhaustive"
     )
   else
     subsets <-
     regsubsets(
       lmX,
       data = data,
-      nbest = 1,
+      nbest = nbest,
       nvmax = nvmax,
       force.in = index,
       really.big = big,
-      weights = weights
+      weights = weights,
+      method = "exhaustive"
     )
 
-  results <- base::summary(subsets)
-  results$numberOfTerms <- as.numeric(rowSums(results$which) - 1)
+  results <- summary(subsets)
+  results <- screenSubset(data, results, data[, raw], k, t)
+  highestConsistent <- results$highestConsistent
 
-  i <- 1
-  rAdj <- results$adjr2[i]
+  # model selection strategy:
+  # 1. If no criterion is specified, take largest consistent model, if available
+  # 2. else take the first model exceeding R2 > .99
+  # 3. else if nothing worked, take model with 5 terms
+  # 4. else if terms are specified, take terms
+  # 5. Selection based on R2
+  selectionStrategy <- 0
 
+  # take highest consistent model
   if (is.null(R2) && (terms == 0)) {
-    if (results$adjr[[length(results$adjr2)]] > .99) {
-      R2 <- .99
-    } else if (nvmax > 4) {
-      R2 <- results$adjr[[5]]
-    } else {
-      R2 <- results$adjr[[nvmax]]
+    if(!is.null(results$highestConsistent)){
+      i <- results$highestConsistent
+      selectionStrategy <- 1
+      report <- paste0("Final solution: ", i, " terms (highest consistent model)")
+    }
+    # no consistent model available, take model with R2 > .99
+    else{
+      i <- which(results$adjr2 > 0.99)[1]
+      selectionStrategy <- 2
+      # not available, take last model
+      if (is.na(i)) {
+        i <- 5
+        selectionStrategy <- 3
+        report <- paste0("Final solution: ", i, " terms (model with highest R2)")
+      }else{
+        report <- paste0("Final solution: ", i, " terms (model exceeding R2 > .99)")
+      }
+    }
+  }else if(terms > 0){
+    i <- terms
+    selectionStrategy <- 4
+    report <- paste0("User specified solution: ", i, " terms")
+  } else{
+    i <- which(results$adjr2 > R2)[1]
+    selectionStrategy <- 5
+    # not available, take last model
+    if (is.na(i)) {
+      i <- nvmax
+      selectionStrategy <- 3
+      report <- paste0("User specified solution: R2 > ", R2, ", but value not reached. Using the highest model instead.")
+    }else{
+      report <- paste0("User specified solution: R2 > ", R2, " resulting in ", i, " terms")
     }
   }
 
-  if (terms > 0 && terms <= length(results$adjr2)) {
-    i <- terms
-    report <- paste0("User specified solution: ", i, " terms")
-  } else {
-    # check upper and lower bounds and cycle through R2 list
-    if (terms > 0) {
-      message("\n\nCould not determine best model based of number of terms, using R2 instead.")
-    }
-    if (R2 < results$adjr2[i]) {
-      report <- paste0(
-        "Specified R2 falls below the value of the most primitive model. Falling back to model 1."
-      )
-    } else if (results$adjr2[length(results$adjr2)] < R2) {
-      i <- length(results$adjr2)
-      report <- (
-        paste0(
-          "Specified R2 exceeds the R2 of the model with the highest fit. Consider reducing the R2 or fixing the number of terms (e.g. 4 to 10). You can use the plotSubset function to find a good balance between number of terms and R2. Look out for an 'elbow' in the information function or use the cnorm.cv function to determine the optimal number of terms. Falling back to model ",
-          i
-        )
-      )
-    } else {
-      while (rAdj < R2) {
-        i <- i + 1
-        rAdj <- results$adjr2[i]
-      }
-      report <- paste0("Final solution: ", i, " terms")
-    }
-  }
+
   report[2] <-
     paste0("R-Square Adj. = ", round(results$adjr2[i], digits = 6))
 
 
-  variables <- colnames(results$outmat)[results$outmat[i,] == "*"]
-  text <-
-    paste0(raw, " ~ ", paste(variables, collapse = " + ")) # build regression formula
+  # build regression formula
+  text <- paste0(raw, " ~ ",
+                 paste(colnames(results$outmat)[results$outmat[i,] == "*"],
+                       collapse = " + "))
 
   report[3] <- paste0("Final regression model: ", text)
 
@@ -293,6 +308,8 @@ bestModel <- function(data,
   bestformula$age <- attributes(data)$age
   bestformula$k <- attributes(data)$k
   bestformula$A <- attributes(data)$A
+  bestformula$highestConsistent <- highestConsistent
+  bestformula$selectionStrategy <- selectionStrategy
 
   # Print output
   report[4] <-
@@ -667,6 +684,52 @@ modelSummary <- function(object, ...) {
   if (inherits(object, "cnorm")) {
     object <- object$model
   }
+  strat <- c("largest consistent model", "first model exceeding R2 > .99", "fall back to model with 5 terms",
+    "terms specified manually", "selection based on R2")
+  # Extract relevant information
+  terms <- length(object$coefficients) - 1  # Subtract 1 for intercept
+  adj_r_squared <- object$subset$adjr2[object$ideal.model]
+  rmse <- object$rmse
+  selection_strategy <- object$selectionStrategy
+  highest_consistent <- object$highestConsistent
+
+  # Create summary list
+  summary_list <- list(
+    terms = terms,
+    adj_r_squared = adj_r_squared,
+    rmse = rmse,
+    selection_strategy = selection_strategy,
+    highest_consistent = highest_consistent,
+    raw_variable = object$raw,
+    use_age = object$useAge,
+    min_raw = object$minRaw,
+    max_raw = object$maxRaw,
+    regression_function = regressionFunction(object)
+  )
+
+  # Add age-related information if applicable
+  if (object$useAge) {
+    summary_list$min_age <- object$minA1
+    summary_list$max_age <- object$maxA1
+  }
+
+  cat("cNORM Model Summary\n")
+  cat("-------------------\n")
+  cat("Number of terms:", summary_list$terms, "\n")
+  cat("Adjusted R-squared:", round(summary_list$adj_r_squared, 4), "\n")
+  cat("RMSE:", round(summary_list$rmse, 4), "\n")
+  cat("Selection strategy:", summary_list$selection_strategy)
+  if(summary_list$selection_strategy > 0 && summary_list$selection_strategy < 6){
+    cat(", ", strat[summary_list$selection_strategy])
+  }
+  cat("\nHighest consistent model:", summary_list$highest_consistent, "\n")
+  cat("Raw score variable:", summary_list$raw_variable, "\n")
+  cat("Raw score range:", summary_list$min_raw, "to", summary_list$max_raw, "\n")
+  if (summary_list$use_age) {
+    cat("Age range:", summary_list$min_age, "to", summary_list$max_age, "\n")
+  }
+  cat("\nRegression function:\n")
+  cat(summary_list$regression_function, "\n")
 
   cat(object$report, sep = "\n")
 }
@@ -1463,4 +1526,149 @@ buildFunction <- function(raw, k, t, age) {
 
     return(formula(substr(f, 1, nchar(f) - 3)))
   }
+}
+
+
+
+
+#' Check Monotonicity of Predicted Values
+#'
+#' This function checks if the predicted values from a linear model are
+#' monotonically increasing or decreasing across a range of L values for
+#' multiple age points.
+#'
+#' @param lm_model An object of class 'lm' representing the fitted linear model.
+#' @param pred_data Matrix with prediction values
+#' @param minRaw lowest raw score in prediction
+#' @param maxRaw highest raw score in prediction
+#'
+#' @return A named character vector where each element corresponds to an age point.
+#'         Possible values for each element are 1 for "Monotonically increasing"
+#'         -1 for "Monotonically decreasing", or 0 for "Not monotonic".
+#'
+#' @details The function creates a prediction data frame using all combinations
+#'          of the provided L values and age points. It then generates predictions
+#'          using the provided linear model and checks if these predictions are
+#'          monotonically increasing or decreasing for each age point across the
+#'          range of L values.
+#'
+#'
+check_monotonicity <- function(lm_model, pred_data, minRaw, maxRaw) {
+
+  # Make predictions
+  predictions <- predict(lm_model, newdata = pred_data)
+  predictions[predictions < minRaw] <- minRaw
+  predictions[predictions > maxRaw] <- maxRaw
+
+  # Reshape predictions into a matrix (L values as rows, age points as columns)
+  pred_matrix <- matrix(predictions, nrow = 50, ncol = 2)
+
+  # Check monotonicity for each age point
+  results <- sapply(1:2, function(col) {
+    col_preds <- pred_matrix[, col]
+    is_increasing <- all(diff(col_preds) >= 0)
+    is_decreasing <- all(diff(col_preds) <= 0)
+
+    if (is_increasing) {
+      return(1)
+    } else if (is_decreasing) {
+      return(-1)
+    } else {
+      return(0)
+    }
+  })
+
+  return(results[1]==results[2]&&results[1]!=0)
+}
+
+predictionMatrix <- function(minL, maxL, minA, maxA, k, t){
+  # Create a data frame for predictions
+  pred_data <- expand.grid(L = seq(from = minL, to = maxL, length.out=50), A = c(minA, maxA))
+
+  for (i in 1:k) {
+    pred_data[paste0("L", i)] <- pred_data$L^i
+  }
+  for (j in 1:t) {
+    pred_data[paste0("A", j)] <- pred_data$A^j
+  }
+  for (i in 1:k) {
+    for (j in 1:t) {
+      pred_data[paste0("L", i, "A", j)] <- pred_data[paste0("L", i)] * pred_data[paste0("A", j)]
+    }
+  }
+
+  return(pred_data)
+}
+
+screenSubset <- function(data1, results, raw, k, t){
+  minRaw <- min(data1$raw)
+  maxRaw <- max(data1$raw)
+
+  # Create a data frame for predictions
+  pred_data <- predictionMatrix(min(data1$L1), max(data1$L1), min(data1$A1), max(data1$A1), k, t)
+
+  # prepare variables
+  nTerms <- as.numeric(apply(results$outmat, 1, function(row) sum(row == '*', na.rm = TRUE)))
+  consistent <- rep(FALSE, length(nTerms))
+  norms <- seq(from = min(data1$L1), to = max(data1$L1), length.out = 50)
+  age <- c(min(data1$A1), max(data1$A1))
+  currentNumber <- 0
+
+  # Loop through each possible model to screen consistency
+  for(i in 1:length(nTerms)){
+    if(nTerms[i]>currentNumber){
+      currentNumber <- nTerms[[i]]
+      consistentFound <- FALSE
+    }
+
+    if(!consistentFound){
+      text <- paste0("raw ~ ",
+                     paste(colnames(results$outmat)[results$outmat[i,] == "*"],
+                           collapse = " + "))
+      linear.model <- lm(text, data = data1)
+      consistentFound <- check_monotonicity(linear.model, pred_data, minRaw, maxRaw)
+      consistent[i] <- consistentFound
+    }
+  }
+
+
+
+  # set first occurence of model per term to true, if no consistent one found
+  df_modified <- data.frame(terms = nTerms, consistent = consistent, R2 = results$adjr2)
+  df <- df_modified
+  df_sorted <- df[order(df$R2, decreasing = TRUE), ]
+  df_sorted <- df_sorted[df$consistent, ]
+
+  # Loop through each unique term
+  unique_terms <- unique(nTerms)
+  for (term in unique_terms) {
+    # Get indices for the current term
+    term_indices <- which(df$terms == term)
+
+    # Check if there are any TRUE values for this term
+    if (!any(df$consistent[term_indices])) {
+      # If no TRUE values, set the first occurrence to TRUE
+      df_modified$consistent[term_indices[1]] <- TRUE
+    }
+  }
+
+  consistent <- df_modified$consistent
+  results1 <- results
+  results1$consistent <- df$consistent[consistent]
+  results1$which <- results1$which[consistent,]
+  results1$outmat <- results1$outmat[consistent,]
+  results1$adjr2 <- results1$adjr2[consistent]
+  results1$cp <- results1$cp[consistent]
+  results1$bic <- results1$bic[consistent]
+  results1$rss <- results1$rss[consistent]
+  results1$rsq <- results1$rsq[consistent]
+
+  for(i in 1:(length(results1$consistent))){
+    if(results1$consistent[i]){
+      highestConsistent <- i
+    }
+  }
+
+  results1$highestConsistent <- highestConsistent
+  return(results1)
 }

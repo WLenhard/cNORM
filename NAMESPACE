@@ -51,7 +51,8 @@ export(
 	weighted.quantile.inflation,
 	weighted.quantile.harrell.davis,
 	weighted.quantile.type7,
-	computeWeights
+	computeWeights,
+	taylorSwift
 )
 
 

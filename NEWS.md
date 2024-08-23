@@ -3,15 +3,20 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.3.0,
-Date: in preparation
+Date: in preparation, current 2024.08.23
 
 
 Changes:
 
 *    checkConsistency performance improvement; now runs 100 times faster
 *    visualization improvement in 'plotDerivative'
+*    bug in subheadline f plotPercentileSeries fixed
 *    reduced number of messages
-*    Starting work on inclusion of regularized Taylor models via glmnet
+*    Starting work on inclusion of regularized Taylor models. Since simulation
+     studies with glmnet did not show improvement, we generate much more models
+     and preselct those, which pass an initial consistency check.
+     Now, the a consistent model with the highest R2 is selected. R^2 and terms
+     can of course still be specified as usual.
   
 
 
