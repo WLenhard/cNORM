@@ -176,6 +176,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' parameters are NULL, k is set to 3, since age trajectories are most often well
 #' captured by cubic polynomials.
 #' @param plot Default TRUE; plots the regression model and prints report
+#' @param extensive If TRUE, screen models for consistency and - if possible, exclude inconsistent ones
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
@@ -229,8 +230,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #'   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
 #'   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
 #'   \item Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
-
-
+#'
 #' }
 cnorm <- function(raw = NULL,
                   group = NULL,
@@ -244,7 +244,8 @@ cnorm <- function(raw = NULL,
                   t = NULL,
                   terms = 0,
                   R2 = NULL,
-                  plot = TRUE){
+                  plot = TRUE,
+                  extensive = TRUE){
 
   if(!is.null(group)&&!is.null(age)){
     warning("Specifying both 'group' as well as 'age' is discouraged.")
@@ -326,7 +327,7 @@ cnorm <- function(raw = NULL,
 
     data <- rankByGroup(data, raw=data$raw, group=FALSE, scale=scale, weights=data$weights, descend = descend, method = method)
     data <- computePowers(data, k = k, t = t, silent = silent)
-    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2, plot = plot)
+    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2, plot = plot, extensive = extensive)
 
     result <- list(data = data, model = model)
     class(result) <- "cnorm"
@@ -355,8 +356,79 @@ cnorm <- function(raw = NULL,
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }
 
-  model <- bestModel(data, R2=R2, terms=terms, weights = data$weights, plot = plot)
+  model <- bestModel(data, R2=R2, terms=terms, weights = data$weights, plot = plot, extensive = extensive)
   result <- list(data = data, model = model)
   class(result) <- "cnorm"
   return(result)
 }
+
+#' Swiftly compute Taylor regression models for distribution free continuous norming
+#'
+#' Conducts distribution free continuous norming and aims to find a fitting model. Raw data are modelled as a Taylor polynomial
+#' of powers of age and location and their interactions. In addition to the
+#' raw scores, either provide a numeric vector for the grouping information (group)
+#' for the ranking of the raw scores. You can adjust the grade of smoothing of the regression model by setting the k, t and terms
+#' parameter. In general, increasing k and t leads to a higher fit, while lower values lead to more smoothing. If both parameters
+#' are missing, taylorSwift uses k = 5 and t = 3 by default.
+#'
+#' @param raw Numeric vector of raw scores
+#' @param group Numeric vector of grouping variable, e. g. grade. If no group
+#' or age variable is provided, conventional norming is applied
+#' @param age Numeric vector with chronological age, please additionally specify
+#' width of window
+#' @param width Size of the moving window in case an age vector is used
+#' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
+#' transformation); a double vector with the mean and standard deviation can as
+#' well, be provided f. e. c(10, 3) for Wechsler scale index points
+#' @param method Ranking method in case of bindings, please provide an index,
+#' choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
+#' 3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
+#' 6 = Filliben (1975), 7 = Yu & Huang (2001)
+#' @param descend ranking order (default descent = FALSE): inverses the
+#' ranking order with higher raw scores getting lower norm scores; relevant
+#' for example when norming error scores, where lower scores mean higher
+#' performance
+#' @param weights Vector or variable name in the dataset with weights for each
+#' individual case. It can be used to compensate for moderate imbalances due to
+#' insufficient norm data stratification. Weights should be numerical and positive.
+#' @param terms Selection criterion for model building. The best fitting model with
+#' this number of terms is used
+#' @param R2 Adjusted R square as a stopping criterion for the model building
+#' (default R2 = 0.99)
+#' @param k The power constant. Higher values result in more detailed approximations
+#' but have the danger of over-fit (max = 6). If not set, it uses t and if both
+#' parameters are NULL, k is set to 5.
+#' @param t The age power parameter (max = 6). If not set, it uses k and if both
+#' parameters are NULL, k is set to 3, since age trajectories are most often well
+#' captured by cubic polynomials.
+#' @param plot Default TRUE; plots the regression model and prints report
+#' @param extensive If TRUE, screen models for consistency and - if possible, exclude inconsistent ones
+#'
+#' @return cnorm object including the ranked raw data and the regression model
+#' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
+#' @examples
+#' # Using this function with the example dataset 'ppvt'
+#' # You can use the 'getGroups()' function to set up grouping variable in case,
+#' # you have a continuous age variable.
+#' model <- taylorSwift(raw = ppvt$raw, group = ppvt$group)
+#'
+#' # return norm tables including 90% confidence intervals for a
+#' # test with a reliability of r = .85; table are set to mean of quartal
+#' # in grade 3 (children completed 2 years of schooling)
+#' normTable(c(5, 10, 15), model, CI = .90, reliability = .95)
+#'
+#' # ... or instead of raw scores for norm scores, the other way round
+#' rawTable(c(4, 8, 12, 16), model, CI = .90, reliability = .95)
+#'
+#' @export
+#' @references
+#' \enumerate{
+#'   \item Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
+#'   \item Gary, S., Lenhard, W. & Lenhard, A. (2021). Modelling Norm Scores with the cNORM Package in R. Psych, 3(3), 501-521. https://doi.org/10.3390/psych3030033
+#'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi:10.1177/1073191116656437
+#'   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
+#'   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
+#'   \item Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
+#'
+#' }
+taylorSwift <- cnorm
