@@ -590,7 +590,7 @@ plotPercentiles <- function(model,
     }
   }
 
-  # Prepare data for ggplot without using tidyr
+  # Prepare data for ggplot
   plot_data <- data.frame(
     group = rep(percentile$group, 2 * length(percentiles)),
     value = c(as.matrix(percentile[, NAMES]), as.matrix(percentile[, NAMESP])),
@@ -1049,7 +1049,7 @@ plotSubset <- function(model, type = 0) {
       geom_point(aes(x = .data$adjr2, y = .data$cp, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       scale_y_log10() +
       labs(title = "Information Function: Mallows's Cp",
-           x = "Adjusted R2",
+           x = expression(paste("Adjusted ", R^2)),
            y = "log-transformed Mallows's Cp") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
@@ -1058,7 +1058,7 @@ plotSubset <- function(model, type = 0) {
       geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), size = .75) +
       geom_point(aes(x = .data$adjr2, y = .data$bic, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: BIC",
-           x = "Adjusted R2",
+           x = expression(paste("Adjusted ", R^2)),
            y = "Bayesian Information Criterion (BIC)") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
@@ -1096,7 +1096,7 @@ plotSubset <- function(model, type = 0) {
       ylim(-0.005, 0.11) +
       labs(title = "Information Function: p-values",
            x = "Number of Predictors",
-           y = "p-values for Tests on R2 adj. of Consecutive Models") +
+           y = expression(paste("p-values for Tests on ", R^2, " adj. of Consecutive Models"))) +
       geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", size = 1) +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
@@ -1104,9 +1104,9 @@ plotSubset <- function(model, type = 0) {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
       geom_point(aes(x = .data$nr, y = .data$adjr2, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
-      labs(title = "Information Function: Adjusted R2",
+      labs(title = expression(paste("Information Function: Adjusted ", R^2)),
            x = "Number of Predictors",
-           y = "Adjusted R2") +
+           y = expression(paste("Adjusted ", R^2))) +
       geom_hline(aes(yintercept = cutoff, color = "R2 = .05"), linetype = "dashed", size = 1, color = "#d62728") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))

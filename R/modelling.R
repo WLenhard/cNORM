@@ -414,6 +414,10 @@ printSubset <- function(x, ...) {
     p = head(p, -1),
     nr = seq(1, length(x$subsets$adjr2), by = 1)
   )
+
+  if(!is.null(x$subsets$consistent))
+    table$consistent <- x$subsets$consistent
+
   return(table)
 }
 
@@ -893,6 +897,7 @@ cnorm.cv <-
     if (inherits(data, "cnorm")) {
       formula <- data$model$terms
       data <- data$data
+      cnorm.model <- data$model
     }
 
     if (is.null(pCutoff)) {
@@ -1244,11 +1249,11 @@ cnorm.cv <-
       }
     }
 
-    if (norms) {
-      par(mfrow = c(2, 2)) # set the plotting area into a 1*2 array
-    } else {
-      par(mfrow = c(1, 1))
-    }
+    # if (norms) {
+    #   par(mfrow = c(2, 2)) # set the plotting area into a 1*2 array
+    # } else {
+    #   par(mfrow = c(1, 1))
+    # }
     tab <-
       data.frame(
         RMSE.raw.train = train.errors,
@@ -1259,114 +1264,86 @@ cnorm.cv <-
         Delta.R2.test = delta,
         Crossfit = r2.train / r2.test,
         RMSE.norm.test = norm.rmse,
-        SE.norm.test = norm.se
+        SE.norm.test = norm.se,
+        terms = seq(from = 1, to = length(train.errors))
       )
+
+    theme_custom <- theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+        axis.title = element_text(face = "bold", size = 12),
+        axis.title.x = element_text(margin = margin(t = 10)),
+        axis.title.y = element_text(margin = margin(r = 10)),
+        axis.text = element_text(size = 10),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom",
+        panel.grid.major = element_line(color = "gray90"),
+        panel.grid.minor = element_line(color = "gray95")
+      )
+
+    breaks_step_1 <- function(x) {
+      seq(floor(min(x)), ceiling(max(x)), by = 1)
+    }
 
     if (is.null(formula)) {
-      # plot RMSE
-      graphics::plot(
-        val.errors,
-        pch = 19,
-        type = "b",
-        col = "blue",
-        main = "Raw Score RMSE",
-        ylab = "Root MSE",
-        xlab = "Number of terms",
-        ylim = c(
-          min(train.errors, na.rm = TRUE),
-          max(val.errors, na.rm = TRUE)
-        )
-      )
-      points(
-        complete.errors,
-        pch = 19,
-        type = "b",
-        col = "black"
-      )
-      points(train.errors,
-             pch = 19,
-             type = "b",
-             col = "red")
-      legend(
-        "topright",
-        legend = c("Training", "Validation", "Complete"),
-        col = c("red", "blue", "black"),
-        pch = 19
-      )
+      p1 <- ggplot(tab) + theme_custom
+      p1 <- p1 +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.complete, color = "Complete"), size = .75, na.rm = TRUE) +
+        geom_point(aes(x = .data$terms, y = .data$RMSE.raw.complete), size = 2.5, color = "#33aa55", na.rm = TRUE) +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.test, color = "Validation"), size = .75, na.rm = TRUE) +
+        geom_point(aes(x = .data$terms, y = .data$RMSE.raw.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.train, color = "Training"), size = .75, na.rm = TRUE) +
+        geom_point(aes(x = .data$terms, y = .data$RMSE.raw.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
+        labs(title = "Raw Score RMSE (1)",
+             x = "Number of terms",
+             y = "Root Mean Squared Error") +
+        scale_color_manual(values = c("Training" = "#d62728", "Validation" = "#1f77b4", "Complete" = "#33aa55")) +
+        scale_x_continuous(breaks = breaks_step_1)
+      print(p1)
+
 
       if (norms) {
-        # plot R2
-        graphics::plot(
-          r2.train,
-          pch = 19,
-          type = "b",
-          col = "red",
-          main = "Norm Score R2",
-          ylab = "R Square",
-          xlab = "Number of terms",
-          ylim = c(min(r2.test, na.rm = TRUE), 1)
-        )
-        points(r2.test,
-               pch = 19,
-               type = "b",
-               col = "blue")
-        legend(
-          "bottomright",
-          legend = c("Training", "Validation"),
-          col = c("red", "blue"),
-          pch = 19
-        )
+        p2 <- ggplot(tab) + theme_custom +
+          geom_line(aes(x = .data$terms, y = .data$R2.norm.test, color = "Validation"), size = .75, na.rm = TRUE) +
+          geom_point(aes(x = .data$terms, y = .data$R2.norm.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
+          geom_line(aes(x = .data$terms, y = .data$R2.norm.train, color = "Training"), size = .75, na.rm = TRUE) +
+          geom_point(aes(x = .data$terms, y = .data$R2.norm.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
+          labs(title = expression(paste("Norm Score ", R^2 , " (2)")),
+               x = "Number of terms",
+               y = expression(R^2)) +
+          scale_color_manual(values = c("Training" = "#d62728", "Validation" = "#1f77b4", "Complete" = "#33aa55")) +
+          scale_x_continuous(breaks = breaks_step_1)
+        print(p2)
 
-        # plot CROSSFIT
-        graphics::plot(
-          tab$Crossfit,
-          pch = 19,
-          type = "b",
-          col = "black",
-          main = "Norm Score CROSSFIT",
-          ylab = "Crossfit",
-          xlab = "Number of terms",
-          ylim = c(min(c(
-            tab$Crossfit, .88
-          ), na.rm = TRUE), max(c(
-            tab$Crossfit, 1.12
-          ), na.rm = TRUE))
-        )
-        abline(h = 1, col = 3, lty = 2)
-        abline(h = .9, col = 2, lty = 3)
-        text(
-          max,
-          .89,
-          adj = c(1, 1),
-          "underfit",
-          col = 2,
-          cex = .75
-        )
-        abline(h = 1.1, col = 2, lty = 3)
-        text(
-          max,
-          1.11,
-          adj = c(1, 0),
-          "overfit",
-          col = 2,
-          cex = .75
-        )
+        p3 <- ggplot(tab) + theme_custom +
+          geom_line(aes(x = .data$terms, y = .data$Crossfit, color = "Crossfit"), size = .75, na.rm = TRUE) +
+          geom_point(aes(x = .data$terms, y = .data$Crossfit), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
+          geom_hline(aes(yintercept = 1.10, color = "Overfit"), linetype = "dashed", size = 1, na.rm = TRUE) +
+          geom_hline(aes(yintercept = 0.90, color = "Underfit"), linetype = "dashed", size = 1, na.rm = TRUE) +
+          labs(title = "Norm Score CROSSFIT (3)",
+               x = "Number of terms",
+               y = "Crossfit") +
+          scale_color_manual(values = c("Underfit" = "#FF2728", "Crossfit" = "#1f77b4", "Overfit" = "#AA00AA")) +
+          scale_x_continuous(breaks = breaks_step_1)
+
+        print(p3)
+
+
 
         # plot delta r2 test
-        graphics::plot(
-          tab$Delta.R2.test,
-          pch = 19,
-          type = "b",
-          col = "black",
-          main = "Norm Score Delta R2 in Validation",
-          ylab = "Delta R2",
-          xlab = "Number of terms",
-          ylim = c(
-            min(tab$Delta.R2.test, na.rm = TRUE),
-            max(tab$Delta.R2.test, na.rm = TRUE)
-          )
-        )
-        abline(h = 0, col = 3, lty = 2)
+        p4 <- ggplot(tab) + theme_custom +
+          geom_line(aes(x = .data$terms, y = .data$Delta.R2.test, color = "Delta R2"), size = .75, na.rm = TRUE) +
+          geom_point(aes(x = .data$terms, y = .data$Delta.R2.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
+          geom_hline(aes(yintercept = 0.00, color = "Equal R2"), linetype = "dashed", size = 1, na.rm = TRUE) +
+          labs(title = expression(paste("Norm Score ", Delta, R^2 , " in Validation (4)")),
+               x = "Number of terms",
+               y = "Delta R2") +
+          scale_color_manual(values = c("Equal R2" = "#33aa55", "Delta R2" = "#1f77b4")) +
+          scale_x_continuous(breaks = breaks_step_1)
+
+        print(p4)
+
       } else{
         tab$R2.norm.train <- NULL
         tab$R2.norm.test <- NULL
