@@ -26,7 +26,8 @@ A ggplot object representing the selected information criterion plot.
 \description{
 This function plots various information criteria and model fit statistics against
 the number of predictors or adjusted R-squared, depending on the type of plot selected.
-It helps in model selection by visualizing different aspects of model performance.
+It helps in model selection by visualizing different aspects of model performance. Models,
+which did not pass the initial consistency check are depicted with an empty circle.
 }
 \details{
 The function generates different plots to help in model selection:
