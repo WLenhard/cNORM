@@ -404,34 +404,7 @@ simulateRasch <- function(data = NULL, n = 100, minAge = 1, maxAge = 7, items.n 
   return(list(data = dat, sim = sim, theta = theta))
 }
 
-#' @keywords internal
-simulate.weighting <- function(n1, m1, sd1, weight1, n2, m2, sd2, weight2){
-  group1 <- data.frame(group=rep(1, length.out = n1), raw=rnorm(n1, mean=m1, sd=sd1), weights=rep(weight1, length.out = n1))
-  group2 <- data.frame(group=rep(2, length.out = n2), raw=rnorm(n2, mean=m2, sd=sd2), weights=rep(weight2, length.out = n2))
-
-  total.rep <- rbind(group1[1:(n1*weight1),], group2[1:(n2*weight2),])
-  total.rep <- total.rep[sample(nrow(total.rep)),]
-  total.rep$percentileReal <- rankByGroup(total.rep, group = FALSE, raw = total.rep$raw, descriptives = FALSE, na.rm = FALSE)$percentile
-
-  total <- rbind(group1, group2)
-  total <- total[sample(nrow(total)),]
-  total <- total[1:nrow(total.rep),]
-  total$percentileUnweighted <- rankByGroup(total, group = FALSE, raw = total$raw, descriptives = FALSE, na.rm = FALSE)$percentile
-  total$percentileWeighted <- rankByGroup(total, group = FALSE, raw = total$raw, descriptives = FALSE,  weights = total$weights, na.rm = FALSE)$percentile
-
-
-  total <- total[order(total$raw),]
-  total.rep <- total.rep[order(total.rep$raw),]
-
-
-  graphics::plot(total.rep$raw, total.rep$percentileReal, type = "l", lty = 1, main = "Simulated effects of weighted ranking", ylab = "Percentile", xlab = "Raw score")
-  points(total$raw, total$percentileWeighted, type = "l", lty = 1, col="blue")
-  points(total$raw, total$percentileUnweighted, type = "l", lty = 1, col="red")
-  legend("bottomright", legend = c("Real percentile", "Weighted", "Unweighted"), col = c("black", "blue", "red"), pch = 19)
-
-}
-
-#' Build cnorm object from data and bestModle model object
+#' Build cnorm object from data and bestModel model object
 #'
 #' Helper function to build a cnorm object from a data object and
 #' a model object from the bestModel function for compatibility reasons.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{buildCnormObject}
 \alias{buildCnormObject}
-\title{Build cnorm object from data and bestModle model object}
+\title{Build cnorm object from data and bestModel model object}
 \usage{
 buildCnormObject(data, model)
 }
