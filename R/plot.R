@@ -932,7 +932,8 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #'
 #' This function plots various information criteria and model fit statistics against
 #' the number of predictors or adjusted R-squared, depending on the type of plot selected.
-#' It helps in model selection by visualizing different aspects of model performance.
+#' It helps in model selection by visualizing different aspects of model performance. Models,
+#' which did not pass the initial consistency check are depicted with an empty circle.
 #'
 #' @param model The regression model from the bestModel function or a cnorm object.
 #' @param type Integer specifying the type of plot to generate:
