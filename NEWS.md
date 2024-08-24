@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.3.0,
-Date: in preparation, current 2024.08.23
+Date: in preparation, current 2024.08.24
 
 
 Changes:
@@ -17,6 +17,8 @@ Changes:
      and preselct those, which pass an initial consistency check.
      Now, the a consistent model with the highest R2 is selected. R^2 and terms
      can of course still be specified as usual.
+*    plotSubset improved: now indicates, which models did not pass the initial 
+     consistency check
   
 
 

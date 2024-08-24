@@ -1001,6 +1001,13 @@ plotSubset <- function(model, type = 0) {
   F <- ((RSS1-RSS2)/df1)/(RSS2/df2)
   p <- 1 - pf(F, df1, df2)
 
+  filled <- rep(TRUE, length(model$subsets$rss))
+  if(!is.null(model$subsets$consistent))
+    filled <- model$subsets$consistent
+  cutoff <- .99
+  if(!is.null(model$cutoff))
+    cutoff <- model$cutoff
+
   dataFrameTMP <- data.frame(
     adjr2 = model$subsets$adjr2,
     bic = model$subsets$bic,
@@ -1009,7 +1016,8 @@ plotSubset <- function(model, type = 0) {
     RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
     F = head(F, -1),
     p = head(p, -1),
-    nr = seq(1, length(model$subsets$adjr2), by = 1)
+    nr = seq(1, length(model$subsets$adjr2), by = 1),
+    filled = filled
   )
 
   # Improved base theme
@@ -1037,62 +1045,70 @@ plotSubset <- function(model, type = 0) {
   if (type == 1) {
     p <- p +
       geom_line(aes(x = .data$adjr2, y = .data$cp, color = "Model in Ascending Order"), size = .75) +
-      geom_point(aes(x = .data$adjr2, y = .data$cp), size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$adjr2, y = .data$cp, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       scale_y_log10() +
       labs(title = "Information Function: Mallows's Cp",
            x = "Adjusted R2",
            y = "log-transformed Mallows's Cp") +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else if (type == 2) {
     p <- p +
       geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), size = .75) +
-      geom_point(aes(x = .data$adjr2, y = .data$bic), size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$adjr2, y = .data$bic, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: BIC",
            x = "Adjusted R2",
            y = "Bayesian Information Criterion (BIC)") +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else if (type == 3) {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$RMSE, color = "Model in Ascending Order"), size = .75) +
-      geom_point(aes(x = .data$nr, y = .data$RMSE), size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$nr, y = .data$RMSE, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: RMSE",
            x = "Number of Predictors",
            y = "Root Mean Square Error (Raw Score)") +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else if (type == 4) {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$RSS, color = "Model in Ascending Order"), size = .75) +
-      geom_point(aes(x = .data$nr, y = .data$RSS), size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$nr, y = .data$RSS, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: RSS",
            x = "Number of Predictors",
            y = "Residual Sum of Squares (RSS)") +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else if (type == 5) {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$F, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
-      geom_point(aes(x = .data$nr, y = .data$F), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$nr, y = .data$F, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: F-test Statistics",
            x = "Number of Predictors",
            y = "F-test Statistics for Consecutive Models") +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else if (type == 6) {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$p, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
-      geom_point(aes(x = .data$nr, y = .data$p), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$nr, y = .data$p, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       ylim(-0.005, 0.11) +
       labs(title = "Information Function: p-values",
            x = "Number of Predictors",
            y = "p-values for Tests on R2 adj. of Consecutive Models") +
       geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", size = 1) +
-      scale_color_manual(values = custom_colors)
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   } else {
     p <- p +
       geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
-      geom_point(aes(x = .data$nr, y = .data$adjr2), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      geom_point(aes(x = .data$nr, y = .data$adjr2, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: Adjusted R2",
            x = "Number of Predictors",
            y = "Adjusted R2") +
-      scale_color_manual(values = custom_colors)
+      geom_hline(aes(yintercept = cutoff, color = "R2 = .05"), linetype = "dashed", size = 1, color = "#d62728") +
+      scale_color_manual(values = custom_colors) +
+      scale_shape_manual(values = c(1, 16))
   }
 
   # Add legend title
