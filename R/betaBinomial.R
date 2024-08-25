@@ -1,6 +1,6 @@
-#' Calculate the negative log-likelihood for a heteroscedastic regression model
+#' Calculate the negative log-likelihood for a beta binomial regression model
 #'
-#' This function computes the negative log-likelihood for a heteroscedastic regression model
+#' This function computes the negative log-likelihood for a beta binomial regression model
 #' where both the mean and standard deviation are modeled as functions of predictors.
 #'
 #' @param params A numeric vector containing all model parameters. The first n_beta elements
@@ -27,9 +27,9 @@ log_likelihood <- function(params, X, Z, y, weights) {
 }
 
 
-#' Fit a heteroscedastic regression model
+#' Fit a beta binomial regression model
 #'
-#' This function fits a heteroscedastic regression model where both the mean and
+#' This function fits a beta binomial regression model where both the mean and
 #' standard deviation of the response variable are modeled as polynomial functions
 #' of the predictor variable. While 'cnorm-betabinomial2' fits a beta-binomial model
 #' on the basis of /$alpha$ and /$beta$ of a beta binomial function, this function
@@ -49,7 +49,7 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' well, be provided f. e. c(10, 3) for Wechsler scale index points
 #' @param plot Logical indicating whether to plot the model. Default is TRUE.
 #'
-#' @return A list of class "hetero_model" containing:
+#' @return A list of class "cnormBetaBinomial" containing:
 #'   \item{beta_est}{Estimated coefficients for the mean model}
 #'   \item{gamma_est}{Estimated coefficients for the log-standard deviation model}
 #'   \item{se}{Standard errors of the estimated coefficients}
@@ -169,12 +169,12 @@ cnorm.betabinomial1 <- function(age,
   return(model)
 }
 
-#' Predict mean and standard deviation for a heteroscedastic regression model
+#' Predict mean and standard deviation for a beta binomial regression model
 #'
-#' This function generates predictions from a fitted heteroscedastic regression model
+#' This function generates predictions from a fitted beta binomial regression model
 #' for new age points.
 #'
-#' @param model An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.
+#' @param model An object of class "cnormBetaBinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.
 #' @param ages A numeric vector of age points at which to make predictions.
 #' @param n The maximum score to be achieved.
 #'
@@ -184,7 +184,7 @@ cnorm.betabinomial1 <- function(age,
 #'   \item{sigma}{Predicted standard deviation values}
 #'
 #' @details
-#' This function takes a fitted heteroscedastic regression model and generates predictions
+#' This function takes a fitted beta binomial regression model and generates predictions
 #' for new age points. It applies the same standardization used in model fitting,
 #' generates predictions on the standardized scale, and then transforms these back
 #' to the original scale.
