@@ -425,6 +425,7 @@ plotNormCurves <- function(model,
 #' f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
 #' data preparation is used (default)
 #' @param title custom title for plot
+#' @param subtitle custom title for plot
 #' @param points Logical indicating whether to plot the data points. Default is TRUE.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
@@ -443,6 +444,7 @@ plotPercentiles <- function(model,
                             percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                             scale = NULL,
                             title = NULL,
+                            subtitle = NULL,
                             points = F) {
 
   is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
@@ -578,16 +580,7 @@ plotPercentiles <- function(model,
 
   if (is.null(title)) {
     title <- "Observed and Predicted Percentile Curves"
-    subtitle <- paste0("Model: ", m$ideal.model, ", R2 = ", round(m$subsets$adjr2[[m$ideal.model]], digits = 4))
-  }else{
-    seg <- strsplit(title, "\n")
-    if(length(seg[[1]]) == 2){
-      title <- seg[[1]][1]
-      subtitle <- seg[[1]][2]
-    }else{
-      title <- title
-      subtitle <- ""
-    }
+    subtitle <- bquote(paste("Model: ", .(m$ideal.model), ", R"^2, "=", .(round(m$subsets$adjr2[[m$ideal.model]], digits = 4))))
   }
 
   # Prepare data for ggplot
@@ -909,7 +902,9 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                           percentiles = percentiles,
                                           scale = NULL,
                                           group = group,
-                                          title = paste0("Observed and Predicted Percentiles\nModel with ", start, " predictors, R2=", round(bestformula$subsets$adjr2[[start]], digits = 4))
+                                          title = "Observed and Predicted Percentiles",
+                                          subtitle = bquote(paste("Model with ", start, " predictors, ", R^2, "=",
+                                                               .(round(bestformula$subsets$adjr2[[start]], digits = 4))))
     )
 
     if (!is.null(filename)) {
