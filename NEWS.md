@@ -132,7 +132,7 @@ Changes:
      by providing marginal means factor levels of stratification variables in the 
      population as a data frame
      New function: computeWeights()
-*    Newly developed, highly performant and biasless weighted ranking procedure
+*    Newly developed, highly performant and unbiased weighted ranking procedure
 *    New vignette: 'WeightedRanking'
 *    Modelling returns info on range of weights if post stratification is used
 *    automatically remove  cases with missings in 'cnorm' function

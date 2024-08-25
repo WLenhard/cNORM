@@ -3,9 +3,9 @@
 #' Computes Taylor polynomial regression models by evaluating a series of models with increasing predictors.
 #' It aims to find a consistent model that effectively captures the variance in the data. It draws on the
 #' regsubsets function from the leaps package and builds up to 20 models for each number of predictors, evaluates
-#' tese models regarding model consistency and selects consistent model with the highest R^2.
+#' these models regarding model consistency and selects consistent model with the highest R^2.
 #' This automatic model selection should usually be accompanied with visual inspection of the percentile plots
-#' and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonuos model,
+#' and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonious model,
 #' if desired.
 #'
 #' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},

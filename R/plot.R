@@ -1254,7 +1254,7 @@ plotDerivative <- function(model,
   return(p)
 }
 
-#' General convencience plotting function
+#' General convenience plotting function
 #'
 #' @param x a cnorm object
 #' @param y the type of plot as a string, can be one of

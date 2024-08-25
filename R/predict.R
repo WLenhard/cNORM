@@ -590,7 +590,7 @@ derivationTable <-
 
 #' Retrieve norm value for raw score at a specific age
 #'
-#' This functions numericaly determines the norm score for raw scores depending on the
+#' This functions numerically determines the norm score for raw scores depending on the
 #' level of the explanatory variable A, e. g. norm scores for raw scores at given ages.
 #' @param raw The raw value, either single numeric or numeric vector
 #' @param A the explanatory variable (e. g. age), either single numeric or numeric vector

@@ -63,12 +63,12 @@ marginals <- data.frame(var = c("sex", "sex", "migration", "migration"),
 head(marginals)
 ```
 
-To caclulate raking weights, the cNORM's 'computeWeights()' function is used, with the norm sample data and the population marginals as function parameters. 
+To calculate raking weights, the cNORM's 'computeWeights()' function is used, with the norm sample data and the population marginals as function parameters. 
 ```{r message=FALSE}
 weights <- computeWeights(data = norm.data, population.margins = marginals)
 ```
 
-Using the 'cnorm()' function passing the raking weights by function parameter 'weights', the intial weighted ranking and the actual norming process is started.
+Using the 'cnorm()' function passing the raking weights by function parameter 'weights', the initial weighted ranking and the actual norming process is started.
 ```{r message = FALSE, results = 'hide', warning=FALSE, fig0, fig.height = 4, fig.width = 7}
 norm.model <- cnorm(raw = norm.data$raw, group = norm.data$group,
 					weights = weights)
@@ -101,7 +101,7 @@ We extensively simulated biased distributions and assessed, if our approach can 
 * Gary, S., & Lenhard, W., (2021). In norming we trust - Verfahren zur statistischen Modellierung kontinuierlicher Testnormen auf dem Prüfstand. *Diagnostica*, 67(2), 75 - 86.
 * Hernandez, A., Aguilar, C., Paradell, È., Munoz, M., Vannier, L.C., & Vallar, F. (2017). The effect of demographic variables on the assesment of cognitive ability. *Psicothema*. *29*(4), 469 - 474.
 * Kruskal, W., & Mosteller, F. (1979). Representative sampling, III: The current statistical literature. *International Statistical Review/Revue Internationale de Statistique*, 245 - 265
-* Lenhard, A., Lenhard, W., Segerer, R., & Suggate, S. (2015). *Peabody Picture Vocbulary Test (PPVT-4)*. Frankfurt: Pearson Clinical Assesment. 
+* Lenhard, A., Lenhard, W., Segerer, R., & Suggate, S. (2015). *Peabody Picture Vocabulary Test (PPVT-4)*. Frankfurt: Pearson Clinical Assesment. 
 * Lenhard, A., Lenhard, W., & Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. *PloS one*, *14*(9), e0222279.
 * Lenhard, W., & Lenhard, A. (2021). Improvement of norm score quality via regression-based continuous norming. *Educational and Psychological Measurement*, *81*(2), 229 - 261.
 * Lumley, T. (2011). *Complex surveys: A guide to analysis using R* (Vol. 565); John Wiley & Sons.

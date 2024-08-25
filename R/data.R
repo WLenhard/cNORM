@@ -40,7 +40,7 @@
 #'   \item{age}{the chronological age of the child}
 #'   \item{sex}{the sex of the test taker, 1=male, 2=female}
 #'   \item{migration}{migration status of the family, 0=no, 1=yes}
-#'   \item{region}{factor specifiying the region, the data were collected; grouped into south, north, east and west}
+#'   \item{region}{factor specifying the region, the data were collected; grouped into south, north, east and west}
 #'   \item{raw}{the raw score of the student, spanning values from 0 to 228}
 #'   \item{group}{age group of the child, determined by the getGroups()-function with 12 equidistant age groups}
 #' }
