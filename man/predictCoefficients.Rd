@@ -2,12 +2,12 @@
 % Please edit documentation in R/betaBinomial.R
 \name{predictCoefficients}
 \alias{predictCoefficients}
-\title{Predict mean and standard deviation for a heteroscedastic regression model}
+\title{Predict mean and standard deviation for a beta binomial regression model}
 \usage{
 predictCoefficients(model, ages, n = NULL)
 }
 \arguments{
-\item{model}{An object of class "cnorm_betabinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.}
+\item{model}{An object of class "cnormBetaBinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.}
 
 \item{ages}{A numeric vector of age points at which to make predictions.}
 
@@ -20,11 +20,11 @@ A data frame with columns:
   \item{sigma}{Predicted standard deviation values}
 }
 \description{
-This function generates predictions from a fitted heteroscedastic regression model
+This function generates predictions from a fitted beta binomial regression model
 for new age points.
 }
 \details{
-This function takes a fitted heteroscedastic regression model and generates predictions
+This function takes a fitted beta binomial regression model and generates predictions
 for new age points. It applies the same standardization used in model fitting,
 generates predictions on the standardized scale, and then transforms these back
 to the original scale.

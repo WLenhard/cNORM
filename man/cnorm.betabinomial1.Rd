@@ -2,7 +2,7 @@
 % Please edit documentation in R/betaBinomial.R
 \name{cnorm.betabinomial1}
 \alias{cnorm.betabinomial1}
-\title{Fit a heteroscedastic regression model}
+\title{Fit a beta binomial regression model}
 \usage{
 cnorm.betabinomial1(
   age,
@@ -39,7 +39,7 @@ well, be provided f. e. c(10, 3) for Wechsler scale index points}
 \item{plot}{Logical indicating whether to plot the model. Default is TRUE.}
 }
 \value{
-A list of class "hetero_model" containing:
+A list of class "cnormBetaBinomial" containing:
   \item{beta_est}{Estimated coefficients for the mean model}
   \item{gamma_est}{Estimated coefficients for the log-standard deviation model}
   \item{se}{Standard errors of the estimated coefficients}
@@ -48,7 +48,7 @@ A list of class "hetero_model" containing:
   \item{result}{Full result from the optimization procedure}
 }
 \description{
-This function fits a heteroscedastic regression model where both the mean and
+This function fits a beta binomial regression model where both the mean and
 standard deviation of the response variable are modeled as polynomial functions
 of the predictor variable. While 'cnorm-betabinomial2' fits a beta-binomial model
 on the basis of /$alpha$ and /$beta$ of a beta binomial function, this function

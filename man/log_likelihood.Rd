@@ -2,7 +2,7 @@
 % Please edit documentation in R/betaBinomial.R
 \name{log_likelihood}
 \alias{log_likelihood}
-\title{Calculate the negative log-likelihood for a heteroscedastic regression model}
+\title{Calculate the negative log-likelihood for a beta binomial regression model}
 \usage{
 log_likelihood(params, X, Z, y, weights)
 }
@@ -23,7 +23,7 @@ coefficients for the log-standard deviation model.}
 The negative log-likelihood of the model.
 }
 \description{
-This function computes the negative log-likelihood for a heteroscedastic regression model
+This function computes the negative log-likelihood for a beta binomial regression model
 where both the mean and standard deviation are modeled as functions of predictors.
 }
 \keyword{internal}
