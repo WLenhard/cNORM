@@ -3,14 +3,14 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.3.0,
-Date: in preparation, current 2024.08.26
+Date: 2024.08.26
 
 
 Changes:
 
 *    checkConsistency performance improvement; now runs 100 times faster
 *    visualization improvement in 'plotDerivative'
-*    bug in subheadline f plotPercentileSeries fixed
+*    bug in subheadline of plotPercentileSeries fixed
 *    reduced number of messages
 *    Starting work on inclusion of regularized Taylor models. Since simulation
      studies with glmnet did not show improvement, we generate much more models
@@ -19,7 +19,7 @@ Changes:
      can of course still be specified as usual.
 *    plotSubset improved: now indicates, which models did not pass the initial 
      consistency check via empty circles
-*    Plots improved generally, now prints formulae and statistical indicators
+*    Plots improved generally, now prints formula and statistical indicators
      in Greek letters and R^2 with the 2 uppercase
   
 
