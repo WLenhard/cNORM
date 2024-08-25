@@ -66,6 +66,9 @@ cross-validation. For a more streamlined validation process focused only on mode
 The output comprises RMSE for raw score models, norm score R^2, delta R^2, crossfit, and the norm score SE according
 to Oosterhuis, van der Ark, & Sijtsma (2016).
 
+This function is not yet prepared for the 'extensive' search strategy, introduced in version 3.3, but instead
+relies on the first model per number of terms, without consistency check.
+
 For assessing overfitting:
 \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
 A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and values around 1 are optimal,

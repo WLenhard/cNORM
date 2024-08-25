@@ -88,10 +88,10 @@ model <- taylorSwift(raw = ppvt$raw, group = ppvt$group)
 # return norm tables including 90\% confidence intervals for a
 # test with a reliability of r = .85; table are set to mean of quartal
 # in grade 3 (children completed 2 years of schooling)
-normTable(c(5, 10, 15), model, CI = .90, reliability = .95)
+normTable(c(5, 15), model, CI = .90, reliability = .95)
 
 # ... or instead of raw scores for norm scores, the other way round
-rawTable(c(4, 8, 12, 16), model, CI = .90, reliability = .95)
+rawTable(c(8, 12), model, CI = .90, reliability = .95)
 
 }
 \references{

@@ -89,7 +89,6 @@ for the age trajectory can be specified independently by 't'. If both parameters
 are missing, cnorm uses k = 5 and t = 3 by default.
 }
 \examples{
-\dontrun{
 # Using this function with the example dataset 'elfe'
 
 # Conventional norming (no modelling over age)
@@ -103,10 +102,10 @@ cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 # return norm tables including 90\% confidence intervals for a
 # test with a reliability of r = .85; table are set to mean of quartal
 # in grade 3 (children completed 2 years of schooling)
-normTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+normTable(c(2.125, 2.375, 2.625), cnorm.elfe, CI = .90, reliability = .95)
 
 # ... or instead of raw scores for norm scores, the other way round
-rawTable(c(2.125, 2.375, 2.625, 2.875), cnorm.elfe, CI = .90, reliability = .95)
+rawTable(c(2.125, 2.375, 2.625), cnorm.elfe, CI = .90, reliability = .95)
 
 
 # Using a continuous age variable instead of distinct groups, using a sliding
@@ -128,7 +127,7 @@ margins <- data.frame(variables = c("sex", "sex",
                       share = c(.52, .48, .7, .3))
 weights <- computeWeights(ppvt, margins)
 model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
-}
+
 }
 \references{
 \enumerate{

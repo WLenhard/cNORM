@@ -15,6 +15,7 @@ plotPercentiles(
   percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
   scale = NULL,
   title = NULL,
+  subtitle = NULL,
   points = F
 )
 }
@@ -42,6 +43,8 @@ f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from 
 data preparation is used (default)}
 
 \item{title}{custom title for plot}
+
+\item{subtitle}{custom title for plot}
 
 \item{points}{Logical indicating whether to plot the data points. Default is TRUE.}
 }
