@@ -28,7 +28,7 @@ the weighted quantiles
 Computes weighted quantiles (code from Andrey Akinshin (2023) "Weighted quantile estimators" arXiv:2304.07265 [stat.ME]
 Code made available via the CC BY-NC-SA 4.0 license) on the basis of either the weighted Harrell-Davis
 quantile estimator or an adaption of the type 7 quantile estimator of the generic quantile function in
-the base package. Please provide a vector with raw values, the pobabilities for the quantiles and an
+the base package. Please provide a vector with raw values, the probabilities for the quantiles and an
 additional vector with the weight of each observation. In case the weight vector is NULL, a normal
 quantile estimation is done. The vectors may not include NAs and the weights should be positive non-zero
 values. Please draw on the computeWeights() function for retrieving weights in post stratification.

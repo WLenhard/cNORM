@@ -89,6 +89,7 @@ for the age trajectory can be specified independently by 't'. If both parameters
 are missing, cnorm uses k = 5 and t = 3 by default.
 }
 \examples{
+\dontrun{
 # Using this function with the example dataset 'elfe'
 
 # Conventional norming (no modelling over age)
@@ -127,7 +128,7 @@ margins <- data.frame(variables = c("sex", "sex",
                       share = c(.52, .48, .7, .3))
 weights <- computeWeights(ppvt, margins)
 model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
-
+}
 }
 \references{
 \enumerate{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plotCnorm}
 \alias{plotCnorm}
-\title{General convencience plotting function}
+\title{General convenience plotting function}
 \usage{
 plotCnorm(x, y, ...)
 }
@@ -16,5 +16,5 @@ or 'derivative' (7), either as a string or the according index}
 \item{...}{additional parameters for the specific plotting function}
 }
 \description{
-General convencience plotting function
+General convenience plotting function
 }

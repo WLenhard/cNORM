@@ -33,7 +33,7 @@ predictNorm(
 The predicted norm score for a raw score, either single value or vector
 }
 \description{
-This functions numericaly determines the norm score for raw scores depending on the
+This functions numerically determines the norm score for raw scores depending on the
 level of the explanatory variable A, e. g. norm scores for raw scores at given ages.
 }
 \examples{

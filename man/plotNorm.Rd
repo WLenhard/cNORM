@@ -49,6 +49,7 @@ of the modeling process. The scores should not deviate too far from
 the regression line. Applicable for Taylor polynomial models.
 }
 \examples{
+\dontrun{
 # Load example data set, compute model and plot results
 
 # Taylor polynomial model
@@ -58,7 +59,7 @@ plot(model, "norm")
 # Beta binomial models; maximum number of items in elfe is n = 28
 model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 plotNorm(model.bb, age = elfe$group, score = elfe$raw)
-
+}
 
 }
 \seealso{

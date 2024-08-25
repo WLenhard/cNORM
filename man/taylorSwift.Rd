@@ -80,6 +80,7 @@ parameter. In general, increasing k and t leads to a higher fit, while lower val
 are missing, taylorSwift uses k = 5 and t = 3 by default.
 }
 \examples{
+\dontrun{
 # Using this function with the example dataset 'ppvt'
 # You can use the 'getGroups()' function to set up grouping variable in case,
 # you have a continuous age variable.
@@ -92,7 +93,7 @@ normTable(c(5, 15), model, CI = .90, reliability = .95)
 
 # ... or instead of raw scores for norm scores, the other way round
 rawTable(c(8, 12), model, CI = .90, reliability = .95)
-
+}
 }
 \references{
 \enumerate{

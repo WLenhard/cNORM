@@ -181,6 +181,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
+#' \dontrun{
 #' # Using this function with the example dataset 'elfe'
 #'
 #' # Conventional norming (no modelling over age)
@@ -219,7 +220,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #'                       share = c(.52, .48, .7, .3))
 #' weights <- computeWeights(ppvt, margins)
 #' model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
-#'
+#' }
 #' @export
 #' @references
 #' \enumerate{
@@ -406,6 +407,7 @@ cnorm <- function(raw = NULL,
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
+#' \dontrun{
 #' # Using this function with the example dataset 'ppvt'
 #' # You can use the 'getGroups()' function to set up grouping variable in case,
 #' # you have a continuous age variable.
@@ -418,7 +420,7 @@ cnorm <- function(raw = NULL,
 #'
 #' # ... or instead of raw scores for norm scores, the other way round
 #' rawTable(c(8, 12), model, CI = .90, reliability = .95)
-#'
+#' }
 #' @export
 #' @references
 #' \enumerate{

@@ -112,6 +112,7 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 #' @return A ggplot object representing the norm scores plot.
 #'
 #' @examples
+#' \dontrun{
 #' # Load example data set, compute model and plot results
 #'
 #' # Taylor polynomial model
@@ -121,7 +122,7 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 #' # Beta binomial models; maximum number of items in elfe is n = 28
 #' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 #' plotNorm(model.bb, age = elfe$group, score = elfe$raw)
-#'
+#' }
 #'
 #' @import ggplot2
 #' @export
