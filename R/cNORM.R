@@ -181,7 +181,6 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
-#' \dontrun{
 #' # Using this function with the example dataset 'elfe'
 #'
 #' # Conventional norming (no modelling over age)
@@ -220,7 +219,7 @@ cNORM.GUI <- function(launch.browser=TRUE){
 #'                       share = c(.52, .48, .7, .3))
 #' weights <- computeWeights(ppvt, margins)
 #' model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
-#' }
+#'
 #' @export
 #' @references
 #' \enumerate{
