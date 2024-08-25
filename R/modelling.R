@@ -171,7 +171,7 @@ bestModel <- function(data,
   }
 
   nbest <- 1
-  if(extensive)
+  if(extensive && useAge)
     nbest <- 20
 
   # determine best subset
@@ -200,8 +200,11 @@ bestModel <- function(data,
     )
 
   results <- summary(subsets)
-  results <- screenSubset(data, results, data[, raw], k, t)
-  highestConsistent <- results$highestConsistent
+  if(extensive && useAge){
+    results <- screenSubset(data, results, data[, raw], k, t)
+    highestConsistent <- results$highestConsistent
+  }else
+    highestConsistent <- NULL
 
   # model selection strategy:
   # 1. If no criterion is specified, take largest consistent model, if available
