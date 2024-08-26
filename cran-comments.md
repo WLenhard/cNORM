@@ -22,10 +22,12 @@ This is a minor release of an existing package. In this version I have:
 ## Test environments
 * local WIN10, 64Bit install, R 4.4.1
 * winbuilder win release, win old release, win development and mac release
+* rhub2 win, mac, mac-arm64, ubuntu-latest, ubuntu-release
 
 
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTEs.
+There were no ERRORs or WARNINGs. There was a NOTE not on a potentially invalid URL in DESCRIPTION,
+which is however correct.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
