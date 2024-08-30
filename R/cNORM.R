@@ -336,22 +336,51 @@ cnorm <- function(raw = NULL,
   }
 
   # if no grouping variable is given
-  else if(is.numeric(raw)&&is.numeric(age)&&!is.na(width)){
+  else if(is.numeric(raw)&&is.numeric(age)){
     if(length(raw)!=length(age)){
       stop("Please provide numeric vectors of equal length for raw score and group data.")
     }
 
-    if(is.null(weights))
-      data <- data.frame(raw = raw, age = age)
-    else
-      data <- data.frame(raw = raw, age = age, weights = weights)
+    if(is.na(width)){
+      if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+        message("Width for the sliding window is missing. Using age as grouping variable and resorting to rankByGroups.")
+        if(is.null(weights))
+          data <- data.frame(raw = raw, group = age)
+        else
+          data <- data.frame(raw = raw, group = age, weights = weights)
 
-    # removing missing cases
-    data <- data[complete.cases(data), ]
+        # removing missing cases
+        data <- data[complete.cases(data), ]
+        data <- rankByGroup(raw=data$raw, group=data$group, scale=scale, weights=data$weights, descend = descend, method = method)
+        data <- computePowers(data, k = k, t = t, silent = silent)
 
-    message("Ranking data with sliding window ...")
-    data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
-    data <- computePowers(data, k = k, t = t, silent = silent)
+      }else{
+        message("Width for the sliding window is missing. Building group variable and resorting to rankByGroups.")
+
+        if(is.null(weights))
+          data <- data.frame(raw = raw, group = getGroups(age))
+        else
+          data <- data.frame(raw = raw, group = getGroups(age), weights = weights)
+
+        # removing missing cases
+        data <- data[complete.cases(data), ]
+        data <- rankByGroup(raw=data$raw, group=data$group, scale=scale, weights=data$weights, descend = descend, method = method)
+        data <- computePowers(data, k = k, t = t, silent = silent)
+      }
+    }else{
+      message("Ranking data with sliding window ...")
+      if(is.null(weights))
+        data <- data.frame(raw = raw, age = age)
+      else
+        data <- data.frame(raw = raw, age = age, weights = weights)
+
+      # removing missing cases
+      data <- data[complete.cases(data), ]
+      data <- rankBySlidingWindow(raw=data$raw, age=data$age, scale=scale, weights=data$weights, descend = descend, width = width, method = method)
+      data <- computePowers(data, k = k, t = t, silent = silent)
+    }
+
+
   }else{
     stop("Please provide a numerical vector for the raw scores and either a vector for grouping and/or age of the same length. If you use an age vector only, please specify the width of the window.")
   }

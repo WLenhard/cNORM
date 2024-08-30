@@ -615,7 +615,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
     )
 
   # Calculate and add manifest percentiles
-  if (length(age) / length(unique(age)) > 50) {
+  if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
     # Distinct age groups
     data$group <- age
   } else {
@@ -804,7 +804,7 @@ diagnostics.betabinomial <- function(model,
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
 
-    if (length(age) / length(unique(age)) > 50) {
+    if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
       data <- data.frame(group = age, raw = score)
       data <- rankByGroup(
         data = data,
@@ -1202,7 +1202,7 @@ cnorm.betabinomial <- function(age,
   }
 
   if(!(all(score >= 0 & score == floor(score)))){
-    stop("The score values should be non-negative integers.")
+    stop("The score variable needs to include only positive integers to model data with beta-binomial distributions. Please try Taylor polynomials with 'cnorm(score, group)' or 'cnorm(score, age = age, width = ageIntervall)' instead.")
   }
 
   if (mode == 2) {
