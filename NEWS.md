@@ -2,6 +2,16 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.3.1,
+Date: in progress
+
+
+Changes:
+
+*    added check on score data in cnorm.betabinomial 
+
+
+
 ### Version in 3.3.0,
 Date: 2024.08.26
 

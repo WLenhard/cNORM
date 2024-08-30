@@ -1201,6 +1201,10 @@ cnorm.betabinomial <- function(age,
     message("n parameter not specified, using the maximum score in the data instead. Consider to provide n manually.")
   }
 
+  if(!(all(score >= 0 & score == floor(score)))){
+    stop("The score values should be non-negative integers.")
+  }
+
   if (mode == 2) {
     model <- cnorm.betabinomial2(age, score, n, weights, alpha, beta, control, scale, plot)
   } else{
