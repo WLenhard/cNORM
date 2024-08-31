@@ -1201,8 +1201,9 @@ cnorm.betabinomial <- function(age,
     message("n parameter not specified, using the maximum score in the data instead. Consider to provide n manually.")
   }
 
-  if(!(all(score >= 0 & score == floor(score)))){
-    stop("The score variable needs to include only positive integers to model data with beta-binomial distributions. Please try Taylor polynomials with 'cnorm(score, group)' or 'cnorm(score, age = age, width = ageIntervall)' instead.")
+  if(!(all(score >= 0) & all(score == floor(score)))){
+    warning("The score variable needs to include only positive integers for modelling with beta-binomial distributions. Trying to use Taylor polynomials instead (function 'cnorm').")
+    return(cnorm(raw=score, age=age, weights = weights, scale = scale, plot = plot))
   }
 
   if (mode == 2) {

@@ -8,7 +8,8 @@ Date: in progress
 
 Changes:
 
-*    added check on score data in cnorm.betabinomial 
+*    added check on score data in cnorm.betabinomial
+*    switch to rankByGroup in cnorm in case age variable is plausibly grouping variable
 
 
 
