@@ -1,6 +1,7 @@
 importFrom(leaps, regsubsets)
 importFrom(stats, setNames, qbeta, optim, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
 importFrom(grDevices, rainbow, dev.off)
+importFrom(utils, menu, head, tail)
 importFrom(ggplot2, .data, scale_shape_manual, scale_x_continuous, annotate, margin, element_rect, unit, geom_tile, ggsave, geom_contour_filled, facet_wrap, geom_contour, scale_fill_gradientn, geom_abline, element_text, element_blank, element_line, scale_color_viridis_d, scale_color_brewer, ylim, geom_text, scale_y_log10, geom_vline, theme, geom_point, guides, guide_legend, aes, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
 export(
 	bestModel,
