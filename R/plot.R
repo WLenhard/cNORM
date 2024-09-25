@@ -904,7 +904,7 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                           scale = NULL,
                                           group = group,
                                           title = "Observed and Predicted Percentiles",
-                                          subtitle = bquote(paste("Model with ", start, " predictors, ", R^2, "=",
+                                          subtitle = bquote(paste("Model with ", .(start), " predictors, ", R^2, "=",
                                                                .(round(bestformula$subsets$adjr2[[start]], digits = 4))))
     )
 
