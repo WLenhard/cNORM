@@ -124,7 +124,7 @@ predictRaw <-
 
     # Identify which variables are in the model
     model_vars <- names(coef)
-    model_vars[[1]] <- "Intercept"
+    model_vars <- gsub("^.*Intercept.*$", "Intercept", model_vars)
 
     # Create a matrix with all possible variables, filled with zeros
     X_new_full <- matrix(0, nrow = nrow(X_new), ncol = length(all_vars))
