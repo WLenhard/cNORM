@@ -1368,10 +1368,7 @@ cnorm.cv <-
           1 - tab$Crossfit
         ) ^ 2)))
       }
-      cat(paste0(
-        "\nNumber of terms with best raw validation RMSE: ",
-        which.min(tab$RMSE.raw.test)
-      ))
+
       if (norms) {
         best.norm <- which.max(r2.test)
         FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
@@ -1384,24 +1381,27 @@ cnorm.cv <-
 
         cat(paste0(
           "First negative norm score R2 delta in validation: ",
-          FirstNegative,
-          "\n"
+          FirstNegative
         ))
 
+        cat(paste0(
+          "\nNumber of terms with best norm validation RMSE: ",
+          which.min(tab$RMSE.norm.test)
+        ))
         cat(
           paste0(
             "\nChoosing a model with ",
-            FirstNegative,
+            (FirstNegative - 1),
             " terms might be a good choice. For this, use the parameter 'terms = ",
-            FirstNegative,
-            "' in the bestModel-function.\n"
+            (FirstNegative - 1),
+            "' in the cnorm-function.\n"
           )
         )
         cat(
           "\nPlease investigate the plots and the summary table, as the results might vary within a narrow range."
         )
         cat(
-          "\nEspacially pay attention to RMSE.raw.test, r2.test, crossfit near 1 and where delta R2 stops to progress."
+          "\nEspecially pay attention to RMSE.norm.test delta R2 stops to progress."
         )
       }
 
