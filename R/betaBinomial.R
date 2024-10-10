@@ -986,8 +986,10 @@ cnorm.betabinomial2 <- function(age,
   y <- data$score
 
   # Initial parameters: use some sensible starting values
-  initial_alpha <- log(mean(y) / (n - mean(y)) + 1e-6)  # Add small constant
-  initial_beta <- log(1 + 1e-6)  # Add small constant
+  starting_vaules <- betaCoefficients(y)
+  initial_alpha <- log(starting_vaules[1] + 1e-6)
+  initial_beta <- log(starting_vaules[2] + 1e-6)
+
   initial_params <- c(initial_alpha,
                       rep(0, alpha_degree),
                       initial_beta,
@@ -996,7 +998,7 @@ cnorm.betabinomial2 <- function(age,
   # Optimize to find parameter estimates. If control is NULL, set default
   if (is.null(control)){
     n_param <-alpha_degree + beta_degree + 2
-    control = list(factr = 1e-8, maxit = n_param*50)
+    control = list(factr = 1e-8, maxit = n_param*50, lmm = n_param)
   }
 
   result <- optim(
@@ -1011,6 +1013,10 @@ cnorm.betabinomial2 <- function(age,
     hessian = TRUE,
     control = control
   )
+
+  if (result$convergence != 0) {
+    warning("Optimization did not converge. Consider adjusting control parameters.")
+  }
 
   # Extract results and calculate standard errors
   alpha_est <- result$par[1:(alpha_degree + 1)]

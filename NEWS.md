@@ -14,6 +14,7 @@ Changes:
 *    adjusted output and model recommendations in cnorm.cv
 *    fixed legend in plotDensity()
 *    bug in predictRaw fixed, which caused plotDerivative to plot wrong results
+*    improved initial starting and control parameters in cnorm.betabinomial2
 
 
 ### Version in 3.3.0,
