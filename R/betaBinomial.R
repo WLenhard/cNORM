@@ -986,19 +986,20 @@ cnorm.betabinomial2 <- function(age,
   y <- data$score
 
   # Initial parameters: use some sensible starting values
-  starting_vaules <- betaCoefficients(y)
-  initial_alpha <- log(starting_vaules[1] + 1e-6)
-  initial_beta <- log(starting_vaules[2] + 1e-6)
+  starting_values <- betaCoefficients(y)
+  starting_values[starting_values<=0] <- 1e-6
+  initial_alpha <- log(starting_values[1])
+  initial_beta <- log(starting_values[2])
 
   initial_params <- c(initial_alpha,
-                      rep(0, alpha_degree),
+                      rep(1e-9, alpha_degree),
                       initial_beta,
-                      rep(0, beta_degree))
+                      rep(1e-9, beta_degree))
 
   # Optimize to find parameter estimates. If control is NULL, set default
   if (is.null(control)){
     n_param <-alpha_degree + beta_degree + 2
-    control = list(factr = 1e-8, maxit = n_param*50, lmm = n_param)
+    control = list(factr = 1e-6, maxit = n_param*50, lmm = n_param)
   }
 
   result <- optim(
