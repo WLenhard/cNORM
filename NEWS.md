@@ -16,6 +16,7 @@ Changes:
 *    bug in predictRaw fixed, which caused plotDerivative to plot wrong results
 *    improved initial starting and control parameters in cnorm.betabinomial2
 *    bugs in diagnostics.betabinomial fixed
+*    vignettes revised
 
 
 
