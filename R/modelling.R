@@ -670,6 +670,10 @@ derive <- function(model,
           newString <- paste0(nam[[1]][3], nam[[1]][4])
         }
       }
+
+      if(nchar(newString)==0)
+        newString <- "Intercept"
+
       name[[i]] <- newString
 
       i <- i + 1
