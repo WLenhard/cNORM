@@ -19,28 +19,28 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-In this vignette, we demonstrate how to model psychometric data over age using beta binomial distributions. We'll cover the theoretical background, provide practical examples, and showcase the capabilities through a simulation study.
+An alternative to distribution-free modeling of norm data is parametric modeling. In this approach, the parameters of specific distribution functions (e.g., normal distribution, Box-Cox power function, beta-binomial distribution, etc.) are adjusted across age. One challenge with this approach is finding a function that fits the manifest data well. Note that for the normal distribution, this is usually not the case (cf. A. Lenhard et al., 2019).
 
-The beta-binomial distribution is a powerful approach for modeling psychometric test scores with a fixed maximum score and discrete outcomes. In psychometric testing, we often encounter situations where individuals answer a set number of questions or items, resulting in whole-number scores bounded by zero and the maximum possible score. The probability of answering each question correctly varies among individuals due to factors like ability or personal traits. 
+In certain cases, however, the beta-binomial distribution is excellently suited for modeling norm scores. This is especially true for psychometric test scales with a fixed number of questions or items that are completed without time constraints, and where each individual item can only be scored as 0 or 1.
 
-To quantify this ability or trait, norm scores are used to express the relative location of an individual's score within a reference population. This allows for meaningful interpretation and comparison of test results across different age groups or populations. The beta-binomial distribution combines the binomial distribution, which models the count of correct answers in a fixed number of trials, with the beta distribution, which accounts for the variability in the probability of success. 
+As the name suggests, the beta-binomial distribution combines the binomial distribution with the beta distribution. The binomial distribution can be used to determine the probability of achieving x successes in n trials. The binomial distribution assumes a constant probability of success. However, this is usually not the case in psychometric test scales, especially in performance tests. This is where the beta distribution comes into play. In the beta-binomial distribution, it is assumed that the probability of success is not constant, but that the item difficulties follow a beta distribution. The latter does not represent a specific distribution, but a family of distributions determined by two shape parameters $\alpha$ and $\beta$. Although the item difficulties in most test scales are probably not exactly beta-distributed, test results can usually be modeled very well with the beta-binomial distribution, at least for unspeeded tests.
+
+Since version 3.2, cNORM is not only able to model psychometric data across age using Taylor polynomials, but also using the beta-binomial distribution. In the following we will show the mathematical derivation, explain the requirements, demonstrate a practical modeling example and present the results of a simulation study.
+
 
 ## Mathematical Derivation
-The beta-binomial distribution arises as a compound distribution of the binomial and beta distribution. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability mass function of the beta-binomial distribution is given by:
+The beta-binomial distribution is a combination of the binomial and the beta distribution. For a test with n items, which are scored dichotomously with 0 (= false) and 1 (= correct), let X be the number of correct responses. The probability function of the beta-binomial distribution is given by: 
 
 \[P(X = k | n, \alpha, \beta) = \binom{n}{k} \frac{B(k + \alpha, n - k + \beta)}{B(\alpha, \beta)}\]
 
 where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
 
-We directly model the $\alpha$ and $\beta$ parameters of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically:
+We model the shape parameters $\alpha$ and $\beta$ of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically: 
 
 \[\log(\alpha(age)) = a_0 + a_1age + a_2age^2 + ... + a_mage^m\]
 \[\log(\beta(age)) = b_0 + b_1age + b_2age^2 + ... + b_sage^s\]
 
-where m and s are the degrees of the polynomials for $\alpha$ and $\beta$ respectively.
-We use the log of $\alpha$ and $\beta$ to ensure positivity of these parameters, as they must be positive for the beta-binomial distribution. This transformation also helps in stabilizing the variance and improving the optimization process.
-
-The mean ($\mu$) and variance ($\sigma^2$) of the beta-binomial distribution can be derived from $\alpha$ and $\beta$ as follows:
+where m and s are the degrees of the polynomials for $\alpha$ and $\beta$ respectively. We use the logarithm of $\alpha$ and β to ensure that they are positive, since the beta-binomial distribution is only defined for positive $\alpha$ and $\beta$. This transformation also helps in stabilizing the variance and improving the optimization process. The mean $\mu$ and variance $\sigma^2$ of the beta-binomial distribution can be derived from $\alpha$ and $\beta$ as follows: 
 
 \[\mu = \frac{n\alpha}{\alpha + \beta}\]
 \[\sigma^2 = \frac{n\alpha\beta(\alpha + \beta + n)}{(\alpha + \beta)^2(\alpha + \beta + 1)}\]
@@ -51,107 +51,129 @@ To estimate the parameters ($a_0, ..., a_m, b_0, ..., b_s$), we use maximum like
 
 where $X_i$ is the score and $Age_i$ is the age for the i-th observation.
 
-This log-likelihood is jointly optimized over all parameters using numerical optimization techniques, specifically the L-BFGS-B (Limited-memory BFGS) algorithm of the optim function. The L-BFGS-B algorithm is a quasi-Newton method for solving large nonlinear optimization problems with simple bounds. It's particularly effective for our problem as it can handle a large number of parameters and allows for bound constraints, which can be useful to ensure the positivity of $\alpha$ and $\beta$. The optimization process finds the values of $a$ and $b$ that maximize the log-likelihood through approximating the Hessian matrix, thereby providing the best fit to the observed data.
-
-This direct modeling of $\alpha$ and $\beta$ allows for flexibly capturing the shape of the beta-binomial distribution across different ages, potentially leading to the best fit for complex data patterns.
+The data fitting is performed using numerical optimization techniques, specifically the L-BFGS-B (Limited-memory BFGS) algorithm of the 'optim' function. The latter is a quasi-Newton method for solving large nonlinear optimization problems with simple bounds. By approximating the Hessian matrix, it simultaneously determines the coefficients of the regression equations for $\alpha$ and $\beta$ that maximize the log-likelihood, thus providing the best fit to the observed data.
 
 
 ## Prerequisites
-Before applying beta-binomial modeling to psychometric data over age, several key prerequisites should be met:
+To our knowledge, it has not yet been systematically investigated empirically under which circumstances the beta-binomial distribution yields the best results and when distribution-free modeling should be preferred. Nevertheless, there are some requirements that should be fulfilled if you want to use the beta-binomial distribution when modeling your data with the cNORM package.
 
-- **Systematic development over age resp. the explanatory variable**: The scores must show a systematic, but not necessarily monotonic development over age (resp. the explanatory variable). By default, the modeling can capture curvilinear relationships for both $\mu$ and $\sigma$. In case of more complex trajectories, the polynomial degrees for both parameters can be increased. This however requires larger sample sizes and entails the danger of overfitting.
 
-- **Discrete outcomes**: The test scores must be distinct, whole number values. For example, scores like 0, 1, 2, ..., n are appropriate. Fractional or continuous scores are not suitable for the beta binomial model.
 
-- **Fixed maximum score**: The test must have a predetermined maximum score or a fixed number of items with a consistent upper bound across all age groups.
+- **Systematic development across age or the explanatory variable**: The test raw scores must show a systematic, but not necessarily monotonic, development across age (resp. the explanatory variable). By default, the modeling can capture nonlinear relationships across age. This applies to both the development of the mean and the standard deviation of the raw scores. For more complex trajectories, the polynomial degrees for age adjustment of both shape parameters can be increased. However, ensure that sufficiently large sample sizes are available in these cases to avoid overfitting.
 
-- **Size and representativeness of the norm sample**: As always, the result of norm score modeling depends on the quality of the norm sample data. The sample should be large enough to capture the variability in the test scores and representative of the population of interest. In continuous norming, usually a minimum of 100 cases per age cohort is recommended. This recommendation is based on the need to have sufficient data to reliably estimate the parameters of the model, especially when using higher-degree polynomials. Strong deviations from the population will lead to biased norm scores. Mild to moderate deviations can be partly corrected by post-stratification or weighting.
+- **Discrete outcomes**: Only positive integers including zero are permitted as test raw scores. Decimal numbers, fractions or negative scores are not suitable for fitting with the beta-binomial distribution.
 
-- **Absence of outliers or influential observations**: It's important to check for and handle any outliers or influential observations that could disproportionately affect the model fit. These could be due to data entry errors, unusual testing conditions, or genuinely extreme performances.
+- **Fixed maximum score**: The test should have a predefined maximum score or a fixed number of items. It cannot be ruled out that the beta-binomial distribution also works for test scales with an open-ended score. However, the beta-binomial distribution assumes, at least theoretically, that there is a discrete number of trials and therefore also a maximum number of successes.
 
-## Example
+- **No time contraints**: The test in question should be unspeeded. At least theoretically, the beta-binomial distribution assumes that the raw score distribution depends solely on the distribution of the item difficulties and the number of items. However, in speeded tests, the probability of solving an item also depends on its position within the test. For example, people with low processing speed are less likely to solve an item far back in the test than would be expected based on the item difficulty alone. In line with this hypothesis, we observed in simulation studies that the fit of the beta-binomial distribution deteriorates as the speed component of a test increases.
 
-Let's walk through a practical example using the ppvt dataset, included in cNORM. Before we begin, ensure you have installed the cNORM package.
+- **Size and representativeness of the norm sample**: As always, the result of norm score modeling depends on the quality of the norm data. The norm sample should be representative of the reference population and it should be large enough to sufficiently capture the variability of the personality trait to be measured. Slight to moderate deviations of the standard sample from representativeness can be partially corrected by post-stratification and weighting. However, this is not necessarily guaranteed in the case of strong deviations. For continuous norming, a minimum of 100 cases per age cohort is generally recommended. This recommendation results from the need to be able to estimate the parameters of the model reliably enough. However, if several stratification variables are used or if the relation between raw score distribution and explanatory variable is complex, larger samples may also be necessary.
+
+- **Absence of outliers or influential observations**: It is crucial to examine the data for outliers prior to modeling, as these anomalous points could disproportionately influence the model fit. Such outliers may arise from data entry errors or invalid test conditions. If such reasons are identified, the affected data points should be excluded from the modeling process. (Note that it is important to document any data exclusions and provide justification for their removal to maintain transparency in the analysis.)
+
+
+## Modeling Example
+
+In the following, we will demonstrate parametric continous norming based on the beta-binomial distribution using the example of the development of receptive vocabulary in childhood and adolescence. For this purpose, we have integrated a data set into cNORM that was collected using the German version of the Peabody Picture Vocabulary Test 4 (PPVT-4). If you would like to reproduce the modeling yourself please make sure that you have installed a current version of cNORM.
 
 ### Data Preparation
-The ppvt dataset included in cNORM contains data on vocabulary development over age, specifically scores from the Peabody Picture Vocabulary Test (Version 4, German adaption by A. Lenhard et al., 2015). This test measures receptive vocabulary and is widely used in psychological and educational assessments. Let's load the data and examine its structure:
+With the following code you can load the cNORM library and view the structure of the ppvt data set:
 
 ```{r fig0, fig.height = 4, fig.width = 7}
+ ## Loads the package and displays the data
+
 library(cNORM)
 str(ppvt)
-max(ppvt$raw)
-plot(ppvt$age, ppvt$raw, main="PPVT Raw Scores by Age", xlab="Age", ylab="Raw Score")
+plot(ppvt$age, ppvt$raw, main="PPVT Raw Scores by Age",
+              xlab="Age", ylab="Raw score")
 ```
 
-The development over age shows a strong curvilinear trajectory, which is typical for vocabulary development. We observe a rapid increase in scores during early childhood, followed by a more gradual increase in later years. The data contain several columns including background variables, a raw score variable, age, and age group. We will use the continuous age variable for modeling the vocabulary development, initially without using stratification or weighting.
+The dataset contains two columns that encode the explanatory variable: a continuous age variable and a discrete group variable (see also Data Preparation). The latter is primarily used for visualization purposes in parametric norming. Furthermore, the dataset includes the raw score and three background variables that can be used for stratification or weighting, namely sex, migration, and region.
+
+The 'Raw Scores by Age' plot exhibits a pronounced curvilinear pattern, which is characteristic of vocabulary development. A rapid increase in scores is observed during the preschool years, followed by a deceleration of growth during adolescence.
+
+We will initially conduct the modeling without stratification or weighting.
 
 ### Model Fitting
-To fit the beta-binomial model to the data, we use the `cnorm.betabinomial` function. This function takes the age and raw score variables as input and returns the model object. Here's how you can fit the model:
+To fit the beta-binomial distribution to the data, we employ the 'cnorm.betabinomial()' function. You have to specify the variables 'age' for the explanatory variable and 'score' for the raw score to be modeled. Additionally, it is necessary to indicate the number of items, which for the PPVT-4, is 228. Note that it is important to employ the actual number of items here, not the maximum achievable score.
 
 ```{r fig1, fig.height = 4, fig.width = 7}
-# Data can be fitted over a continuous variable like age without the prerequisite of defining
-# age groups. We will use the data on vocabulary development (ppvt) included in cNORM. The test
-# has a maximum score of 228, which is however not reached in the sample:
-model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
+# Models the data across a continuos explanatroy variable such as age,
+# thereby assuming that the raw scores follow a beta-binomial distribution
+# at a given age level:
 
-# In order to use different optimization functions, you can specify different 
-# control parameters, e.g., including methods from the optimx package. 
-# The default is the L-BFGS algorithm.
+model.betabinomial <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
+```
 
-# To retrieve fit indices, use the 'diagnostic.betabinomial' or the 'summary' function
-# If age and raw scores are provided, R2, RMSE and bias are computed in comparison
-# to manifest norm scores.
-summary(model.betabinomial)
+Fit indices can be obtained using the 'diagnostic.betabinomial()' function or the 'summary()' function. If the age variable and raw score variable are additionally specified, the output will also include R2, RMSE, and bias in relation to the observed data.
+
+```{r}
+# Provides fit indices
+
+diagnostics.betabinomial(model.betabinomial, age = ppvt$age, score = ppvt$raw)
+```
+
+By default, the function fits a third-degree polynomial for both $\alpha$ and $\beta$. However, you can also specify the degrees of the polynomials yourself. Use the parameters 'alpha' and 'beta' for this purpose. When the 'mode' parameter of the function is set to 1, the adjustment is performed using the parameters for mean and standard deviation ($\mu$ and $\sigma$) instead of $\alpha$ and $\beta$. If the number of items is not specified using the 'n' parameter, the function will use the maximum raw score (which we do not recommend).
+
+Norm scores are returned as T-scores by default, but IQ scores, z-scores, percentiles, or customized norm scores specified by a vector 'c(M, SD)' are also possible.
+
+By default, a plot of the manifest and modeled percentile curves is returned, too. Diagramms can also be generated using the 'plot()' function. As with distribution-free modeling, it is always important to have a close look at the percentile curves. Wavy patterns indicate overfitting.
+
+To determine norm scores, please use the 'predict()' function and provide the model object along with a vector for the desired age levels and raw scores. Please use the midpoint of the desired age interval to specify age. In the example, T-scores for 10-year-old children are provided in 3-month intervals for the raw score 200.
+
+```{r}
+# Provides norm scores for specified age levels and raw scores.
+# If not specified otherwise in the model, the norm scores will
+# be returned as T-scores.
+
+predict(model.betabinomial, c(10.125, 10.375, 10.625, 10.875), c(200, 200, 200, 200))
+```
+
+
+### Post stratification and weighting
+Post-stratification is a method in which individual cases are weighted after data collection is complete, aiming to minimize deviations from representativeness in the sample. In parametric modeling, such weights can be applied in the same way as in distribution-free modeling. The 'computeWeights()' function calculates the necessary weights using a technique called 'raking'. In this example, we weight individual cases to account for population proportions of gender and immigration status when computing the model. Consequently, the resulting norm scores should better represent the target population compared to the unweighted model.
+
+```{r fig2, fig.height = 4, fig.width = 7}
+# Calculates weights and models the data:
+
+margins <- data.frame(variables = c("sex", "sex",
+                    "migration", "migration"),
+                    levels = c(1, 2, 0, 1),
+                    share = c(.52, .48, .7, .3))
+weights <- computeWeights(ppvt, margins)
+model_weighted <- cnorm.betabinomial(ppvt$age, ppvt$raw, weights = weights)
 
 ```
 
-By default, the function fits a polynomial of degree 3 for both $\alpha$ and $\beta$, but it can as well resort to $\mu$ and $\sigma$ by setting 'mode' to 1. You can specify the degrees of the polynomials using the `alpha` and `beta` arguments. By default, norm scores are set to T scores, but IQ, z, percentiles and custom standard scores (use `c(M, SD)` for specification) are possible as well. If the maximum score is not provided via the n parameter, the function will resort to `max(raw)`.
+These norm tables provide the raw scores (x), their probabilities (Px), the cumulative probabilities (Pcum), percentiles, z-scores, and norm scores (if not specified otherwise: T-scores) and in this specific case the 95%-confidence intervals with respect to the norm score and percentile.
 
-`cnorm.betabinomial` already displays a plot of the raw scores and the percentile curves. This can also be done manually using the `plot(model, age, score)` function. Observe if the percentile trajectories exhibit plausible forms. To predict the norm scores for new data, please use the 'predict' function and provide the model object together with a vector for age and raw scores:
-
-```{r}
-# Predict norm scores for new data. Since we used the default T-score scaling,
-# the output will as well be a vector with T-scores.
-# Usage: predict(model, age, raw)
-predict(model.betabinomial, c(8.9, 10.1, 9.3, 8.7), c(123, 98, 201, 165))
-```
+Please consult the vignette on `WeightedRegression` for more information on post-stratification and weighting techniques.
 
 
-### Norm table generation
-Norm tables can be generated with the `normTable` or 'normTable.betabinomial' function. The function takes the model object and a vector of ages for which you want to generate norm scores. If available, reliability can be specified to compute confidence intervals as well. By default, the function limits the results to +/- 3 standard deviations.
+
+### Generation of Norm tables
+Norm tables can be generated using the 'normTable.betabinomial()' function. This function requires the model object and an age specification or a vector with multiple age specifications for which you want to generate norm tables. When specifying ages, please note that the midpoint of the desired age interval should be used. In this example, norms for 14-year-old children are provided in 6-month intervals. If a confidence coefficient and a reliability coefficient are additionally specified in the 'normTable.betabinomial()' function, the table will be returned with confidence intervals. By default, the function limits the norm scores to +/- 3 standard deviations.
 
 ```{r}
-# Generate norm tables for age 2, 3 and 4 and compute confidence intervals with a 
-# reliability of .9. The output is by default limited to +/- 3 standard deviations.
-tables <- normTable(model = model.betabinomial, A = c(2, 3, 4), reliability=0.9)
+# Generates norm tables for age 14.25 and 14.75 and computes 95%-confidence
+# intervals with a reliability of .97.
+
+tables <- normTable.betabinomial(model.betabinomial, c(14.25, 14.75), CI = .95, reliability = .97)
 head(tables[[1]]) # head is used to show only the first few rows of the table
 ```
 
 These norm tables provide the raw scores (x), their probabilities (Px), cumulative probabilities (Pcum), percentiles, z-scores, and norm scores (in this case, T-scores) and in this specific case the confidence intervals for the norm score and the percentiles for each age. This allows for the interpretation of an individual's raw score in relation to their age group.
 
-### Post stratification and weighting
-In modeling with the beta binomial function, just like in `cnorm`, weights can be applied as a means for post-stratification. Post-stratification is a technique used to adjust the sample data to better represent the population, which can help correct for sampling biases. Please use the raking function `computeWeights`. Here's an example for the 'ppvt' dataset:
-
-```{r fig2, fig.height = 4, fig.width = 7}
-margins <- data.frame(variables = c("sex", "sex",
-                                   "migration", "migration"),
-                      levels = c(1, 2, 0, 1),
-                      share = c(.52, .48, .7, .3))
-weights <- computeWeights(ppvt, margins)
-model_weighted <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, weights = weights)
-
-```
-
-In this example, we're adjusting the sample to match population proportions for sex and migration status. The resulting weighted model should provide norm scores that better represent the target population.
-
-Please consult the vignette on `WeightedRegression` for more information on post-stratification and weighting techniques.
-
 
 ## Simulation Study
 
-Recent research by Urban et al. (2024) has demonstrated that regression-based modeling with beta-binomial distributions can effectively approximate norm scores of psychological tests in many scenarios. Our study replicates and extends the work of Lenhard & Lenhard (2021), which assessed the performance of semi-parametric regression models for norm score estimation as applied in cNORM, comparing it with conventional norming methods. cNORM demonstrated superior performance even with small sample sizes. The simulated scales in this study were constructed to align with scenarios where beta-binomial modeling is expected to perform well, particularly given the normal distribution of item difficulties. Thus, we wanted to replicate our results, including beta binomial distributions as outlined above.
+In simulation studies (W. Lenhard & Lenhard, 2021), we demonstrated that distribution-free continuous norming using Taylor polynomials, as applied in cNORM, is significantly superior to conventional norming methods. This superiority was more pronounced with smaller normative samples. Only with unrealistically large samples did the relevant difference between continuous and conventional norming disappear. In another simulation study (A. Lenhard et al., 2019), we compared distribution-free with parametric norming. These investigations showed no general superiority of one method over the other. Instead, the quality of norming depended on the raw score distribution and sample size. A crucial factor for norming quality was whether an appropriate distribution could be found in parametric norming that fit the raw score distributions within each individual age group. However, the beta-binomial distribution was not included in our simulation study at that time.
 
-The complete simulation code and detailed results are available in our [OSF repository](https://osf.io/hcg7v/). Our methodology involves simulating scales of varying difficulty and item numbers, applying these to norming samples of different sizes. The resulting models are then tested against an ideal, large population where the latent ability and true T-score are known, based on the IRT simulation process. This approach allows us to assess model quality while minimizing the noise inherent in real-world norming studies. Furthermore, with all person parameters known, we can evaluate the models in terms of bias, Root Mean Square Error (RMSE), and coefficient of determination ($R^2$).
+Recent publications by Urban et al. (2024) have now shown that parametric modeling using the beta-binomial distribution can very effectively approximate the norm scores of some typical psychological test scales. Our own (unpublished) simulations with 1-PL IRT scales also pointed in this direction.
+
+With the simulation study presented below, we aim to extend our previous results comparing parametric and distribution-free modeling to include the beta-binomial distribution. The simulations exclusively modeled scales without time limitations (i.e., without speed effects). In theory, the beta-binomial distribution should be particularly well-suited for modeling these scales.
+
+Our simulation includes scales of varying difficulty and item numbers, and normative samples of different sizes.
 
 We conducted five simulation runs with the following parameters:
 
@@ -163,33 +185,36 @@ We conducted five simulation runs with the following parameters:
 
 - Cross-validation sample: 70,000 cases
 
-In the results data, SCPM refers to cNORM with Taylor polynomials, numeric values indicate conventional norming with varying norm group interval sizes in month, and 'beta' denotes the beta-binomial models. The 'rCrossT_' prefix indicates the correlation between actual and fitted T-scores in the cross-validation sample.
+In the results, we compare conventional norming with 6-month intervals, distribution-free continuous norming, and parametric continuous norming by means of beta-binomial distribution. The resulting norm scores for each method are compared with manifest T-scores simulated for an ideally representative, large population using an IRT process. This approach allows us to assess model quality while minimizing biases that occur in real norming studies. Since the person parameters are known in the simulation, we can calculate the mean bias, Root Mean Square Error (RMSE), R2, and Mean Absolute Difference (MAD) for each norming method. For simplicity, we will focus on R2 in the cross-validation sample in the following. However, detailed results and the complete simulation code are available in our [OSF repository](https://osf.io/hcg7v/).
 
-### Results
 
-Our findings demonstrate that beta-binomial models perform robustly in terms of bias, RMSE, and $R^2$, even with relatively small sample sizes. Their performance is comparable to or better than Taylor polynomials and significantly superior to conventional norming methods:
+
+### Results and discussion
 
 <img src="beta.png" style="border:0;" height=400>
 
+Our results demonstrate that parametric continuous norming with beta-binomial distribution performs exceptionally well for the simulated scales. Even with relatively small samples, it closely approximates the 'ideal' norm scores simulated for the large and representative cross-validation sample. Parametric norming with the beta-binomial distribution is markedly superior to conventional norming with 6-month intervals. In fact, for the simple 1-PL scales simulated here, it performs even slightly better than distribution-free continuous norming with Taylor polynomials. However, the differences between the two continuous methods are so minimal that they are unlikely to have practical significance in most cases.
 
+Moreover, based on the results presented here, it cannot be assumed that parametric norming using the beta-binomial distribution generally yields better results than distribution-free continuous norming. At least in unsystematic simulations for individual age groups, we found a better fit with Taylor polynomials for speeded test scales. We are currently preparing additional systematic simulations, the results of which we will report as soon as possible.
 
 
 ## Conclusion: When to Use What?
 
-Having a diverse methodological toolkit is invaluable in psychometric research. Taylor polynomials, as implemented in cNORM, have proven effective across a wide range of norming scenarios. Their distribution-free nature makes them applicable to various tests, including those with continuous raw scores. Beta-binomial models, on the other hand, are particularly well-suited for tests with fixed maximum scores and discrete outcomes. Both approaches consistently outperform conventional norming studies and should be considered in test construction whenever feasible.
+A diverse methodological toolkit is invaluable in psychometrics. Taylor polynomials, as implemented in cNORM, have proven effective in a wide range of norming scenarios. Their distribution-free nature makes them applicable to various tests, including those with continuous or negative raw scores. Parametric modeling with beta-binomial distribution, on the other hand, is particularly well-suited for unspeeded tests with dichotomous items and fixed maximum scores. Both methods yield significantly better results than conventional norming for typical sample sizes and should therefore be preferentially applied in test construction.
 
-The choice between these approaches should be guided by:
+The choice between these approaches should be guided by the following factors:
 
-1. Test characteristics (e.g., discrete vs. continuous outcomes)
-2. Available data (sample size and distribution)
-3. Theoretical underpinnings of the construct being measured
+1. Characteristics of raw scores (e.g., discrete vs. continuous raw scores, negative values)
+2. Test scale features (e.g., speeded vs. unspeeded)
 
-It is crucial to thoroughly assess model fit, with particular attention to the trajectory of percentile curves. These curves should align with theoretical expectations of the construct's development. Wavy lines in specific percentiles often indicate overfitting and should be addressed, possibly by adjusting model parameters or considering alternative modeling approaches.
+Regardless of the method used, it is always necessary to thoroughly evaluate the model fit and transparently report its quality in the test manuals. Particular attention should be paid to the shape of the percentile curves, which should align with theoretical expectations. For instance, wavy percentile curves are generally not expected. Such a pattern indicates overfitting and should be avoided. In such cases, review the model parameters or employ an alternative modeling approach.
 
-In conclusion, while both cNORM with Taylor polynomials and beta-binomial models offer significant advantages over conventional norming, the specific choice should be informed by careful consideration of the test's nature, the available data, and the theoretical framework of the construct being measured.
+In summary, both distribution-free and parametric continuous norming with cNORM offer significant advantages over conventional norming. The specific choice between the two continuous norming methods should be made through careful consideration of the test type and available data.
 
 ## References
-* Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, 81(2), 229–261. https://doi.org/10.1177/0013164420928457
+* Lenhard, A., Lenhard, W. & Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9), e0222279. https://doi.org/10.1371/journal.pone.0222279
+* Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, 81(2), 229-261. https://doi.org/10.1177/0013164420928457
 * Urban, J., Scherrer, V., Strobel, A., & Preckel, F. (2024). Continuous Norming Approaches: A Systematic Review and Real Data Example. Assessment. https://doi.org/10.1177/10731911241260545
+
 
 
