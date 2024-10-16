@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.3.1,
-Date: in progress
+Date: 16.10.2024
 
 
 Changes:
@@ -15,6 +15,8 @@ Changes:
 *    fixed legend in plotDensity()
 *    bug in predictRaw fixed, which caused plotDerivative to plot wrong results
 *    improved initial starting and control parameters in cnorm.betabinomial2
+*    bugs in diagnostics.betabinomial fixed
+
 
 
 ### Version in 3.3.0,
