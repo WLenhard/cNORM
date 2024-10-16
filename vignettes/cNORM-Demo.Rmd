@@ -19,20 +19,24 @@ library(ggplot2)
 
 ```
 
-<img src="logo.png" align=right style="border:0;">cNORM is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. It is based on the approach of A. Lenhard et al. (2016, 2019), which aims at fitting Taylor polynomials. It as well includes the option for parametric modelling data with beta binomial distributions. In this vignette, however, we will focus on the Taylor polynomial approach for continuous norming. Please consult the vignette 'BetaBinomial' for the parametric norming.
+<img src="logo.png" align=right style="border:0;"> cNORM (A. Lenhard, Lenhard & Gary, 2018) is an R package that generates continuous test norms for psychometric and biometric data and analyzes the associated model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution.
 
-The method stems from psychometric test construction and was developed to create continuous norms for age or grade in performance assessment (e. g. vocabulary development, A. Lenhard, Lenhard, Segerer & Suggate, 2015; reading and writing development, W. Lenhard, Lenhard & Schneider, 2017). It can however be applied wherever test data like psychological (e. g. intelligence), physiological (e. g. weight) or other measures are dependent on continuous (e.g., age) or discrete (e.g., sex or test mode) explanatory variables. It has been applied to biometric data (fetal growth in dependence of gestation week) and macro economic data as well. It does not require any assumptions on the data distribution.
+cNORM was developed specifically for achievement tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, the package can be used wherever mental (e.g. reaction time), physical (e.g. body weight) or other test scores depend on continuous (e.g. age, duration of schooling) or discrete explanatory variables (e.g. sex, test form). In addition, the package can also be used for "conventional" norming based on individual groups, i.e. without including explanatory variables.
 
-The package estimates percentile curves in dependence of the explanatory variable (e. g. schooling duration, age ...) via Taylor polynomials, thus offering several advantages, some of which apply to all continuous norming approaches:
+The package estimates percentiles as a function of the explanatory variable. This is done either parametrically on the basis of the beta-binomial distribution or distribution-free using Taylor polynomials. Mathematical modeling of the data using continuous variables such as age has the following advantages:
 
-*   By optimizing the model on the basis of the total sample, small deviations from the representativeness of individual subsamples, for example due to incomplete data stratification, are minimized. Further, it can automatically post-stratify samples to approximate representativeness.
-*   Gaps between different discrete levels of the explanatory variable are closed. For example, in school performance tests, norm tables can be created not only for the discrete measurement point of the norm sample collection (e.g. midyear or end of the year), but also at any time of the school year with the desired accuracy.
-*   The total sample size for the norm data collection is reduced because all norm tables are determined on the basis of the entire sample.
-*   The limits of the model fit can be evaluated graphically and analytically. For example, it is possible to determine where the model deviates strongly from the manifest data or where strong floor or ceiling effects occur. This makes it possible to specify at which points the test scores can no longer be interpreted in a meaningful way.
-*   The modelling with Taylor polynomials does not require any distribution assumptions.
-*   For post-stratification of non-representative samples, cNORM draws on iterative proportional fitting (raking) to approximate representativeness. Please consult the 'WeightedRegression' vignette for further information.
+*   By optimizing the model based on the overall sample, small deviations from representativeness in individual subsamples caused by random sampling are minimized (A. Lenhard, Lenhard & Gary, 2019).
+*   Gaps between different discrete levels of the explanatory variable are closed. In intelligence tests, for example, norms can be created not only for relatively wide age intervals (e.g., 6 months), but for any exact age. In achievement tests, the norms are no longer limited to the specific time of the data collection (e.g., middle or end of the school year), but can be extended to any point in time within a school year under certain conditions.
+*   Norm tables are always determined on the basis of the entire sample instead of a single cohort or grade level. For this reason, only around a quarter of the sample size is required to achieve the same norm score precision with continuous norming compared to conventional norming per subgroub. In general, continuous norming only requires a sample size of around 100 per cohort to achieve sufficient norming quality (W. Lenhard & Lenhard, 2020). Especially in those performance areas that deviate relatively strongly from the population mean, continuous norming usually leads to more precise results than conventional norming. This is specifically important, because it is precisely these areas that are most relevant in diagnostic practice.
+*   The limits of the model fit can be evaluated graphically and analytically. For example, it is possible to determine at which points the model deviates strongly from the manifest data or where strong floor or ceiling effects occur. This feature allows to specify in which age and performance ranges the test no longer differentiates sufficiently.
+*   The beta-binomial distribution models the raw data very precisely in many application scenarios, especially for tests that are based on 1-PL IRT models. Fitting with Taylor polynomials, on the other hand, requires very few assumptions about the raw score distributions. This means that a wider range of scales can be standardized, for example, continuous measures such as reaction times, scales that contain negative values or speeded test scales.
+*   In case of violations of represantativeness, Iterative Proportional Fitting (Raking) can be used to calculate weights and apply these to mitigate biases.
 
-The rationale of the approach is to rank the results in the different age cohorts (= age, $a$; a sliding window can be used in case the data is distributed over a large age interval) and thus to determine the observed norm scores (= location, $l$). Afterwards, powers of the age specific location and of the age are computed, as well as all linear interactions. Thus, we model the raw score $r$ as a function of the powers of location $l$ and age $a$ and their interactions by a Taylor polynomial:
+In this vignette, we will demonstrate the necessary steps for the application of the R package with real human performance data, namely, with the normative sample of the sentence comprehension subtest of ELFE 1-6, a reading comprehension test in German language (W. Lenhard & Schneider, 2006) and with the German adaptation of the Peabody Picture Vocabulary Test 4 (A. Lenhard et al., 2015)
+
+
+## Mathematical Background
+The rationale of the approach is to rank the results in the different age cohorts (= age, $a$) or continuously with a sliding window and thus to determine the observed norm scores (= location, $l$). Afterwards, powers of the age specific location and of the age are computed, as well as all linear interactions. Thus, we model the raw score $r$ as a function of the powers of location $l$ and age $a$ and their interactions by a Taylor polynomial:
 $$f(r) = \sum_{k=0}^K \sum_{t=0}^T \beta_{k,t} \cdot l^k \cdot a^t$$
 
 Where:
@@ -48,265 +52,282 @@ Finally, the data is fitted by a hyperplane via multiple regression and the most
 <img src="plos.png" style="border:0;">
 
 
-
 ## In a nutshell: Establishing continuous norming models
 The 'cnorm' method combines most of the steps in one go. The example in a nutshell already suffices for establishing norm scores. It conducts the ranking, the computation of powers and the modeling. A detailed explanation of the distinct steps follows afterwards. 
  
 ```
+ ## Basic example code for modeling the sample dataset
+
 library(cNORM)
 
-# We will use the internal dataset elfe on reading comprehension
-# that includes raw scores and grade as a grouping variable.
+# Start the graphical user interface (needs shiny installed)
+# The GUI includes the most important functions. For specific cases,
+# please use cNORM on the console.
 
-# Most easy example: conventional norming without age or group.
-# Just get the manifest norm scores and as well modelled via polynomial regression.
-model <- cnorm(raw = elfe$raw)
+cNORM.GUI()
 
-# The method 'cnorm' prepares the data and establishes a model for continuous
-# norming. Please specify a raw score and a grouping vector.
-model <- cnorm(raw = elfe$raw, group = elfe$group)
+# Using the syntax on the console: The function 'cnorm' performs
+# all steps automatically. Please specify the raw score and the
+# grouping variable. The resulting object contains the ranked data
+# via object$data and the model via object$model.
 
-# Fine tune model selection by checking model fit and by
-# visual inspection, e. g. with the following checks
-plot(model, "series", start=4, end = 8)   # series of percentile plots
-plot(model, "subset")                     # plot information function
-cnorm.cv(model$data)                      # run repeated cross validation
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
-# Select final model
-model <- cnorm(raw = elfe$raw, group = elfe$group, terms = 3)
+# Plot different indicators of model fit depending on the number of
+# predictors
 
-# generate norm score table with 90% confiden interval and
-# a reliability of .94 for several grade levels
-normTable(c(3, 3.2, 3.4, 3.6), model, CI = .9, reliability = .94)
+plot(cnorm.elfe, "subset", type=0) # plot R2
+plot(cnorm.elfe, "subset", type=3) # plot MSE
 
-# To set powers of age and location independently, please specify k as the
-# power parameter for location and t for age, e. g. for a cubic age trend
-# with the ppvt demo data:
-model.ppvt <- cnorm(raw = ppvt$raw, group = ppvt$group, k = 4, t = 3)
+# NOTE! At this point, you usually select a good fitting model and rerun
+# the process with a fixed number of terms, e. g. 4. Avoid models
+# with a high number of terms:
 
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
+
+# Powers of age can be specified via the parameter 't'.
+# Cubic modeling is usually sufficient, i.e., t = 3.
+# In contrast, 'k' specifies the power of the person location.
+# This parameter should be somewhat higher, e.g., k = 5.
+
+cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 5, t = 3)
+
+# Visual inspection of the percentile curves of the fitted model
+
+plot(cnorm.elfe, "percentiles")
+
+# Visual inspection of the observed and fitted raw and norm scores
+
+plot(cnorm.elfe, "norm")
+plot(cnorm.elfe, "raw")
+
+# In order to compare different models, generate a series of percentile
+# plots with an ascending number of predictors, in this example between
+# 5 and 14 predictors.
+
+plot(cnorm.elfe, "series", start=5, end=14)
+
+# Cross validation in order to choose appropriate number of terms
+# with 80% of the data for training and 20% for validation. Due to
+# the time consumption, the maximum number of terms is limited to 10
+# in this example with 3 repetitions of the cross validation.
+
+cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
+
+# Cross validation with prespecified terms of an already
+# existing model
+
+cnorm.cv(cnorm.elfe, repetitions=3)
+
+# Print norm table (in this case: 0, 3 or 6 months at grade level 3)
+# (Note: The data is coded such that 3.0 represents the beginning and
+# 3.5 the middle of the third school year)
+
+normTable(c(3, 3.25, 3.5), cnorm.elfe)
+
+```
+
+Conventional norming per age group
+```
+library(cNORM)
+
+# Application of cNORM for the generation of conventional norms
+# for a specific age group (in this case age group 3):
+
+data <- elfe[elfe$group == 3,]
+cnorm(raw=data$raw) 
 ```
 
 In the following, the single steps in detail:
 
 ## 1. Data Preparation and modelling
-If a sufficiently large and representative sample has been established (missings will be excluded casewise), then the data must first be imported. It is advisable to start with a simply structured data object of type data.frame or numeric vectors containing raw score and grouping or the continuous explanatory variable. This explanatory variable in psychometric performance tests is usually age. We therefore refer to this variable as 'age' in the following. In fact, however, the explanatory variable is not necessarily age, but can be any continuous variable that exert influence on the raw score. Consequently training or schooling duration or other explanatory variables can also be included in the modeling. However, it must be an interval-scaled (or, as the case may be, dichotomous) variable. The method is relatively robust against changes in the granularity of the group subdivision. For example, the result of the standardization only marginally depends on whether one chooses half-year or full-year gradations (see A. Lenhard, Lenhard, Suggate & Segerer, 2016). The more the variable to be measured co-varies with the explanatory variable (e. g. a fast development over age in an intelligence test), the more groups should be formed beforehand to capture the trajectories adequately. By standard, we assign the variable name "group" to the grouping variable.
 
-### Conventional norming
-In case, you are not interested in continuously modelling norm scores over age, cNORM can be used for conventional norming as well. It returns the manifest norm scores and percentiles but as well establishes a polynomial regression model that closes all the missings in the norm table, smoothes error variance and can be used for cautiously extrapolating more extreme raw scores.
+### Representativeness of the data base
 
+The starting point for standardization should always be a representative sample. Establishing representativeness is one of the most difficult tasks of test construction and must therefore be carried out with appropriate care. First of all, it is important to identify those variables that systematically covary with the variable to be measured. In the case of school achievement and intelligence tests, these are, for example, educational background of the parents, the federal state, the socio-economic background, etc. Caution: Increasing the sample size is only beneficial for the quality of the standardization if the covariates do not remain systematically distorted. For example, it would be useless or even counterproductive to increase the size of the sample if the sample was only collected from a single type of school or only in a single region. One advantage of continuous norming is the generally low sample size required. One way of achieving representativeness is therefore to delete as many randomly selected cases from overrepresented strata as necessary, until the individual strata are represented with the required percentage in the overall sample. However, this means that laboriously collected data is lost again.
+
+
+### Weighting
+
+If representativeness cannot be achieved by removing cases, a second option is to weight the data using Iterative Proportional Fitting (Raking). In simulation studies (Gary et al., 2023, 204), we were able to show that weighting usually leads to more precise norm scores. However, we have so far only conducted these simulation studies using the distribution-free continuous norming method implemented in cNORM. Problems with weighting only arose when the variance in the standardization sample differed greatly from the actual variance in the reference population. Therefore, when applying weighting, make sure that no excessive deviations from representativeness must be compensated for and that subgroups whose average test scores deviate relatively strongly from the population mean are already sufficiently taken into account during data collection. 
+
+For conducting weighting, please consult the vignette on 'WeightedRegression'.
+
+
+### Determining the norm sample size
+
+The appropriate sample size cannot be quantified in a definitive way, but depends on how well the test (or scale) must differentiate in the extreme sections of the norm scale. In many countries, for example, it is common (although not always reasonable) to differentiate between IQ < 70 and IQ > 70 to diagnose developmental disabilities and to choose the appropriate school type or educational track. An IQ test used for school placement must therefore be able to identify a deviation of 2 SDs or more from the population mean as reliably as possible. If, on the other hand, the diagnosis of a reading/spelling disorder is required, a deviation of 1.5 SD from the population mean is generally sufficient for the diagnosis according to DSM-5. As a rule of thumb for determining the ideal sample size, it can be stated that the measurement error caused by the norming procedure is particularly high in those performance areas that are only represented with low probability in the norming sample. (This does not only apply to continuous norming, but to all norming methods.) For example, in a representative random sample of N = 100, the probability that there is no single child with an IQ below 70 is about 10%. For a sample size of N = 200, this probability decreases to 1 %. Doubling the sample size thus notably improves the reliability of the norm score in ranges markedly deviating from the scale mean.
+
+Since continuous norming models are always based on the entire sample, the statistical power of the norming procedure increases for each individual age. As a result, the required size of the norm sample can be substantially reduced. With a sample size of n = 100 per cohort or grade level, the norms already achieve a goodness of fit that is only achieved with conventional norming with sample sizes of n = 400 and more (W. Lenhard & Lenhard, 2021). Thus, not only do the norm scores become more precise, but the standardization projects become more cost-effective overall.
+
+
+### Data preparation
+
+Once a representative sample of sufficient size has been created, the data must be loaded into the R workspace. cNORM excludes cases with missings in relevant variables. For continuous norming, in addition to the variable with the raw scores, an explanatory variable (e.g. age or duration of schooling) is required, which can be represented as a discrete grouping variable or as a continuous variable. Please ensure that the discrete grouping variable is a numerical variable with the group mean of the corresponding continuous variable being used as the variable's value, e.g. 10.5 for all children aged between 10 and 11. If only a continuous variable is initially available when applying the distribution-free method (i.e., modeling with Taylor polynomials), then this variable must be recoded into a discrete grouping variable. However, the method is relatively robust to changes in the granularity of the group subdivision. For example, the modeling result barely depends on whether the sample is devided into age brackets of 6 months or 12 months (see A. Lenhard, Lenhard, Suggate, & Segerer, 2016). The more the course of the raw scores across the explanatory variable deviates from a linear development, the finer the groups should be formed. In parametric modeling with the beta-binomial distribution, an additional group variable is generally unnecessary.
+
+For recoding a continuous explanatory variable into a group variable, the following function can be used:
 ```
-# Apply conventional norming. You simply have to provide a raw score vector.
-# Additionally, you can specify ranking order (parameter 'descend'), the 
-# degree of the polynomial (parameter 'k') or the number of terms in the model
-# via the parameter 'terms'.
+    # Creates a grouping variable for the variable 'age'
+    # of the ppvt data set. In this example, 12 equidistant
+    # subgroups are generated.
 
-model <- cnorm(raw=elfe$raw, terms=4)
-rawTable <- rawTable(0, model)
-normTable <- normTable(0, model)
+    group <- getGroups(ppvt$age, 12)
 ```
 
 
-### Recoding Continuous Variables
-If a continuous variable like age  available, it can either be split into age groups or be used in its continuous form. In that case, an interval width is necessary. To obtain age groups, cNORM includes des helper function 'getGroups':
+## 2. Calculation of Manifest Norms and Modeling
 
-```
-# Creates a grouping variable for a fictitious age variable
-# for children age 2 to 18 for the ppvt demo dataset. That way, 
-# the age variable is recoded into a discrete group variable 
-# with 12 distinct groups. The resulting vector specifies the 
-# mean age of each group.
+In the cNORM package, distribution-free modeling of norm scores is based on estimating raw scores as a power function of person location $l$ and the explanatory variable $a$. This approach requires several steps, which internally can be executed by a single function - the 'cnorm()' function.
 
-data <- data.frame(age = ppvt$age, raw = ppvt$raw)
-data$group <- getGroups(ppvt$age, 12)
-```
+First, the 'cnorm()' function estimates preliminary values for the person locations. To this purpose, the raw scores within each group are ranked. Alternatively, a sliding window can be used in conjunction with the continuous explanatory variable. In this case, the width of the sliding window (function parameter 'width') must be specified. Subsequently, the ranks are converted to norm scores using inverse normal transformation. The resulting norm scores serve as estimators for the person locations. To compensate for violations of representativeness, weights can be included in this process (see Weighting).
 
-Of course, it is also possible to use a data set for which values already exist for individual age groups. Please pay attention, that the grouping variable corresponds to the group mean in case, you use a continuous age variable later on.
+The second internal step is the calculation of powers for l and a. Powers are calculated up to a certain exponent 'k'. In order to use a different exponent for a than for l, you can also specify the parameter 't' (see mathematical derivation), which is beneficial in most cases. If neither k nor t is specified, the 'cNORM()' function uses the values k = 5 and t = 3, which have proven effective in practice. All powers are also multiplied crosswise with each other to capture the interactions of l and a in the subsequent regression. The object finally returned by the 'cnorm()' function contains the preprocessed data including the manifest norm scores and all powers and interactions of l and a in 'model$data'.
 
-### Sample Data
-For demonstration purposes, cNORM includes a cleaned data set from a German test standardization (ELFE 1-6, W. Lenhard & Schneider, 2006, subtest sentence comprehension) that will be used for demonstrating the method. Another large (but unrepresentative) data set for demonstration purposes stems from the adaption of a vocabulary test to the German language (PPVT-4, A. Lenhard, Lenhard, Segerer & Suggate, 2015). For biometric modeling, it includes a large CDC dataset (N > 45,000) for growth curves from age 2 to 25 (weight, height, BMI; CDC, 2012). You can retrieve information on the data by typing ?elfe, ?ppvt and ?CDC on the R console.
+In the third internal step, 'cnorm' determines a regression function. Following the principle of parsimony, models that achieve the highest $R_{adjusted}^{2}$ with as few predictors as possible should be selected. The 'cnorm()' function uses the 'regsubset()' function from the 'leaps' package for regression. Two different model selection strategies are possible: You can either specify the minimum value required for $R_{adjusted}^{2}$. Then the regression function that meets this requirement with the fewest number of predictors is selected. Or you can specify a fixed number of predictors. Then the model that achieves the highest $R_{adjusted}^{2}$ with this number of predictors is selected. Unfortunately, it is usually not known in advance how many predictors are needed to optimally fit the data. How to find the best possible model is explained in the following section Model Selection. To begin with, however, we would first like to explain the basic functionality of cNORM using a simple modeling example. To do this, we will use the 'elfe' dataset provided and start with the default setting. Since cNORM version 3.3.0, this setting provides the model with the highest $R_{adjusted}^{2}$ while avoiding inconsistencies. (What we mean by 'inconsistency' is also explained in more detail in the section Model Selection).
 
-```{r}
+```{r fig0, fig.height = 4, fig.width = 7}
 library(cNORM)
-# Displays the first lines of the data of the example dataset 'elfe'
-head(elfe)
+# Models the 'raw' variable as a function of the discrete 'group' variable
+model <- cnorm(raw = elfe$raw, group = elfe$group)
 ```
 
-### Data Exploration
-As you can see, there is no age variable in the data set 'elfe', only a person ID, a raw score and a grouping variable. In this case, the grouping variable also serves as a continuous explanatory variable, since children were only examined at the very beginning and in the exact middle of the school year during the test standardization. For example, the value 2.0 means that the children were at the beginning of the second school year, the value 2.5 means that the children were examined in the middle of the second school year. In the 'elfe' data set there are seven groups with 200 cases each, i.e. a total of 1400 cases. 
+The model explains more than 99.2% of the data variance but requires a relatively high number of 10 predictors (plus intercept) to do so. The third line ('Final regression model') reports which powers and interactions were included in the regression. For example, L2 represents the second power of l, A3 represents the third power of a, and so on. By default, the location l is returned in T-scores (M = 50, SD = 10). However, IQ scores, z-scores, percentiles, or any vector containing mean and standard deviation (e.g., c(10, 3) for Wechsler scaled scores) can be selected instead by specifying the 'scale' parameter of the 'cnorm' function. Subsequently, the complete regression formula including coefficients is returned.
+
+The returned 'model' object contains both the data (model$data) and the regression model (model$model). All information about the model selection can be accessed under 'model$model$subsets'. The variable selection process is listed step by step in 'outmat' and 'which'. There you can find $R^{2}$, $R_{adjusted}^{2}$, Mallow's Cp, and BIC. The regression coefficients for the selected model ('model$model$coefficients') are available, as are the fitted values ('model$model$fitted.values') and all other information. A table with the corresponding information can be printed using the following code:
 
 ```{r}
-# Display some descriptive results by group
-by(elfe$raw, elfe$group, summary)
-```
-
-### Data Preparation and modelling
-The complete process is captured by the 'cnorm' function. Internally, 'cnorm' first ranks the raw scores in each group or uses a sliding window in case of a continuous explanatory variable (please provide the continuous variable via the 'age' parameter and the 'width' parameter for the sliding window interval). The rank is transformed to standard scores via inverse normal transformation. These standard scores serves as estimates for the location 'l' of the cases within the norm sample. The percentiles can as well be computed including raking weights in order to compensate for violations of representativeness. Please have a look at the 'WeightedRegression' vignette on how to establish the weights.
-
-The second internal step is the computation of powers for location 'l' and the explanatory variable 'a' (age). The powers are computed up to a certain exponent 'k' for location and 't' for age. The powers are then multiplied with each other to obtain all possible interactions. In the final object returned by the 'cnorm' function, the preprocessed data including manifest norm scores and all the powers and interactions are stored in 'model$data'.
-
-In the third internal step, 'cnorm' tries to find a regression model that models the original data as closely as possible. To achieve this, several model selection strategies are possible: If no selection criteria is provided, cnorm selects the model with the highest $R_{adjusted}^{2}$ which passes initial consistency checks. If you specify $R_{adjusted}^{2}$, then the regression function will be selected that meets this requirement with the smallest number of predictors. You can however also specify a fixed number of predictors. Then the model is selected that achieves the highest $R_{adjusted}^{2}$ with this specification. To select the model, cNORM uses the 'regsubset' function from the 'leaps' package and by default generates up to 20 models per number of predictors, which are the screened. As we do not know beforehand, how well the data can be modeled, we start with the default values ($k$ = 5, $t$ = 3). All these steps of data preparation and modeling are conducted with:
-
-
-```{r fig0, fig.height = 6, fig.width = 7}
-# Convenience method that does everything at once
-model <- cnorm(raw=elfe$raw, group=elfe$group)
-```
-
-### Model selection
-Fine! The determined model includes 10 predictors and reaches an $R_{adjusted}^{2}$ = .9927. To retrieve the fit in the selection procedure:
-
-```
-# Print information criteria
 print(model)
 ```
-```{r fig1, fig.height = 6, fig.width = 7}
-# plot the information function per number of predictor
-plot(model, "subset", type = 0) # R2
-```
-```{r fig2, fig.height = 6, fig.width = 7}
-plot(model, "subset", type = 3) # RMSE
-```
+
+Mathematically, the regression function represents a hypersurface in three-dimensional space. When R2 is sufficiently high (e.g., $R^2$ > .99), this surface typically models the manifest data very well over wide ranges of the normative sample. However, a Taylor polynomial, as used here, usually has a finite radius of convergence. In practice, this means that at some age or performance ranges the regression function might no longer provide plausible values. The model might, for example, unexpectedly deviate strongly from the manifest data. Such areas are usually best recognized by graphically comparing manifest and modeled data. For this purpose, cNORM provides, among other things, percentile plots. 
+
+In the percentile plot, the manifest data are represented as dots, while the modeled percentiles are shown as lines. The raw score range is automatically determined based on the values from the original dataset. However, it can also be explicitly specified using the parameters 'minRaw' and 'maxRaw'.
+
+As can be seen from the percentile plot above, the percentiles of the norming model run relatively smoothly across all levels of the explanatory variable and align well with the manifest data. Small fluctuations between individual groups are eliminated. The uppermost percentile line (PR = 97.5) runs horizontally from the fourth grade onward. However, this does not represent a limitation of the model, but rather a ceiling effect of the test, as the maximum raw score of 28 is reached at this point. Nevertheless, implausible values or model inconsistencies often appear at those points where the test has floor or ceiling effects or where the normative sample is too sparse, that is, they usually occur at the boundaries of the age or performance range of the normative sample, or even beyond. Therefore, when checking the percentile lines, particular attention should be payed to the model's behavior at these boundaries.
 
 
-The figure displays $R_{adjusted}^{2}$ as a function of the number of predictors by default. Alternatively, you can also plot log-transformed Mallow's $C_p$ (type = 1) and $BIC$ (type = 2) as a function of $R_{adjusted}^{2}$ or RMSE (type = 3) as a function of the number of terms and others. The figure shows that the default value of $R_{adjusted}^{2}$ = .99 is already achieved with only three predictors, so you might reduces the number of terms for a more parsimonious model.
+### Model Selection
 
-Nevertheless, the model found in this way must still be tested for plausibility using the means described in Model Validation. Above all, it is necessary to determine the limits of model validity. If a model turns out to be suboptimal after this model check, $R_{adjusted}^{2}$, the number of predictors or, if necessary, k and t should be chosen differently. What is more, you can use the cnorm.cv cross validation function to get an impression on the quality of the norm sample and modeling process. The function determines RMSE for the raw score of the training and validation data (80% and 20% drawn from the data set), $R^{2}$ for the norm scores, crossfit and norm score $R^{2}$. Crossfit values below indicate an underfit and values greater 1 an overfit, with values between .9 and 1.1 being optimal:
+Although the percentile plot suggests a good model fit, the number of predictors (i.e., 10) is relatively high. This high number carries the risk of potential overfitting of the data. The most obvious sign of overfitting is usually wavy (and therefore counter intuitive) percentile lines. Since they are not wavy for the calculated model, there is not much indication of relevant overfitting here. Moreover, if too much emphasis is placed on parsimony, insufficient fit in extreme performance ranges can occur. Therefore, the proposed model with 10 predictors seems to be an adequate option. However, the cNORM package provides methods to find even more parsimonious models, which we will demonstrate in the following.
 
-```
-# do a cross validation with 10 repetitions, restrict number of max terms to 10
-cnorm.cv(model$data, min = 3, max=10, repetitions = 10)
-```
-<img src="cnorm.cv.png" align=center style="border:0;">
-
-In this specific case, it might not be worthwhile to use more terms than 4, because $R^{2}$ in the cross validated data set does not increase anymore.You should however as well inspect to percentile curves visually or use the 'checkConsistency' function on the final model to avoid intersecting percentile curves and use a model with more terms in that case.
-
-
-## 2. Model Validation
-
-From a mathematical point of view, the regression function represents a so-called hyperplane in three-dimensional space. If $R^2$ is sufficiently high (e.g. $R^2 > .99$), this plane usually models the manifest data over wide ranges of the standardization sample very well. However, a Taylor polynomial, as used here, usually has a finite radius of convergence. This means that there are age or performance ranges for which the regression function no longer provides plausible values. With high $R^{2}$, these limits of model validity are only reached at the outer edges of the age or performance range of the standardization sample or even beyond. Please note that such model limits occur not only because the method is not omnipotent, but also because the underlying test scales have only a limited validity range within which they can reliably map a latent ability to a meaningful numerical test score. In other words, the limits of model validity often show up at those points where the test has too strong floor or ceiling effects or where the standardization sample is too diluted. To find inconsistencies in the model (we restrict it to the T score range of 25 to 75):
-
-```{r}
-model <- cnorm(elfe$raw, elfe$group, terms = 5, plot = FALSE)
-
-# Search for intersecting percentiles
-checkConsistency(model, minNorm = 25, maxNorm = 75)
-```
-
-Of course, norm tables and normal scores should generally only be issued within the validity range of the model and the test. It is therefore essential to determine the limits of model validity when applying cNORM (or any other procedure used to model normal scores). For this purpose, cNORM provides visualization and numerical search. At this point, however, we would like to point out to the mathematically experienced users that it is also possible to approach the topic analytically. Since the regression equation is a polynomial of the nth degree that is very easy to handle from a mathematical point of view, it can be subjected to a conventional curve sketching. This makes it very easy to determine, for example, where extremes, turning points, saddle points, etc. occur or where the gradient has implausible values.
-
-Below you will find functions for checking the model fit graphically and making the limits of the model visible:
-
-### Plot Percentiles (already done in the modeling process)
-The following figure shows how well the model generally fits the manifest data:
+First, we recommend to perform a visual inspection using percentile plots. To this end, cNORM offers a function that generates a series of percentile plots with an increasing number of predictors.
 
 ```
-# Plots the fitted and the manifest percentiles
-# modeling already  displays the plot; you can call it
-# directly with plot(results) as well
-plot(model, "percentiles")
+# Generates a series of percentile plots with increasing number of predictors
 
+plotPercentileSeries(model, start = 1, end = 15)
 ```
 
-As the figure shows, the predicted percentiles run smoothly across all levels of the explanatory variable and are in good agreement with the original data. Small fluctuations between the individual groups are eliminated. It is important to ensure that the percentile lines do not intersect, since this would mean that different values of the latent person variable are assigned to one single raw score. The mapping of latent person variables to raw scores would no longer be biunique (=bijective) at this point, e.g. it would not be possible to distinguish between these different values of the latent variable by means of the test score. As already described above, intersecting percentiles predominantly occur when the regression model is extended to age or performance ranges that do not or only rarely occur in the standardization sample, or when the test shows strong floor or ceiling effects. Inconsistencies 
+In this case, a series of percentile plots with 1 to 15 predictors will be generated. The percentile lines begin to intersect from 12 predictors onward in the higher grade levels. This means that a single raw score is mapped on two different norm scores, i.e., the mapping of latent person variables to raw scores is not bijective in these models. Consequently, at least for some raw scores, it would be impossible to determine a definitive norm score when using these models.
 
-A drawback of the Taylor polynomials is a model misspecification in the form of intersecting percentile curves. These can be checked with the 'checkConsistency' function. Please not that extending the check to extreme values will at some point most likely find inconsistencies in the model. Here, we restrict it to the T score range of 25 to 75:
+There can be various reasons for intersecting percentile lines:
 
-```{r}
-# Search for intersecting percentiles
-checkConsistency(model, minNorm = 25, maxNorm = 75)
+*   The test shows floor or ceiling effects. When the minimum or maximum raw score is reached for the first time, cNORM normally cuts off the norm scores automatically. Unfortunately, in unfavorable cases, intersecting percentile lines can still occur.
+*   Too many predictors were used. Please try to obtain a consistent model with fewer predictors.
+*   The power parameter 't' for the explanatory variable a was chosen too high. Usually, t = 3 will be sufficient to model the raw scores across age. If only three age groups exist, t should be set to a maximum of 2, and for only two age groups, to 1. Higher values are not reasonable in these cases.
+*   The regression model has been extended to age or performance ranges that were rare or non-existent in the normative sample. While it is mathematically possible to cover age and performance ranges that are not present in the normative sample, such extrapolation without empirical basis should be done with caution.
+
+If the power parameter 't' for the explanatory variable a is chosen too high, very wavy percentile lines can occur in addition to crossing ones. For comparison, you will find below the series of percentile plots that is obtained with k = 5 and t = 4.
+
+With 14 predictors, wavy percentile lines can be seen at PR = 2.5, but even with 7 or more predictors, the percentile lines no longer increase as monotonically as desired.
+
+Let's return to our model series with k = 5 and t = 3, which evidently produces better results than k = 5 and t = 4. Our goal was to potentially find models that provide sufficiently good modeling results with fewer than 10 predictors. To this end, you can also examine how the addition of predictors affects Radjusted2. For this purpose, use the following command:
+
+```{r fig1, fig.height = 4, fig.width = 7}
+    plot(model, "subset", type = 0)
 ```
 
-If you are not sure yet, which model to choose, you can display a series of plots:
+If 'type = 1' is set in the 'plot()' function instead of 'type = 0', Mallow's Cp is displayed in logarithmic form. With 'type = 2', the BIC (Bayesian Information Criterion) is plotted against $R_{adjusted}^{2}$.
 
-```
-# Displays a series of plots of the fitted and the manifest percentiles
-# Here the maximum number of terms is fixed (optional)
-plot(model, "series", start = 5, end = 10)
-```
-
-### Plot predicted against observed raw scores
-In the next plot, the fitted and the manifest data are compared separately for each (age) group:
-```
-plot(model, "raw")
-```
-
-The adjustment is particularly good if all points are as close as possible to the bisecting line. However, it must be noted that deviations in the extremely upper, but particularly in the extremely lower performance range often occur because the manifest data in these areas are also associated with low reliability.
-
-### Plot predicted against manifest norm scors
-This function does the same as plot raw, but instead uses norm values. Please note, that it might take some time depending on the sample size:
-```{r fig4, fig.height = 6, fig.width = 7}
-plot(model, "norm")
-```
-```{r fig5, fig.height = 6, fig.width = 7}
-# The plot can be split by group as well:
-plot(model, "norm", group = TRUE)    # specifies the grouping variable
-```
-
-### Plot derivatives
-To check whether the mapping between latent person variables and test scores is biunique, the regression function can be searched numerically within each group for bijectivity violations using the 'checkConsistency' function. In addition, it is also possible to plot the first partial derivative of the regression function to l and search for negative values. This can be done in the following way:
-
-```{r fig6, fig.height = 6, fig.width = 7}
-plot(model, "derivative", minAge=1, maxAge=6, minNorm=20, maxNorm=80)
-# if parameters on age an norm are not specified, cnorm plots within
-# the ranges of the current dataset
-```
-
-In this figure, we have extended both the age and the performance range beyond the limits of the standardization sample in order to better represent and check the limits of the model validity. (Please remember that the age variable in this norming sample comprises the values 2 to 5 and that 200 children per age group were examined.) As you can see, the first partial derivative of the regression function to $l$ reaches negative values in the upper parts of the scale beginning with age 5. Crossings of 0 are indicated with a black dashed line. If zero crossings occur, this does not necessarily mean that the modeling has failed, but that the test scale loses its ability to differentiate in this measuring range.
-
-When, at the end of the modeling process, norm tables are generated, the identified limits of model validity must be respected. Or to put it in other words: Normal scores should only be issued for the valid ranges of the model.
+Fortunately, the scale can be modeled very well, which is evident from the fact that it's possible to find consistent models that explain more than 99% of the data variance. This value is even achieved here with just three predictors ($R_{adjusted}^{2}$ = .991). With 8 predictors, 99.3% of the data variance is explained by the according model, only 0.2% more than with three predictors. But even such small increases can sometimes lead to significant improvements for extreme person locations. Beyond 8 predictors, however, a further addition of predictors does not even lead to changes in the per mille range. So all models between 3 and 8 predictors seem to fit well, but are more parsimonious than the model with 10 predictors and can thus be considered for selection, too. Which of these models should ultimately be selected will be determined through the following cross-validation.
 
 
 ## 3. Generating Norm Tables
-In addition to the pure modeling functions, cNORM also contains functions for generating norm tables, retrieving the normal score for a specific raw score and vice versa or for the visualization of norm curves. These functions are described below.
+In addition to the pure modeling functions, cNORM also contains functions for generating norm tables or retrieving the normal score for a specific raw score and vice versa.
 
-### Predict raw and norm scores
+### predictNorm
 
-The 'predictNorm' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores can be limited to a minimum and maximum value in order to take into account the limits of model validity.
+The 'predictNorm' function returns the normal score for a specific raw score (e.g., raw = 15) and a specific age (e.g., a = 4.7). The normal scores have to be limited to a minimum and maximum value in order to take into account the limits of model validity.
 ```{r}
-# Predict norm score for raw score 15 and age 4.7
 predictNorm(15, 4.7, model, minNorm = 25, maxNorm = 75)
 
-# Predict raw score for normal score 55 and age 4.5
-predictRaw(55, 4.5, model)
-
-# ... or vectors, if you like ...
-predictRaw(c(40, 45, 50, 55, 60), c(2.5, 3, 3.5, 4, 4.5), model)
-
 ```
 
-### Generating norm tables
 
-The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) or vector of ages and a pre-specified series of normal scores. If reliability and confidence coefficient (CI) is provided, confidence intervalls are generated as well.
+### predictRaw
 
-```
-# Generate norm table for grade 3
-normTable(3, model) # additional parameters: minRaw, maxRaw, minNorm, maxNorm=70, step
+The 'predictRaw' function returns the predicted raw score for a specific normal score (e.g., T = 55) and a specific age (e.g., a = 4.5).
+```{r}
+predictRaw(55, 4.5, model, minRaw = 0, maxRaw = 28)
 
-# You as well can generate multiple tables at once, by providing a vector for the age groups,
-# here for grade 3, 3.5, 4 and 4.5
-normTables -> normTable(c(3.5, 4.5), model, minRaw = 0, maxRaw = 28, 
-              minNorm=30, maxNorm=70, step = 1)
-
-# In case, you want to use the data for producing paper and pencil tests, you might
-# want to export the data. Here, this is demonstratet with an export to Excel:
-# library(xlsx2)
-# write_xlsx(normTables, file="normtables.xlsx")
-
+# ... or for several norm scores and age levels ...
+predictRaw(c(45, 50, 55), c(2.5, 3, 3.5), model) 
 ```
 
-The function 'rawTable' is similar to 'normTable', but reverses the assignment: The normal scores are assigned to a pre-specified series of raw scores at a certain age. This requires an inversion of the regression function, which is determined numerically.
+
+### normTable
+
+The 'normTable' function returns the corresponding raw scores for a specific age (e.g., a = 3) and a pre-specified series of normal scores. The parameter 'step' specifies the distance between two normal scores.
+
+```{r}
+normTable(3, model, minRaw = 0, maxRaw = 28, minNorm=30.5, maxNorm=69.5, step = 1)
 ```
-# Generate raw table for grade 3.5
-rawTable(3.5, model)
 
-# Generate raw table for grade 3.5, 3.6, 3.7
-rawTable(c(3.5, 3.6, 3.7), model)
+This function is particularly useful when scales have a large range of raw scores, and consequently, multiple raw scores correspond to a single (rounded) norm score. For example, for a tabulated norm score of T = 40, all integer raw scores that are assigned to norm scores between 39.5 and 40.5 would need to be listed. In the present case, the raw score 8.47 corresponds to T = 39.5, and the raw score 8.99 corresponds to T = 40.5. As a result, no single (integer) raw score would be assigned to a standard score of 40 in the test manual's table. Furthermore, the 'normTable()' funtion is also useful when norm scores for various subtests need to be tabulated in a single table.
+
+
+### rawTable
+
+The function 'rawTable' is similar to 'normTable', but reverses the assignment: The normal scores are assigned to a pre-specified series of raw scores at a certain age. This requires an inversion of the regression function, which is determined numerically. Specify reliability and confidence coefficient to automatically calculate confidence intervals:
+
+```{r}
+rawTable(3.5, model, minRaw = 0, maxRaw = 28, minNorm = 25, maxNorm = 75, step = 1, CI = .95, reliability = .89)
+
+# generate several raw tables
+table <- rawTable(c(2.5, 3.5, 4.5), model, minRaw = 0, maxRaw = 28)
 ```
-You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores. With higher precision and smaller increments, this function becomes computationally intensive.
+
+You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores.
 
 
-## Examples
-Please visit https://www.psychometrica.de/cNorm_examples_en.html for further examples with the inbuilt data sets, especially with respect to continuous explanatory variables and non standard application cases.
+## 4. Useful Tools
+### Plot of raw scores
+
+In the following figures, the manifest and projected raw scores are compared separately for each (age) group. If the 'group' variable is set to 'FALSE', the values are plotted over the entire range of explanatory variable (i.e. without group differentiation).
+
+```{r fig2, fig.height = 7, fig.width = 7}
+plot(model, "raw", group = TRUE)
+```
+
+The fit is particularly good if all dots are as close as possible to the angle bisector. However, it must be noted that deviations in the extreme upper, but especially in the extreme lower range of the raw scores often occur because the manifest data in these ranges are associated with large measurement error.
+
+
+### Plot of norm scores
+
+The function corresponds to the plot("raw") function, except that in this case, the manifest and projected norm scores are plotted against each other. Please specify the minimum and maximum norm score. In the specific example, T-scores from 25 to 75 are used, covering the range from -2.5 to +2.5 standard deviations around the average score of the reference population.
+
+```{r fig3, fig.height = 7, fig.width = 7}
+plot(model, "norm", group = TRUE, minNorm = 25, maxNorm = 75)
+```
+
+
+### Probability Density Function
+
+The 'plot("density") function plots the probability density function of the raw scores. This method can be used to visualize the deviation of the test results from the normal distribution.
+
+```{r fig4, fig.height = 4, fig.width = 7}
+plot(model, "density", group = c (2, 3, 4))
+```
+
+### Curve analysis of the regression function
+
+Finally, we would like to remind mathematically experienced users that it is also possible to perform conventional curve sketching of the regression function. Since the regression equation is a polynomial of the nth degree, the required calculations are not very complicated. You can, for example, determine local extrema, inflection points etc..
+
+In this context, the 'plot("derivative")' function provides a visual illustration of the first partial derivative of the regression function with respect to the person location. The illustration helps to determine the points at which the derivative crosses zero. At these points, the mapping is no longer bijective. The points therefore indicate the boundaries of the model's validity.
+
+```{r fig5, fig.height = 4, fig.width = 7}
+plot(model, "derivative")
+```
 
 
 ## References
