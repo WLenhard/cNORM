@@ -32,8 +32,8 @@ log_likelihood <- function(params, X, Z, y, weights) {
 #' This function fits a beta binomial regression model where both the mean and
 #' standard deviation of the response variable are modeled as polynomial functions
 #' of the predictor variable. While 'cnorm-betabinomial2' fits a beta-binomial model
-#' on the basis of /$alpha$ and /$beta$ of a beta binomial function, this function
-#' fits /$mu$ and /$sigma$, which are then used to estimate the beta binomial distribution
+#' on the basis of \eqn{\gamma} and \eqn{\beta} of a beta binomial function, this function
+#' fits \eqn{\mu} and \eqn{\sigma}, which are then used to estimate the beta binomial distribution
 #' parameters.
 #'
 #' @param age A numeric vector of predictor values (e.g., age).
@@ -934,8 +934,8 @@ log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
 #' This function fits a beta-binomial regression model where both the alpha and beta
 #' parameters of the beta-binomial distribution are modeled as polynomial functions
 #' of the predictor variable (typically age). While 'cnorm-betabinomial' fits a beta-binomial model
-#' on the basis of /$mu$ and /$sigma$, this function fits a beta-binomial model directly on the basis
-#' of /$alpha$ and /$beta$.
+#' on the basis of \eqn{\mu} and \eqn{\sigma}, this function fits a beta-binomial model directly on the basis
+#' of \eqn{\gamma} and \eqn{\beta}.
 #'
 #' @param age A numeric vector of predictor values (e.g., age).
 #' @param score A numeric vector of response values.
@@ -1134,29 +1134,28 @@ predictCoefficients2 <- function(model, ages, n = NULL) {
 
 #' Fit a beta-binomial regression model for continuous norming
 #'
-#' This function fits a beta-binomial regression model where both the /$alpha$ and /$beta$
+#' This function fits a beta-binomial regression model where both the \eqn{\alpha} and \eqn{\beta}
 #' parameters of the beta-binomial distribution are modeled as polynomial functions
 #' of the predictor variable (typically age). Setting mode to 1 fits a beta-binomial
-#' model on the basis of /$mu$ and /$sigma$, setting it to 2 (default) fits a beta-binomial
-#' model directly on the basis of /$alpha$ and /$beta$.
+#' model on the basis of \eqn{\mu} and \eqn{\sigma}, setting it to 2 (default) fits a beta-binomial
+#' model directly on the basis of \eqn{\alpha} and \eqn{\beta}.
 #'
 #' @param age A numeric vector of predictor values (e.g., age).
 #' @param score A numeric vector of response values.
 #' @param n The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.
 #' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
-#' @param mode Integer specifying the mode of the model. Default is 2 (direct modelling of /$alpha$ and /$beta$).
-#'             If set to 1, the model is fitted on the basis of /$mu$ and /$sigma$, the predicted
+#' @param mode Integer specifying the mode of the model. Default is 2 (direct modelling of \eqn{\gamma} and \eqn{\beta}).
+#'             If set to 1, the model is fitted on the basis of \eqn{\mu} and \eqn{\sigma}, the predicted
 #'             mean and standard deviation over age.
 #' @param alpha Integer specifying the degree of the polynomial for the alpha model.
 #'              Default is 3. If mode is set to 1, this parameter is used to specify the degree
-#'              of the polynomial for the /$mu$ model.
+#'              of the polynomial for the \eqn{\mu} model.
 #' @param beta Integer specifying the degree of the polynomial for the beta model. Default is 3.
 #'             If mode is set to 1, this parameter is used to specify the degree of the polynomial
-#'             for the /$sigma$ model.
+#'             for the \eqn{\sigma} model.
 #' @param control A list of control parameters to be passed to the `optim` function.
 #'   If NULL, default values are used, namely control = list(reltol = 1e-8, maxit = 1000)
 #'   for mode 1 and control = list(factr = 1e-8, maxit = 1000) for mode 2.
-#'   and
 #' @param scale Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.
 #' @param plot Logical indicating whether to plot the model. Default is TRUE.
 #'

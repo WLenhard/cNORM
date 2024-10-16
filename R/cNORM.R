@@ -405,7 +405,7 @@ cnorm <- function(raw = NULL,
 #' or age variable is provided, conventional norming is applied
 #' @param age Numeric vector with chronological age, please additionally specify
 #' width of window
-#' @param width Size of the moving window in case an age vector is used
+#' @param width Size of the sliding window in case an age vector is used
 #' @param scale type of norm scale, either T (default), IQ, z or percentile (= no
 #' transformation); a double vector with the mean and standard deviation can as
 #' well, be provided f. e. c(10, 3) for Wechsler scale index points

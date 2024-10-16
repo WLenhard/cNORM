@@ -49,8 +49,8 @@ A list of class "cnormBetaBinomial2" containing:
 This function fits a beta-binomial regression model where both the alpha and beta
 parameters of the beta-binomial distribution are modeled as polynomial functions
 of the predictor variable (typically age). While 'cnorm-betabinomial' fits a beta-binomial model
-on the basis of /$mu$ and /$sigma$, this function fits a beta-binomial model directly on the basis
-of /$alpha$ and /$beta$.
+on the basis of \eqn{\mu} and \eqn{\sigma}, this function fits a beta-binomial model directly on the basis
+of \eqn{\gamma} and \eqn{\beta}.
 }
 \details{
 The function standardizes the input variables, fits polynomial models for both

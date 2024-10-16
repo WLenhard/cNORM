@@ -51,8 +51,8 @@ A list of class "cnormBetaBinomial" containing:
 This function fits a beta binomial regression model where both the mean and
 standard deviation of the response variable are modeled as polynomial functions
 of the predictor variable. While 'cnorm-betabinomial2' fits a beta-binomial model
-on the basis of /$alpha$ and /$beta$ of a beta binomial function, this function
-fits /$mu$ and /$sigma$, which are then used to estimate the beta binomial distribution
+on the basis of \eqn{\gamma} and \eqn{\beta} of a beta binomial function, this function
+fits \eqn{\mu} and \eqn{\sigma}, which are then used to estimate the beta binomial distribution
 parameters.
 }
 \details{
