@@ -803,8 +803,7 @@ diagnostics.betabinomial <- function(model,
   rmse <- NA
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
-
-    if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+    if (length(age) / length(unique(age)) > 50 && min(table(age)) > 30) {
       data <- data.frame(group = age, raw = score)
       data <- rankByGroup(
         data = data,
