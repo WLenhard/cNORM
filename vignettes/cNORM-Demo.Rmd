@@ -193,7 +193,7 @@ model <- cnorm(raw = elfe$raw, group = elfe$group)
 
 The model explains more than 99.2% of the data variance but requires a relatively high number of 10 predictors (plus intercept) to do so. The third line ('Final regression model') reports which powers and interactions were included in the regression. For example, L2 represents the second power of l, A3 represents the third power of a, and so on. By default, the location l is returned in T-scores (M = 50, SD = 10). However, IQ scores, z-scores, percentiles, or any vector containing mean and standard deviation (e.g., c(10, 3) for Wechsler scaled scores) can be selected instead by specifying the 'scale' parameter of the 'cnorm' function. Subsequently, the complete regression formula including coefficients is returned.
 
-The returned 'model' object contains both the data (model$data) and the regression model (model$model). All information about the model selection can be accessed under 'model$model$subsets'. The variable selection process is listed step by step in 'outmat' and 'which'. There you can find $R^{2}$, $R_{adjusted}^{2}$, Mallow's Cp, and BIC. The regression coefficients for the selected model ('model$model$coefficients') are available, as are the fitted values ('model$model$fitted.values') and all other information. A table with the corresponding information can be printed using the following code:
+The returned 'model' object contains both the data (model\$data) and the regression model (model\$model). All information about the model selection can be accessed under 'model\$model\$subsets'. The variable selection process is listed step by step in 'outmat' and 'which'. There you can find $R^{2}$, $R_{adjusted}^{2}$, Mallow's Cp, and BIC. The regression coefficients for the selected model ('model\$model\$coefficients') are available, as are the fitted values ('model\$model\$fitted.values') and all other information. A table with the corresponding information can be printed using the following code:
 
 ```{r}
 print(model)
@@ -231,7 +231,7 @@ If the power parameter 't' for the explanatory variable a is chosen too high, ve
 
 With 14 predictors, wavy percentile lines can be seen at PR = 2.5, but even with 7 or more predictors, the percentile lines no longer increase as monotonically as desired.
 
-Let's return to our model series with k = 5 and t = 3, which evidently produces better results than k = 5 and t = 4. Our goal was to potentially find models that provide sufficiently good modeling results with fewer than 10 predictors. To this end, you can also examine how the addition of predictors affects Radjusted2. For this purpose, use the following command:
+Let's return to our model series with k = 5 and t = 3, which evidently produces better results than k = 5 and t = 4. Our goal was to potentially find models that provide sufficiently good modeling results with fewer than 10 predictors. To this end, you can also examine how the addition of predictors affects $R_{adjusted}^{2}$. For this purpose, use the following command:
 
 ```{r fig1, fig.height = 4, fig.width = 7}
     plot(model, "subset", type = 0)
