@@ -44,7 +44,7 @@ Changes:
 
 
 ### Version in 3.2.0,
-Date: 2023.08.17
+Date: 2024.08.17
 
 
 Changes:
@@ -68,7 +68,7 @@ Changes:
 
 
 ### Version in 3.1.0,
-Date: 2023.07.19
+Date: 2024.07.19
 
 
 Changes:
