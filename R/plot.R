@@ -1426,13 +1426,16 @@ compare <- function(model1, model2,
                             ))
   }
 
+  plot_data_long$value[plot_data_long$value < min(score)] <- min(score)
+  plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
+
   # Set factor levels for correct ordering
   plot_data_long$percentile <- factor(plot_data_long$percentile,
                                       levels = paste0("P", percentiles * 100))
 
   # Set default title if none provided
   if (is.null(title)) {
-    title <- "Visual Model Comparison of Percentile Curves"
+    title <- "Visual Model Comparison"
   }
 
   if (is.null(subtitle)) {
@@ -1520,6 +1523,57 @@ compare <- function(model1, model2,
       size = 2,
       shape = 18
     )
+
+
+    if(is.null(weights)){
+      data <- rankByGroup(data, raw="score", group="group")
+    }else{
+      data <- rankByGroup(data, raw="score", group="group", weights="w")
+    }
+
+    if(inherits(model1, "cnorm")){
+      data$fitted1 <- predictNorm(score, age, model1, minNorm = model1$model$minL1, maxNorm = model1$model$maxL1)
+    }else{
+      data$fitted1 <- predict(model1, age, score)
+    }
+
+    if(inherits(model2, "cnorm")){
+      data$fitted2 <- predictNorm(score, age, model2, minNorm = model2$model$minL1, maxNorm = model2$model$maxL1)
+    }else{
+      data$fitted2 <- predict(model2, age, score)
+    }
+    R2a <- cor(data$fitted1, data$normValue, use = "pairwise.complete.obs")^2
+    R2b <- cor(data$fitted2, data$normValue, use = "pairwise.complete.obs")^2
+
+    bias1 <- mean(data$fitted1 - data$normValue)
+    bias2 <- mean(data$fitted2 - data$normValue)
+
+    RMSE1 <- sqrt(mean((data$fitted1 - data$normValue)^2))
+    RMSE2 <- sqrt(mean((data$fitted2 - data$normValue)^2))
+
+    MAD1 <- mean(abs(data$fitted1 - data$normValue))
+    MAD2 <- mean(abs(data$fitted2 - data$normValue))
+
+
+    # Create and print summary table
+    fit_table <- data.frame(
+      Metric = c("R²", "Bias", "RMSE", "MAD"),
+      Model1 = c(R2a, bias1, RMSE1, MAD1),
+      Model2 = c(R2b, bias1, RMSE1, MAD1),
+      Difference = c(R2b - R2a,
+                     bias2 - bias1,
+                     RMSE2 - RMSE1,
+                     MAD2 - MAD1)
+    )
+
+    # Round values
+    fit_table[, 2:4] <- round(fit_table[, 2:4], 3)
+
+    cat("\nModel Comparison Summary:\n")
+    cat("------------------------\n")
+    print(format(fit_table, justify = "right"), row.names = FALSE)
+    cat("\nNote: Difference = Model2 - Model1\n")
+    cat("      Fit indices are based on the manifest and fitted norm scores of both models\n")
   }
 
   return(p)
