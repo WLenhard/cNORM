@@ -404,7 +404,6 @@ normTable.betabinomial <- function(model,
 #' This function calculates norm scores based on raw scores, age, and a fitted cnormBetaBinomial model.
 #'
 #' @param object A fitted model object of class 'cnormBetaBinomial' or 'cnormBetaBinomial2'.
-#' @param ... Additional arguments passed to the prediction method.
 #' @param ... Additional arguments passed to the prediction method:
 #'   \itemize{
 #'      \item age A numeric vector of ages, same length as raw.
