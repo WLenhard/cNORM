@@ -1426,8 +1426,10 @@ compare <- function(model1, model2,
                             ))
   }
 
-  plot_data_long$value[plot_data_long$value < min(score)] <- min(score)
-  plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
+  if(!is.null(score)) {
+    plot_data_long$value[plot_data_long$value < min(score)] <- min(score)
+    plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
+  }
 
   # Set factor levels for correct ordering
   plot_data_long$percentile <- factor(plot_data_long$percentile,
@@ -1472,7 +1474,8 @@ compare <- function(model1, model2,
       panel.grid.minor = element_line(color = "gray95")
     )
 
-  if (!is.null(score)&!is.null(age)) {
+  if (!is.null(score) & !is.null(age)) {
+    # Prepare data for manifest percentiles and fit statistics
     data <- data.frame(age = age, score = score)
     if(!is.null(weights)){
       data$w <- weights
@@ -1480,23 +1483,21 @@ compare <- function(model1, model2,
       data$w <- rep(1, length(age))
     }
 
-    # Calculate and add manifest percentiles
+    # Calculate groups for manifest percentiles
     if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
-      # Distinct age groups
       data$group <- age
     } else {
-      # Use getGroups function
       data$group <- getGroups(age)
     }
 
-    # get actual percentiles
+    # Calculate manifest percentiles
     percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data$group), function(df) {
       c(age = mean(df$age),
         weighted.quantile(df$score, probs = percentiles, weights = df$w))
     })))
     colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))
 
-    # Reshape manifest data to long format
+    # Reshape manifest data
     manifest_data_long <- data.frame(
       age = numeric(),
       value = numeric(),
@@ -1512,7 +1513,6 @@ compare <- function(model1, model2,
                                   ))
     }
 
-    # Set factor levels for manifest data
     manifest_data_long$percentile <- factor(manifest_data_long$percentile,
                                             levels = paste0("P", percentiles * 100))
 
@@ -1524,42 +1524,48 @@ compare <- function(model1, model2,
       shape = 18
     )
 
-
+    # Calculate fit statistics
     if(is.null(weights)){
       data <- rankByGroup(data, raw="score", group="group")
     }else{
       data <- rankByGroup(data, raw="score", group="group", weights="w")
     }
 
+    # Get predictions for both models
     if(inherits(model1, "cnorm")){
-      data$fitted1 <- predictNorm(score, age, model1, minNorm = model1$model$minL1, maxNorm = model1$model$maxL1)
+      data$fitted1 <- predictNorm(data$score, data$age, model1,
+                                  minNorm = model1$model$minL1,
+                                  maxNorm = model1$model$maxL1)
     }else{
-      data$fitted1 <- predict(model1, age, score)
+      data$fitted1 <- predict(model1, data$age, data$score)
     }
 
     if(inherits(model2, "cnorm")){
-      data$fitted2 <- predictNorm(score, age, model2, minNorm = model2$model$minL1, maxNorm = model2$model$maxL1)
+      data$fitted2 <- predictNorm(data$score, data$age, model2,
+                                  minNorm = model2$model$minL1,
+                                  maxNorm = model2$model$maxL1)
     }else{
-      data$fitted2 <- predict(model2, age, score)
+      data$fitted2 <- predict(model2, data$age, data$score)
     }
+
+    # Calculate fit statistics
     R2a <- cor(data$fitted1, data$normValue, use = "pairwise.complete.obs")^2
     R2b <- cor(data$fitted2, data$normValue, use = "pairwise.complete.obs")^2
 
-    bias1 <- mean(data$fitted1 - data$normValue)
-    bias2 <- mean(data$fitted2 - data$normValue)
+    bias1 <- mean(data$fitted1 - data$normValue, na.rm = TRUE)
+    bias2 <- mean(data$fitted2 - data$normValue, na.rm = TRUE)
 
-    RMSE1 <- sqrt(mean((data$fitted1 - data$normValue)^2))
-    RMSE2 <- sqrt(mean((data$fitted2 - data$normValue)^2))
+    RMSE1 <- sqrt(mean((data$fitted1 - data$normValue)^2, na.rm = TRUE))
+    RMSE2 <- sqrt(mean((data$fitted2 - data$normValue)^2, na.rm = TRUE))
 
-    MAD1 <- mean(abs(data$fitted1 - data$normValue))
-    MAD2 <- mean(abs(data$fitted2 - data$normValue))
-
+    MAD1 <- mean(abs(data$fitted1 - data$normValue), na.rm = TRUE)
+    MAD2 <- mean(abs(data$fitted2 - data$normValue), na.rm = TRUE)
 
     # Create and print summary table
     fit_table <- data.frame(
       Metric = c("R²", "Bias", "RMSE", "MAD"),
       Model1 = c(R2a, bias1, RMSE1, MAD1),
-      Model2 = c(R2b, bias1, RMSE1, MAD1),
+      Model2 = c(R2b, bias2, RMSE2, MAD2),
       Difference = c(R2b - R2a,
                      bias2 - bias1,
                      RMSE2 - RMSE1,
