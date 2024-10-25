@@ -998,7 +998,7 @@ cnorm.betabinomial2 <- function(age,
   # Optimize to find parameter estimates. If control is NULL, set default
   if (is.null(control)){
     n_param <-alpha_degree + beta_degree + 2
-    control = list(factr = 1e-6, maxit = n_param*50, lmm = n_param)
+    control = list(factr = 1e-6, maxit = n_param*100, lmm = n_param)
   }
 
   result <- optim(
