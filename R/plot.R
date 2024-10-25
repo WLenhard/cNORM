@@ -1426,9 +1426,13 @@ compare <- function(model1, model2,
                             ))
   }
 
+  # Set factor levels for correct ordering
+  plot_data_long$percentile <- factor(plot_data_long$percentile,
+                                      levels = paste0("P", percentiles * 100))
+
   # Set default title if none provided
   if (is.null(title)) {
-    title <- "Model Comparison of Percentile Curves"
+    title <- "Model Comparison: Percentile Curves"
   }
 
   if (is.null(subtitle)) {
@@ -1465,7 +1469,6 @@ compare <- function(model1, model2,
       panel.grid.minor = element_line(color = "gray95")
     )
 
-
   if (!is.null(score)&!is.null(age)) {
     data <- data.frame(age = age, score = score)
     if(!is.null(weights)){
@@ -1488,7 +1491,7 @@ compare <- function(model1, model2,
       c(age = mean(df$age),
         weighted.quantile(df$score, probs = percentiles, weights = df$w))
     })))
-    colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))  # Match naming convention with model data
+    colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))
 
     # Reshape manifest data to long format
     manifest_data_long <- data.frame(
@@ -1506,6 +1509,10 @@ compare <- function(model1, model2,
                                   ))
     }
 
+    # Set factor levels for manifest data
+    manifest_data_long$percentile <- factor(manifest_data_long$percentile,
+                                            levels = paste0("P", percentiles * 100))
+
     # Add manifest percentiles to plot
     p <- p + geom_point(
       data = manifest_data_long,
@@ -1514,7 +1521,6 @@ compare <- function(model1, model2,
       shape = 18
     )
   }
-
 
   return(p)
 }
