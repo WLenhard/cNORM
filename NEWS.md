@@ -2,6 +2,17 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.3.2,
+Date: in preparation
+
+
+Changes:
+
+*    new function 'compare' added to visually compare models
+
+
+
+
 ### Version in 3.3.1,
 Date: 16.10.2024
 

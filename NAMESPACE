@@ -12,6 +12,7 @@ export(
 	cnorm.cv,
 	cnorm,
 	cnorm.betabinomial,
+	compare,
 	computePowers,
 	diagnostics.betabinomial,
 	derivationTable,
