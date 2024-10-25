@@ -1432,7 +1432,7 @@ compare <- function(model1, model2,
 
   # Set default title if none provided
   if (is.null(title)) {
-    title <- "Model Comparison: Percentile Curves"
+    title <- "Visual Model Comparison of Percentile Curves"
   }
 
   if (is.null(subtitle)) {
