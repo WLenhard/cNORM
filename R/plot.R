@@ -1329,6 +1329,18 @@ compare <- function(model1, model2,
                     title = NULL,
                     subtitle = NULL) {
 
+  # retrieve score from model if score is null and of of the
+  # models is a cnorm object
+  if(is.null(score) && inherits(model1, "cnorm")){
+    score <- model1$data[[attributes(model1$data)$raw]]
+    age <- model1$data[[attributes(model1$data)$age]]
+  }
+
+  if(is.null(score) && inherits(model2, "cnorm")){
+    score <- model1$data[[attributes(model1$data)$raw]]
+    age <- model1$data[[attributes(model1$data)$age]]
+  }
+
   # Function to get predictions for beta-binomial models
   get_bb_predictions <- function(model, pred_ages) {
     if(inherits(model, "cnormBetaBinomial")) {
