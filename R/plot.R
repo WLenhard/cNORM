@@ -1291,3 +1291,230 @@ plotCnorm <- function(x, y, ...){
     message("Please provide the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', 'derivative' or the according index.")
   }
 }
+
+#' Compare Two Norm Models Visually
+#'
+#' This function creates a visualization comparing two norm models by displaying
+#' their percentile curves. The first model is shown with solid lines, the second
+#' with dashed lines. If age and score vectors are provided, manifest percentiles
+#' are displayed as dots. The function works with both regular cnorm models and
+#' beta-binomial models and allows comparison between different model types.
+#'
+#' @param model1 First model object (distribution free or beta-binomial)
+#' @param model2 Second model object (distribution free or beta-binomial)
+#' @param age Optional vector with manifest age or group values
+#' @param score Optional vector with manifest raw score values
+#' @param weights Optional vector with manifest weights
+#' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
+#' @param title Custom title for plot (optional)
+#' @param subtitle Custom subtitle for plot (optional)
+#'
+#' @return A ggplot object showing the comparison of both models
+#'
+#' @examples
+#' \dontrun{
+#' # Compare different types of models
+#' model1 <- cnorm(group = elfe$group, raw = elfe$raw)
+#' model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
+#' compare(model1, model2, age = elfe$group, score = elfe$raw)
+#' }
+#'
+#' @export
+#' @family plot
+compare <- function(model1, model2,
+                    percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
+                    age = NULL,
+                    score = NULL,
+                    weights = NULL,
+                    title = NULL,
+                    subtitle = NULL) {
+
+  # Function to get predictions for beta-binomial models
+  get_bb_predictions <- function(model, pred_ages) {
+    if(inherits(model, "cnormBetaBinomial")) {
+      preds <- predictCoefficients(model, pred_ages)
+    } else {
+      preds <- predictCoefficients2(model, pred_ages)
+    }
+
+    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
+    for(i in seq_along(percentiles)) {
+      pred_matrix[,i] <- qbeta(percentiles[i],
+                               shape1 = preds$a,
+                               shape2 = preds$b) * attr(model$result, "max")
+    }
+
+    pred_data <- data.frame(age = pred_ages, pred_matrix)
+    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    return(pred_data)
+  }
+
+  # Function to get predictions for cnorm models
+  get_cnorm_predictions <- function(model, pred_ages) {
+    m <- model$model
+    T <- qnorm(percentiles, m$scaleM, m$scaleSD)
+
+    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
+    for(i in 1:length(pred_ages)) {
+      pred_matrix[i,] <- predictRaw(T, pred_ages[i], m$coefficients)
+    }
+
+    pred_data <- data.frame(age = pred_ages, pred_matrix)
+    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    return(pred_data)
+  }
+
+  # Determine age range
+  get_age_range <- function(model) {
+    if(inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+      return(c(model$ageMin, model$ageMax))
+    } else {
+      m <- model$model
+      return(c(m$minA1, m$maxA1))
+    }
+  }
+
+  # Get age ranges for both models
+  range1 <- get_age_range(model1)
+  range2 <- get_age_range(model2)
+
+  # Create common age sequence
+  pred_ages <- seq(min(range1[1], range2[1]),
+                   max(range1[2], range2[2]),
+                   length.out = 100)
+
+  # Get predictions for both models
+  plot_data1 <- if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+    get_bb_predictions(model1, pred_ages)
+  } else {
+    get_cnorm_predictions(model1, pred_ages)
+  }
+
+  plot_data2 <- if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+    get_bb_predictions(model2, pred_ages)
+  } else {
+    get_cnorm_predictions(model2, pred_ages)
+  }
+
+  # Prepare data for plotting (reshape to long format using base R)
+  plot_data_long <- data.frame(
+    age = numeric(),
+    value = numeric(),
+    percentile = character(),
+    model = character()
+  )
+
+  # Reshape data for model 1
+  for(i in 2:ncol(plot_data1)) {
+    plot_data_long <- rbind(plot_data_long,
+                            data.frame(
+                              age = plot_data1$age,
+                              value = plot_data1[[i]],
+                              percentile = names(plot_data1)[i],
+                              model = "Model 1"
+                            ))
+  }
+
+  # Reshape data for model 2
+  for(i in 2:ncol(plot_data2)) {
+    plot_data_long <- rbind(plot_data_long,
+                            data.frame(
+                              age = plot_data2$age,
+                              value = plot_data2[[i]],
+                              percentile = names(plot_data2)[i],
+                              model = "Model 2"
+                            ))
+  }
+
+  # Set default title if none provided
+  if (is.null(title)) {
+    title <- "Model Comparison of Percentile Curves"
+  }
+
+  if (is.null(subtitle)) {
+    subtitle <- "First model: solid lines, Second model: dashed lines"
+  }
+
+  # Create plot
+  p <- ggplot() +
+    geom_line(data = plot_data_long[plot_data_long$model == "Model 1",],
+              aes(x = .data$age, y = .data$value, color = percentile),
+              linetype = "solid", size = 0.6) +
+    geom_line(data = plot_data_long[plot_data_long$model == "Model 2",],
+              aes(x = .data$age, y = .data$value, color = percentile),
+              linetype = "dashed", size = 0.6) +
+    scale_color_manual(values = rainbow(length(percentiles)),
+                       labels = paste0(percentiles * 100, "%")) +
+    labs(title = title,
+         subtitle = subtitle,
+         x = "Age",
+         y = "Score",
+         color = "Percentile") +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.subtitle = element_text(hjust = 0.5, size = 12),
+      axis.title = element_text(size = 12, face = "bold"),
+      axis.title.x = element_text(margin = margin(t = 10)),
+      axis.title.y = element_text(margin = margin(r = 10)),
+      axis.text = element_text(size = 10),
+      legend.position = "right",
+      legend.title = element_text(size = 12, face = "bold"),
+      legend.text = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
+
+  if (!is.null(score)&!is.null(age)) {
+    data <- data.frame(age = age, score = score)
+    if(!is.null(weights)){
+      data$w <- weights
+    }else{
+      data$w <- rep(1, length(age))
+    }
+
+    # Calculate and add manifest percentiles
+    if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+      # Distinct age groups
+      data$group <- age
+    } else {
+      # Use getGroups function
+      data$group <- getGroups(age)
+    }
+
+    # get actual percentiles
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data$group), function(df) {
+      c(age = mean(df$age),
+        weighted.quantile(df$score, probs = percentiles, weights = df$w))
+    })))
+    colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))  # Match naming convention with model data
+
+    # Reshape manifest data to long format
+    manifest_data_long <- data.frame(
+      age = numeric(),
+      value = numeric(),
+      percentile = character()
+    )
+
+    for(i in 2:ncol(percentile.actual)) {
+      manifest_data_long <- rbind(manifest_data_long,
+                                  data.frame(
+                                    age = percentile.actual$age,
+                                    value = percentile.actual[[i]],
+                                    percentile = names(percentile.actual)[i]
+                                  ))
+    }
+
+    # Add manifest percentiles to plot
+    p <- p + geom_point(
+      data = manifest_data_long,
+      aes(x = age, y = value, color = percentile),
+      size = 2,
+      shape = 18
+    )
+  }
+
+
+  return(p)
+}
