@@ -517,9 +517,6 @@ rankBySlidingWindow <- function(data = NULL,
                                 na.rm = TRUE,
                                 silent = FALSE) {
 
-  # experimental code to include covariates
-  # covariate <- NULL
-
   if(is.null(data)){
     d <- data.frame(raw=raw, age = age)
     raw <- "raw"
