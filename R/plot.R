@@ -1542,22 +1542,31 @@ compare <- function(model1, model2,
     }else{
       data <- rankByGroup(data, raw="score", group="group", weights="w")
     }
+    data$normValue <- 10*(data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
 
     # Get predictions for both models
     if(inherits(model1, "cnorm")){
       data$fitted1 <- predictNorm(data$score, data$age, model1,
                                   minNorm = model1$model$minL1,
                                   maxNorm = model1$model$maxL1)
+      data$fitted1 <- 10*(data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
     }else{
       data$fitted1 <- predict(model1, data$age, data$score)
+      scaleMean <- attr(model1$result, "scaleMean")
+      scaleSD <- attr(model1$result, "scaleSD")
+      data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
     }
 
     if(inherits(model2, "cnorm")){
       data$fitted2 <- predictNorm(data$score, data$age, model2,
                                   minNorm = model2$model$minL1,
                                   maxNorm = model2$model$maxL1)
+      data$fitted2 <- 10*(data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
     }else{
       data$fitted2 <- predict(model2, data$age, data$score)
+      scaleMean <- attr(model2$result, "scaleMean")
+      scaleSD <- attr(model2$result, "scaleSD")
+      data$fitted2 <- 10*(data$fitted2 - scaleMean) / scaleSD
     }
 
     # Calculate fit statistics
@@ -1585,13 +1594,14 @@ compare <- function(model1, model2,
     )
 
     # Round values
-    fit_table[, 2:4] <- round(fit_table[, 2:4], 3)
+    fit_table[, 2:4] <- round(fit_table[, 2:4], 4)
 
     cat("\nModel Comparison Summary:\n")
     cat("------------------------\n")
     print(format(fit_table, justify = "right"), row.names = FALSE)
     cat("\nNote: Difference = Model2 - Model1\n")
-    cat("      Fit indices are based on the manifest and fitted norm scores of both models\n")
+    cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
+    cat("      Scale metrics are T scores (scaleSD = 10)\n")
   }
 
   return(p)
