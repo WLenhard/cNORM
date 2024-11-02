@@ -74,6 +74,7 @@ plotPercentiles(result)
 plotNormCurves, plotPercentileSeries
 
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},

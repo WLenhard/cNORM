@@ -27,6 +27,7 @@ including the original data points manifest percentiles and specified percentile
 }
 \seealso{
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plotDensity}()},

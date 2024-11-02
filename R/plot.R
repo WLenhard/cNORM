@@ -1459,10 +1459,10 @@ compare <- function(model1, model2,
   # Create plot
   p <- ggplot() +
     geom_line(data = plot_data_long[plot_data_long$model == "Model 1",],
-              aes(x = .data$age, y = .data$value, color = percentile),
+              aes(x = .data$age, y = .data$value, color = .data$percentile),
               linetype = "solid", size = 0.6) +
     geom_line(data = plot_data_long[plot_data_long$model == "Model 2",],
-              aes(x = .data$age, y = .data$value, color = percentile),
+              aes(x = .data$age, y = .data$value, color = .data$percentile),
               linetype = "dashed", size = 0.6) +
     scale_color_manual(values = rainbow(length(percentiles)),
                        labels = paste0(percentiles * 100, "%")) +
@@ -1531,7 +1531,7 @@ compare <- function(model1, model2,
     # Add manifest percentiles to plot
     p <- p + geom_point(
       data = manifest_data_long,
-      aes(x = age, y = value, color = percentile),
+      aes(x = .data$age, y = .data$value, color = .data$percentile),
       size = 2,
       shape = 18
     )
@@ -1584,7 +1584,7 @@ compare <- function(model1, model2,
 
     # Create and print summary table
     fit_table <- data.frame(
-      Metric = c("R²", "Bias", "RMSE", "MAD"),
+      Metric = c("R2", "Bias", "RMSE", "MAD"),
       Model1 = c(R2a, bias1, RMSE1, MAD1),
       Model2 = c(R2b, bias2, RMSE2, MAD2),
       Difference = c(R2b - R2a,

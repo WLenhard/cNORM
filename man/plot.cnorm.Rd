@@ -20,6 +20,7 @@ S3 function for plotting cnorm objects
 }
 \seealso{
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},
 \code{\link{plotDensity}()},

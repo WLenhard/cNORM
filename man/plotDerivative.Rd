@@ -63,6 +63,7 @@ plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, s
 \code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
 
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},

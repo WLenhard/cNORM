@@ -62,6 +62,7 @@ plotSubset(cnorm.model, type = 3)
 \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
 
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},

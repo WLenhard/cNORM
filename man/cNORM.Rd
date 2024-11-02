@@ -30,7 +30,7 @@ or age variable is provided, conventional norming is applied}
 \item{age}{Numeric vector with chronological age, please additionally specify
 width of window}
 
-\item{width}{Size of the moving window in case an age vector is used}
+\item{width}{Size of the sliding window in case an age vector is used}
 
 \item{weights}{Vector or variable name in the dataset with weights for each
 individual case. It can be used to compensate for moderate imbalances due to

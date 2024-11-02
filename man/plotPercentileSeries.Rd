@@ -48,6 +48,7 @@ plotPercentileSeries(result, start=4, end=6)
 plotPercentiles
 
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},

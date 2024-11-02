@@ -38,6 +38,7 @@ plot(model.bb, age = elfe$group, score = elfe$raw, weights=NULL, points=FALSE)
 }
 \seealso{
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial2}()},
 \code{\link{plotDensity}()},

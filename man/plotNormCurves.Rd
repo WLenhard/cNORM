@@ -61,6 +61,7 @@ plotNormCurves(bb_model)
 \code{\link{checkConsistency}}, \code{\link{plotDerivative}}, \code{\link{plotPercentiles}}
 
 Other plot: 
+\code{\link{compare}()},
 \code{\link{plot.cnorm}()},
 \code{\link{plot.cnormBetaBinomial}()},
 \code{\link{plot.cnormBetaBinomial2}()},
