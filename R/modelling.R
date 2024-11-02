@@ -1597,7 +1597,7 @@ screenSubset <- function(data1, results, raw, k, t){
   nTerms <- as.numeric(apply(results$outmat, 1, function(row) sum(row == '*', na.rm = TRUE)))
   consistent <- rep(FALSE, length(nTerms))
   norms <- seq(from = min(data1$L1), to = max(data1$L1), length.out = 50)
-  age <- c(min(data1$A1), max(data1$A1))
+  age <- c(min(data1$A1), min(data1$A1) + (max(data1$A1)-min(data1$A1))/2, max(data1$A1))
   currentNumber <- 0
 
   # Loop through each possible model to screen consistency
