@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.4.0,
-Date: in preparation
+Date: 04.11.2024
 
 
 Changes:
