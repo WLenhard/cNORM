@@ -1690,8 +1690,6 @@ screenSubset <- function(data1, results, raw, k, t){
 #' The function splits the data into k subsets, fits a linear model on k-1 subsets,
 #' and stores the coefficients. This process is repeated k times, and the final
 #' coefficients are averaged across all iterations to provide more stable estimates.
-#'
-#' @internal
 subsample_lm <- function(text, data, weights, k = 10) {
 
   # in case of very small samples, just return linear model

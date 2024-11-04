@@ -15,7 +15,8 @@ bestModel(
   weights = NULL,
   force.in = NULL,
   plot = TRUE,
-  extensive = TRUE
+  extensive = TRUE,
+  subsampling = TRUE
 )
 }
 \arguments{
@@ -41,6 +42,9 @@ bestModel(
 regression object. FALSE turns off plotting and report.}
 
 \item{extensive}{If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones}
+
+\item{subsampling}{If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
+This produces more robust estimates with a slight increase in bias.}
 }
 \value{
 The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
