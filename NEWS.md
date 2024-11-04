@@ -2,13 +2,15 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.3.2,
+### Version in 3.4.0,
 Date: in preparation
 
 
 Changes:
 
 *    new function 'compare' added to visually compare models
+*    inclusion of 10-fold subsampling and averaging of model coefficients in model estimation
+     which produces more stable results
 
 
 

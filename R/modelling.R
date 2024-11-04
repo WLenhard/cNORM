@@ -26,6 +26,8 @@
 #' @param plot If TRUE (default), displays a percentile plot of the model and information about the
 #'             regression object. FALSE turns off plotting and report.
 #' @param extensive If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones
+#' @param subsampling If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
+#'                    This produces more robust estimates with a slight increase in bias.
 #' @return The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
 #'
@@ -54,7 +56,8 @@ bestModel <- function(data,
                       weights = NULL,
                       force.in = NULL,
                       plot = TRUE,
-                      extensive = TRUE) {
+                      extensive = TRUE,
+                      subsampling = TRUE) {
   # retrieve attributes
   if (is.null(raw)) {
     raw <- attr(data, "raw")
@@ -263,10 +266,19 @@ bestModel <- function(data,
 
   report[3] <- paste0("Final regression model: ", text)
 
-  if (is.null(attr(data, "weights")))
-    bestformula <- lm(text, data)
-  else
-    bestformula <- lm(text, data, weights = data$weights)
+  # determine final lm object; use resampling if specified
+  if(subsampling){
+    if (is.null(attr(data, "weights")))
+      bestformula <- subsample_lm(text, data, NULL)
+    else
+      bestformula <- subsample_lm(text, data, weights = data$weights)
+  }else{
+    if (is.null(attr(data, "weights")))
+      bestformula <- lm(text, data)
+    else
+      bestformula <- lm(text, data, weights = data$weights)
+  }
+
 
   # compute rmse
   tab <-
@@ -1657,4 +1669,75 @@ screenSubset <- function(data1, results, raw, k, t){
 
   results1$highestConsistent <- highestConsistent
   return(results1)
+}
+
+#' K-fold Resampled Coefficient Estimation for Linear Regression
+#'
+#' @description
+#' Performs k-fold resampling to estimate averaged coefficients for linear regression.
+#' The coefficients are averaged across k different subsets of the data to provide
+#' more stable estimates. For small samples (n < 100), returns a standard linear model instead.
+#'
+#' @param text A character string or formula specifying the model to be fitted
+#' @param data A data frame containing the variables in the model
+#' @param weights Optional numeric vector of weights. If NULL, unweighted regression is performed
+#' @param k Integer specifying the number of resampling folds (default = 10)
+#'
+#' @return An object of class 'lm' with averaged coefficients from k-fold resampling.
+#' For small samples, returns a standard lm object.
+#'
+#' @details
+#' The function splits the data into k subsets, fits a linear model on k-1 subsets,
+#' and stores the coefficients. This process is repeated k times, and the final
+#' coefficients are averaged across all iterations to provide more stable estimates.
+#'
+#' @internal
+subsample_lm <- function(text, data, weights, k = 10) {
+
+  # in case of very small samples, just return linear model
+  if(nrow(data)<100){
+    if(is.null(weights)){
+      return(lm(text, data))
+    }else{
+      return(lm(text, data, weights = weights))
+    }
+  }
+
+  formula <- formula(text)
+
+  # Set up k-fold CV
+  folds <- sample(rep(1:k, length.out = nrow(data)))
+
+  # Store coefficients from each fold
+  coef_matrix <- matrix(NA, nrow = k,
+                        ncol = length(attr(terms(formula), "term.labels")) + 1)
+  colnames(coef_matrix) <- c("(Intercept)",
+                             attr(terms(formula), "term.labels"))
+
+  # Perform k-fold CV
+  for(i in 1:k) {
+    # Split data and fit the model
+    if(is.null(weights)){
+      train_data <- data[-folds[[i]], ]
+      fit <- lm(formula, data = train_data)
+    }else{
+      train_data <- data[-folds[[i]], ]
+      train_weights <- weights[-folds[[i]]]
+      fit <- lm(formula, data = train_data, weights = train_weights)
+    }
+
+    # Store coefficients
+    coef_matrix[i,] <- coef(fit)
+  }
+
+  # Calculate final coefficients (mean across folds)
+  final_coef <- colMeans(coef_matrix)
+
+  # Create final model with averaged coefficients
+  final_model <- lm(formula, data = data)
+  final_model$coefficients <- final_coef
+  final_model$fitted.values <- model.matrix(final_model) %*% final_coef
+  final_model$residuals <- final_model$model[[1]] - final_model$fitted.values
+
+  return(final_model)
 }
