@@ -4,6 +4,7 @@ This is a medium release of an existing package. In this version I have:
 *    fixed bugs
 *    added method for visual comparison of models
 *    added resampling for robust model coefficient estimation
+*    updated vignettes
 
 
 ## Test environments
