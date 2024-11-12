@@ -1692,6 +1692,16 @@ screenSubset <- function(data1, results, raw, k, t){
 #' coefficients are averaged across all iterations to provide more stable estimates.
 subsample_lm <- function(text, data, weights, k = 10) {
 
+  # Save current random seed state to get reproducible results
+  if (exists(".Random.seed", envir = .GlobalEnv)) {
+    old_seed <- .Random.seed
+    on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv))
+  }else{
+    on.exit(rm(".Random.seed", envir = .GlobalEnv))
+  }
+
+  set.seed(123)
+
   # in case of very small samples, just return linear model
   if(nrow(data)<100){
     if(is.null(weights)){
