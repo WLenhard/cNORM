@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 An alternative to distribution-free modeling of norm data is parametric modeling. In this approach, the parameters of specific distribution functions (e.g., normal distribution, Box-Cox power function, beta-binomial distribution, etc.) are adjusted across age. One challenge with this approach is finding a function that fits the manifest data well. Note that for the normal distribution, this is usually not the case (cf. A. Lenhard et al., 2019).
 
-In certain cases, however, the beta-binomial distribution is excellently suited for modeling norm scores. This is especially true for psychometric test scales with a fixed number of questions or items that are completed without time constraints, and where each individual item can only be scored as 0 or 1.
+In certain cases, however, the beta-binomial distribution is excellently suited for modeling norm scores (Timmermann, Voncken & Albers, 2021). This is especially true for psychometric test scales with a fixed number of questions or items that are completed without time constraints, and where each individual item can only be scored as 0 or 1.
 
 As the name suggests, the beta-binomial distribution combines the binomial distribution with the beta distribution. The binomial distribution can be used to determine the probability of achieving x successes in n trials. The binomial distribution assumes a constant probability of success. However, this is usually not the case in psychometric test scales, especially in performance tests. This is where the beta distribution comes into play. In the beta-binomial distribution, it is assumed that the probability of success is not constant, but that the item difficulties follow a beta distribution. The latter does not represent a specific distribution, but a family of distributions determined by two shape parameters $\alpha$ and $\beta$. Although the item difficulties in most test scales are probably not exactly beta-distributed, test results can usually be modeled very well with the beta-binomial distribution, at least for unspeeded tests.
 
@@ -35,7 +35,7 @@ The beta-binomial distribution is a combination of the binomial and the beta dis
 
 where $B(\cdot,\cdot)$ is the beta function, and $\alpha$ and $\beta$ are shape parameters of the beta distribution.
 
-We model the shape parameters $\alpha$ and $\beta$ of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically: 
+In cNORM, we model the shape parameters $\alpha$ and $\beta$ of the beta-binomial distribution as functions of age (or another explanatory variable) using polynomial regression. Specifically: 
 
 \[\log(\alpha(age)) = a_0 + a_1age + a_2age^2 + ... + a_mage^m\]
 \[\log(\beta(age)) = b_0 + b_1age + b_2age^2 + ... + b_sage^s\]
@@ -214,7 +214,5 @@ In summary, both distribution-free and parametric continuous norming with cNORM 
 ## References
 * Lenhard, A., Lenhard, W. & Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9), e0222279. https://doi.org/10.1371/journal.pone.0222279
 * Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement, 81(2), 229-261. https://doi.org/10.1177/0013164420928457
+* Timmerman, M. E., Voncken, L., & Albers, C. J. (2021). A tutorial on regression-based norming of psychological tests with GAMLSS. Psychological Methods, 26(3), 357–373. https://doi.org/10.1037/met0000348
 * Urban, J., Scherrer, V., Strobel, A., & Preckel, F. (2024). Continuous Norming Approaches: A Systematic Review and Real Data Example. Assessment. https://doi.org/10.1177/10731911241260545
-
-
-
