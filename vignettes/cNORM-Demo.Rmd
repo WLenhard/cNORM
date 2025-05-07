@@ -8,8 +8,10 @@ output: rmarkdown::html_vignette
 #    latex_engine: xelatex
 #    toc: true  # Optional table of contents
 #    number_sections: true  # Optional section numbering
-vignette: "%\\VignetteIndexEntry{Demonstration for Creating Continuous Norms with
-  cNORM} %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
+vignette: >
+  %\VignetteIndexEntry{Demonstration for Creating Continuous Norms with cNORM}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}

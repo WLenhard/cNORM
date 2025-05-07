@@ -2,7 +2,19 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.4.0,
+### Version in 3.4.1,in preparation
+Date: 07.05.2025
+
+
+Changes:
+
+*    revision of beta binomial function to robustly handle scales with large n
+*    deprecated function calcPolyInLBase removed
+
+
+
+
+### Version in 3.4.0
 Date: 04.11.2024
 
 
@@ -15,7 +27,7 @@ Changes:
 
 
 
-### Version in 3.3.1,
+### Version in 3.3.1
 Date: 16.10.2024
 
 
@@ -33,7 +45,7 @@ Changes:
 
 
 
-### Version in 3.3.0,
+### Version in 3.3.0
 Date: 2024.08.26
 
 
@@ -56,7 +68,7 @@ Changes:
 
 
 
-### Version in 3.2.0,
+### Version in 3.2.0
 Date: 2024.08.17
 
 
@@ -80,7 +92,7 @@ Changes:
 
 
 
-### Version in 3.1.0,
+### Version in 3.1.0
 Date: 2024.07.19
 
 
