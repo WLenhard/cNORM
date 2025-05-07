@@ -888,42 +888,31 @@ log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
   alpha_coef <- params[1:n_alpha]
   beta_coef <- params[(n_alpha + 1):length(params)]
 
-  log_alpha <- X %*% alpha_coef
-  log_beta <- Z %*% beta_coef
+  # Compute log parameters and clamp to reasonable range
+  log_alpha <- pmax(pmin(X %*% alpha_coef, 20), -20)
+  log_beta <- pmax(pmin(Z %*% beta_coef, 20), -20)
+
   alpha <- exp(log_alpha)
   beta <- exp(log_beta)
 
-  # More numerically stable implementation of beta-binomial log-probability
-  dbetabinom <- function(x, size, alpha, beta, log = FALSE) {
-    logp <- lchoose(size, x) +
-      lgamma(size + 1) +
-      lgamma(alpha + x) +
-      lgamma(beta + size - x) +
-      lgamma(alpha + beta) -
-      lgamma(x + 1) -
-      lgamma(size - x + 1) -
-      lgamma(size + alpha + beta) -
-      lgamma(alpha) -
-      lgamma(beta)
-
-    if (log)
-      return(logp)
-    else
-      return(exp(logp))
-  }
-
-  # If weights are not provided, use equal weights
+  # Use weights if provided
   if (is.null(weights)) {
     weights <- rep(1, length(y))
   }
 
-  ll <- sum(weights * dbetabinom(
-    y,
-    size = n,
-    alpha = alpha,
-    beta = beta,
-    log = TRUE
-  ))
+  # Revision of prior approach for more numerically stable calculation using direct lbeta approach
+  logp <- lchoose(n, y) + lbeta(y + alpha, n - y + beta) - lbeta(alpha, beta)
+
+  # Handle non-finite values safely
+  logp[!is.finite(logp)] <- -709  # Approximately log(.Machine$double.xmin)
+
+  ll <- sum(weights * logp)
+
+  # Check for valid result and provide fallback
+  if (!is.finite(ll)) {
+    return(1e10)  # Return a large but finite penalty
+  }
+
   return(-ll)  # Return negative log-likelihood for minimization
 }
 
@@ -961,6 +950,30 @@ log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
 #' find the optimal parameters. The optimization is performed using the L-BFGS-B method.
 #'
 #' @keywords internal
+#' Fit a beta-binomial regression model for continuous norming
+#'
+#' This function fits a beta-binomial regression model where both the alpha and beta
+#' parameters of the beta-binomial distribution are modeled as polynomial functions
+#' of the predictor variable (typically age).
+#'
+#' @param age A numeric vector of predictor values (e.g., age).
+#' @param score A numeric vector of response values.
+#' @param n The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.
+#' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
+#' @param alpha_degree Integer specifying the degree of the polynomial for the alpha model. Default is 3.
+#' @param beta_degree Integer specifying the degree of the polynomial for the beta model. Default is 3.
+#' @param control A list of control parameters to be passed to the `optim` function.
+#'   If NULL, default values are used.
+#' @param scale Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.
+#' @param plot Logical indicating whether to plot the model. Default is TRUE.
+#'
+#' @return A list of class "cnormBetaBinomial2" containing:
+#'   \item{alpha_est}{Estimated coefficients for the alpha model}
+#'   \item{beta_est}{Estimated coefficients for the beta model}
+#'   \item{se}{Standard errors of the estimated coefficients}
+#'   \item{alpha_degree}{Degree of the polynomial for the alpha model}
+#'   \item{beta_degree}{Degree of the polynomial for the beta model}
+#'   \item{result}{Full result from the optimization procedure}
 cnorm.betabinomial2 <- function(age,
                                 score,
                                 n = NULL,
@@ -969,58 +982,133 @@ cnorm.betabinomial2 <- function(age,
                                 beta_degree = 3,
                                 control = NULL,
                                 scale = "T",
-                                plot = T) {
+                                plot = TRUE) {
+  # Input validation
+  if (length(age) != length(score)) {
+    stop("Length of 'age' and 'score' must be the same.")
+  }
+
   # Standardize inputs
   age_std <- standardize(age)
 
-  # Set up 'data' object containing both variables
+  # Setup data
   data <- data.frame(age = age_std, score = score)
-  if (is.null(n))
+  if (is.null(n)) {
     n <- max(score)
+    message("Using max(score) = ", n, " as the maximum score.")
+  }
 
-  # Prepare the data matrices for alpha and beta, including intercept
+  # Prepare design matrices
   X <- cbind(1, poly(data$age, degree = alpha_degree, raw = TRUE))
   Z <- cbind(1, poly(data$age, degree = beta_degree, raw = TRUE))
   y <- data$score
 
-  # Initial parameters: use some sensible starting values
-  starting_values <- betaCoefficients(y)
-  starting_values[starting_values<=0] <- 1e-6
-  initial_alpha <- log(starting_values[1])
-  initial_beta <- log(starting_values[2])
+  # Robust initial parameter calculation
+  initial_values <- tryCatch({
+    vals <- betaCoefficients(y, n)
+    # Handle invalid values
+    vals[vals <= 0 | !is.finite(vals)] <- 1e-4
+    vals
+  }, error = function(e) {
+    # Fallback to simple method if betaCoefficients fails
+    a <- 1.0
+    b <- (n - mean(y)) / mean(y) * a
+    c(a, b, mean(y), sd(y), n)
+  })
 
+  initial_alpha <- log(initial_values[1])
+  initial_beta <- log(initial_values[2])
+
+  # Better initial parameter distribution for polynomials
   initial_params <- c(initial_alpha,
-                      rep(1e-9, alpha_degree),
+                      rep(1e-6, alpha_degree),
                       initial_beta,
-                      rep(1e-9, beta_degree))
+                      rep(1e-6, beta_degree))
 
-  # Optimize to find parameter estimates. If control is NULL, set default
-  if (is.null(control)){
-    n_param <-alpha_degree + beta_degree + 2
-    control = list(factr = 1e-6, maxit = n_param*100, lmm = n_param)
+  # Adaptive control parameters based on problem size
+  if (is.null(control)) {
+    n_param <- alpha_degree + beta_degree + 2
+
+    # Different settings based on n
+    if (n <= 50) {
+      factr <- 1e-8
+      maxit <- n_param * 100
+    } else if (n <= 150) {
+      factr <- 1e-7
+      maxit <- n_param * 150
+    } else {
+      factr <- 1e-6
+      maxit <- n_param * 200
+    }
+
+    control <- list(
+      factr = factr,
+      maxit = maxit,
+      lmm = min(n_param, 20)
+    )
   }
 
-  result <- optim(
-    initial_params,
-    log_likelihood2,
-    X = X,
-    Z = Z,
-    y = y,
-    n = n,
-    weights = weights,
-    method = "L-BFGS-B",
-    hessian = TRUE,
-    control = control
-  )
+  # Parameter bounds to prevent numerical issues
+  lower_bounds <- rep(-20, length(initial_params))
+  upper_bounds <- rep(20, length(initial_params))
 
+  # First optimization attempt
+  result <- tryCatch({
+    optim(
+      initial_params,
+      log_likelihood2,
+      X = X, Z = Z, y = y, n = n,
+      weights = weights,
+      method = "L-BFGS-B",
+      lower = lower_bounds,
+      upper = upper_bounds,
+      hessian = TRUE,
+      control = control
+    )
+  }, error = function(e) {
+    # Try again with different initial values if first attempt fails
+    message("First optimization attempt failed. Trying with different parameters...")
+    initial_alpha <- log(1.0)
+    initial_beta <- log(3.0)
+    initial_params <- c(initial_alpha,
+                        rep(0, alpha_degree),
+                        initial_beta,
+                        rep(0, beta_degree))
+
+    # More relaxed control parameters
+    control$factr <- control$factr * 10
+    control$maxit <- control$maxit * 2
+
+    optim(
+      initial_params,
+      log_likelihood2,
+      X = X, Z = Z, y = y, n = n,
+      weights = weights,
+      method = "L-BFGS-B",
+      lower = lower_bounds,
+      upper = upper_bounds,
+      hessian = TRUE,
+      control = control
+    )
+  })
+
+  # Check convergence
   if (result$convergence != 0) {
-    warning("Optimization did not converge. Consider adjusting control parameters.")
+    warning("Optimization did not converge (code: ", result$convergence,
+            "). Consider adjusting control parameters.")
   }
 
-  # Extract results and calculate standard errors
+  # Extract results
   alpha_est <- result$par[1:(alpha_degree + 1)]
   beta_est <- result$par[(alpha_degree + 2):length(result$par)]
-  se <- sqrt(diag(solve(result$hessian)))
+
+  # Robust standard error calculation
+  se <- tryCatch({
+    sqrt(diag(solve(result$hessian)))
+  }, error = function(e) {
+    warning("Could not compute standard errors: Hessian matrix issue")
+    rep(NA, length(result$par))
+  })
 
   # Store original mean and sd for unstandardizing later
   # add attributes for usage in other functions
