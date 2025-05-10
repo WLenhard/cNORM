@@ -2,14 +2,15 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.4.1,in preparation
-Date: 07.05.2025
+### Version in 3.4.1
+Date: 10.05.2025
 
 
 Changes:
 
 *    revision of beta binomial function to robustly handle scales with large n
 *    deprecated function calcPolyInLBase removed
+*    corrected bug in computeWeights when there is a single SV with two levels, enhanced type safety 
 
 
 

@@ -1,16 +1,15 @@
 ## Resubmission
-This is a medium release of an existing package. In this version I have:
+This is a minor release of an existing package. In this version I have:
 
-*    fixed bugs
-*    added method for visual comparison of models
-*    added resampling for robust model coefficient estimation
+*    fixed bugs in computeWeights function
+*    revised cnorm.betabinomial to handle large scales
 *    updated vignettes
 
 
 ## Test environments
-* local WIN10, 64Bit install, R 4.4.1
+* local WIN10, 64Bit install, R 4.5.
 * winbuilder win release, win old release, win development and mac release
-* rhub2 win, mac, mac-arm64, ubuntu-latest, ubuntu-release
+
 
 
 ## R CMD check results

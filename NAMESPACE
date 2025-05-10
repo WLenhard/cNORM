@@ -53,6 +53,14 @@ export(
 	weighted.quantile.type7,
 	computeWeights,
 	taylorSwift
+	#,
+	#log_likelihood_bcpe,
+  #cnorm.bcpe,
+  #normTable.bcpe,
+  #predict.cnormBCPE,
+  #plot.cnormBCPE,
+  #diagnostics.bcpe,
+	#summary.cnormBCPE
 )
 
 
