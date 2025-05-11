@@ -4,6 +4,7 @@ This is a minor release of an existing package. In this version I have:
 *    fixed bugs in computeWeights function
 *    revised cnorm.betabinomial to handle large scales
 *    updated vignettes
+*    The outdated link to NHANES was corrected in the man page
 
 
 ## Test environments
