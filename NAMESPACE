@@ -52,8 +52,7 @@ export(
 	weighted.quantile.harrell.davis,
 	weighted.quantile.type7,
 	computeWeights,
-	taylorSwift
-	#,
+	taylorSwift#,
 	#log_likelihood_bcpe,
   #cnorm.bcpe,
   #normTable.bcpe,
