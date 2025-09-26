@@ -84,6 +84,7 @@ Other predict:
 \code{\link{normTable}()},
 \code{\link{predict.cnormBetaBinomial}()},
 \code{\link{predict.cnormBetaBinomial2}()},
+\code{\link{predict.cnormShaSh}()},
 \code{\link{predictNorm}()},
 \code{\link{predictRaw}()}
 }

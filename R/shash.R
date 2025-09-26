@@ -147,9 +147,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, y, weights = 
 #'   Default is 2. This controls how the variability (spread) of scores changes with age.
 #'   Lower degrees are often sufficient as variability typically changes more smoothly than location.
 #' @param epsilon_degree Integer specifying the degree of the polynomial for modeling the skewness parameter ε(age).
-#'   Default is 2. This controls how the asymmetry of the distribution changes with age:
-#'   Note: ε = 0 produces a symmetric distribution, ε > 0 creates right skew (longer upper tail),
-#'   ε < 0 creates left skew (longer lower tail).
+#'   Default is 1. This controls how the asymmetry of the distribution changes with age.
 #'
 #' @param delta Fixed tail weight parameter (must be > 0). Default is 1. This parameter controls the
 #'   heaviness of the distribution tails and is kept constant across all ages in this implementation.
@@ -157,12 +155,6 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, y, weights = 
 #'     \item δ = 1: Normal-like tail behavior (baseline)
 #'     \item δ > 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
 #'     \item δ < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
-#'   }
-#'   Choose δ based on the degree of individual differences in your population:
-#'   \itemize{
-#'     \item 0.5-0.9: Homogeneous populations, restricted ranges
-#'     \item 1.0: General population samples
-#'     \item 1.2-2.0: Heterogeneous populations, mixed ability groups
 #'   }
 #'
 #' @param control An optional list of control parameters passed to the \code{optim} function for
@@ -214,14 +206,6 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, y, weights = 
 #' }
 #' }
 #'
-#' \subsection{Age-Varying Parameters}{
-#' Each parameter (except δ) is modeled as a polynomial function of standardized age:
-#' \deqn{\mu(\text{age}) = \alpha_0 + \alpha_1 \cdot \text{age}_{std} + \alpha_2 \cdot \text{age}_{std}^2 + \ldots}
-#' \deqn{\log(\sigma(\text{age})) = \beta_0 + \beta_1 \cdot \text{age}_{std} + \beta_2 \cdot \text{age}_{std}^2 + \ldots}
-#' \deqn{\epsilon(\text{age}) = \gamma_0 + \gamma_1 \cdot \text{age}_{std} + \gamma_2 \cdot \text{age}_{std}^2 + \ldots}
-#'
-#' Age is standardized as: age_std = (age - mean(age)) / sd(age) for numerical stability.
-#' }
 #'
 #' \subsection{Model Fitting}{
 #' Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm. The function
@@ -313,7 +297,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, y, weights = 
 #' sapply(models, function(m) 2 * length(m$result$par) + 2 * m$result$value)
 #' }
 #'
-#' @author [Your name]
+#' @author Wolfgang Lenhard
 #' @references
 #' Jones, M. C., & Pewsey, A. (2009). Sinh-arcsinh distributions. *Biometrika*, 96(4), 761-780.
 #'
@@ -327,7 +311,7 @@ cnorm.shash <- function(age,
                         weights = NULL,
                         mu_degree = 3,
                         sigma_degree = 2,
-                        epsilon_degree = 2,
+                        epsilon_degree = 1,
                         delta = 1,
                         control = NULL,
                         scale = "T",
@@ -437,7 +421,7 @@ cnorm.shash <- function(age,
   # Check convergence
   if (result$convergence != 0) {
     warning("Optimization did not converge (code: ", result$convergence,
-            "). Consider adjusting control parameters.")
+            "). Consider adjusting control parameters or degrees of the polynomials. Check percentile curves for plausibility.")
   }
 
   # Extract parameter estimates
@@ -1099,7 +1083,7 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
         group = "group",
         weights = weights
       )
-      norm_scores <- predict(model, data$group, data$raw)
+      norm_scores <- predict(object, data$group, data$raw)
     } else{
       data <- data.frame(age = age, raw = score)
       data$groups <- getGroups(age)
@@ -1111,7 +1095,7 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
         width = width,
         weights = weights
       )
-      norm_scores <- predict(model, data$age, data$raw)
+      norm_scores <- predict(object, data$age, data$raw)
     }
 
     norm_manifest <- data$normValue

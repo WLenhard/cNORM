@@ -74,3 +74,7 @@ S3method(summary, cnormBetaBinomial)
 S3method(predict, cnormBetaBinomial2)
 S3method(plot, cnormBetaBinomial2)
 S3method(summary, cnormBetaBinomial2)
+
+S3method(predict, cnormShaSh)
+S3method(plot, cnormShaSh)
+S3method(summary, cnormShaSh)
