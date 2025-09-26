@@ -448,9 +448,9 @@ plotPercentiles <- function(model,
                             subtitle = NULL,
                             points = F) {
 
-  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
-  if(is_beta_binomial){
-    stop("This function is not applicable for beta-binomial models. Please use 'plot(model.binomial, age, raw)' instead.")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  if(is_parametric){
+    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use 'plot(model, age, raw)' instead.")
   }
 
   if(inherits(model, "cnorm")){
@@ -651,7 +651,8 @@ plotPercentiles <- function(model,
 #' It supports both traditional continuous norming models and beta-binomial models.
 #' The function allows for customization of the plot range and groups to be displayed.
 #'
-#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial or cnormBetaBinomial2 object.
+#' @param model The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2 or
+#'    cnormShaSh object.
 #' @param minRaw Lower bound of the raw score. If NULL, it's automatically determined based on the model type.
 #' @param maxRaw Upper bound of the raw score. If NULL, it's automatically determined based on the model type.
 #' @param minNorm Lower bound of the norm score. If NULL, it's automatically determined based on the model type.
@@ -699,6 +700,7 @@ plotDensity <- function(model,
   }
 
   is_beta_binomial <- inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")
+  is_shash <- inherits(model, "cnormShaSh")
 
   if (is.null(minNorm)) {
     minNorm <- if(is_beta_binomial) -3 else model$minL1
@@ -719,7 +721,7 @@ plotDensity <- function(model,
 
 
   if (is.null(group)) {
-    if(is_beta_binomial) {
+    if(is_beta_binomial||is_shash) {
       age_min <- attr(model$result, "ageMin")
       age_max <- attr(model$result, "ageMax")
       group <- round(seq(from = age_min, to = age_max, length.out = 4), digits = 3)
@@ -735,6 +737,12 @@ plotDensity <- function(model,
   matrix_list <- lapply(group, function(g) {
     if(is_beta_binomial) {
       norm <- normTable.betabinomial(model, g, attr(model$result, "max"))[[1]]
+      norm$group <- rep(g, length.out = nrow(norm))
+      colnames(norm)[colnames(norm) == "x"] <- "raw"
+      colnames(norm)[colnames(norm) == "norm"] <- "norm1"
+      colnames(norm)[colnames(norm) == "z"] <- "norm"
+    } else if(is_shash) {
+      norm <- normTable.shash(model, g, attr(model$result, "max"))[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
@@ -820,9 +828,9 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
 
-  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
-  if(is_beta_binomial){
-    stop("This function is not applicable for beta-binomial models. Please use the plotDensity function instead.")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  if(is_parametric){
+    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
 
   if(inherits(model, "cnorm")){
@@ -980,8 +988,9 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' @family plot
 plotSubset <- function(model, type = 0) {
 
-  if(inherits(model, "cnormBetaBinomial2") || inherits(model, "cnormBetaBinomial")){
-    stop("This function is not applicable for beta-binomial models.")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  if(is_parametric){
+    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh).")
   }
 
   if(inherits(model, "cnorm")){
@@ -1169,9 +1178,9 @@ plotDerivative <- function(model,
     model <- model$model
   }
 
-  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")
-  if(is_beta_binomial){
-    stop("This function is not applicable for beta-binomial models. Please use the plotDensity function instead.")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  if(is_parametric){
+    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
 
   if (!model$useAge){
@@ -1297,11 +1306,11 @@ plotCnorm <- function(x, y, ...){
 #' This function creates a visualization comparing two norm models by displaying
 #' their percentile curves. The first model is shown with solid lines, the second
 #' with dashed lines. If age and score vectors are provided, manifest percentiles
-#' are displayed as dots. The function works with both regular cnorm models and
-#' beta-binomial models and allows comparison between different model types.
+#' are displayed as dots. The function works with regular cnorm models, beta-binomial
+#' models, and ShaSh models, allowing comparison between different model types.
 #'
-#' @param model1 First model object (distribution free or beta-binomial)
-#' @param model2 Second model object (distribution free or beta-binomial)
+#' @param model1 First model object (distribution free, beta-binomial, or ShaSh)
+#' @param model2 Second model object (distribution free, beta-binomial, or ShaSh)
 #' @param age Optional vector with manifest age or group values
 #' @param score Optional vector with manifest raw score values
 #' @param weights Optional vector with manifest weights
@@ -1316,7 +1325,13 @@ plotCnorm <- function(x, y, ...){
 #' # Compare different types of models
 #' model1 <- cnorm(group = elfe$group, raw = elfe$raw)
 #' model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
-#' compare(model1, model2, age = elfe$group, score = elfe$raw)
+#' model3 <- cnorm.shash(elfe$group, elfe$raw)
+#'
+#' # Compare traditional cnorm with ShaSh
+#' compare(model1, model3, age = elfe$group, score = elfe$raw)
+#'
+#' # Compare beta-binomial with ShaSh
+#' compare(model2, model3, age = elfe$group, score = elfe$raw)
 #' }
 #'
 #' @export
@@ -1329,7 +1344,7 @@ compare <- function(model1, model2,
                     title = NULL,
                     subtitle = NULL) {
 
-  # retrieve score from model if score is null and of of the
+  # retrieve score from model if score is null and one of the
   # models is a cnorm object
   if(is.null(score) && inherits(model1, "cnorm")){
     score <- model1$data[[attributes(model1$data)$raw]]
@@ -1337,8 +1352,8 @@ compare <- function(model1, model2,
   }
 
   if(is.null(score) && inherits(model2, "cnorm")){
-    score <- model1$data[[attributes(model1$data)$raw]]
-    age <- model1$data[[attributes(model1$data)$age]]
+    score <- model2$data[[attributes(model2$data)$raw]]
+    age <- model2$data[[attributes(model2$data)$age]]
   }
 
   # Function to get predictions for beta-binomial models
@@ -1354,6 +1369,24 @@ compare <- function(model1, model2,
       pred_matrix[,i] <- qbeta(percentiles[i],
                                shape1 = preds$a,
                                shape2 = preds$b) * attr(model$result, "max")
+    }
+
+    pred_data <- data.frame(age = pred_ages, pred_matrix)
+    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    return(pred_data)
+  }
+
+  # Function to get predictions for ShaSh models
+  get_shash_predictions <- function(model, pred_ages) {
+    preds <- predictCoefficients_shash(model, pred_ages)
+
+    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
+    for(i in seq_along(percentiles)) {
+      pred_matrix[,i] <- qshash(percentiles[i],
+                                mu = preds$mu,
+                                sigma = preds$sigma,
+                                epsilon = preds$epsilon,
+                                delta = preds$delta)
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1379,7 +1412,9 @@ compare <- function(model1, model2,
   # Determine age range
   get_age_range <- function(model) {
     if(inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
-      return(c(model$ageMin, model$ageMax))
+      return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
+    } else if(inherits(model, "cnormShaSh")) {
+      return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
     } else {
       m <- model$model
       return(c(m$minA1, m$maxA1))
@@ -1398,12 +1433,16 @@ compare <- function(model1, model2,
   # Get predictions for both models
   plot_data1 <- if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
     get_bb_predictions(model1, pred_ages)
+  } else if(inherits(model1, "cnormShaSh")) {
+    get_shash_predictions(model1, pred_ages)
   } else {
     get_cnorm_predictions(model1, pred_ages)
   }
 
   plot_data2 <- if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
     get_bb_predictions(model2, pred_ages)
+  } else if(inherits(model2, "cnormShaSh")) {
+    get_shash_predictions(model2, pred_ages)
   } else {
     get_cnorm_predictions(model2, pred_ages)
   }
@@ -1550,7 +1589,12 @@ compare <- function(model1, model2,
                                   minNorm = model1$model$minL1,
                                   maxNorm = model1$model$maxL1)
       data$fitted1 <- 10*(data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
-    }else{
+    }else if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+      data$fitted1 <- predict(model1, data$age, data$score)
+      scaleMean <- attr(model1$result, "scaleMean")
+      scaleSD <- attr(model1$result, "scaleSD")
+      data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
+    }else if(inherits(model1, "cnormShaSh")) {
       data$fitted1 <- predict(model1, data$age, data$score)
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
@@ -1562,7 +1606,12 @@ compare <- function(model1, model2,
                                   minNorm = model2$model$minL1,
                                   maxNorm = model2$model$maxL1)
       data$fitted2 <- 10*(data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
-    }else{
+    }else if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+      data$fitted2 <- predict(model2, data$age, data$score)
+      scaleMean <- attr(model2$result, "scaleMean")
+      scaleSD <- attr(model2$result, "scaleSD")
+      data$fitted2 <- 10*(data$fitted2 - scaleMean) / scaleSD
+    }else if(inherits(model2, "cnormShaSh")) {
       data$fitted2 <- predict(model2, data$age, data$score)
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")

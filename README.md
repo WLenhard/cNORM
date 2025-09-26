@@ -9,7 +9,7 @@
 
 cNORM was developed specifically for achievement tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, the package can be used wherever mental (e.g. reaction time), physical (e.g. body weight) or other test scores depend on continuous (e.g. age, duration of schooling) or discrete explanatory variables (e.g. sex, test form). In addition, the package can also be used for "conventional" norming based on individual groups, i.e. without including explanatory variables.
 
-The package estimates percentiles as a function of the explanatory variable. This is done either parametrically on the basis of the beta-binomial distribution or distribution-free using Taylor polynomials. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and have a look at the vignettes.
+The package estimates percentiles as a function of the explanatory variable. This is done either parametrically on the basis of the beta-binomial or the Sinh-Arcsinh (ShaSh) distribution or distribution-free using Taylor polynomials. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and have a look at the vignettes.
 
 
 ## In a nutshell
@@ -108,6 +108,26 @@ tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
                                  reliability=0.9)
 ```
 
+Modelling norm data using Sinh-Arcsinh (ShaSh) distributions:
+```{r example}
+library(cNORM)
+# The Sinh-Arcsinh (ShaSh) distribution is a flexible approach.
+# It can handle raw score value ranges including zeros and negative
+# values, which pose a problem to Box Cox distributions.
+# Shape parameters mu, sigma, epsilon and delta can be adjusted as well.
+model.shash <- cnorm.shash(ppvt$age, ppvt$raw)
+
+# Plot percentile curves and display manifest and modelled norm scores.
+plot(model.shash, ppvt$age, ppvt$raw)
+
+# Display fit statistics:
+summary(model.shash, ppvt$age, ppvt$raw)
+
+# Prediction of norm scores for new data and generating norm tables
+predict(model.shash, c(8.9, 10.1), c(153, 121))
+tables <- normTable.shash(model.shash, c(10, 15),
+                                 reliability=0.9)
+```
 
 Conventional norming:
 ```{r example}
@@ -125,6 +145,7 @@ library(cNORM)
 vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
 vignette("BetaBinomial", package = "cNORM")
+vignette("ShaSh", package = "cNORM")
 ```
 
 

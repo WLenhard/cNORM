@@ -1,7 +1,7 @@
 Package: cNORM
 Type: Package
 Title: Continuous Norming
-Version: 3.4.1
+Version: 3.5.0
 Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
 Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
     email="lenhard@psychometrica.de", comment=c(ORCID = "0000-0001-8680-4381")), 
@@ -13,10 +13,10 @@ Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
 Description: A comprehensive toolkit for generating continuous test norms in 
     psychometrics and biometrics, and analyzing model fit. The package offers both 
     distribution-free modeling using Taylor polynomials and parametric modeling 
-    using the beta-binomial distribution. Originally developed for achievement 
-    tests, it is applicable to a wide range of mental, physical, or other test 
-    scores dependent on continuous or discrete explanatory variables. The package 
-    provides several advantages: It minimizes deviations from representativeness 
+    using the beta-binomial and the Sinh-Arcsinh distribution. Originally developed
+    for achievement tests, it is applicable to a wide range of mental, physical, or 
+    other test scores dependent on continuous or discrete explanatory variables. The
+    package provides several advantages: It minimizes deviations from representativeness 
     in subsamples, interpolates between discrete levels of explanatory variables, 
     and significantly reduces the required sample size compared to conventional 
     norming per age group. cNORM enables graphical and analytical evaluation of 

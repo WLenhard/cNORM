@@ -2,8 +2,8 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
-### Version in 3.4.1
-Date: 11.05.2025
+### Version in 3.5.0
+Date: 26.09.2025
 
 
 Changes:
@@ -12,7 +12,11 @@ Changes:
 *    deprecated function calcPolyInLBase removed
 *    corrected bug in computeWeights when there is a single SV with two levels, enhanced type safety 
 *    Link to NHANES corrected
-
+*    Implemented parametric modelling with the Sinh-Arcsinh (ShaSh) distribution
+     New functions: cnorm.shash, normTable.shash, summary.cnormShaSh, print.cnormShaSh,  
+     plot.cnormShaSh, predict.cnormShaSh and diagnostics.shash
+*    updated all generic function to handel cnormShaSh objects
+*    vignette on ShaSh modelling added
 
 
 ### Version in 3.4.0
