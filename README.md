@@ -5,7 +5,7 @@
 
 # cNORM
 
- cNORM (W. Lenhard, Lenhard & Gary) is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution and since version 3.5 modelling with the Sinh-Arcsinh (ShaSh) model.
+ cNORM (W. Lenhard, Lenhard & Gary) is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution and since version 3.5 modeling with the Sinh-Arcsinh (ShaSh) distribution.
 
 cNORM was developed specifically for achievement tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, the package can be used wherever mental (e.g. reaction time), physical (e.g. body weight) or other test scores depend on continuous (e.g. age, duration of schooling) or discrete explanatory variables (e.g. sex, test form). In addition, the package can also be used for "conventional" norming based on individual groups, i.e. without including explanatory variables.
 
