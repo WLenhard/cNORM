@@ -9,9 +9,10 @@ log_likelihood_shash(
   X_mu,
   X_sigma,
   X_epsilon,
+  X_delta = NULL,
   y,
   weights = NULL,
-  delta = 1
+  fixed_delta = NULL
 )
 }
 \arguments{
@@ -23,11 +24,13 @@ log_likelihood_shash(
 
 \item{X_epsilon}{Design matrix for skewness parameter}
 
+\item{X_delta}{Design matrix for tails}
+
 \item{y}{Response vector}
 
 \item{weights}{Observation weights}
 
-\item{delta}{Fixed tail weight parameter}
+\item{fixed_delta}{If not NULL, the delta parameter is fixed to this value}
 }
 \value{
 The negative log-likelihood of the model

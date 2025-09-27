@@ -12,6 +12,7 @@ cnorm.shash(
   sigma_degree = 2,
   epsilon_degree = 1,
   delta = 1,
+  delta_degree = NULL,
   control = NULL,
   scale = "T",
   plot = TRUE
@@ -51,6 +52,11 @@ heaviness of the distribution tails and is kept constant across all ages in this
   \item delta < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
 }}
 
+\item{delta_degree}{Instead of the fixed delta parameter, you can also model delta as a polynomial function of age.
+The default setting is NULL, which means delta is fixed. If you specify an integer value (e.g., 1, 2),
+the function will fit a polynomial of that degree to model how tail weight changes with age. The degree
+has to be set explicitly and should be kept low (1 or 2) to avoid overfitting.}
+
 \item{control}{An optional list of control parameters passed to the \code{optim} function for
 maximum likelihood estimation. If NULL, sensible defaults are chosen automatically based on
 the model complexity. Common parameters to adjust:
@@ -81,6 +87,8 @@ An object of class "cnormShaSh" containing the fitted model results. This is a l
     Note: These are coefficients for log(sigma) to ensure sigma > 0.}
   \item{epsilon_est}{Numeric vector of estimated coefficients for the skewness parameter epsilon(age).}
   \item{delta}{The fixed tail weight parameter value used in fitting.}
+  \item{delta_est}{Numeric vector of estimated coefficients for the tail weight parameter delta(age) -
+     in case, a degree has been set.}
   \item{se}{Numeric vector of standard errors for all estimated coefficients (if Hessian computation succeeds).}
   \item{mu_degree, sigma_degree, epsilon_degree}{The polynomial degrees used for each parameter.}
   \item{result}{Complete output from the \code{optim} function, including convergence information,
@@ -97,10 +105,8 @@ from the Box Cox family of functions. In contrast to Box Cox, Sinh-Arcsinh can m
 including zero and negativ values.
 }
 \details{
-This implementation uses the Jones & Pewsey (2009) parameterization of the
-Sinh-Arcsinh distribution. While similar to the GAMLSS implementation,
-minor numerical differences may exist. The practical impact on norm score
-modeling is negligible.
+This implementation uses the Jones & Pewsey (2009) parameterization of the Sinh-Arcsinh distribution.
+Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm.
 
 \subsection{The Sinh-Arcsinh Distribution}{
 The ShaSh distribution is defined by the transformation:
@@ -113,18 +119,6 @@ This transformation provides:
   \item sigma: Scale parameter (similar to standard deviation)
   \item epsilon: Skewness parameter (epsilon = 0 for symmetry)
   \item delta: Tail weight parameter (delta = 1 for normal-like tails)
-}
-}
-
-
-\subsection{Model Fitting}{
-Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm. The function
-includes several robustness features:
-\itemize{
-  \item Automatic parameter bounds to prevent numerical overflow
-  \item Multiple starting values if initial optimization fails
-  \item Fallback optimization settings for difficult convergence cases
-  \item Comprehensive convergence diagnostics
 }
 }
 
@@ -149,8 +143,8 @@ a good balance of flexibility and parsimony.
     Predictions outside the observed age range should be made cautiously.
   \item If convergence fails, try: (1) reducing polynomial degrees, (2) adjusting the delta parameter,
     (3) providing custom control parameters, or (4) checking for data quality issues.
-  \item The tail weight parameter delta is fixed across ages in this implementation. For applications
-    where tail behavior changes substantially with age, consider extending the model to include delta(age).
+  \item The tail weight parameter delta is fixed across ages by default. For applications
+    where tail behavior changes substantially with age, consider setting the delta_degree paramerer to 1 or 2.
 }
 }
 \examples{
@@ -166,6 +160,16 @@ model_complex <- cnorm.shash(
   sigma_degree = 3,   # Changing variability pattern
   epsilon_degree = 2, # Skewness shifts
   delta = 1.3         # Slightly heavy tails
+)
+
+# Even more complex model, including a polynomial for the delta parameter
+model_complex2 <- cnorm.shash(
+  age = adolescents$age,
+  score = adolescents$vocabulary_score,
+  mu_degree = 4,      # Complex mean trajectory
+  sigma_degree = 3,   # Changing variability pattern
+  epsilon_degree = 2, # Skewness shifts
+  delta_deree = 2     # Quadratic change for the tail weight
 )
 
 # Homogeneous population with light tails
@@ -191,15 +195,8 @@ model_robust <- cnorm.shash(
   delta = 1.5
 )
 
-# Model comparison for delta selection
-models <- list(
-  light = cnorm.shash(age, score, delta = 0.8, plot = FALSE),
-  normal = cnorm.shash(age, score, delta = 1.0, plot = FALSE),
-  heavy = cnorm.shash(age, score, delta = 1.5, plot = FALSE)
-)
-
-# Compare AIC values
-sapply(models, function(m) 2 * length(m$result$par) + 2 * m$result$value)
+# Compare model fit
+compare(model_complex, model_complex2)
 }
 
 }

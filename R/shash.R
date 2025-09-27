@@ -103,7 +103,6 @@ rshash <- function(n, mu = 0, sigma = 1, epsilon = 0, delta = 1) {
 #' @param fixed_delta If not NULL, the delta parameter is fixed to this value
 #' @param y Response vector
 #' @param weights Observation weights
-#' @param delta Fixed tail weight parameter
 #'
 #' @return The negative log-likelihood of the model
 #'
