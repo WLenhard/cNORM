@@ -1525,6 +1525,43 @@ compare <- function(model1, model2,
       panel.grid.minor = element_line(color = "gray95")
     )
 
+  # Information criteria
+  if(inherits(model1, "cnorm")) {
+    ideal.model <- model1$model$ideal.model
+    rss <- model1$model$subsets$rss[ideal.model]
+    n <- nrow(model1$data)
+
+    sigma2 <- rss / (nrow(model1$data) - ideal.model - 1)  # residual variance
+    loglik <- -0.5 * n * (log(2 * pi) + log(sigma2) + 1)
+
+    AIC1 <- -2 * loglik + 2 * ideal.model
+    BIC1 <- model1$model$subsets$bic[ideal.model]
+  } else{
+    n_obs <- attr(model1$result, "N")
+    n_params <- length(model1$result$par)
+    log_likelihood <- -model1$result$value
+    AIC1 <- 2 * n_params - 2 * log_likelihood
+    BIC1 <- n_params * log(n_obs) - 2 * log_likelihood
+  }
+
+  if(inherits(model2, "cnorm")) {
+    ideal.model <- model2$model$ideal.model
+    rss <- model2$model$subsets$rss[ideal.model]
+    n <- nrow(model2$data)
+
+    sigma2 <- rss / (nrow(model2$data) - ideal.model - 1)  # residual variance
+    loglik <- -0.5 * n * (log(2 * pi) + log(sigma2) + 1)
+
+    AIC2 <- -2 * loglik + 2 * ideal.model
+    BIC2 <- model2$model$subsets$bic[ideal.model]
+  } else{
+    n_obs <- attr(model2$result, "N")
+    n_params <- length(model2$result$par)
+    log_likelihood <- -model2$result$value
+    AIC2 <- 2 * n_params - 2 * log_likelihood
+    BIC2 <- n_params * log(n_obs) - 2 * log_likelihood
+  }
+
   if (!is.null(score) & !is.null(age)) {
     # Prepare data for manifest percentiles and fit statistics
     data <- data.frame(age = age, score = score)
@@ -1631,15 +1668,18 @@ compare <- function(model1, model2,
     MAD1 <- mean(abs(data$fitted1 - data$normValue), na.rm = TRUE)
     MAD2 <- mean(abs(data$fitted2 - data$normValue), na.rm = TRUE)
 
+
     # Create and print summary table
     fit_table <- data.frame(
-      Metric = c("R2", "Bias", "RMSE", "MAD"),
-      Model1 = c(R2a, bias1, RMSE1, MAD1),
-      Model2 = c(R2b, bias2, RMSE2, MAD2),
+      Metric = c("R2", "Bias", "RMSE", "MAD", "AIC", "BIC"),
+      Model1 = c(R2a, bias1, RMSE1, MAD1, AIC1, BIC1),
+      Model2 = c(R2b, bias2, RMSE2, MAD2, AIC2, BIC2),
       Difference = c(R2b - R2a,
                      bias2 - bias1,
                      RMSE2 - RMSE1,
-                     MAD2 - MAD1)
+                     MAD2 - MAD1,
+                     AIC2 - AIC1,
+                     BIC2 - BIC1)
     )
 
     # Round values
@@ -1651,6 +1691,25 @@ compare <- function(model1, model2,
     cat("\nNote: Difference = Model2 - Model1\n")
     cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
     cat("      Scale metrics are T scores (scaleSD = 10)\n")
+    cat("      Comparing AIC and BIC is only meaningfull for directly comparing parametric models\n")
+    cat("      with each other, or distribution-free models with each other. \n")
+  }else{
+    # Create and print summary table
+    fit_table <- data.frame(
+      Metric = c("AIC", "BIC"),
+      Model1 = c(AIC1, BIC1),
+      Model2 = c(AIC2, BIC2),
+      Difference = c(AIC2 - AIC1,
+                     BIC2 - BIC1)
+    )
+
+    cat("\nModel Comparison Summary:\n")
+    cat("------------------------\n")
+    print(format(fit_table, justify = "right"), row.names = FALSE)
+    cat("\nNote: Difference = Model2 - Model1\n")
+    cat("      Comparing AIC and BIC is only meaningfull for directly comparing parametric models\n")
+    cat("      with each other, or distribution-free models with each other. \n")
+
   }
 
   return(p)
