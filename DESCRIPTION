@@ -13,7 +13,7 @@ Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
 Description: A comprehensive toolkit for generating continuous test norms in 
     psychometrics and biometrics, and analyzing model fit. The package offers both 
     distribution-free modeling using Taylor polynomials and parametric modeling 
-    using the beta-binomial and the Sinh-Arcsinh distribution. Originally developed
+    using the beta-binomial and the 'Sinh-Arcsinh' distribution. Originally developed
     for achievement tests, it is applicable to a wide range of mental, physical, or 
     other test scores dependent on continuous or discrete explanatory variables. The
     package provides several advantages: It minimizes deviations from representativeness 
