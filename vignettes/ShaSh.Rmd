@@ -1,4 +1,3 @@
-
 ---
 title: "Modelling Psychometric Data with Sinh-Arcsinh Distributions"
 author: "Wolfgang Lenhard & Alexandra Lenhard"
@@ -13,68 +12,77 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  eval = FALSE  # Disabled due to computational intensity
 )
 ```
 
-## Introduction
+# Introduction
 
-The Sinh-Arcsinh (ShaSh) distribution represents a powerful and flexible parametric approach for modeling psychometric norm data across age or other continuous predictors. Unlike traditional approaches that assume normality or require discrete score distributions, the ShaSh distribution can accommodate a wide range of distributional shapes. It was introduced by Jones and Pewsey (2009) as a generalization of the normal distribution that provides independent control over skewness and kurtosis. This flexibility makes it particularly well-suited for applications where score distributions often exhibit floor effects, ceiling effects, varying degrees of skewness, or heterogeneous populations with different tail behaviors. In contrast to Box Cox distributions, ShaSh can handle zeros and negative values as well.
+The Sinh-Arcsinh (ShaSh) distribution represents a powerful and flexible parametric approach for modeling psychometric norm data across age or other continuous predictors. Unlike traditional approaches that assume normality or require discrete score distributions, the ShaSh distribution can accommodate a wide range of distributional shapes while maintaining mathematical tractability.
 
-The ShaSh distribution was introduced to cNORM in version 3.5. In this vignette, we present the mathematical foundation of the ShaSh distribution, discuss its advantages and prerequisites, demonstrate practical modeling applications, and provide guidance for choosing between different distributional approaches.
+The ShaSh distribution was introduced by Jones and Pewsey (2009) as a generalization of the normal distribution that provides independent control over skewness and kurtosis. This flexibility makes it particularly well-suited for psychometric applications where score distributions often exhibit floor effects, ceiling effects, varying degrees of skewness, or heterogeneous populations with different tail behaviors. In contrast to Box-Cox transformations, ShaSh can handle zero and negative values without requiring data modifications.
 
-
-## Mathematical Foundation
-
-The ShaSh distribution is based on a two-step transformation of the standard normal distribution, allowing independent control over distributional shape and location-scale characteristics. Is is a two-step approach, which separates shape control (Step 1) from location-scale adjustment (Step 2).
+The ShaSh distribution was introduced to cNORM in version 3.5, expanding the toolkit for continuous norming beyond distribution-free Taylor polynomial methods and beta-binomial approaches. In this vignette, we present the mathematical foundation of the ShaSh distribution, discuss its advantages and prerequisites, demonstrate practical modeling applications, and provide guidance for choosing between different distributional approaches.
 
 
-**Step 1: Shape Transformation**
+# Mathematical Foundation
 
-If Y follows a standard normal distribution N(0,1), then the ShaSh-transformed variable Z is defined as:
+## The Sinh-Arcsinh Transformation
 
-\[Z = \sinh(\delta \cdot \text{arcsinh}(Y) + \epsilon)\]
+The ShaSh distribution is based on a two-step transformation of the standard normal distribution, allowing independent control over distributional shape and location-scale characteristics. This two-step approach separates shape control (Step 1) from location-scale adjustment (Step 2), enabling flexible modeling while preserving mathematical properties. If Y follows a standard normal distribution N(0,1), then the ShaSh-transformed variable Z is defined as (Step 1):
 
-This transformation controls the distributional shape through the parameters ε (skewness) and δ (tail weight).
+$$Z = \sinh(\delta \cdot \text{arcsinh}(Y) + \epsilon)$$
 
+This transformation controls the distributional shape through the parameters ε (skewness) and δ (tail weight). The final ShaSh-distributed variable X is obtained by applying location and scale parameters (Step 2):
 
-**Step 2: Location-Scale Transformation**
-
-The final ShaSh-distributed variable X is obtained by applying location and scale parameters:
-
-\[X = \mu + \sigma \cdot Z\]
-
-**Complete Transformation:**
-
-\[Y \sim N(0,1) \rightarrow Z = \sinh(\delta \cdot \text{arcsinh}(Y) + \epsilon) \rightarrow X = \mu + \sigma \cdot Z\]
+$$X = \mu + \sigma \cdot Z$$
 
 where:
 
 - **μ** (mu): location parameter, shifts the distribution horizontally (similar to mean)
-
 - **σ** (sigma): scale parameter (σ > 0), controls the spread of the distribution (similar to standard deviation)  
-
 - **ε** (epsilon): skewness parameter (ε = 0 for symmetry, ε > 0 for right skew, ε < 0 for left skew)
-
 - **δ** (delta): tail weight parameter (δ = 1 produces normal-like tails, δ > 1 produces heavier tails, δ < 1 produces lighter tails)
 
 
-### Modelling Parameters over Age
+The probability density function involves:
+
+$$f(x|\mu,\sigma,\epsilon,\delta) = \frac{\delta}{\sigma\sqrt{2\pi}} \cdot \frac{\cosh(\delta \cdot \text{arcsinh}(z) + \epsilon)}{\sqrt{1 + z^2}} \cdot \exp\left(-\frac{1}{2}[\sinh(\delta \cdot \text{arcsinh}(z) + \epsilon)]^2\right)$$
+
+where $$z = \frac{x - \mu}{\sigma}$$
+
+The cumulative distribution function (CDF) does not have a closed-form expression but can be computed numerically. For a given value x, the CDF is:
+
+$$F(x|\mu,\sigma,\epsilon,\delta) = P(X \leq x) = \Phi[\sinh(\delta \cdot \text{arcsinh}(z) + \epsilon)]$$
+
+where Φ is the standard normal CDF and z = (x - μ)/σ. The quantile function (inverse CDF) can be expressed as:
+
+$$Q(p|\mu,\sigma,\epsilon,\delta) = \mu + \sigma \cdot \sinh\left(\frac{\text{arcsinh}(\Phi^{-1}(p)) - \epsilon}{\delta}\right)$$
+
+
+## Modeling the Sinh-Arcsinh over Age
 
 In cNORM's ShaSh implementation, we model three of the four parameters as polynomial functions of standardized age:
 
-\[\mu(\text{age}) = \alpha_0 + \alpha_1 \cdot \text{age}_{std} + \alpha_2 \cdot \text{age}_{std}^2 + \ldots + \alpha_m \cdot \text{age}_{std}^m\]
+$$\mu(\text{age}) = \alpha_0 + \alpha_1 \cdot \text{age}_{std} + \alpha_2 \cdot \text{age}_{std}^2 + \ldots + \alpha_m \cdot \text{age}_{std}^m$$
 
-\[\log(\sigma(\text{age})) = \beta_0 + \beta_1 \cdot \text{age}_{std} + \beta_2 \cdot \text{age}_{std}^2 + \ldots + \beta_s \cdot \text{age}_{std}^s\]
+$$\log(\sigma(\text{age})) = \beta_0 + \beta_1 \cdot \text{age}_{std} + \beta_2 \cdot \text{age}_{std}^2 + \ldots + \beta_s \cdot \text{age}_{std}^s$$
 
-\[\epsilon(\text{age}) = \gamma_0 + \gamma_1 \cdot \text{age}_{std} + \gamma_2 \cdot \text{age}_{std}^2 + \ldots + \gamma_t \cdot \text{age}_{std}^t\]
+$$\epsilon(\text{age}) = \gamma_0 + \gamma_1 \cdot \text{age}_{std} + \gamma_2 \cdot \text{age}_{std}^2 + \ldots + \gamma_t \cdot \text{age}_{std}^t$$
 
-The tail weight parameter δ is typically held constant across ages in the current implementation, though it can be adjusted to reflect population characteristics.
+The tail weight parameter δ is held constant across ages in the current implementation, though it can be adjusted to reflect population characteristics. Age is standardized as: $\text{age}_{std} = \frac{\text{age} - \overline{\text{age}}}{\text{SD}(\text{age})}$ for numerical stability during optimization.
+
+Parameters are estimated using maximum likelihood estimation. The log-likelihood function for N observations is:
+
+$$L(\boldsymbol{\theta} | \mathbf{X}, \mathbf{Age}) = \sum_{i=1}^N \log[f(X_i | \mu(Age_i), \sigma(Age_i), \epsilon(Age_i), \delta)]$$
+
+where f(·) is the ShaSh probability density function and $\boldsymbol{\theta}$ represents all model parameters.
 
 
-## Advantages and Applications
+# Advantages and Applications
 
-Key advantages of the Sinh-Arcsinh distribution include:
+## Key Advantages
 
 **1. Distributional Flexibility**: The ShaSh distribution can model symmetric and asymmetric distributions with varying tail weights, making it suitable for diverse psychometric applications.
 
@@ -82,102 +90,117 @@ Key advantages of the Sinh-Arcsinh distribution include:
 
 **3. Zero and Negative Values**: ShaSh can accommodate scores of zero and negative values without transformation, unlike Box-Cox approaches that require strictly positive data.
 
+**4. Independent Parameter Control**: Skewness (ε) and tail weight (δ) can be controlled independently, allowing precise modeling of distributional characteristics.
 
-It is particularly well-suited for:
+
+## Optimal Applications
+
+The ShaSh distribution is particularly well-suited for:
 
 - **Continuous performance measures** (reaction times, achievement scores with decimal precision)
 - **Tests with floor or ceiling effects** where skewness varies across age groups
+- **Heterogeneous populations** with varying degrees of individual differences
 - **Change or difference scores** that may include negative values
 - **Adaptive tests** or measures with variable stopping rules
 - **Large-scale assessments** where distributional assumptions are complex
+- **Developmental studies** where distribution shape changes systematically with age
 
 
-## Prerequisites and Considerations
+# Prerequisites and Considerations
 
-### Data Requirements
+## Data Requirements
 
-**Continuous Trajectories**: Scores should exhibit systematic (though not necessarily monotonic) development across the predictor variable.
+**Systematic Development**: Test scores should exhibit systematic (though not necessarily monotonic) development across the predictor variable. The ShaSh model can capture complex non-linear relationships through polynomial terms.
 
-**Sufficient Sample Size**: We recommend a minimum of 100 cases per major age group, with larger samples needed for higher polynomial degrees or complex developmental patterns. There is - however - no clear
-prove of this rule of thumb available yet, but these case number worked in Lenhard et al. (2019).
+**Sufficient Sample Size**: We recommend a minimum of 100 cases per major age group, with larger samples needed for higher polynomial degrees or complex developmental patterns. While empirical validation of this rule is ongoing, these sample sizes have proven effective in previous norming studies (Lenhard et al., 2019).
 
-**Score Characteristics**: While ShaSh handles continuous scores optimally, it can also model discrete scores effectively, especially when the number of possible values is large.
+**Score Characteristics**: While ShaSh handles continuous scores optimally, it can also model discrete scores effectively, especially when the number of possible values is large (> 20).
 
-**Representativeness**: The sample should be representative of the target population, though post-stratification weighting can help address moderate deviations.
+**Representativeness**: The sample should be representative of the target population, though post-stratification weighting can help address moderate deviations from representativeness.
 
-### Model Selection Considerations
+
+## Model Selection Considerations
 
 **Polynomial Degrees**: Choose polynomial degrees based on:
 
 - Theoretical expectations about developmental trajectories
+- Sample size (higher degrees require more data to avoid overfitting)
+- Model comparison criteria (AIC, BIC, cross-validation)
+- Visual inspection of fitted curves for realistic patterns
 
-- Sample size (higher degrees require more data)
+**Delta Parameter Selection**: The tail weight parameter should reflect population characteristics:
 
-- Model comparison criteria (AIC, BIC)
+- δ = 0.7-0.9: Homogeneous populations, selected samples
+- δ = 1.0: General population samples with normal-like variability
+- δ = 1.2-2.0: Heterogeneous populations with high individual differences
 
-- Visual inspection of fitted curves
-
-**Delta Parameter**: The tail weight parameter should reflect population characteristics:
-
-- δ = 0.7-0.9: Homogeneous, places emphasis on the central body of the distributions
-
-- δ = 1.0: General population samples
-
-- δ = 1.2-2.0: Heterogeneous populations, emphases tail behavior
+**Convergence Considerations**: Complex models may require adjusted optimization parameters. The function includes automatic fallback strategies for difficult convergence cases.
 
 
-## Modeling Example
+# Modeling Example
 
-We demonstrate ShaSh modeling using the PPVT-4 vocabulary development dataset. This example showcases the distribution's ability to handle the complex developmental patterns and distributional characteristics typical of psychometric data. The code is not executed here due to computational intensity, but can be run in an R environment with the cNORM package installed.
+We demonstrate ShaSh modeling using the PPVT-4 vocabulary development dataset, which showcases the distribution's ability to handle complex developmental patterns and distributional characteristics typical of psychometric data. The code examples are provided for reference but are not executed in this vignette due to computational intensity.
 
-### Data Exploration
+## Data Exploration
 
-```{r fig0, fig.height = 4, fig.width = 7, eval=FALSE}
+```{r fig0, fig.height = 4, fig.width = 7}
 library(cNORM)
 
 # Examine the data structure and distribution
 str(ppvt)
 plot(ppvt$age, ppvt$raw, main="PPVT Raw Scores by Age", 
-     xlab="Age", ylab="Raw Score", pch=16, alpha=0.6)
+     xlab="Age", ylab="Raw Score", pch=16, col=rgb(0,0,0,0.3))
 
-# Examine distributional characteristics by age groups
+# Examine distributional characteristics
 hist(ppvt$raw, breaks=30, main="Distribution of Raw Scores", 
-     xlab="Raw Score", probability=TRUE)
+     xlab="Raw Score", probability=TRUE, col="lightblue")
 ```
 
-The vocabulary development data shows the characteristic curvilinear growth pattern with potential distributional changes across age groups, making it an ideal candidate for ShaSh modeling.
+The vocabulary development data exhibits characteristic curvilinear growth patterns with potential distributional changes across age groups. The raw score distribution may show skewness or varying tail weights, making it an ideal candidate for ShaSh modeling.
 
-### Basic Model Fitting
+## Basic Model Fitting
 
-```{r fig1, fig.height = 4, fig.width = 7, eval=FALSE}
-# Fit ShaSh model with default settings. 
-# The function automatically displays percentile plots.
+```{r fig1, fig.height = 4, fig.width = 7}
+# Fit ShaSh model with default settings
+# Default: mu_degree=3, sigma_degree=2, epsilon_degree=2, delta=1
 model.shash <- cnorm.shash(age = ppvt$age, score = ppvt$raw)
 
+# The function automatically displays percentile plots
+print(model.shash)
 ```
 
-The model uses reasonable default values for polynomial degrees and provides visual feedback through percentile plots. The output shows the fitted parameters and convergence information. In case of more
-complex data patterns, consider adjusting polynomial degrees of mu, sigma and epsilon and changing the delta parameter.
+The model uses reasonable default polynomial degrees and provides immediate visual feedback through percentile plots. The output includes fitted parameters, convergence information, and basic model statistics.
 
-### Model Diagnostics
+## Model Diagnostics
 
-```{r, eval=FALSE}
-# Obtain detailed diagnostics
+```{r}
+# Obtain comprehensive diagnostics
 summary(model.shash, age = ppvt$age, score = ppvt$raw)
 ```
 
-The summary provides comprehensive fit statistics, parameter estimates with significance tests, and model comparison metrics. Pay attention to the R-squared values and examine residual patterns for model adequacy.
+The summary provides:
 
-### Custom Model Specifications
+- Model fit statistics (log-likelihood, AIC, BIC, R²)
+- Parameter estimates with standard errors and significance tests
+- Convergence diagnostics
+- Separate tables for location, scale, and skewness parameters
 
-For more complex developmental patterns, you can adjust the polynomial degrees and tail weight parameter:
+Key diagnostic indicators:
 
-```{r, eval=FALSE}
-# Fit model with custom parameters
+- **Convergence**: Should be successful (code = 0). If not, please inspect modell visually.
+- **R²**: Correlation between fitted and manifest percentiles (> 0.95 desirable)
+- **Parameter significance**: Check z-values and p-values for parameter importance
+
+## Custom Model Specifications
+
+For datasets with complex patterns, adjust polynomial degrees and distributional parameters:
+
+```{r fig2, eval=FALSE}
+# Example with more complex parameterization (not executed due to computation time)
 model.custom <- cnorm.shash(age = ppvt$age, score = ppvt$raw,
-                           mu_degree = 2,        # Quadratic location pattern
-                           sigma_degree = 1,     # Variability changing linearly  
-                           epsilon_degree = 1,   # Skewness changing linearly
+                           mu_degree = 4,        # More flexible location pattern
+                           sigma_degree = 3,     # Complex variability changes  
+                           epsilon_degree = 2,   # Age-varying skewness
                            delta = 1.2)          # Slightly heavy tails
 
 # Compare models
@@ -185,40 +208,63 @@ compare(model.shash, model.custom, age = ppvt$age, score = ppvt$raw,
         title = "ShaSh Model Comparison")
 ```
 
-### Weighted Modeling
+**Note**: Higher polynomial degrees increase model flexibility but may lead to overfitting with insufficient data. Always validate complex models through visual inspection and cross-validation.
 
-ShaSh models support post-stratification weighting, similar to other cNORM approaches:
+## Simplified Alternative
 
-```{r, eval=FALSE}
-# Calculate weights for representative sampling
+```{r fig2alt, fig.height = 4, fig.width = 7}
+# More conservative parameterization for demonstration
+model.simple <- cnorm.shash(age = ppvt$age, score = ppvt$raw,
+                           mu_degree = 2,        # Quadratic location pattern
+                           sigma_degree = 1,     # Linear variability change  
+                           epsilon_degree = 1,   # Linear skewness change
+                           delta = 1.1)          # Slightly heavy tails
+
+# This model balances flexibility with stability
+```
+
+## Post-Stratification and Weighting
+
+ShaSh models support weighted estimation for representative sampling:
+
+```{r fig3, fig.height = 4, fig.width = 7}
+# Calculate post-stratification weights
 margins <- data.frame(variables = c("sex", "sex", "migration", "migration"),
                      levels = c(1, 2, 0, 1),
                      share = c(.52, .48, .7, .3))
 
 weights <- computeWeights(ppvt, margins)
 
-# Fit weighted model
-model.weighted <- cnorm.shash(ppvt$age, ppvt$raw, weights = weights,
-                             title = "Weighted ShaSh Model")
+# Fit weighted ShaSh model
+model.weighted <- cnorm.shash(ppvt$age, ppvt$raw, weights = weights)
+
+# Compare weighted vs. unweighted
+compare(model.shash, model.weighted, age = ppvt$age, score = ppvt$raw,
+        title = "Unweighted vs. Weighted ShaSh Models")
 ```
 
-## Norm Score Generation
+# Norm Score Generation
 
-### Individual Predictions
+## Individual Predictions
 
-```{r, eval=FALSE}
-# Generate norm scores for specific ages and raw scores
+```{r}
+# Generate norm scores for specific age-score combinations
 ages <- c(10.25, 10.75, 11.25, 11.75)
 raw_scores <- c(180, 185, 190, 195)
 
 norm_scores <- predict(model.shash, ages, raw_scores)
-print(data.frame(Age = ages, Raw_Score = raw_scores, Norm_Score = norm_scores))
+prediction_table <- data.frame(
+  Age = ages, 
+  Raw_Score = raw_scores, 
+  Norm_Score = round(norm_scores, 1)
+)
+print(prediction_table)
 ```
 
-### Comprehensive Norm Tables
+## Comprehensive Norm Tables
 
-```{r, eval=FALSE}
-# Generate detailed norm tables
+```{r}
+# Generate detailed norm tables for multiple ages
 tables <- normTable.shash(model.shash, 
                          ages = c(10.25, 10.75), 
                          start = 150, 
@@ -227,73 +273,122 @@ tables <- normTable.shash(model.shash,
                          CI = 0.95, 
                          reliability = 0.94)
 
-# Display portion of first table
+# Display sample from first table
 head(tables[[1]], 10)
 ```
 
-The norm tables provide raw scores, probabilities, percentiles, z-scores, norm scores, and confidence intervals when reliability is specified.
+The norm tables provide:
 
-## Model Comparison and Selection
+- **x**: Raw scores
+- **Px**: Probability density values
+- **Pcum**: Cumulative probabilities
+- **Percentile**: Percentile ranks (0-100)
+- **z**: Standardized z-scores  
+- **norm**: Norm scores in specified scale
+- **Confidence intervals**: When reliability is specified
 
-### Comparing Different Approaches
 
-```{r, eval=FALSE}
-# Fit different model types for comparison
+# Model Comparison and Selection
+
+## Comparing Distributional Approaches
+
+```{r fig4, fig.height = 4, fig.width = 7}
+# Compare ShaSh with other approaches
 model.bb <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 model.taylor <- cnorm(group = ppvt$group, raw = ppvt$raw, age = ppvt$age)
 
-# Visual comparison
+# Visual comparisons
 compare(model.shash, model.bb, age = ppvt$age, score = ppvt$raw,
-        title = "ShaSh vs. Beta-Binomial Comparison")
+        title = "ShaSh vs. Beta-Binomial")
 
 compare(model.taylor, model.shash, age = ppvt$age, score = ppvt$raw,
-        title = "Distribution free vs. ShaSh Comparison")
+        title = "Distribution-Free vs. ShaSh")
 ```
 
-### Selection Criteria
+## Decision Framework
 
-When choosing between modeling approaches, consider:
+The different continuous models have advantages for specific use cases, with the distribution free approach (Taylor polynomials) being the most flexible, the beta-binomial approach being optimal for discrete item counts, and ShaSh being ideal for continuous scores with complex distributional shapes.
 
-**Use ShaSh when:**
+Use ShaSh models for
 
-- Scores are continuous or have many possible values
-
-- Distributions show complex skewness patterns across age
-
-- Floor/ceiling effects are present
-
-- Population heterogeneity varies with age
-
-- Zero or negative scores are possible
+- continuous scores with decimal precision
+- complex skewness patterns that change across age
+- floor or ceiling effects requiring flexible shape modeling
+- zero or negative scores are present
 
 
-**Use Beta-Binomial when:**
+Use Beta-Binomial models for
 
-- Scores represent discrete item counts
-
-- Clear maximum score exists
-
-- Test is unspeeded with binary scoring
-
-- Typical use case are 1PL IRT based psychometric tests
+- discrete item counts from binary scoring
+- fixed maximum score (number of test items)
+- unspeeded tests with homogeneous item difficulties
+- 1PL IRT-based psychometric instruments
+- small to moderate number of possible scores
 
 
-**Use distribution free cNORM models when:**
+Use distribution-free (Taylor Polynomial) models when
 
-- Maximum flexibility is needed
-
-- Distributional assumptions are uncertain
-
-- Distribution free models based on Taylor polynomials are in most cases very 
-  efficient and show a very good fit. They are the preferable approach, when no
-  specific distributional characteristics are expected.
+- maximum flexibility is paramount
+- no strong distributional assumptions can be made
+- quick implementation is needed and manual adjustment is desired
 
 
+In selecting models, please compare models using:
 
-## References
+1. Information criteria: AIC, BIC (lower is better)
+2. Fit statistics: R², RMSE, bias
+3. Visual inspection: Smoothness, realism of percentile curves
+4. Cross-validation: Out-of-sample prediction accuracy
+5. Theoretical appropriateness: Match between model assumptions and data characteristics
+
+
+## Computational Considerations
+
+### Performance Tips
+
+1. **Start simple**: Use default parameters initially, then increase complexity as needed
+2. **Monitor convergence**: Check convergence codes and adjust control parameters if necessary
+3. **Validate visually**: Always inspect percentile plots for realistic patterns
+4. **Use appropriate sample sizes**: Larger samples for higher polynomial degrees
+5. **Consider data preprocessing**: Remove extreme outliers that might affect convergence
+
+
+### Troubleshooting
+
+**Convergence Issues and Numerical Instability:**
+
+- Reduce polynomial degrees
+- Adjust delta parameter
+- Use simpler control parameters
+- Check for data quality issues
+- Pay attention to warning messages during optimization
+
+
+**Overfitting Signs:**
+
+- Wavy, unrealistic percentile curves
+- Very high polynomial degrees relative to sample size
+- Poor out-of-sample prediction
+
+
+# Conclusion
+
+The Sinh-Arcsinh distribution provides a sophisticated yet practical framework for modeling psychometric norm data. Its ability to independently control location, scale, skewness, and tail weight makes it particularly valuable for applications where traditional parametric approaches are inadequate due to distributional complexity.
+
+**Best practices for ShaSh modeling:**
+
+1. Carefully assess data characteristics before model selection
+2. Use appropriate sample sizes for model complexity
+3. Validate models through visually and via statistical indicators (R2, AIC, Bias)
+4. Compare alternative distributional assumptions. Is distribution-free or beta-binomial more appropriate?
+5. Document model selection rationale
+
+# References
 
 Jones, M. C., & Pewsey, A. (2009). Sinh-arcsinh distributions. *Biometrika*, 96(4), 761-780.
 
-Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. *PLoS ONE*, 14(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279
+Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. *PLoS ONE*, 14(9), e0222279. https://doi.org/10.1371/journal.pone.0222279
+
+Lenhard, W., Lenhard, A., & Gary, S. (2025). cNORM: Continuous norming. R package version 3.5.0. https://CRAN.R-project.org/package=cNORM
 
 Rigby, R. A., & Stasinopoulos, D. M. (2005). Generalized additive models for location, scale and shape. *Journal of the Royal Statistical Society: Series C*, 54(3), 507-554.

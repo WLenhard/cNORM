@@ -10,7 +10,7 @@ cnorm.shash(
   weights = NULL,
   mu_degree = 3,
   sigma_degree = 2,
-  epsilon_degree = 2,
+  epsilon_degree = 1,
   delta = 1,
   control = NULL,
   scale = "T",
@@ -41,9 +41,7 @@ Default is 2. This controls how the variability (spread) of scores changes with 
 Lower degrees are often sufficient as variability typically changes more smoothly than location.}
 
 \item{epsilon_degree}{Integer specifying the degree of the polynomial for modeling the skewness parameter ε(age).
-Default is 2. This controls how the asymmetry of the distribution changes with age:
-Note: ε = 0 produces a symmetric distribution, ε > 0 creates right skew (longer upper tail),
-ε < 0 creates left skew (longer lower tail).}
+Default is 1. This controls how the asymmetry of the distribution changes with age.}
 
 \item{delta}{Fixed tail weight parameter (must be > 0). Default is 1. This parameter controls the
 heaviness of the distribution tails and is kept constant across all ages in this implementation.
@@ -101,6 +99,11 @@ including zero and negativ values.
 \details{
 Caution! The fitting procedure is ressource intensive an can take some time.
 
+
+This implementation uses the Jones & Pewsey (2009) parameterization of the
+Sinh-Arcsinh distribution. While similar to the GAMLSS implementation,
+minor numerical differences may exist. The practical impact on norm score
+modeling is negligible.
 
 \subsection{The Sinh-Arcsinh Distribution}{
 The ShaSh distribution is defined by the transformation:

@@ -192,6 +192,11 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, y, weights = 
 #'     log-likelihood value, and other optimization details.}
 #'
 #' @details
+#' This implementation uses the Jones & Pewsey (2009) parameterization of the
+#' Sinh-Arcsinh distribution. While similar to the GAMLSS implementation,
+#' minor numerical differences may exist. The practical impact on norm score
+#' modeling is negligible.
+#'
 #' \subsection{The Sinh-Arcsinh Distribution}{
 #' The ShaSh distribution is defined by the transformation:
 #' \deqn{Z = \sinh(\delta \cdot \text{arcsinh}(Y) + \epsilon)}
