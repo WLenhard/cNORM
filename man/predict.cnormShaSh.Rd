@@ -24,7 +24,7 @@ A numeric vector of norm scores.
 This function calculates norm scores based on raw scores, age, and a fitted cnormShaSh model.
 }
 \details{
-The function predicts the ShaSh distribution parameters (μ, σ, ε, δ) for each age
+The function predicts the ShaSh distribution parameters (mu, sigma, epsilon, delta) for each age
 using the provided model. It then calculates the cumulative probability for each
 raw score given these parameters using the continuous ShaSh distribution. Finally,
 it converts these probabilities to the norm scale specified in the model.

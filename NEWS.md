@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.0
-Date: 26.09.2025
+Date: 26.09.2025 - in progress
 
 
 Changes:
@@ -17,6 +17,7 @@ Changes:
      plot.cnormShaSh, predict.cnormShaSh and diagnostics.shash
 *    updated all generic function to handel cnormShaSh objects
 *    vignette on ShaSh modelling added
+*    Compare function now includes AIC and BIC information
 
 
 ### Version in 3.4.0

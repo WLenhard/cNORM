@@ -1691,8 +1691,7 @@ compare <- function(model1, model2,
     cat("\nNote: Difference = Model2 - Model1\n")
     cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
     cat("      Scale metrics are T scores (scaleSD = 10)\n")
-    cat("      Comparing AIC and BIC is only meaningfull for directly comparing parametric models\n")
-    cat("      with each other, or distribution-free models with each other. \n")
+    cat("      AIC and BIC should only be used when comparing models of the same type.\n")
   }else{
     # Create and print summary table
     fit_table <- data.frame(
@@ -1707,9 +1706,7 @@ compare <- function(model1, model2,
     cat("------------------------\n")
     print(format(fit_table, justify = "right"), row.names = FALSE)
     cat("\nNote: Difference = Model2 - Model1\n")
-    cat("      Comparing AIC and BIC is only meaningfull for directly comparing parametric models\n")
-    cat("      with each other, or distribution-free models with each other. \n")
-
+    cat("      AIC and BIC should only be used when comparing models of the same type.\n")
   }
 
   return(p)

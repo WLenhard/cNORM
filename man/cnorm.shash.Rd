@@ -26,7 +26,7 @@ The value range is unresticted and it can include zeros and negative values.}
 \item{weights}{An optional numeric vector of weights for each observation.
 Useful for incorporating sampling weights. If NULL (default), all observations are weighted equally.}
 
-\item{mu_degree}{Integer specifying the degree of the polynomial for modeling the location parameter μ(age).
+\item{mu_degree}{Integer specifying the degree of the polynomial for modeling the location parameter mu(age).
 Default is 3. Higher degrees allow more flexible modeling of how the central tendency changes with age,
 but may lead to overfitting with small samples. Common choices:
 \itemize{
@@ -36,19 +36,19 @@ but may lead to overfitting with small samples. Common choices:
   \item 4+: Higher-order changes (use cautiously, mainly for large samples)
 }}
 
-\item{sigma_degree}{Integer specifying the degree of the polynomial for modeling the scale parameter σ(age).
+\item{sigma_degree}{Integer specifying the degree of the polynomial for modeling the scale parameter sigma(age).
 Default is 2. This controls how the variability (spread) of scores changes with age.
 Lower degrees are often sufficient as variability typically changes more smoothly than location.}
 
-\item{epsilon_degree}{Integer specifying the degree of the polynomial for modeling the skewness parameter ε(age).
+\item{epsilon_degree}{Integer specifying the degree of the polynomial for modeling the skewness parameter epsilon(age).
 Default is 1. This controls how the asymmetry of the distribution changes with age.}
 
 \item{delta}{Fixed tail weight parameter (must be > 0). Default is 1. This parameter controls the
 heaviness of the distribution tails and is kept constant across all ages in this implementation.
 \itemize{
-  \item δ = 1: Normal-like tail behavior (baseline)
-  \item δ > 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
-  \item δ < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
+  \item delta = 1: Normal-like tail behavior (baseline)
+  \item delta > 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
+  \item delta < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
 }}
 
 \item{control}{An optional list of control parameters passed to the \code{optim} function for
@@ -75,11 +75,11 @@ Default is TRUE.}
 }
 \value{
 An object of class "cnormShaSh" containing the fitted model results. This is a list with components:
-  \item{mu_est}{Numeric vector of estimated coefficients for the location parameter μ(age).
+  \item{mu_est}{Numeric vector of estimated coefficients for the location parameter mu(age).
     The first coefficient is the intercept, subsequent coefficients correspond to polynomial terms.}
-  \item{sigma_est}{Numeric vector of estimated coefficients for the scale parameter log(σ(age)).
-    Note: These are coefficients for log(σ) to ensure σ > 0.}
-  \item{epsilon_est}{Numeric vector of estimated coefficients for the skewness parameter ε(age).}
+  \item{sigma_est}{Numeric vector of estimated coefficients for the scale parameter log(sigma(age)).
+    Note: These are coefficients for log(sigma) to ensure sigma > 0.}
+  \item{epsilon_est}{Numeric vector of estimated coefficients for the skewness parameter epsilon(age).}
   \item{delta}{The fixed tail weight parameter value used in fitting.}
   \item{se}{Numeric vector of standard errors for all estimated coefficients (if Hessian computation succeeds).}
   \item{mu_degree, sigma_degree, epsilon_degree}{The polynomial degrees used for each parameter.}
@@ -97,9 +97,6 @@ from the Box Cox family of functions. In contrast to Box Cox, Sinh-Arcsinh can m
 including zero and negativ values.
 }
 \details{
-Caution! The fitting procedure is ressource intensive an can take some time.
-
-
 This implementation uses the Jones & Pewsey (2009) parameterization of the
 Sinh-Arcsinh distribution. While similar to the GAMLSS implementation,
 minor numerical differences may exist. The practical impact on norm score
@@ -107,15 +104,15 @@ modeling is negligible.
 
 \subsection{The Sinh-Arcsinh Distribution}{
 The ShaSh distribution is defined by the transformation:
-\deqn{Z = \sinh(\delta \cdot \text{arcsinh}(Y) + \epsilon)}
-where Y ~ N(0,1), and the final variable is X = μ + σZ.
+\deqn{X = \mu + \sigma \cdot \sinh\left(\frac{\text{arcsinh}(Y) - \epsilon}{\delta}\right)}
+where Y is a standard normal variable, Y ~ N(0,1).
 
 This transformation provides:
 \itemize{
-  \item μ: Location parameter (similar to mean)
-  \item σ: Scale parameter (similar to standard deviation)
-  \item ε: Skewness parameter (ε = 0 for symmetry)
-  \item δ: Tail weight parameter (δ = 1 for normal-like tails)
+  \item mu: Location parameter (similar to mean)
+  \item sigma: Scale parameter (similar to standard deviation)
+  \item epsilon: Skewness parameter (epsilon = 0 for symmetry)
+  \item delta: Tail weight parameter (delta = 1 for normal-like tails)
 }
 }
 
@@ -152,8 +149,8 @@ a good balance of flexibility and parsimony.
     Predictions outside the observed age range should be made cautiously.
   \item If convergence fails, try: (1) reducing polynomial degrees, (2) adjusting the delta parameter,
     (3) providing custom control parameters, or (4) checking for data quality issues.
-  \item The tail weight parameter δ is fixed across ages in this implementation. For applications
-    where tail behavior changes substantially with age, consider extending the model to include δ(age).
+  \item The tail weight parameter delta is fixed across ages in this implementation. For applications
+    where tail behavior changes substantially with age, consider extending the model to include delta(age).
 }
 }
 \examples{
