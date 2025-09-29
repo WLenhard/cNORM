@@ -34,10 +34,10 @@ export(
 	plotNorm,
 	plotCnorm,
 	plot.cnormBetaBinomial,
-	plot.cnormShaSh,
+	plot.cnormShash,
 	predictNorm,
 	predict.cnormBetaBinomial,
-	predict.cnormShaSh,
+	predict.cnormShash,
 	predictRaw,
 	prepareData,
 	printSubset,
@@ -50,7 +50,7 @@ export(
 	standardize,
 	modelSummary,
 	summary.cnormBetaBinomial,
-	summary.cnormShaSh,
+	summary.cnormShash,
 	getNormScoreSE,
 	weighted.rank,
 	weighted.quantile,
@@ -75,6 +75,6 @@ S3method(predict, cnormBetaBinomial2)
 S3method(plot, cnormBetaBinomial2)
 S3method(summary, cnormBetaBinomial2)
 
-S3method(predict, cnormShaSh)
-S3method(plot, cnormShaSh)
-S3method(summary, cnormShaSh)
+S3method(predict, cnormShash)
+S3method(plot, cnormShash)
+S3method(summary, cnormShash)

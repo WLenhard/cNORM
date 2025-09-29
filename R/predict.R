@@ -208,7 +208,7 @@ normTable <- function(A,
 
   if(inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")){
     return(normTable.betabinomial(model, A, CI = CI, reliability = reliability))
-  }else if(inherits(model, "cnormShaSh")){
+  }else if(inherits(model, "cnormShaSh")||inherits(model, "cnormShash")){
     return(normTable.shash(model, A, minRaw, maxRaw, step, CI = CI, reliability = reliability))
   } else if(inherits(model, "cnorm")){
     model <- model$model

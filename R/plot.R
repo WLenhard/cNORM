@@ -448,7 +448,7 @@ plotPercentiles <- function(model,
                             subtitle = NULL,
                             points = F) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShash")||inherits(model, "cnormShash")
   if(is_parametric){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use 'plot(model, age, raw)' instead.")
   }
@@ -700,7 +700,7 @@ plotDensity <- function(model,
   }
 
   is_beta_binomial <- inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")
-  is_shash <- inherits(model, "cnormShaSh")
+  is_shash <- inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
 
   if (is.null(minNorm)) {
     minNorm <- if(is_beta_binomial) -3 else model$minL1
@@ -828,7 +828,7 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
   if(is_parametric){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
@@ -988,7 +988,7 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' @family plot
 plotSubset <- function(model, type = 0) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
   if(is_parametric){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh).")
   }
@@ -1178,7 +1178,7 @@ plotDerivative <- function(model,
     model <- model$model
   }
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")
+  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
   if(is_parametric){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
@@ -1413,7 +1413,7 @@ compare <- function(model1, model2,
   get_age_range <- function(model) {
     if(inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
       return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
-    } else if(inherits(model, "cnormShaSh")) {
+    } else if(inherits(model, "cnormShaSh")||inherits(model, "cnormShash")) {
       return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
     } else {
       m <- model$model
@@ -1433,7 +1433,7 @@ compare <- function(model1, model2,
   # Get predictions for both models
   plot_data1 <- if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
     get_bb_predictions(model1, pred_ages)
-  } else if(inherits(model1, "cnormShaSh")) {
+  } else if(inherits(model1, "cnormShash")) {
     get_shash_predictions(model1, pred_ages)
   } else {
     get_cnorm_predictions(model1, pred_ages)
@@ -1441,7 +1441,7 @@ compare <- function(model1, model2,
 
   plot_data2 <- if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
     get_bb_predictions(model2, pred_ages)
-  } else if(inherits(model2, "cnormShaSh")) {
+  } else if(inherits(model2, "cnormShash")) {
     get_shash_predictions(model2, pred_ages)
   } else {
     get_cnorm_predictions(model2, pred_ages)
@@ -1631,7 +1631,7 @@ compare <- function(model1, model2,
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
       data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
-    }else if(inherits(model1, "cnormShaSh")) {
+    }else if(inherits(model1, "cnormShash")) {
       data$fitted1 <- predict(model1, data$age, data$score)
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
@@ -1648,7 +1648,7 @@ compare <- function(model1, model2,
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")
       data$fitted2 <- 10*(data$fitted2 - scaleMean) / scaleSD
-    }else if(inherits(model2, "cnormShaSh")) {
+    }else if(inherits(model2, "cnormShash")) {
       data$fitted2 <- predict(model2, data$age, data$score)
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")

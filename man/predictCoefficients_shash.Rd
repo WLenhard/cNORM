@@ -2,12 +2,12 @@
 % Please edit documentation in R/shash.R
 \name{predictCoefficients_shash}
 \alias{predictCoefficients_shash}
-\title{Predict parameters for a ShaSh regression model}
+\title{Predict parameters for a shash regression model}
 \usage{
 predictCoefficients_shash(model, ages)
 }
 \arguments{
-\item{model}{An object of class "cnormShaSh"}
+\item{model}{An object of class "cnormShash"}
 
 \item{ages}{A numeric vector of age points for prediction}
 }
@@ -15,6 +15,6 @@ predictCoefficients_shash(model, ages)
 A data frame with predicted parameters and statistics
 }
 \description{
-Predict parameters for a ShaSh regression model
+Predict parameters for a shash regression model
 }
 \keyword{internal}

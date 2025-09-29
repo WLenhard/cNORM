@@ -15,7 +15,7 @@ normTable.shash(
 )
 }
 \arguments{
-\item{model}{Fitted ShaSh model object of class "cnormShaSh"}
+\item{model}{Fitted shash model object of class "cnormShash"}
 
 \item{ages}{Numeric vector of age points for norm table generation}
 
@@ -41,12 +41,12 @@ List of data frames (one per age) containing:
   \item{lowerCI_PR, upperCI_PR}{CI as percentile ranks (if reliability provided)}
 }
 \description{
-Generates norm tables for specific ages based on a fitted Sinh-Arcsinh (ShaSh) regression model.
+Generates norm tables for specific ages based on a fitted SinH-ArcSinH (shash) regression model.
 Computes probabilities, percentiles, z-scores, and norm scores for a specified range of raw scores.
 Optionally includes confidence intervals when reliability is provided.
 }
 \details{
-For continuous ShaSh distributions, probability densities are computed and converted to
+For continuous shash distributions, probability densities are computed and converted to
 cumulative probabilities and percentiles. When reliability is specified, confidence
 intervals include correction for regression to the mean.
 }

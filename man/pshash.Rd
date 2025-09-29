@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{pshash}
 \alias{pshash}
-\title{Sinh-Arcsinh (ShaSh) probability}
+\title{Sinh-Arcsinh (shash) probability}
 \usage{
 pshash(
   q,

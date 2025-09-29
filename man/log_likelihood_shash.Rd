@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{log_likelihood_shash}
 \alias{log_likelihood_shash}
-\title{Calculate the negative log-likelihood for a ShaSh regression model}
+\title{Calculate the negative log-likelihood for a shash regression model}
 \usage{
 log_likelihood_shash(
   params,

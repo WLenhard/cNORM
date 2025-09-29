@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{qshash}
 \alias{qshash}
-\title{Sinh-Arcsinh (ShaSh) quantile function}
+\title{Sinh-Arcsinh (shash) quantile function}
 \usage{
 qshash(
   p,

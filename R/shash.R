@@ -1,4 +1,4 @@
-#' Sinh-Arcsinh (ShaSh) distribution functions
+#' Sinh-Arcsinh (shash) distribution functions
 #'
 #' Density, distribution function, quantile function and random generation
 #' for the Sinh-Arcsinh distribution
@@ -22,7 +22,7 @@ dshash <- function(x, mu = 0, sigma = 1, epsilon = 0, delta = 1, log = FALSE) {
   if (log) return(logdens) else return(exp(logdens))
 }
 
-#' Sinh-Arcsinh (ShaSh) probability
+#' Sinh-Arcsinh (shash) probability
 #'
 #' Density, distribution function, quantile function and random generation
 #' for the Sinh-Arcsinh distribution
@@ -45,7 +45,7 @@ pshash <- function(q, mu = 0, sigma = 1, epsilon = 0, delta = 1,
   return(p)
 }
 
-#' Sinh-Arcsinh (ShaSh) quantile function
+#' Sinh-Arcsinh (shash) quantile function
 #'
 #' Density, distribution function, quantile function and random generation
 #' for the Sinh-Arcsinh distribution
@@ -71,7 +71,7 @@ qshash <- function(p, mu = 0, sigma = 1, epsilon = 0, delta = 1,
   return(x)
 }
 
-#' Sinh-Arcsinh (ShaSh) random generation
+#' Sinh-Arcsinh (shash) random generation
 #'
 #' Density, distribution function, quantile function and random generation
 #' for the Sinh-Arcsinh distribution
@@ -90,7 +90,7 @@ rshash <- function(n, mu = 0, sigma = 1, epsilon = 0, delta = 1) {
   return(x)
 }
 
-#' Calculate the negative log-likelihood for a ShaSh regression model
+#' Calculate the negative log-likelihood for a shash regression model
 #'
 #' This function computes the negative log-likelihood for a Sinh-Arcsinh regression model
 #' where the location, scale, and skewness parameters are modeled as functions of predictors.
@@ -153,14 +153,14 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
   return(-loglik)  # Return negative log-likelihood for minimization
 }
 
-#' Fit a Sinh-Arcsinh (ShaSh) Regression Model for Continuous Norming
+#' Fit a Sinh-Arcsinh (shash) Regression Model for Continuous Norming
 #'
-#' This function fits a Sinh-Arcsinh (ShaSh; Jones & Pewsey, 2009) regression model for continuous norm
+#' This function fits a Sinh-Arcsinh (shash; Jones & Pewsey, 2009) regression model for continuous norm
 #' score modeling, where the distribution parameters vary smoothly as polynomial functions of age or other
-#' predictors. The ShaSh distribution is well-suited for psychometric data as it can flexibly model
+#' predictors. The shash distribution is well-suited for psychometric data as it can flexibly model
 #' skewness and tail weight independently, making it ideal for handling floor effects, ceiling effects,
 #' and varying degrees of individual differences across age groups. In a simulation study (Lenhard et
-#' al, 2019), the ShaSh model demonstrated superior performance compared to other parametric approaches
+#' al, 2019), the shash model demonstrated superior performance compared to other parametric approaches
 #' from the Box Cox family of functions. In contrast to Box Cox, Sinh-Arcsinh can model distributions
 #' including zero and negativ values.
 #'
@@ -220,7 +220,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' @param plot Logical indicating whether to automatically display a diagnostic plot of the fitted model.
 #'   Default is TRUE.
 #'
-#' @return An object of class "cnormShaSh" containing the fitted model results. This is a list with components:
+#' @return An object of class "cnormShash" containing the fitted model results. This is a list with components:
 #'   \item{mu_est}{Numeric vector of estimated coefficients for the location parameter mu(age).
 #'     The first coefficient is the intercept, subsequent coefficients correspond to polynomial terms.}
 #'   \item{sigma_est}{Numeric vector of estimated coefficients for the scale parameter log(sigma(age)).
@@ -239,7 +239,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm.
 #'
 #' \subsection{The Sinh-Arcsinh Distribution}{
-#' The ShaSh distribution is defined by the transformation:
+#' The shash distribution is defined by the transformation:
 #' \deqn{X = \mu + \sigma \cdot \sinh\left(\frac{\text{arcsinh}(Y) - \epsilon}{\delta}\right)}
 #' where Y is a standard normal variable, Y ~ N(0,1).
 #'
@@ -278,8 +278,8 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' }
 #'
 #' @seealso
-#' \code{\link{plot.cnormShaSh}} for plotting fitted models,
-#' \code{\link{predict.cnormShaSh}} for generating predictions,
+#' \code{\link{plot}} for plotting fitted models,
+#' \code{\link{predict}} for generating predictions,
 #' \code{\link{cnorm.betabinomial2}} for discrete beta-binomial alternative
 #'
 #' @examples
@@ -558,27 +558,27 @@ cnorm.shash <- function(age,
     result = result
   )
 
-  class(model) <- "cnormShaSh"
+  class(model) <- "cnormShash"
 
   if (plot) {
-    p <- plot.cnormShaSh(model, age, score, weights = weights)
+    p <- plot.cnormShash(model, age, score, weights = weights)
     print(p)
   }
 
   return(model)
 }
 
-#' Predict parameters for a ShaSh regression model
+#' Predict parameters for a shash regression model
 #'
-#' @param model An object of class "cnormShaSh"
+#' @param model An object of class "cnormShash"
 #' @param ages A numeric vector of age points for prediction
 #'
 #' @return A data frame with predicted parameters and statistics
 #'
 #' @keywords internal
 predictCoefficients_shash <- function(model, ages) {
-  if (!inherits(model, "cnormShaSh")) {
-    stop("Wrong object. Please provide object from class 'cnormShaSh'.")
+  if (!(inherits(model, "cnormShaSh")||inherits(model, "cnormShash"))) {
+    stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
   # Standardize new ages
@@ -617,15 +617,15 @@ predictCoefficients_shash <- function(model, ages) {
   return(predicted)
 }
 
-#' Plot cnormShaSh Model with Data and Percentile Lines
+#' Plot SinH-ArcSinH Model with Data and Percentile Lines
 #'
-#' @param x A fitted model object of class "cnormShaSh"
+#' @param x A fitted model object of class "cnormShash"
 #' @param ... Additional arguments including age, score, weights, percentiles, points
 #'
 #' @return A ggplot object
 #'
 #' @export
-plot.cnormShaSh <- function(x, ...) {
+plot.cnormShash <- function(x, ...) {
   model <- x
   args <- list(...)
 
@@ -638,8 +638,8 @@ plot.cnormShaSh <- function(x, ...) {
   if(is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
-  if (!inherits(model, "cnormShaSh")) {
-    stop("Wrong object. Please provide object from class 'cnormShaSh'.")
+  if (!inherits(model, "cnormShash")) {
+    stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
   if (length(age) != length(score)) {
@@ -665,7 +665,7 @@ plot.cnormShaSh <- function(x, ...) {
   # Get predictions
   preds <- predictCoefficients_shash(model, pred_ages)
 
-  # Calculate percentile lines using ShaSh quantiles
+  # Calculate percentile lines using shash quantiles
   percentile_lines <- lapply(percentiles, function(p) {
     qshash(p, mu = preds$mu, sigma = preds$sigma,
            epsilon = preds$epsilon, delta = preds$delta)
@@ -770,13 +770,13 @@ plot.cnormShaSh <- function(x, ...) {
   return(p)
 }
 
-#' Print method for cnormShaSh objects
+#' Print method for SinH-ArcSinH objects
 #'
-#' @param x A cnormShaSh object
+#' @param x A cnormShash object
 #' @param ... Additional arguments
 #' @export
-print.cnormShaSh <- function(x, ...) {
-  cat("Sinh-Arcsinh Regression Model for Continuous Norming\n")
+print.cnormShash <- function(x, ...) {
+  cat("SinH-ArcSinH Regression Model for Continuous Norming\n")
   cat("====================================================\n\n")
 
   cat("Model Parameters:\n")
@@ -797,11 +797,11 @@ print.cnormShaSh <- function(x, ...) {
 
 #' Calculate Norm Tables for Sinh-Arcsinh Distribution
 #'
-#' Generates norm tables for specific ages based on a fitted Sinh-Arcsinh (ShaSh) regression model.
+#' Generates norm tables for specific ages based on a fitted SinH-ArcSinH (shash) regression model.
 #' Computes probabilities, percentiles, z-scores, and norm scores for a specified range of raw scores.
 #' Optionally includes confidence intervals when reliability is provided.
 #'
-#' @param model Fitted ShaSh model object of class "cnormShaSh"
+#' @param model Fitted shash model object of class "cnormShash"
 #' @param ages Numeric vector of age points for norm table generation
 #' @param start Minimum raw score value for the norm table
 #' @param end Maximum raw score value for the norm table
@@ -820,7 +820,7 @@ print.cnormShaSh <- function(x, ...) {
 #'   \item{lowerCI_PR, upperCI_PR}{CI as percentile ranks (if reliability provided)}
 #'
 #' @details
-#' For continuous ShaSh distributions, probability densities are computed and converted to
+#' For continuous shash distributions, probability densities are computed and converted to
 #' cumulative probabilities and percentiles. When reliability is specified, confidence
 #' intervals include correction for regression to the mean.
 #'
@@ -845,8 +845,8 @@ normTable.shash <- function(model,
                             reliability = NULL) {
 
   # Input validation
-  if (!inherits(model, "cnormShaSh")) {
-    stop("Wrong object. Please provide object from class 'cnormShaSh'.")
+  if (!inherits(model, "cnormShash")) {
+    stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
   if (is.null(start)) {
@@ -963,12 +963,12 @@ normTable.shash <- function(model,
   return(result)
 }
 
-#' Summarize a Sinh-Arcsinh Continuous Norming Model
+#' Summarize a SinH-ArcSinH Continuous Norming Model
 #'
-#' This function provides a summary of a fitted Sinh-Arcsinh continuous norming model,
+#' This function provides a summary of a fitted SinH-ArcSinH (shash) continuous norming model,
 #' including model fit statistics, convergence information, and parameter estimates.
 #'
-#' @param object An object of class "cnormShaSh", typically the result of a call to
+#' @param object An object of class "cnormShash", typically the result of a call to
 #'   \code{\link{cnorm.shash}}.
 #' @param ... Additional arguments passed to the summary method:
 #'   \itemize{
@@ -1003,7 +1003,7 @@ normTable.shash <- function(model,
 #'
 #' @seealso \code{\link{cnorm.shash}}, \code{\link{diagnostics.shash}}
 #' @export
-summary.cnormShaSh <- function(object, ...) {
+summary.cnormShash <- function(object, ...) {
   args <- list(...)
 
   if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
@@ -1012,7 +1012,7 @@ summary.cnormShaSh <- function(object, ...) {
 
   diag <- diagnostics.shash(object, age, score, weights)
 
-  cat("Sinh-Arcsinh Continuous Norming Model\n")
+  cat("SinH-ArcSinH Continuous Norming Model\n")
   cat("-------------------------------------\n")
   cat("Polynomial degrees:\n")
   cat("  Location (mu):", diag$mu_degree, "\n")
@@ -1094,12 +1094,12 @@ summary.cnormShaSh <- function(object, ...) {
   invisible(diag)
 }
 
-#' Diagnostic Statistics for Sinh-Arcsinh Continuous Norming Model
+#' Diagnostic Statistics for SiHh-ArcSinH Continuous Norming Model
 #'
-#' This function computes detailed diagnostic statistics for a fitted ShaSh model,
+#' This function computes detailed diagnostic statistics for a fitted shash model,
 #' including fit statistics, parameter estimates, and convergence information.
 #'
-#' @param object An object of class "cnormShaSh"
+#' @param object An object of class "cnormShash"
 #' @param age An optional numeric vector of age values for computing fit statistics
 #' @param score An optional numeric vector of raw scores for computing fit statistics
 #' @param weights An optional numeric vector of observation weights
@@ -1109,8 +1109,8 @@ summary.cnormShaSh <- function(object, ...) {
 #' @keywords internal
 diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) {
 
-  if (!inherits(object, "cnormShaSh")) {
-    stop("Wrong object. Please provide object from class 'cnormShaSh'.")
+  if (!inherits(object, "cnormShash")) {
+    stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
   # Basic model information
@@ -1277,9 +1277,9 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
 
 #' Predict Norm Scores from Raw Scores
 #'
-#' This function calculates norm scores based on raw scores, age, and a fitted cnormShaSh model.
+#' This function calculates norm scores based on raw scores, age, and a fitted cnormShash model.
 #'
-#' @param object A fitted model object of class 'cnormShaSh'.
+#' @param object A fitted model object of class 'cnormShash'.
 #' @param ... Additional arguments passed to the prediction method:
 #'   \itemize{
 #'      \item age A numeric vector of ages, same length as score.
@@ -1291,9 +1291,9 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
 #' @return A numeric vector of norm scores.
 #'
 #' @details
-#' The function predicts the ShaSh distribution parameters (mu, sigma, epsilon, delta) for each age
+#' The function predicts the SinH-ArcSinH (shash) distribution parameters (mu, sigma, epsilon, delta) for each age
 #' using the provided model. It then calculates the cumulative probability for each
-#' raw score given these parameters using the continuous ShaSh distribution. Finally,
+#' raw score given these parameters using the continuous shash distribution. Finally,
 #' it converts these probabilities to the norm scale specified in the model.
 #'
 #' @examples
@@ -1307,7 +1307,7 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
 #'
 #' @export
 #' @family predict
-predict.cnormShaSh <- function(object, ...) {
+predict.cnormShash <- function(object, ...) {
 
   model <- object
   args <- list(...)
@@ -1316,8 +1316,8 @@ predict.cnormShaSh <- function(object, ...) {
   if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
   if ("range" %in% names(args)) { range <- args$range } else { if(length(args)>2) range <- args[[3]] else range <- 3 }
 
-  if (!inherits(model, "cnormShaSh")) {
-    stop("Wrong object. Please provide object from class 'cnormShaSh'.")
+  if (!inherits(model, "cnormShash")) {
+    stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
   if (is.null(age) || is.null(score)) {

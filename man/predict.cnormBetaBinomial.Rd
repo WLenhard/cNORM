@@ -44,7 +44,7 @@ Other predict:
 \code{\link{getNormCurve}()},
 \code{\link{normTable}()},
 \code{\link{predict.cnormBetaBinomial2}()},
-\code{\link{predict.cnormShaSh}()},
+\code{\link{predict.cnormShash}()},
 \code{\link{predictNorm}()},
 \code{\link{predictRaw}()},
 \code{\link{rawTable}()}

@@ -2,12 +2,12 @@
 % Please edit documentation in R/shash.R
 \name{diagnostics.shash}
 \alias{diagnostics.shash}
-\title{Diagnostic Statistics for Sinh-Arcsinh Continuous Norming Model}
+\title{Diagnostic Statistics for SiHh-ArcSinH Continuous Norming Model}
 \usage{
 diagnostics.shash(object, age = NULL, score = NULL, weights = NULL)
 }
 \arguments{
-\item{object}{An object of class "cnormShaSh"}
+\item{object}{An object of class "cnormShash"}
 
 \item{age}{An optional numeric vector of age values for computing fit statistics}
 
@@ -19,7 +19,7 @@ diagnostics.shash(object, age = NULL, score = NULL, weights = NULL)
 A list containing comprehensive diagnostic information
 }
 \description{
-This function computes detailed diagnostic statistics for a fitted ShaSh model,
+This function computes detailed diagnostic statistics for a fitted shash model,
 including fit statistics, parameter estimates, and convergence information.
 }
 \keyword{internal}

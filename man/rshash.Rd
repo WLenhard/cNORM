@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{rshash}
 \alias{rshash}
-\title{Sinh-Arcsinh (ShaSh) random generation}
+\title{Sinh-Arcsinh (shash) random generation}
 \usage{
 rshash(n, mu = 0, sigma = 1, epsilon = 0, delta = 1)
 }

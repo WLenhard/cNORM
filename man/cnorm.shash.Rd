@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{cnorm.shash}
 \alias{cnorm.shash}
-\title{Fit a Sinh-Arcsinh (ShaSh) Regression Model for Continuous Norming}
+\title{Fit a Sinh-Arcsinh (shash) Regression Model for Continuous Norming}
 \usage{
 cnorm.shash(
   age,
@@ -80,7 +80,7 @@ This affects the scaling of derived norm scores but does not influence model fit
 Default is TRUE.}
 }
 \value{
-An object of class "cnormShaSh" containing the fitted model results. This is a list with components:
+An object of class "cnormShash" containing the fitted model results. This is a list with components:
   \item{mu_est}{Numeric vector of estimated coefficients for the location parameter mu(age).
     The first coefficient is the intercept, subsequent coefficients correspond to polynomial terms.}
   \item{sigma_est}{Numeric vector of estimated coefficients for the scale parameter log(sigma(age)).
@@ -95,12 +95,12 @@ An object of class "cnormShaSh" containing the fitted model results. This is a l
     log-likelihood value, and other optimization details.}
 }
 \description{
-This function fits a Sinh-Arcsinh (ShaSh; Jones & Pewsey, 2009) regression model for continuous norm
+This function fits a Sinh-Arcsinh (shash; Jones & Pewsey, 2009) regression model for continuous norm
 score modeling, where the distribution parameters vary smoothly as polynomial functions of age or other
-predictors. The ShaSh distribution is well-suited for psychometric data as it can flexibly model
+predictors. The shash distribution is well-suited for psychometric data as it can flexibly model
 skewness and tail weight independently, making it ideal for handling floor effects, ceiling effects,
 and varying degrees of individual differences across age groups. In a simulation study (Lenhard et
-al, 2019), the ShaSh model demonstrated superior performance compared to other parametric approaches
+al, 2019), the shash model demonstrated superior performance compared to other parametric approaches
 from the Box Cox family of functions. In contrast to Box Cox, Sinh-Arcsinh can model distributions
 including zero and negativ values.
 }
@@ -109,7 +109,7 @@ This implementation uses the Jones & Pewsey (2009) parameterization of the Sinh-
 Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm.
 
 \subsection{The Sinh-Arcsinh Distribution}{
-The ShaSh distribution is defined by the transformation:
+The shash distribution is defined by the transformation:
 \deqn{X = \mu + \sigma \cdot \sinh\left(\frac{\text{arcsinh}(Y) - \epsilon}{\delta}\right)}
 where Y is a standard normal variable, Y ~ N(0,1).
 
@@ -208,8 +208,8 @@ simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9), 
 https://doi.org/10.1371/journal.pone.0222279
 }
 \seealso{
-\code{\link{plot.cnormShaSh}} for plotting fitted models,
-\code{\link{predict.cnormShaSh}} for generating predictions,
+\code{\link{plot}} for plotting fitted models,
+\code{\link{predict}} for generating predictions,
 \code{\link{cnorm.betabinomial2}} for discrete beta-binomial alternative
 }
 \author{

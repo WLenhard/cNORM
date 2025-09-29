@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{dshash}
 \alias{dshash}
-\title{Sinh-Arcsinh (ShaSh) distribution functions}
+\title{Sinh-Arcsinh (shash) distribution functions}
 \usage{
 dshash(x, mu = 0, sigma = 1, epsilon = 0, delta = 1, log = FALSE)
 }
