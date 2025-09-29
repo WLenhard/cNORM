@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.0
-Date: 26.09.2025 - in progress
+Date: 26.09.2025
 
 
 Changes:
