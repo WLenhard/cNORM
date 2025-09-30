@@ -182,21 +182,22 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' @param sigma_degree Integer specifying the degree of the polynomial for modeling the scale parameter sigma(age).
 #'   Default is 2. This controls how the variability (spread) of scores changes with age.
 #'   Lower degrees are often sufficient as variability typically changes more smoothly than location.
+#'
 #' @param epsilon_degree Integer specifying the degree of the polynomial for modeling the skewness parameter epsilon(age).
-#'   Default is 1. This controls how the asymmetry of the distribution changes with age.
+#'   Default is 2. This controls how the asymmetry of the distribution changes with age.
+#'
+#' @param delta_degree Integer specifying the plynomial for modelling the tail weight parameter delte(age). Default is 1.
+#'   The tail weight can be fixed as well in case of numerical instability. In that case, set 'delta_degree' to NULL and
+#'   specify a value for delta instead. Recommendation: Keep delta_degree low to avoid overfitting.
 #'
 #' @param delta Fixed tail weight parameter (must be > 0). Default is 1. This parameter controls the
 #'   heaviness of the distribution tails and is kept constant across all ages in this implementation.
+#'   It is only used, if 'delta_degree' is set to NULL. Common values:
 #'   \itemize{
 #'     \item delta = 1: Normal-like tail behavior (baseline)
 #'     \item delta > 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
 #'     \item delta < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
 #'   }
-#'
-#' @param delta_degree Instead of the fixed delta parameter, you can also model delta as a polynomial function of age.
-#'   The default setting is NULL, which means delta is fixed. If you specify an integer value (e.g., 1, 2),
-#'   the function will fit a polynomial of that degree to model how tail weight changes with age. The degree
-#'   has to be set explicitly and should be kept low (1 or 2) to avoid overfitting.
 #'
 #' @param control An optional list of control parameters passed to the \code{optim} function for
 #'   maximum likelihood estimation. If NULL, sensible defaults are chosen automatically based on
@@ -261,7 +262,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #'   \item Visual inspection of fitted curves
 #' }
 #'
-#' For most applications, mu_degree = 3, sigma_degree = 2, epsilon_degree = 2 provides
+#' For most applications, mu_degree = 3, sigma_degree = 2, epsilon_degree = 2, delta_degree = 1 provides
 #' a good balance of flexibility and parsimony.
 #' }
 #'
@@ -291,28 +292,11 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' model_complex <- cnorm.shash(
 #'   age = adolescents$age,
 #'   score = adolescents$vocabulary_score,
-#'   mu_degree = 4,      # Complex mean trajectory
-#'   sigma_degree = 3,   # Changing variability pattern
-#'   epsilon_degree = 2, # Skewness shifts
-#'   delta = 1.3         # Slightly heavy tails
-#' )
-#'
-#' # Even more complex model, including a polynomial for the delta parameter
-#' model_complex2 <- cnorm.shash(
-#'   age = adolescents$age,
-#'   score = adolescents$vocabulary_score,
-#'   mu_degree = 4,      # Complex mean trajectory
-#'   sigma_degree = 3,   # Changing variability pattern
-#'   epsilon_degree = 2, # Skewness shifts
-#'   delta_deree = 2     # Quadratic change for the tail weight
-#' )
-#'
-#' # Homogeneous population with light tails
-#' model_selective <- cnorm.shash(
-#'   age = gifted$age,
-#'   score = gifted$achievement,
-#'   delta = 0.8,        # Lighter tails for selected population
-#'   sigma_degree = 1    # Simple linear variance change
+#'   mu_degree = 4,         # Complex mean trajectory
+#'   sigma_degree = 3,      # Changing variability pattern
+#'   epsilon_degree = 2,    # Skewness shifts
+#'   epsilon_degree = NULL, # set to NULL to activate fixed delta
+#'   delta = 1.3            # Slightly heavy tails
 #' )
 #'
 #' # With sampling weights
@@ -331,7 +315,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' )
 #'
 #' # Compare model fit
-#' compare(model_complex, model_complex2)
+#' compare(model, model_complex)
 #' }
 #'
 #' @author Wolfgang Lenhard
@@ -339,7 +323,7 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #' Jones, M. C., & Pewsey, A. (2009). Sinh-arcsinh distributions. *Biometrika*, 96(4), 761-780.
 #'
 #' Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A
-#' simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9), e0222279.
+#' simulation study of parametric and semi-parametric approaches. *PLoS ONE*, 14(9), e0222279.
 #' https://doi.org/10.1371/journal.pone.0222279
 #'
 #' @export
@@ -348,9 +332,9 @@ cnorm.shash <- function(age,
                         weights = NULL,
                         mu_degree = 3,
                         sigma_degree = 2,
-                        epsilon_degree = 1,
+                        epsilon_degree = 2,
+                        delta_degree = 1,
                         delta = 1,
-                        delta_degree = NULL,
                         control = NULL,
                         scale = "T",
                         plot = TRUE) {
