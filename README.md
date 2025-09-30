@@ -145,7 +145,7 @@ library(cNORM)
 vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
 vignette("BetaBinomial", package = "cNORM")
-vignette("ShaSh", package = "cNORM")
+vignette("sinh", package = "cNORM")
 ```
 
 
