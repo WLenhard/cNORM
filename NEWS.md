@@ -3,13 +3,15 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.1
-Date: 26.09.2025
+Date: 26.09.2025 in progress
 
 
 Changes:
 
 *    fixed inconsistencies in terminology. Move class cnormShaSh to cnormShash
-*    stripped down vignette on ShaSh modelling to essentials
+*    stripped down vignette on shash modelling to essentials
+*    updated documentation
+*    
 
 
 ### Version in 3.5.0

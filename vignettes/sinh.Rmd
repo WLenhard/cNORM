@@ -15,6 +15,7 @@ knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),
   comment = "#>",
   eval = TRUE  # Disabled due to computational intensity
 )
+library(cNORM)
 ```
 
 The Sinh-Arcsinh (shash) distribution is very flexible and can adjust to a wide range of distributional shapes. This makes it particularly useful for modeling psychometric data, which often exhibit non-normal characteristics such as skewness and heavy tails. Unlike discrete distributions (e.g., beta-binomial), shash naturally handles continuous scores, decimal values, and unbounded measures. It can accommodate scores of zero and negative values without transformation, unlike Box-Cox approaches that require strictly positive data. Finally, skewness (ε) and tail weight (δ) can be controlled independently, allowing precise modeling of distributional characteristics. This makes it possible to model complex developmental patterns where skewness and tail weight change with age.

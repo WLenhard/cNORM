@@ -16,9 +16,9 @@ compare(
 )
 }
 \arguments{
-\item{model1}{First model object (distribution free, beta-binomial, or ShaSh)}
+\item{model1}{First model object (distribution free, beta-binomial, or shash)}
 
-\item{model2}{Second model object (distribution free, beta-binomial, or ShaSh)}
+\item{model2}{Second model object (distribution free, beta-binomial, or shash)}
 
 \item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
 
@@ -40,7 +40,7 @@ This function creates a visualization comparing two norm models by displaying
 their percentile curves. The first model is shown with solid lines, the second
 with dashed lines. If age and score vectors are provided, manifest percentiles
 are displayed as dots. The function works with regular cnorm models, beta-binomial
-models, and ShaSh models, allowing comparison between different model types.
+models, and shash models, allowing comparison between different model types.
 }
 \examples{
 \dontrun{
@@ -49,10 +49,10 @@ model1 <- cnorm(group = elfe$group, raw = elfe$raw)
 model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
 model3 <- cnorm.shash(elfe$group, elfe$raw)
 
-# Compare traditional cnorm with ShaSh
+# Compare traditional cnorm with shash
 compare(model1, model3, age = elfe$group, score = elfe$raw)
 
-# Compare beta-binomial with ShaSh
+# Compare beta-binomial with shash
 compare(model2, model3, age = elfe$group, score = elfe$raw)
 }
 

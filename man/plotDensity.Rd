@@ -15,7 +15,7 @@ plotDensity(
 }
 \arguments{
 \item{model}{The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2 or
-cnormShaSh object.}
+cnormShash object.}
 
 \item{minRaw}{Lower bound of the raw score. If NULL, it's automatically determined based on the model type.}
 
