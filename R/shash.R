@@ -561,7 +561,7 @@ cnorm.shash <- function(age,
 #'
 #' @keywords internal
 predictCoefficients_shash <- function(model, ages) {
-  if (!(inherits(model, "cnormShaSh")||inherits(model, "cnormShash"))) {
+  if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
@@ -622,7 +622,7 @@ plot.cnormShash <- function(x, ...) {
   if(is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
-  if (!inherits(model, "cnormShash")) {
+  if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
@@ -829,7 +829,7 @@ normTable.shash <- function(model,
                             reliability = NULL) {
 
   # Input validation
-  if (!inherits(model, "cnormShash")) {
+  if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
@@ -1093,7 +1093,7 @@ summary.cnormShash <- function(object, ...) {
 #' @keywords internal
 diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) {
 
-  if (!inherits(object, "cnormShash")) {
+  if (!isSHASH(object)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 
@@ -1300,7 +1300,7 @@ predict.cnormShash <- function(object, ...) {
   if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
   if ("range" %in% names(args)) { range <- args$range } else { if(length(args)>2) range <- args[[3]] else range <- 3 }
 
-  if (!inherits(model, "cnormShash")) {
+  if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
 

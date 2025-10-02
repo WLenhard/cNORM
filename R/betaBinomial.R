@@ -302,8 +302,7 @@ normTable.betabinomial <- function(model,
                                    range = 3,
                                    CI = .9,
                                    reliability = NULL) {
-  if (!(inherits(model, "cnormBetaBinomial") ||
-        inherits(model, "cnormBetaBinomial2"))) {
+  if (!isBeta(model)) {
     stop(
       "Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'."
     )
@@ -439,8 +438,7 @@ predict.cnormBetaBinomial <- function(object, ...) {
   if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
   if ("range" %in% names(args)) { range <- args$range } else { if(length(args)>2) range <- args[[3]] else range <- 3 }
 
-  if (!(inherits(model, "cnormBetaBinomial") ||
-        inherits(model, "cnormBetaBinomial2"))) {
+  if (!isBeta(model)) {
     stop(
       "Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'."
     )
@@ -555,8 +553,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
   if(is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
-  if (!(inherits(model, "cnormBetaBinomial") ||
-        inherits(model, "cnormBetaBinomial2"))) {
+  if (!isBeta(model)) {
     stop(
       "Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'."
     )
@@ -755,8 +752,7 @@ diagnostics.betabinomial <- function(model,
                                      age = NULL,
                                      score = NULL,
                                      weights = NULL) {
-  if (!(inherits(model, "cnormBetaBinomial") ||
-        inherits(model, "cnormBetaBinomial2"))) {
+  if (!isBeta(model)) {
     stop(
       "Wrong object. Please provide object from class 'cnormBetaBinomial' or 'cnormBetaBinomial2'."
     )

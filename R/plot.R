@@ -18,11 +18,11 @@
 #' @family plot
 plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 
-  if(inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")){
-    stop("This function is not applicable for beta-binomial models.")
+  if(isParametric(model)) {
+    stop("This function is not applicable for parametric models.")
   }
 
-  if(!inherits(model, "cnorm")){
+  if(!isTaylor(model)) {
     stop("Please provide a cnorm object.")
   }
 
@@ -130,7 +130,7 @@ plotRaw <- function(model, group = FALSE, raw = NULL, type = 0) {
 plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NULL, group = FALSE, minNorm = NULL, maxNorm = NULL, type = 0) {
 
 
-  if(inherits(model, "cnorm")) {
+  if(isTaylor(model)) {
     data <- model$data
     model <- model$model
 
@@ -159,9 +159,9 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
       }
     }
 
-  } else if(inherits(model, "cnormBetaBinomial") || inherits(model, "cnormBetaBinomial2")) {
+  } else if(isParametric(model)) {
     if(is.null(age) || is.null(score)) {
-      stop("Please provide age and score vectors for beta-binomial models and the width for the sliding window.")
+      stop("Please provide age and score vectors for beta-binomial or shash models and the width for the sliding window.")
     }
 
     d <- data.frame(age = age, score = score)
@@ -200,7 +200,7 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
   r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
 
   if (type == 0) {
-    if(inherits(model, "cnorm")) {
+    if(isTaylor(model)) {
       title <- if(group != "" && !is.null(group)) paste("Observed vs. Fitted Norm Scores by", group) else "Observed vs. Fitted Norm Scores"
     }else{
       title <- if(is.numeric(group)) paste("Observed vs. Fitted Norm Scores by group") else "Observed vs. Fitted Norm Scores"
@@ -216,7 +216,7 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
         y = "Fitted Scores"
       )
   } else {
-    if(inherits(model, "cnorm")) {
+    if(isTaylor(model)) {
       title <- if(group != "" && !is.null(group)) paste("Observed Norm Scores vs. Difference Scores by", group) else "Observed Norm Scores vs. Difference Scores"
     }else{
       title <- if(is.numeric(group)) paste("Observed Norm Scores vs. Difference Scores by group") else "Observed Norm Scores vs. Difference Scores"
@@ -306,18 +306,17 @@ plotNormCurves <- function(model,
                            minRaw = NULL,
                            maxRaw = NULL) {
 
-  if(inherits(model, "cnorm")){
+  if(isTaylor(model)){
     model <- model$model
   }
+  parametric <- isParametric(model)
 
-  is_beta_binomial <- inherits(model, "cnormBetaBinomial2")
-
-  if(!is_beta_binomial && !model$useAge){
+  if(!isParametric(model) && !model$useAge){
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
   # Get scale information
-  if(is_beta_binomial) {
+  if(parametricparametric) {
     scaleMean <- attr(model$result, "scaleMean")
     scaleSD <- attr(model$result, "scaleSD")
   } else {
@@ -330,25 +329,25 @@ plotNormCurves <- function(model,
   }
 
   if (is.null(minAge)) {
-    minAge <- if(is_beta_binomial) attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd") else model$minA1
+    minAge <- if(parametric) attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd") else model$minA1
   }
 
   if (is.null(maxAge)) {
-    maxAge <- if(is_beta_binomial) attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd") else model$maxA1
+    maxAge <- if(parametric) attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd") else model$maxA1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if(is_beta_binomial) 0 else model$minRaw
+    minRaw <- if(parametric) 0 else model$minRaw
   }
 
   if (is.null(maxRaw)) {
-    maxRaw <- if(is_beta_binomial) attr(model$result, "max") else model$maxRaw
+    maxRaw <- if(parametric) attr(model$result, "max") else model$maxRaw
   }
 
   valueList <- data.frame(n = factor(), raw = double(), age = double())
 
   for (norm in normList) {
-    if(is_beta_binomial) {
+    if(parametric) {
       ages <- seq(minAge, maxAge, by = step)
       raws <- sapply(ages, function(age) {
         pred <- predictCoefficients2(model, age, attr(model$result, "max"))
@@ -448,15 +447,11 @@ plotPercentiles <- function(model,
                             subtitle = NULL,
                             points = F) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShash")||inherits(model, "cnormShaSh")
-  if(is_parametric){
+  if(isParametric(model)) {
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use 'plot(model, age, raw)' instead.")
   }
 
-  if(inherits(model, "cnorm")){
-    data <- model$data
-    m <- model$model
-  }else if(inherits(model, "cnormTemp")){
+  if(isTaylor(model)){
     data <- model$data
     m <- model$model
   }else{
@@ -695,12 +690,12 @@ plotDensity <- function(model,
                         maxNorm = NULL,
                         group = NULL) {
 
-  if(inherits(model, "cnorm")){
+  if(isTaylor(model)){
     model <- model$model
   }
 
-  is_beta_binomial <- inherits(model, "cnormBetaBinomial")||inherits(model, "cnormBetaBinomial2")
-  is_shash <- inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
+  is_beta_binomial <- isBeta(model)
+  is_shash <- isSHASH(model)
 
   if (is.null(minNorm)) {
     minNorm <- if(is_beta_binomial) -3 else model$minL1
@@ -828,12 +823,11 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShash")||inherits(model, "cnormShaSh")
-  if(is_parametric){
+  if(isParametric(model)) {
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
 
-  if(inherits(model, "cnorm")){
+  if(isTaylor(model)){
     d <- model$data
     model <- model$model
   }else{
@@ -988,12 +982,11 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' @family plot
 plotSubset <- function(model, type = 0) {
 
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
-  if(is_parametric){
+  if(isParametric(model)){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh).")
   }
 
-  if(inherits(model, "cnorm")){
+  if(isTaylor(model)){
     model <- model$model
   }
 
@@ -1174,12 +1167,9 @@ plotDerivative <- function(model,
                            stepNorm = NULL,
                            order = 1) {
 
-  if(inherits(model, "cnorm")){
+  if(isTaylor(model)){
     model <- model$model
-  }
-
-  is_parametric <- inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial")||inherits(model, "cnormShaSh")||inherits(model, "cnormShash")
-  if(is_parametric){
+  }else if(isParametric(model)){
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
 
@@ -1274,7 +1264,7 @@ plotDerivative <- function(model,
 #'
 #' @export
 plotCnorm <- function(x, y, ...){
-  if(!inherits(x, "cnorm")||!is.character(y)){
+  if(!isTaylor(x)||!is.character(y)){
     message("Please provide a cnorm object as parameter x and the type of plot as a string for parameter y, which can be 'raw', 'norm', 'curves', 'percentiles', 'series', 'subset', or 'derivative'.")
     return()
   }
@@ -1346,12 +1336,12 @@ compare <- function(model1, model2,
 
   # retrieve score from model if score is null and one of the
   # models is a cnorm object
-  if(is.null(score) && inherits(model1, "cnorm")){
+  if(is.null(score) && isTaylor(model1)){
     score <- model1$data[[attributes(model1$data)$raw]]
     age <- model1$data[[attributes(model1$data)$age]]
   }
 
-  if(is.null(score) && inherits(model2, "cnorm")){
+  if(is.null(score) && isTaylor(model2)){
     score <- model2$data[[attributes(model2$data)$raw]]
     age <- model2$data[[attributes(model2$data)$age]]
   }
@@ -1411,10 +1401,7 @@ compare <- function(model1, model2,
 
   # Determine age range
   get_age_range <- function(model) {
-    if(inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
-      return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
-    } else if(inherits(model, "cnormShaSh")||inherits(model, "cnormShash")) {
-      class(model) <- "cnormShash"
+    if(isParametric(model)) {
       return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
     } else {
       m <- model$model
@@ -1432,17 +1419,17 @@ compare <- function(model1, model2,
                    length.out = 100)
 
   # Get predictions for both models
-  plot_data1 <- if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+  plot_data1 <- if(isBeta(model1)) {
     get_bb_predictions(model1, pred_ages)
-  } else if(inherits(model1, "cnormShash")||inherits(model1, "cnormShaSh")) {
+  } else if(isSHASH(model1)) {
     get_shash_predictions(model1, pred_ages)
   } else {
     get_cnorm_predictions(model1, pred_ages)
   }
 
-  plot_data2 <- if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+  plot_data2 <- if(isBeta(model2)) {
     get_bb_predictions(model2, pred_ages)
-  } else if(inherits(model2, "cnormshash")||inherits(model2, "cnormShash")) {
+  } else if(isSHASH(model2)) {
     get_shash_predictions(model2, pred_ages)
   } else {
     get_cnorm_predictions(model2, pred_ages)
@@ -1527,7 +1514,7 @@ compare <- function(model1, model2,
     )
 
   # Information criteria
-  if(inherits(model1, "cnorm")) {
+  if(isTaylor(model1)) {
     ideal.model <- model1$model$ideal.model
     rss <- model1$model$subsets$rss[ideal.model]
     n <- nrow(model1$data)
@@ -1545,7 +1532,7 @@ compare <- function(model1, model2,
     BIC1 <- n_params * log(n_obs) - 2 * log_likelihood
   }
 
-  if(inherits(model2, "cnorm")) {
+  if(isTaylor(model2)) {
     ideal.model <- model2$model$ideal.model
     rss <- model2$model$subsets$rss[ideal.model]
     n <- nrow(model2$data)
@@ -1622,34 +1609,24 @@ compare <- function(model1, model2,
     data$normValue <- 10*(data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
 
     # Get predictions for both models
-    if(inherits(model1, "cnorm")){
+    if(isTaylor(model1)){
       data$fitted1 <- predictNorm(data$score, data$age, model1,
                                   minNorm = model1$model$minL1,
                                   maxNorm = model1$model$maxL1)
       data$fitted1 <- 10*(data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
-    }else if(inherits(model1, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
-      data$fitted1 <- predict(model1, data$age, data$score)
-      scaleMean <- attr(model1$result, "scaleMean")
-      scaleSD <- attr(model1$result, "scaleSD")
-      data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
-    }else if(inherits(model1, "cnormShash")||inherits(model1, "cnormShaSh")) {
+    }else if(isParametric(model1)) {
       data$fitted1 <- predict(model1, data$age, data$score)
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
       data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
     }
 
-    if(inherits(model2, "cnorm")){
+    if(isTaylor(model2)){
       data$fitted2 <- predictNorm(data$score, data$age, model2,
                                   minNorm = model2$model$minL1,
                                   maxNorm = model2$model$maxL1)
       data$fitted2 <- 10*(data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
-    }else if(inherits(model2, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
-      data$fitted2 <- predict(model2, data$age, data$score)
-      scaleMean <- attr(model2$result, "scaleMean")
-      scaleSD <- attr(model2$result, "scaleSD")
-      data$fitted2 <- 10*(data$fitted2 - scaleMean) / scaleSD
-    }else if(inherits(model2, "cnormShash")||inherits(model2, "cnormShaSh")) {
+    }else if(isParametric(model2)) {
       data$fitted2 <- predict(model2, data$age, data$score)
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")

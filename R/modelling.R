@@ -405,7 +405,7 @@ bestModel <- function(data,
 #' printSubset(result)
 #' @family model
 printSubset <- function(x, ...) {
-  if (inherits(x, "cnorm")) {
+  if (isTaylor(x)) {
     x <- x$model
   }
 
@@ -495,7 +495,7 @@ checkConsistency <- function(model,
                              stepNorm = 1,
                              warn = FALSE,
                              silent = FALSE) {
-  if (inherits(model, "cnorm")) {
+  if (isTaylor(model)) {
     model <- model$model
   }
 
@@ -591,7 +591,7 @@ checkConsistency <- function(model,
 #' @export
 #' @family model
 regressionFunction <- function(model, raw = NULL, digits = NULL) {
-  if (inherits(model, "cnorm")) {
+  if (isTaylor(model)) {
     raw <- "raw"
     model <- model$model
   } else{
@@ -646,7 +646,7 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' @family model
 derive <- function(model,
                    order = 1) {
-  if (inherits(model, "cnorm")) {
+  if (isTaylor(model)) {
     model <- model$model
   }
 
@@ -704,7 +704,7 @@ derive <- function(model,
 #' @export
 #' @family model
 modelSummary <- function(object, ...) {
-  if (inherits(object, "cnorm")) {
+  if (isTaylor(object)) {
     object <- object$model
   }
   strat <- c("largest consistent model", "first model exceeding R2 > .99", "fall back to model with 5 terms",
@@ -783,7 +783,7 @@ rangeCheck <-
            maxNorm = NULL,
            digits = 3,
            ...) {
-    if (inherits(object, "cnorm")) {
+    if (isTaylor(object)) {
       object <- object$model
     }
 
@@ -916,7 +916,7 @@ cnorm.cv <-
            group = NULL,
            age = NULL,
            weights = NULL) {
-    if (inherits(data, "cnorm")) {
+    if (isTaylor(data)) {
       formula <- data$model$terms
       data <- data$data
       cnorm.model <- data$model
@@ -1458,7 +1458,7 @@ cnorm.cv <-
 #'
 #' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 getNormScoreSE <- function(model, type = 2) {
-  if (!inherits(model, "cnorm")) {
+  if (!isTaylor(model)) {
     stop("Please provide cnorm object as the model parameter")
   }
 

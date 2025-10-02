@@ -495,3 +495,28 @@ prepare_matrix <- function(location, age, k = 5, t = 3) {
 
   return(interaction_matrix)
 }
+
+# Check if object is of class cnorm
+#' @keywords internal
+isTaylor <- function(model) {
+  return(inherits(model, "cnorm")||inherits(model, "cnormTemp"))
+}
+
+# Check if model is of class cnormBetaBinomial or cnormBetaBinomial2
+#' @keywords internal
+isBeta <- function(model) {
+  return(inherits(model, "cnormBetaBinomial2")||inherits(model, "cnormBetaBinomial"))
+}
+
+# Check if model is of class cnormShash
+#' @keywords internal
+isSHASH <- function(model) {
+  return(inherits(model, "cnormShash")||inherits(model, "cnormShaSh"))
+}
+
+# Check if model is parametric (SHASH or BetaBinomial)
+#' @keywords internal
+isParametric <- function(model) {
+  return(isSHASH(model)||isBeta(model))
+}
+

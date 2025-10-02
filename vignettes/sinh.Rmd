@@ -12,9 +12,11 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=60),
   collapse = TRUE,
-  comment = "#>",
-  eval = TRUE  # Disabled due to computational intensity
+  comment = "#>"
 )
+options(width = 60)
+
+#devtools::load_all(".")
 library(cNORM)
 ```
 
@@ -203,7 +205,11 @@ The norm tables provide:
 ```{r fig5, fig.height = 4, fig.width = 7}
 # Compare shash with betabinomial models (BB). BB models should work worse,
 # since the test has stop rules, leading to non-binomial distributions.
-# Distribution-free models (Taylor) # should be able to model the data flexibly as well.
+# Distribution-free models (Taylor)
+# should be able to model the data flexibly as well. Try:
+#             model.taylor <- cnorm(ppvt$raw, ppvt$group)
+#             compare(model.taylor, model.shash)
+
 model.bb <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
 
 # Visual comparisons
