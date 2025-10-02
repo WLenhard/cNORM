@@ -316,7 +316,7 @@ plotNormCurves <- function(model,
   }
 
   # Get scale information
-  if(parametricparametric) {
+  if(parametric) {
     scaleMean <- attr(model$result, "scaleMean")
     scaleSD <- attr(model$result, "scaleSD")
   } else {
@@ -599,7 +599,7 @@ plotPercentiles <- function(model,
          x = paste0("Explanatory Variable (", group, ")"),
          y = paste0("Raw Score (", raw, ")")) +
     theme_minimal() +
-    theme(legend.position = c(0.99, 0.01),
+    theme(legend.position = "right",
           legend.justification = c(1, 0),
           legend.background = element_rect(fill = "white", color = "black"),
           legend.key.width = unit(1.5, "cm")) +

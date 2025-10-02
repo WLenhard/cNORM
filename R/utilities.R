@@ -430,7 +430,7 @@ buildCnormObject <- function(data, model){
   return(result)
 }
 
-#' Prepare design matrix for LASSO regression
+#' Prepare design matrix for regression
 #'
 #' @description
 #' This function prepares the design matrix, including powers and interaction terms of location and age.
