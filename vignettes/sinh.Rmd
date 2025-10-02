@@ -1,12 +1,15 @@
 ---
-title: "Modelling with Sinh-Arcsinh Distributions"
+title: "Modelling with Sinh-Arcsinh (shash) Distribution"
 author: "Wolfgang Lenhard & Alexandra Lenhard"
 date: "`r Sys.Date()`"
+#output:
+#  word_document: default
+#  pdf_document: default
+#pdf_document:
+#  toc: true
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Modelling Psychometric Data with Sinh-Arcsinh Distributions}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: "%\\VignetteIndexEntry{Modelling Psychometric Data with Sinh-Arcsinh Distributions}
+  %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
 ---
 
 ```{r setup, include = FALSE}
@@ -205,16 +208,19 @@ The norm tables provide:
 ```{r fig5, fig.height = 4, fig.width = 7}
 # Compare shash with betabinomial models (BB). BB models should work worse,
 # since the test has stop rules, leading to non-binomial distributions.
-# Distribution-free models (Taylor)
-# should be able to model the data flexibly as well. Try:
-#             model.taylor <- cnorm(ppvt$raw, ppvt$group)
-#             compare(model.taylor, model.shash)
+model.bb <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228, plot = FALSE)
 
-model.bb <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
+# Model comparisons
+compare(model.shash, model.bb, age = ppvt$group, score = ppvt$raw,
+        title = "SinH-ArcSinH vs. Beta-Binomial")
 
-# Visual comparisons
-compare(model.shash, model.bb, age = ppvt$age, score = ppvt$raw,
-        title = "ShaSh vs. Beta-Binomial")
+
+# Compare distribution free Taylor model
+model.taylor <- cnorm(group = ppvt$group, raw = ppvt$raw, plot=FALSE)
+
+# Model comparisons shash versus taylor
+compare(model.shash, model.taylor, age = ppvt$group, score = ppvt$raw,
+        title = "SinH-ArcSinH vs. Taylor")
 ```
 
 ## Decision Framework
