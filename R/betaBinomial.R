@@ -72,6 +72,39 @@ cnorm.betabinomial1 <- function(age,
                                 control = NULL,
                                 scale = "T",
                                 plot = T) {
+
+  # Input validation
+  if (length(age) != length(score)) {
+    stop("'age' and 'score' must be of the same length.")
+  }
+
+  # Check for non finite values
+  if(any(!is.finite(age))){
+    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  }
+
+  # Check for non-finite values
+  if (any(!is.finite(score))) {
+    stop("'score' contains non-finite values (NA, NaN, or Inf). ",
+         "Beta-binomial modelling requires positive integers (including zero). Please clean the data.")
+  }
+
+  # Check for negative values
+  if (any(score < 0)) {
+    stop("'score' contains negative values. ",
+         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+         Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
+         or transform your data to positive integers.")
+  }
+
+  # Check for non-integers
+  if (any(score != floor(score))) {
+    stop("'score' contains non-integer values. ",
+         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+         Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
+         or transform your data to positive integers.")
+  }
+
   # If weights are not provided, use equal weights
   if (is.null(weights)) {
     weights <- rep(1, length(age))
@@ -984,7 +1017,7 @@ cnorm.betabinomial2 <- function(age,
                                 plot = TRUE) {
   # Input validation
   if (length(age) != length(score)) {
-    stop("Length of 'age' and 'score' must be the same.")
+    stop("'age' and 'score' must be of the same length.")
   }
 
   # Check for non finite values
@@ -992,8 +1025,26 @@ cnorm.betabinomial2 <- function(age,
     stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
   }
 
-  if(any(!is.finite(score))){
-    stop("Score vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  # Check for non-finite values
+  if (any(!is.finite(score))) {
+    stop("'score' contains non-finite values (NA, NaN, or Inf). ",
+         "Beta-binomial modelling requires positive integers (including zero). Please clean the data.")
+  }
+
+  # Check for negative values
+  if (any(score < 0)) {
+    stop("'score' contains negative values. ",
+         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+         Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
+         or transform your data to positive integers.")
+  }
+
+  # Check for non-integers
+  if (any(score != floor(score))) {
+    stop("'score' contains non-integer values. ",
+         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+         Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
+         or transform your data to positive integers.")
   }
 
   # Standardize inputs
