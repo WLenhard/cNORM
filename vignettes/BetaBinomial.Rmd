@@ -1,6 +1,6 @@
 
 ---
-title: "Modelling Psychometric Data with Beta-Binomial Distributions"
+title: "Modelling Norms with the Beta-Binomial Distribution"
 author: "Wolfgang Lenhard & Alexandra Lenhard"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -10,7 +10,7 @@ output: rmarkdown::html_vignette
 #    toc: true  # Optional table of contents
 #    number_sections: true  # Optional section numbering
 vignette: >
-  %\VignetteIndexEntry{Modelling Psychometric Data with Beta-Binomial Distributions}
+  %\VignetteIndexEntry{Modelling Norms with the Beta-Binomial Distribution}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

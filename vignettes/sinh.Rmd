@@ -1,15 +1,18 @@
+
 ---
-title: "Modelling with Sinh-Arcsinh (shash) Distribution"
+title: "Modelling Norms with the Sinh-Arcsinh (shash) Distribution"
 author: "Wolfgang Lenhard & Alexandra Lenhard"
 date: "`r Sys.Date()`"
-#output:
-#  word_document: default
-#  pdf_document: default
-#pdf_document:
-#  toc: true
 output: rmarkdown::html_vignette
-vignette: "%\\VignetteIndexEntry{Modelling Psychometric Data with Sinh-Arcsinh Distributions}
-  %\\VignetteEngine{knitr::rmarkdown} %\\VignetteEncoding{UTF-8}\n"
+#output: 
+#  pdf_document:
+#    latex_engine: xelatex
+#    toc: true  # Optional table of contents
+#    number_sections: true  # Optional section numbering
+vignette: >
+  %\VignetteIndexEntry{Modelling Norms with the Sinh-Arcsinh (shash) Distribution}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
