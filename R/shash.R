@@ -344,6 +344,15 @@ cnorm.shash <- function(age,
     stop("Length of 'age' and 'score' must be the same.")
   }
 
+  # Check for non finite values
+  if(any(!is.finite(age))){
+    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  }
+
+  if(any(!is.finite(score))){
+    stop("Score vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  }
+
   if (delta <= 0) {
     stop("Delta parameter must be positive.")
   }
@@ -682,6 +691,11 @@ plot.cnormShash <- function(x, ...) {
     data$group <- age
   } else {
     data$group <- getGroups(age)
+  }
+
+  # Limit to max 30 groups for better visibility
+  if(length(unique(data$group))>30){
+    data$group <- getGroups(age, n=30)
   }
 
   # Get actual percentiles

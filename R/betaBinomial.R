@@ -612,11 +612,14 @@ plot.cnormBetaBinomial <- function(x, ...) {
 
   # Calculate and add manifest percentiles
   if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
-    # Distinct age groups
     data$group <- age
   } else {
-    # Use getGroups function
     data$group <- getGroups(age)
+  }
+
+  # Limit to max 30 groups for better visibility
+  if(length(unique(data$group))>30){
+    data$group <- getGroups(age, n=30)
   }
 
   # get actual percentiles
@@ -982,6 +985,15 @@ cnorm.betabinomial2 <- function(age,
   # Input validation
   if (length(age) != length(score)) {
     stop("Length of 'age' and 'score' must be the same.")
+  }
+
+  # Check for non finite values
+  if(any(!is.finite(age))){
+    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  }
+
+  if(any(!is.finite(score))){
+    stop("Score vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
   }
 
   # Standardize inputs
