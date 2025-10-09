@@ -717,7 +717,7 @@ plot.cnormShash <- function(x, ...) {
           y = .data[[paste0("P", percentiles[i] * 100)]],
           color = !!NAMES[i]
         ),
-        size = 0.6
+        linewidth = 0.6
       ) +
       geom_point(
         data = manifest_data,

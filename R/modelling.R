@@ -1310,11 +1310,11 @@ cnorm.cv <-
     if (is.null(formula)) {
       p1 <- ggplot(tab) + theme_custom
       p1 <- p1 +
-        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.complete, color = "Complete"), size = .75, na.rm = TRUE) +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.complete, color = "Complete"), linewidth = .75, na.rm = TRUE) +
         geom_point(aes(x = .data$terms, y = .data$RMSE.raw.complete), size = 2.5, color = "#33aa55", na.rm = TRUE) +
-        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.test, color = "Validation"), size = .75, na.rm = TRUE) +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.test, color = "Validation"), linewidth = .75, na.rm = TRUE) +
         geom_point(aes(x = .data$terms, y = .data$RMSE.raw.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.train, color = "Training"), size = .75, na.rm = TRUE) +
+        geom_line(aes(x = .data$terms, y = .data$RMSE.raw.train, color = "Training"), linewidth = .75, na.rm = TRUE) +
         geom_point(aes(x = .data$terms, y = .data$RMSE.raw.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
         labs(title = "Raw Score RMSE (1)",
              x = "Number of terms",
@@ -1326,9 +1326,9 @@ cnorm.cv <-
 
       if (norms) {
         p2 <- ggplot(tab) + theme_custom +
-          geom_line(aes(x = .data$terms, y = .data$R2.norm.test, color = "Validation"), size = .75, na.rm = TRUE) +
+          geom_line(aes(x = .data$terms, y = .data$R2.norm.test, color = "Validation"), linewidth = .75, na.rm = TRUE) +
           geom_point(aes(x = .data$terms, y = .data$R2.norm.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-          geom_line(aes(x = .data$terms, y = .data$R2.norm.train, color = "Training"), size = .75, na.rm = TRUE) +
+          geom_line(aes(x = .data$terms, y = .data$R2.norm.train, color = "Training"), linewidth = .75, na.rm = TRUE) +
           geom_point(aes(x = .data$terms, y = .data$R2.norm.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
           labs(title = expression(paste("Norm Score ", R^2 , " (2)")),
                x = "Number of terms",
@@ -1338,10 +1338,10 @@ cnorm.cv <-
         print(p2)
 
         p3 <- ggplot(tab) + theme_custom +
-          geom_line(aes(x = .data$terms, y = .data$Crossfit, color = "Crossfit"), size = .75, na.rm = TRUE) +
+          geom_line(aes(x = .data$terms, y = .data$Crossfit, color = "Crossfit"), linewidth = .75, na.rm = TRUE) +
           geom_point(aes(x = .data$terms, y = .data$Crossfit), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-          geom_hline(aes(yintercept = 1.10, color = "Overfit"), linetype = "dashed", size = 1, na.rm = TRUE) +
-          geom_hline(aes(yintercept = 0.90, color = "Underfit"), linetype = "dashed", size = 1, na.rm = TRUE) +
+          geom_hline(aes(yintercept = 1.10, color = "Overfit"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
+          geom_hline(aes(yintercept = 0.90, color = "Underfit"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
           labs(title = "Norm Score CROSSFIT (3)",
                x = "Number of terms",
                y = "Crossfit") +
@@ -1354,9 +1354,9 @@ cnorm.cv <-
 
         # plot delta r2 test
         p4 <- ggplot(tab) + theme_custom +
-          geom_line(aes(x = .data$terms, y = .data$Delta.R2.test, color = "Delta R2"), size = .75, na.rm = TRUE) +
+          geom_line(aes(x = .data$terms, y = .data$Delta.R2.test, color = "Delta R2"), linewidth = .75, na.rm = TRUE) +
           geom_point(aes(x = .data$terms, y = .data$Delta.R2.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-          geom_hline(aes(yintercept = 0.00, color = "Equal R2"), linetype = "dashed", size = 1, na.rm = TRUE) +
+          geom_hline(aes(yintercept = 0.00, color = "Equal R2"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
           labs(title = expression(paste("Norm Score ", Delta, R^2 , " in Validation (4)")),
                x = "Number of terms",
                y = "Delta R2") +

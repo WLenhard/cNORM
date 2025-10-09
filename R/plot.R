@@ -368,7 +368,7 @@ plotNormCurves <- function(model,
 
   # Create ggplot
   p <- ggplot(valueList, aes(x = .data$age, y = .data$raw, color = factor(.data$n))) +
-    geom_line(size = 1) +
+    geom_line(linewidth = 1) +
     scale_color_manual(name = "Norm Score",
                        values = color_palette,
                        labels = paste("Norm", normList)) +
@@ -592,7 +592,7 @@ plotPercentiles <- function(model,
 
   # Create the ggplot
   p <- ggplot(plot_data, aes(x = .data$group, y = .data$value, color = .data$percentile)) +
-    geom_line(data = plot_data_predicted, size = .75) +
+    geom_line(data = plot_data_predicted, linewidth = .75) +
     geom_point(data = plot_data_observed, na.rm = TRUE, size = 2.5) +
     labs(title = title,
          subtitle = subtitle,
@@ -769,7 +769,7 @@ plotDensity <- function(model,
 
   matrix <- matrix[complete.cases(matrix), ]
   p <- ggplot(matrix, aes(x = .data$raw, y = .data$density, color = factor(group))) +
-    geom_line(size = 1, na.rm = TRUE) +
+    geom_line(linewidth = 1, na.rm = TRUE) +
     scale_color_viridis_d(name = "Group",
                           labels = paste("Group", group),
                           option = "plasma") +
@@ -1043,7 +1043,7 @@ plotSubset <- function(model, type = 0) {
   # Define plot based on type
   if (type == 1) {
     p <- p +
-      geom_line(aes(x = .data$adjr2, y = .data$cp, color = "Model in Ascending Order"), size = .75) +
+      geom_line(aes(x = .data$adjr2, y = .data$cp, color = "Model in Ascending Order"), linewidth = .75) +
       geom_point(aes(x = .data$adjr2, y = .data$cp, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       scale_y_log10() +
       labs(title = "Information Function: Mallows's Cp",
@@ -1053,7 +1053,7 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 2) {
     p <- p +
-      geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), size = .75) +
+      geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), linewidth = .75) +
       geom_point(aes(x = .data$adjr2, y = .data$bic, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: BIC",
            x = expression(paste("Adjusted ", R^2)),
@@ -1062,7 +1062,7 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 3) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$RMSE, color = "Model in Ascending Order"), size = .75) +
+      geom_line(aes(x = .data$nr, y = .data$RMSE, color = "Model in Ascending Order"), linewidth = .75) +
       geom_point(aes(x = .data$nr, y = .data$RMSE, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: RMSE",
            x = "Number of Predictors",
@@ -1071,7 +1071,7 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 4) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$RSS, color = "Model in Ascending Order"), size = .75) +
+      geom_line(aes(x = .data$nr, y = .data$RSS, color = "Model in Ascending Order"), linewidth = .75) +
       geom_point(aes(x = .data$nr, y = .data$RSS, shape = .data$filled), size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: RSS",
            x = "Number of Predictors",
@@ -1080,7 +1080,7 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 5) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$F, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_line(aes(x = .data$nr, y = .data$F, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
       geom_point(aes(x = .data$nr, y = .data$F, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       labs(title = "Information Function: F-test Statistics",
            x = "Number of Predictors",
@@ -1089,23 +1089,23 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 6) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$p, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_line(aes(x = .data$nr, y = .data$p, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
       geom_point(aes(x = .data$nr, y = .data$p, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       ylim(-0.005, 0.11) +
       labs(title = "Information Function: p-values",
            x = "Number of Predictors",
            y = expression(paste("p-values for Tests on ", R^2, " adj. of Consecutive Models"))) +
-      geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", size = 1) +
+      geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", linewidth = 1) +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   } else {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, size = .75) +
+      geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
       geom_point(aes(x = .data$nr, y = .data$adjr2, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
       labs(title = expression(paste("Information Function: Adjusted ", R^2)),
            x = "Number of Predictors",
            y = expression(paste("Adjusted ", R^2))) +
-      geom_hline(aes(yintercept = cutoff, color = "R2 = .05"), linetype = "dashed", size = 1, color = "#d62728") +
+      geom_hline(aes(yintercept = cutoff, color = "R2 = .05"), linetype = "dashed", linewidth = 1, color = "#d62728") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   }
@@ -1487,10 +1487,10 @@ compare <- function(model1, model2,
   p <- ggplot() +
     geom_line(data = plot_data_long[plot_data_long$model == "Model 1",],
               aes(x = .data$age, y = .data$value, color = .data$percentile),
-              linetype = "solid", size = 0.6) +
+              linetype = "solid", linewidth = 0.6) +
     geom_line(data = plot_data_long[plot_data_long$model == "Model 2",],
               aes(x = .data$age, y = .data$value, color = .data$percentile),
-              linetype = "dashed", size = 0.6) +
+              linetype = "dashed", linewidth = 0.6) +
     scale_color_manual(values = rainbow(length(percentiles)),
                        labels = paste0(percentiles * 100, "%")) +
     labs(title = title,

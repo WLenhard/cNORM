@@ -11,7 +11,9 @@ Changes:
 *    fixed inconsistencies in terminology. Move class cnormShaSh to cnormShash
 *    stripped down vignette on shash modelling to essentials
 *    updated documentation
-*    
+*    additional checks for shash and bb modelling
+*    improved error messages
+*    replaced deprecated ggplot2 function parameter (linewiidth instead of size)
 
 
 ### Version in 3.5.0
