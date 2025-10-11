@@ -106,7 +106,8 @@ including zero and negativ values.
 }
 \details{
 This implementation uses the Jones & Pewsey (2009) parameterization of the Sinh-Arcsinh distribution.
-Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm.
+Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm. In case, optimization
+fails, try reducing model complexity by reducing polynomial degrees or fixing the delta parameter.
 
 \subsection{The Sinh-Arcsinh Distribution}{
 The shash distribution is defined by the transformation:

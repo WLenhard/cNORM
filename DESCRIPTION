@@ -38,7 +38,7 @@ Suggests:
     testthat
 License: AGPL-3
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 NeedsCompilation: no
 Repository: CRAN
 Encoding: UTF-8

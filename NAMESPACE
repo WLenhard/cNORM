@@ -58,7 +58,8 @@ export(
 	weighted.quantile.harrell.davis,
 	weighted.quantile.type7,
 	computeWeights,
-	taylorSwift
+	taylorSwift,
+	dshash, rshash, qshash, pshash
 )
 
 

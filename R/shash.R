@@ -1,41 +1,101 @@
-#' Sinh-Arcsinh (shash) distribution functions
+#' Sinh-Arcsinh (shash) Distribution
 #'
 #' Density, distribution function, quantile function and random generation
-#' for the Sinh-Arcsinh distribution
+#' for the Sinh-Arcsinh distribution with location parameter \code{mu},
+#' scale parameter \code{sigma}, skewness parameter \code{epsilon}, and
+#' tail weight parameter \code{delta}.
 #'
-#' @param x vector of quantiles
-#' @param mu location parameter
-#' @param sigma scale parameter (> 0)
-#' @param epsilon skewness parameter
-#' @param delta tail weight parameter (> 0)
-#' @param log logical; if TRUE, probabilities p are given as log(p)
+#' @name shash
+#' @aliases dshash pshash qshash rshash
 #'
-#' @keywords internal
+#' @param x,q vector of quantiles
+#' @param p vector of probabilities
+#' @param n number of observations. If \code{length(n) > 1}, the length is
+#'   taken to be the number required.
+#' @param mu location parameter (default: 0)
+#' @param sigma scale parameter (must be > 0, default: 1)
+#' @param epsilon skewness parameter (default: 0, symmetric distribution)
+#' @param delta tail weight parameter (must be > 0, default: 1 for normal-like tails)
+#' @param log,log.p logical; if TRUE, probabilities p are given as log(p)
+#' @param lower.tail logical; if TRUE (default), probabilities are P[X ≤ x]
+#'   otherwise, P[X > x]
+#'
+#' @details
+#' The Sinh-Arcsinh distribution (Jones & Pewsey, 2009) is defined by the transformation:
+#' \deqn{X = \mu + \sigma \cdot \sinh\left(\frac{\text{asinh}(Z) - \epsilon}{\delta}\right)}
+#' where \eqn{Z \sim N(0,1)} is a standard normal variable.
+#'
+#' The four parameters control:
+#' \itemize{
+#'   \item \code{mu}: Location (similar to mean)
+#'   \item \code{sigma}: Scale (similar to standard deviation)
+#'   \item \code{epsilon}: Skewness (\code{epsilon = 0} gives symmetry)
+#'   \item \code{delta}: Tail weight (\code{delta = 1} gives normal-like tails,
+#'         \code{delta > 1} gives heavier tails, \code{delta < 1} gives lighter tails)
+#' }
+#'
+#' @return
+#' \code{dshash} gives the density, \code{pshash} gives the distribution
+#' function, \code{qshash} gives the quantile function, and \code{rshash}
+#' generates random deviates.
+#'
+#' The length of the result is determined by \code{n} for \code{rshash}, and
+#' is the maximum of the lengths of the numerical arguments for the other functions.
+#'
+#' @references
+#' Jones, M. C., & Pewsey, A. (2009). Sinh-arcsinh distributions.
+#' \emph{Biometrika}, 96(4), 761-780. \doi{10.1093/biomet/asp053}
+#'
+#' @seealso
+#' \link[stats]{Normal} for the normal distribution.
+#'
+#' @examples
+#' # Generate random samples
+#' x <- rshash(1000, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
+#'
+#' # Density
+#' plot(density(x))
+#' curve(dshash(x, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2),
+#'       add = TRUE, col = "red")
+#'
+#' # Cumulative probability
+#' pshash(0, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
+#'
+#' # Quantiles
+#' qshash(c(0.025, 0.5, 0.975), mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
+#'
+#' # Compare with normal distribution (epsilon = 0, delta = 1)
+#' par(mfrow = c(2, 2))
+#' x_vals <- seq(-4, 4, length.out = 200)
+#' plot(x_vals, dshash(x_vals), type = "l", main = "Symmetric (like normal)")
+#' plot(x_vals, dshash(x_vals, epsilon = 1), type = "l", main = "Right skewed")
+#' plot(x_vals, dshash(x_vals, delta = 2), type = "l", main = "Heavy tails")
+#' plot(x_vals, dshash(x_vals, delta = 0.5), type = "l", main = "Light tails")
+#'
+#' @export
+#' @rdname shash
 dshash <- function(x, mu = 0, sigma = 1, epsilon = 0, delta = 1, log = FALSE) {
   z <- (x - mu) / sigma
-  sinh_z <- sinh(delta * asinh(z) + epsilon)
-  cosh_z <- cosh(delta * asinh(z) + epsilon)
+  z_sq <- z * z
 
-  logdens <- log(delta) - log(sigma) - 0.5 * log(2 * pi) -
-    0.5 * log(1 + z^2) - 0.5 * sinh_z^2 + log(cosh_z)
+  # Pre-compute asinh(z) once
+  asinh_z <- log(z + sqrt(z_sq + 1))
+  arg <- delta * asinh_z + epsilon
+
+  # Compute sinh and cosh more efficiently
+  exp_arg <- exp(arg)
+  exp_neg_arg <- 1 / exp_arg
+  sinh_z <- (exp_arg - exp_neg_arg) * 0.5
+  cosh_z <- (exp_arg + exp_neg_arg) * 0.5
+
+  logdens <- log(delta) - log(sigma) - 0.918938533204673 -  # log(sqrt(2*pi))
+    0.5 * log1p(z_sq) - 0.5 * sinh_z * sinh_z + log(cosh_z)
 
   if (log) return(logdens) else return(exp(logdens))
 }
 
-#' Sinh-Arcsinh (shash) probability
-#'
-#' Density, distribution function, quantile function and random generation
-#' for the Sinh-Arcsinh distribution
-#'
-#' @param q vector of quantiles
-#' @param mu location parameter
-#' @param sigma scale parameter (> 0)
-#' @param epsilon skewness parameter
-#' @param delta tail weight parameter (> 0)
-#' @param log.p logical; if TRUE, probabilities p are given as log(p)
-#' @param lower.tail logical; if TRUE, probabilities are P[X <= x]
-#'
-#' @keywords internal
+#' @export
+#' @rdname shash
 pshash <- function(q, mu = 0, sigma = 1, epsilon = 0, delta = 1,
                    lower.tail = TRUE, log.p = FALSE) {
   z <- (q - mu) / sigma
@@ -45,20 +105,8 @@ pshash <- function(q, mu = 0, sigma = 1, epsilon = 0, delta = 1,
   return(p)
 }
 
-#' Sinh-Arcsinh (shash) quantile function
-#'
-#' Density, distribution function, quantile function and random generation
-#' for the Sinh-Arcsinh distribution
-#'
-#' @param p vector of probabilities
-#' @param mu location parameter
-#' @param sigma scale parameter (> 0)
-#' @param epsilon skewness parameter
-#' @param delta tail weight parameter (> 0)
-#' @param log.p logical; if TRUE, probabilities p are given as log(p)
-#' @param lower.tail logical; if TRUE, probabilities are P[X <= x]
-#'
-#' @keywords internal
+#' @export
+#' @rdname shash
 qshash <- function(p, mu = 0, sigma = 1, epsilon = 0, delta = 1,
                    lower.tail = TRUE, log.p = FALSE) {
   if (log.p) p <- exp(p)
@@ -71,17 +119,8 @@ qshash <- function(p, mu = 0, sigma = 1, epsilon = 0, delta = 1,
   return(x)
 }
 
-#' Sinh-Arcsinh (shash) random generation
-#'
-#' Density, distribution function, quantile function and random generation
-#' for the Sinh-Arcsinh distribution
-#'
-#' @param mu location parameter
-#' @param sigma scale parameter (> 0)
-#' @param epsilon skewness parameter
-#' @param delta tail weight parameter (> 0)
-#'
-#' @keywords internal
+#' @export
+#' @rdname shash
 rshash <- function(n, mu = 0, sigma = 1, epsilon = 0, delta = 1) {
   u <- rnorm(n)
   z <- sinh((asinh(u) - epsilon) / delta)
@@ -114,43 +153,38 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
   n_epsilon <- ncol(X_epsilon)
   n_delta <- if (!is.null(X_delta)) ncol(X_delta) else 0
 
-  # Extract parameter vectors
-  mu_coef <- params[1:n_mu]
-  sigma_coef <- params[(n_mu + 1):(n_mu + n_sigma)]
-  epsilon_coef <- params[(n_mu + n_sigma + 1):(n_mu + n_sigma + n_epsilon)]
+  # Extract coefficients
+  mu_coef <- params[seq_len(n_mu)]
+  sigma_idx <- n_mu + seq_len(n_sigma)
+  sigma_coef <- params[sigma_idx]
+  epsilon_idx <- n_mu + n_sigma + seq_len(n_epsilon)
+  epsilon_coef <- params[epsilon_idx]
 
-  if (!is.null(X_delta)) {
-    delta_coef <- params[(n_mu + n_sigma + n_epsilon + 1):(n_mu + n_sigma + n_epsilon + n_delta)]
-  }
-
-  # Compute parameters with constraints
-  mu <- X_mu %*% mu_coef
-  log_sigma <- pmax(pmin(X_sigma %*% sigma_coef, 10), -10)
+  # Compute parameters with efficient matrix operations
+  mu <- drop(X_mu %*% mu_coef)
+  log_sigma <- pmin.int(pmax.int(drop(X_sigma %*% sigma_coef), -10), 10)
   sigma <- exp(log_sigma)
-  epsilon <- pmax(pmin(X_epsilon %*% epsilon_coef, 10), -10)
+  epsilon <- pmin.int(pmax.int(drop(X_epsilon %*% epsilon_coef), -10), 10)
 
   if (!is.null(X_delta)) {
-    log_delta <- pmax(pmin(X_delta %*% delta_coef, 2), -2)  # Tighter bounds for delta
+    delta_idx <- n_mu + n_sigma + n_epsilon + seq_len(n_delta)
+    delta_coef <- params[delta_idx]
+    log_delta <- pmin.int(pmax.int(drop(X_delta %*% delta_coef), -2), 2)
     delta <- exp(log_delta)
   } else {
-    delta <- rep(fixed_delta, length(y))
+    delta <- rep.int(fixed_delta, length(y))
   }
 
-  # Use weights if provided
   if (is.null(weights)) {
-    weights <- rep(1, length(y))
+    weights <- 1  # Will broadcast in multiplication
   }
 
-  log_densities <- dshash(y, mu = mu, sigma = sigma, epsilon = epsilon,
-                          delta = delta, log = TRUE)
+  log_densities <- dshash(y, mu, sigma, epsilon, delta, log = TRUE)
+  loglik <- sum(weights * log_densities)
 
-  loglik <- sum(weights * log_densities, na.rm = TRUE)
+  if (!is.finite(loglik)) return(1e10)
 
-  if (!is.finite(loglik)) {
-    return(1e10)
-  }
-
-  return(-loglik)  # Return negative log-likelihood for minimization
+  return(-loglik)
 }
 
 #' Fit a Sinh-Arcsinh (shash) Regression Model for Continuous Norming
@@ -237,7 +271,8 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
 #'
 #' @details
 #' This implementation uses the Jones & Pewsey (2009) parameterization of the Sinh-Arcsinh distribution.
-#' Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm.
+#' Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm. In case, optimization
+#' fails, try reducing model complexity by reducing polynomial degrees or fixing the delta parameter.
 #'
 #' \subsection{The Sinh-Arcsinh Distribution}{
 #' The shash distribution is defined by the transformation:
@@ -435,10 +470,10 @@ cnorm.shash <- function(age,
       X_mu = X_mu,
       X_sigma = X_sigma,
       X_epsilon = X_epsilon,
-      X_delta = X_delta,        # ADD this line
+      X_delta = X_delta,
       y = score,
       weights = weights,
-      fixed_delta = if(!use_varying_delta) delta else NULL,  # ADD this line
+      fixed_delta = if(!use_varying_delta) delta else NULL,
       method = "L-BFGS-B",
       lower = lower_bounds,
       upper = upper_bounds,

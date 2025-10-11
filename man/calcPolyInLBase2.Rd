@@ -3,7 +3,7 @@
 \name{calcPolyInLBase2}
 \alias{calcPolyInLBase2}
 \title{Internal function for retrieving regression function coefficients at specific
-age (optimized)}
+age}
 \usage{
 calcPolyInLBase2(raw, age, coeff, k)
 }

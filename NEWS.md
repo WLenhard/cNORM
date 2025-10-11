@@ -13,7 +13,11 @@ Changes:
 *    updated documentation
 *    additional checks for shash and bb modelling
 *    improved error messages
-*    replaced deprecated ggplot2 function parameter (linewiidth instead of size)
+*    replaced deprecated ggplot2 function parameter (linewiidth instead of size
+*    Performance optimamization in shash modelling
+*    shash documentation improved
+*    improved code safety in diverse functions
+*    shash distribution functions exported to NAMESPACE
 
 
 ### Version in 3.5.0
