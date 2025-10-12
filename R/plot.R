@@ -398,8 +398,7 @@ plotNormCurves <- function(model,
 #' The function plots the norm curves based on the regression model against
 #' the actual percentiles from the raw data. As in 'plotNormCurves',
 #' please check for inconsistent curves, especially intersections.
-#' Violations of this assumption are a strong
-#' indication for problems
+#' Violations of this assumption are a strong indication for problems
 #' in modeling the relationship between raw and norm scores.
 #' In general, extrapolation (point 1 and 2) can carefully be done to a
 #' certain degree outside the original sample, but it should in general
@@ -445,7 +444,7 @@ plotPercentiles <- function(model,
                             scale = NULL,
                             title = NULL,
                             subtitle = NULL,
-                            points = F) {
+                            points = FALSE) {
 
   if(isParametric(model)) {
     stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use 'plot(model, age, raw)' instead.")
@@ -590,35 +589,45 @@ plotPercentiles <- function(model,
   plot_data_predicted <- plot_data[plot_data$type == "Predicted", ]
   plot_data_observed <- plot_data[plot_data$type == "Observed", ]
 
-  # Create the ggplot
-  p <- ggplot(plot_data, aes(x = .data$group, y = .data$value, color = .data$percentile)) +
-    geom_line(data = plot_data_predicted, linewidth = .6) +
-    geom_point(data = plot_data_observed, na.rm = TRUE,         size = 2,
+  # Create the ggplot - ALIGNED ORDER: Points first, then lines
+  p <- ggplot()
+
+  # Add raw scores FIRST if points is TRUE (matches plot.cnormShash)
+  if (points) {
+    if(is.null(age)){
+      p <- p + geom_point(data = data, aes(x = .data[[group]], y = .data[[raw]]),
+                          color = "black", alpha = 0.2, size = 0.6)  # Matched size
+    }else{
+      p <- p + geom_point(data = data, aes(x = .data$age, y = .data[[raw]]),
+                          color = "black", alpha = 0.2, size = 0.6)  # Matched size
+    }
+  }
+
+  # Then add percentile lines and observed points
+  p <- p +
+    geom_line(data = plot_data_predicted,
+              aes(x = .data$group, y = .data$value, color = .data$percentile),
+              linewidth = 0.6) +  # Matched linewidth
+    geom_point(data = plot_data_observed,
+               aes(x = .data$group, y = .data$value, color = .data$percentile),
+               na.rm = TRUE,
+               size = 2,
                shape = 18) +
     labs(title = title,
          subtitle = subtitle,
          x = paste0("Explanatory Variable (", group, ")"),
-         y = paste0("Raw Score (", raw, ")")) +
-    theme_minimal() +
-    theme(legend.position = "right",
-          legend.justification = c(1, 0),
-          legend.background = element_rect(fill = "white", color = "black"),
-          legend.key.width = unit(1.5, "cm")) +
-    scale_color_manual(values = setNames(COL1, NAMES),
-                       name = NULL) +
-    guides(color = guide_legend(override.aes = list(linetype = "solid", shape = NA)))
+         y = paste0("Raw Score (", raw, ")"),
+         color = "Percentile") +  # Added legend title
+    scale_color_manual(
+      values = setNames(COL1, NAMES),
+      labels = paste0(percentiles * 100, "%")  # Matched label format
+    ) +
+    guides(color = guide_legend(override.aes = list(
+      linetype = rep("solid", length(NAMES)),
+      shape = rep(18, length(NAMES))
+    )))  # Matched legend override
 
-  # Add raw scores if points is TRUE
-  if (points) {
-    if(is.null(age)){
-      p <- p + geom_point(data = data, aes(x = .data[[group]], y = .data[[raw]]),
-                        color = "black", alpha = 0.2, size = .6)
-    }else{
-      p <- p + geom_point(data = data, aes(x = .data$age, y = .data[[raw]]),
-                          color = "black", alpha = 0.2, size = .6)
-    }
-  }
-
+  # Apply consistent theme
   p <- p + theme_minimal() +
     theme(
       plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
@@ -634,9 +643,8 @@ plotPercentiles <- function(model,
       panel.grid.minor = element_line(color = "gray95")
     )
 
-
   print(p)
-  return(p)
+  invisible(p)
 }
 
 
