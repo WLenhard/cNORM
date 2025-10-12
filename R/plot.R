@@ -592,8 +592,9 @@ plotPercentiles <- function(model,
 
   # Create the ggplot
   p <- ggplot(plot_data, aes(x = .data$group, y = .data$value, color = .data$percentile)) +
-    geom_line(data = plot_data_predicted, linewidth = .75) +
-    geom_point(data = plot_data_observed, na.rm = TRUE, size = 2.5) +
+    geom_line(data = plot_data_predicted, linewidth = .6) +
+    geom_point(data = plot_data_observed, na.rm = TRUE,         size = 2,
+               shape = 18) +
     labs(title = title,
          subtitle = subtitle,
          x = paste0("Explanatory Variable (", group, ")"),
