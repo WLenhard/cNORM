@@ -16,7 +16,7 @@ plotPercentiles(
   scale = NULL,
   title = NULL,
   subtitle = NULL,
-  points = F
+  points = FALSE
 )
 }
 \arguments{
@@ -52,8 +52,7 @@ data preparation is used (default)}
 The function plots the norm curves based on the regression model against
 the actual percentiles from the raw data. As in 'plotNormCurves',
 please check for inconsistent curves, especially intersections.
-Violations of this assumption are a strong
-indication for problems
+Violations of this assumption are a strong indication for problems
 in modeling the relationship between raw and norm scores.
 In general, extrapolation (point 1 and 2) can carefully be done to a
 certain degree outside the original sample, but it should in general
