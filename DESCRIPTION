@@ -1,47 +1,62 @@
 Package: cNORM
-Type: Package
 Title: Continuous Norming
 Version: 3.5.1
-Maintainer: Wolfgang Lenhard <wolfgang.lenhard@uni-wuerzburg.de>
-Authors@R: c(person("Alexandra", "Lenhard", role=c("aut"),
-    email="lenhard@psychometrica.de", comment=c(ORCID = "0000-0001-8680-4381")), 
-    person("Wolfgang", "Lenhard", role = c("cre","aut"), 
-    email="wolfgang.lenhard@uni-wuerzburg.de", 
-    comment=c(ORCID = "0000-0002-8184-6889")), 
-    person("Sebastian", "Gary", role=c("aut")),
-    person("WPS publisher", role = c("fnd"), comment=c("<https://www.wpspublish.com/>")))
+Authors@R: c(
+    person("Alexandra", "Lenhard", 
+           email = "lenhard@psychometrica.de",
+           role = "aut",
+           comment = c(ORCID = "0000-0001-8680-4381")), 
+    person("Wolfgang", "Lenhard", 
+           email = "wolfgang.lenhard@uni-wuerzburg.de",
+           role = c("cre", "aut"), 
+           comment = c(ORCID = "0000-0002-8184-6889")),
+    person("Sebastian", "Gary", 
+           role = "aut"),
+    person("WPS", "Publisher", 
+           role = "fnd",
+           comment = "https://www.wpspublish.com/"))
 Description: A comprehensive toolkit for generating continuous test norms in 
-    psychometrics and biometrics, and analyzing model fit. The package offers both 
-    distribution-free modeling using Taylor polynomials and parametric modeling 
-    using the beta-binomial and the 'Sinh-Arcsinh' distribution. Originally developed
-    for achievement tests, it is applicable to a wide range of mental, physical, or 
-    other test scores dependent on continuous or discrete explanatory variables. The
-    package provides several advantages: It minimizes deviations from representativeness 
-    in subsamples, interpolates between discrete levels of explanatory variables, 
-    and significantly reduces the required sample size compared to conventional 
-    norming per age group. cNORM enables graphical and analytical evaluation of 
-    model fit, accommodates a wide range of scales including those with negative 
-    and descending values, and even supports conventional norming. It generates 
-    norm tables including confidence intervals. It also includes methods for 
-    addressing representativeness issues through Iterative Proportional Fitting.
+     psychometrics and biometrics, and analyzing model fit. The package offers 
+     both distribution-free modeling using Taylor polynomials and parametric 
+     modeling using the beta-binomial and the 'Sinh-Arcsinh' distribution. 
+     Originally developed for achievement tests, it is applicable to a wide 
+     range of mental, physical, or other test scores dependent on continuous or 
+     discrete explanatory variables. The package provides several advantages: 
+     It minimizes deviations from representativeness in subsamples, interpolates 
+     between discrete levels of explanatory variables, and significantly reduces 
+     the required sample size compared to conventional norming per age group. 
+     cNORM enables graphical and analytical evaluation of model fit, 
+     accommodates a wide range of scales including those with negative and 
+     descending values, and even supports conventional norming. It generates 
+     norm tables including confidence intervals. It also includes methods for 
+     addressing representativeness issues through Iterative Proportional Fitting. 
+     Based on Lenhard et al. (2016) 
+    <doi:10.1177/1073191116656437>, Lenhard et al. (2019) 
+    <doi:10.1371/journal.pone.0222279>, Lenhard and Lenhard (2021) 
+    <doi:10.1177/0013164420928457> and Gary et al. (2023) 
+    <doi:10.1007/s00181-023-02456-0>.
+License: AGPL-3
+URL: https://www.psychometrica.de/cNorm_en.html, 
+     https://github.com/WLenhard/cNORM
+BugReports: https://github.com/WLenhard/cNORM/issues
 Depends:
     R (>= 4.0.0)
 Imports:
-    leaps (>= 3.1),
-    ggplot2 (>= 3.5.1)
+    ggplot2 (>= 3.5.0),
+    leaps (>= 3.1)
 Suggests: 
-    knitr,
-    shiny,
     foreign,
+    knitr,
+    markdown,
     readxl,
     rmarkdown,
-    testthat
-License: AGPL-3
+    shiny,
+    shinycssloaders,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
-NeedsCompilation: no
-Repository: CRAN
+Config/testthat/edition: 3
 Encoding: UTF-8
+Language: en-US
 LazyData: true
-URL: https://www.psychometrica.de/cNorm_en.html, https://github.com/WLenhard/cNORM
-BugReports: https://github.com/WLenhard/cNORM/issues
+LazyDataCompression: xz
+RoxygenNote: 7.3.3

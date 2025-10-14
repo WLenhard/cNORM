@@ -1,81 +1,100 @@
-importFrom(leaps, regsubsets)
-importFrom(stats, mad, model.matrix, terms, setNames, qbeta, optim, pf, xtabs, as.formula, summary.lm, pbeta, approx, poly, na.omit, complete.cases, predict, predict.lm, t.test, formula, ave, aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif, optimize, cor, quantile, coef)
+# Imports from base packages
 importFrom(grDevices, rainbow, dev.off)
+importFrom(stats,
+           mad, model.matrix, terms, setNames, qbeta, optim, pf, xtabs,
+           as.formula, summary.lm, pbeta, approx, poly, na.omit,
+           complete.cases, predict, predict.lm, t.test, formula, ave,
+           aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif,
+           optimize, cor, quantile, coef)
 importFrom(utils, menu, head, tail)
-importFrom(ggplot2, .data, scale_shape_manual, scale_x_continuous, annotate, margin, element_rect, unit, geom_tile, ggsave, geom_contour_filled, facet_wrap, geom_contour, scale_fill_gradientn, geom_abline, element_text, element_blank, element_line, scale_color_viridis_d, scale_color_brewer, ylim, geom_text, scale_y_log10, geom_vline, theme, geom_point, guides, guide_legend, aes, geom_hline, geom_line, geom_smooth, ggplot, labs, scale_color_manual, scale_y_continuous, theme_minimal)
+
+# Imports from suggested packages (with checks in code)
+importFrom(leaps, regsubsets)
+
+# Imports from ggplot2
+importFrom(ggplot2,
+           .data, aes, annotate, element_blank, element_line, element_rect,
+           element_text, facet_wrap, geom_abline, geom_contour,
+           geom_contour_filled, geom_hline, geom_line, geom_point,
+           geom_smooth, geom_text, geom_tile, geom_vline, ggplot, ggsave,
+           guide_legend, guides, labs, margin, scale_color_brewer,
+           scale_color_manual, scale_color_viridis_d, scale_fill_gradientn,
+           scale_shape_manual, scale_x_continuous, scale_y_continuous,
+           scale_y_log10, theme, theme_minimal, unit, ylim)
+
+# Exported functions
 export(
-	bestModel,
-	betaCoefficients,
-	buildCnormObject,
-	checkConsistency,
-	cNORM.GUI,
-	cnorm.cv,
-	cnorm,
-	cnorm.betabinomial,
-	cnorm.shash,
-	compare,
-	computePowers,
-	diagnostics.betabinomial,
-	diagnostics.shash,
-	derivationTable,
-	derive,
-	getNormCurve,
-	getGroups,
-	normTable,
-	normTable.betabinomial,
-	normTable.shash,
-	plotDensity,
-	plotDerivative,
-	plotNormCurves,
-	plotPercentiles,
-	plotPercentileSeries,
-	plotSubset,
-	plotRaw,
-	plotNorm,
-	plotCnorm,
-	plot.cnormBetaBinomial,
-	plot.cnormShash,
-	predictNorm,
-	predict.cnormBetaBinomial,
-	predict.cnormShash,
-	predictRaw,
-	prepareData,
-	printSubset,
-	rangeCheck,
-	rankByGroup,
-	rankBySlidingWindow,
-	rawTable,
-	regressionFunction,
-	simulateRasch,
-	standardize,
-	modelSummary,
-	summary.cnormBetaBinomial,
-	summary.cnormShash,
-	getNormScoreSE,
-	weighted.rank,
-	weighted.quantile,
-	weighted.quantile.inflation,
-	weighted.quantile.harrell.davis,
-	weighted.quantile.type7,
-	computeWeights,
-	taylorSwift,
-	dshash, rshash, qshash, pshash
+    bestModel,
+    betaCoefficients,
+    buildCnormObject,
+    checkConsistency,
+    cNORM.GUI,
+    cnorm,
+    cnorm.betabinomial,
+    cnorm.cv,
+    cnorm.shash,
+    compare,
+    computePowers,
+    computeWeights,
+    derivationTable,
+    derive,
+    diagnostics.betabinomial,
+    diagnostics.shash,
+    dshash,
+    getGroups,
+    getNormCurve,
+    getNormScoreSE,
+    modelSummary,
+    normTable,
+    normTable.betabinomial,
+    normTable.shash,
+    plotCnorm,
+    plotDensity,
+    plotDerivative,
+    plotNorm,
+    plotNormCurves,
+    plotPercentiles,
+    plotPercentileSeries,
+    plotRaw,
+    plotSubset,
+    predictNorm,
+    predictRaw,
+    prepareData,
+    printSubset,
+    pshash,
+    qshash,
+    rangeCheck,
+    rankByGroup,
+    rankBySlidingWindow,
+    rawTable,
+    regressionFunction,
+    rshash,
+    simulateRasch,
+    standardize,
+    taylorSwift,
+    weighted.quantile,
+    weighted.quantile.harrell.davis,
+    weighted.quantile.inflation,
+    weighted.quantile.type7,
+    weighted.rank
 )
 
-
-
+# S3 methods for cnorm class
 S3method(plot, cnorm)
 S3method(print, cnorm)
 S3method(summary, cnorm)
 
-S3method(predict, cnormBetaBinomial)
+# S3 methods for cnormBetaBinomial class
 S3method(plot, cnormBetaBinomial)
+S3method(predict, cnormBetaBinomial)
 S3method(summary, cnormBetaBinomial)
 
-S3method(predict, cnormBetaBinomial2)
+# S3 methods for cnormBetaBinomial2 class
 S3method(plot, cnormBetaBinomial2)
+S3method(predict, cnormBetaBinomial2)
 S3method(summary, cnormBetaBinomial2)
 
-S3method(predict, cnormShash)
+# S3 methods for cnormShash class
 S3method(plot, cnormShash)
+S3method(predict, cnormShash)
 S3method(summary, cnormShash)
