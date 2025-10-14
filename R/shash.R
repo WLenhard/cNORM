@@ -17,7 +17,7 @@
 #' @param epsilon skewness parameter (default: 0, symmetric distribution)
 #' @param delta tail weight parameter (must be > 0, default: 1 for normal-like tails)
 #' @param log,log.p logical; if TRUE, probabilities p are given as log(p)
-#' @param lower.tail logical; if TRUE (default), probabilities are P[X ≤ x]
+#' @param lower.tail logical; if TRUE (default), probabilities are P[X <= x]
 #'   otherwise, P[X > x]
 #'
 #' @details
