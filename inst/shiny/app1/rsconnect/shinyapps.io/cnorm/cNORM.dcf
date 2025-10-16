@@ -1,0 +1,11 @@
+name: cNORM
+title: shiny
+username:
+account: cnorm
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 573060
+bundleId: 9279545
+url: https://cnorm.shinyapps.io/cNORM/
+asMultiple: FALSE
+asStatic: FALSE
