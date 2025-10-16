@@ -1233,7 +1233,8 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
         data = data,
         raw = "raw",
         group = "group",
-        weights = weights
+        weights = weights,
+        scale = c(attributes(object$result)$scaleM, attributes(object$result)$scaleSD)
       )
       norm_scores <- predict(object, data$group, data$raw)
     } else{
@@ -1245,7 +1246,8 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
         age = "age",
         raw = "raw",
         width = width,
-        weights = weights
+        weights = weights,
+        scale = c(attributes(object$result)$scaleM, attributes(object$result)$scaleSD)
       )
       norm_scores <- predict(object, data$age, data$raw)
     }

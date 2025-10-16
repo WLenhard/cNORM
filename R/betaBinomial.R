@@ -840,7 +840,8 @@ diagnostics.betabinomial <- function(model,
         data = data,
         raw = "raw",
         group = "group",
-        weights = weights
+        weights = weights,
+        scale = c(attributes(model$result)$scaleM, attributes(model$result)$scaleSD)
       )
       norm_scores <- predict(model, data$group, data$raw)
     } else{
@@ -852,7 +853,8 @@ diagnostics.betabinomial <- function(model,
         age = "age",
         raw = "raw",
         width = width,
-        weights = weights
+        weights = weights,
+        scale = c(attributes(model$result)$scaleM, attributes(model$result)$scaleSD)
       )
       norm_scores <- predict(model, data$age, data$raw)
     }
