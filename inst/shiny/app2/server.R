@@ -27,6 +27,10 @@ shinyServer(function(input, output, session) {
     } else if (input$Example == "CDC") {
       rv$data <- CDC
     }
+
+    # Invalidate model when new data is loaded
+    rv$model <- NULL
+    rv$normTables <- NULL
   })
 
   # Load data from file
@@ -46,6 +50,10 @@ shinyServer(function(input, output, session) {
       } else if (ext == "sav") {
         rv$data <- haven::read_sav(input$file$datapath)
       }
+
+      # Invalidate model when new data is loaded
+      rv$model <- NULL
+      rv$normTables <- NULL
 
       showNotification("Data loaded successfully!", type = "message")
     }, error = function(e) {
@@ -246,6 +254,25 @@ shinyServer(function(input, output, session) {
   # NORM TABLES TAB
   # ============================================================================
 
+  # Auto-populate score range when data/score variable changes
+  observe({
+    req(rv$data, input$score_var)
+
+    score <- rv$data[[input$score_var]]
+
+    updateNumericInput(
+      session,
+      "norm_start",
+      value = floor(min(score, na.rm = TRUE))
+    )
+
+    updateNumericInput(
+      session,
+      "norm_end",
+      value = ceiling(max(score, na.rm = TRUE))
+    )
+  })
+
   observeEvent(input$generateTables, {
     req(rv$model, input$norm_ages)
 
@@ -333,11 +360,21 @@ shinyServer(function(input, output, session) {
   })
 
   # Render individual norm tables
+  # Render individual norm tables
   observe({
     req(rv$normTables)
 
     lapply(names(rv$normTables), function(age_name) {
       output[[paste0("normTable_", age_name)]] <- DT::renderDT({
+
+        # Identify columns to round
+        cols_to_round <- c("Px", "Pcum", "Percentile", "z", "norm")
+
+        # Add CI columns if they exist
+        ci_cols <- c("lowerCI", "upperCI", "lowerCI_PR", "upperCI_PR")
+        existing_ci_cols <- ci_cols[ci_cols %in% names(rv$normTables[[age_name]])]
+        cols_to_round <- c(cols_to_round, existing_ci_cols)
+
         DT::datatable(
           rv$normTables[[age_name]],
           options = list(
@@ -347,7 +384,7 @@ shinyServer(function(input, output, session) {
           ),
           rownames = FALSE
         ) %>%
-          DT::formatRound(columns = c("Px", "Pcum", "Percentile", "z", "norm"), digits = 2)
+          DT::formatRound(columns = cols_to_round, digits = 2)
       })
     })
   })

@@ -20,6 +20,7 @@ shinyUI(fluidPage(
         sidebarPanel(
           width = 3,
           tags$h3("Load Data"),
+
           tags$p("Please choose a data set for parametric modeling. You can use a built-in example or load your own file:"),
 
           selectizeInput(
@@ -54,7 +55,19 @@ shinyUI(fluidPage(
         mainPanel(
           width = 9,
           tags$h3("Data Preview"),
-          tags$p("After loading data, review it below before proceeding to modeling. You can apply betabinomial distributions (especially suitable for IRT-based test scales) and SinH-ArcsinH (shash) distributions, which are extremely versatile and can approximate a wide range of distribution forms."),
+          tags$p("With this app, you can model norm scores like percentiles, T scores and IQ scores for psychometric, biometric or
+                 other data. It uses parametric modelling techniques like the beta-binomial distribution or the SinH-ArcsinH distribution
+                 to derive continuous norms in dependence of an explanatory variable like age. After loading data, review it below before
+                 proceeding to modeling. To fit the models, please select the 'Modelling' tab. To generate norm tables, please select 'Norm tables'.",
+                 tags$br(),
+                 tags$br(),
+                 "Further information on the methodology can be found at",
+                 tags$a(href = "https://www.psychometrica.de/cNorm_betabinomial_en.html", "Psychometrica", target = "_blank"),
+                 "and in the package vignettes on modelling with the ",
+                 tags$a(href = "https://cran.r-project.org/web/packages/cNORM/vignettes/BetaBinomial.html", "Beta-Binomial Distribution", target = "_blank"),
+                 "or the",
+                 tags$a(href = "https://cran.r-project.org/web/packages/cNORM/vignettes/sinh.html", "SinH-ArcsinH Distribution (SHASH)", target = "_blank"),
+                 "on CRAN."),
           withSpinner(DT::DTOutput("dataPreview"), type = 5)
         )
       )

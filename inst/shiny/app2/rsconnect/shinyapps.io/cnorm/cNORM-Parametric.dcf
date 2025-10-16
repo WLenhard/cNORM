@@ -1,0 +1,12 @@
+name: cNORM-Parametric
+title: cNORM-Parametric
+username: cnorm
+account: cnorm
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 15781656
+bundleId: 11044924
+url: https://cnorm.shinyapps.io/cNORM-Parametric/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
