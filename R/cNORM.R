@@ -136,38 +136,50 @@ cNORM.GUI <- function(launch.browser = TRUE) {
                 launch.browser = launch.browser)
 }
 
-#' Launcher for the graphical user interface of cNORM for parametric
-#' continuous norming
+#' Launch the cNORM Parametric Modeling Shiny Application
 #'
-#' @param launch.browser Default TRUE; automatically open browser for GUI
-#'
+#' @param launch.browser Logical, whether to launch browser automatically (default: TRUE)
 #' @export
-#'
-#' @examples
-#' \dontrun{
-#' # Launch graphical user interface
-#' cNORM.GUI2()
-#' }
 cNORM.GUI2 <- function(launch.browser = TRUE) {
-  packageList <- c("shiny", "shinycssloaders", "foreign", "readxl", "markdown", "rmarkdown")
+
+  # Required packages for the parametric modeling GUI
+  packageList <- c("shiny", "shinycssloaders", "DT", "ggplot2",
+                   "foreign", "readxl", "haven")
 
   # Check which packages are missing
   missing <- packageList[!sapply(packageList, requireNamespace, quietly = TRUE)]
 
   if (length(missing) > 0) {
-    cat("Additional packages are needed to start the user interface:\n")
+    cat("Additional packages are needed to start the parametric modeling interface:\n")
     cat(paste("-", missing, collapse = "\n"), "\n")
-    cat("\nWould you like to try to install them now?\n")
-    installChoice <- menu(c("yes", "no"))
+    cat("\nWould you like to install them now?\n")
+    installChoice <- utils::menu(c("Yes", "No"))
 
     if (installChoice == 1) {
+      cat("\nInstalling packages...\n")
       utils::install.packages(missing)
+
+      # Verify installation succeeded
+      still_missing <- missing[!sapply(missing, requireNamespace, quietly = TRUE)]
+      if (length(still_missing) > 0) {
+        stop("Failed to install: ", paste(still_missing, collapse = ", "),
+             "\nPlease install manually and try again.")
+      }
+      cat("Installation complete!\n\n")
     } else {
-      stop("Required packages are missing. Unable to start the GUI")
+      stop("Required packages are missing. Unable to start the GUI.")
     }
   }
 
+  # Locate the app directory
   appDir <- system.file("shiny", "app2", package = "cNORM")
+
+  if (appDir == "") {
+    stop("Could not find app directory. Try re-installing `cNORM`.", call. = FALSE)
+  }
+
+  # Launch the app
+  message("Launching cNORM Parametric Modeling GUI...")
   shiny::runApp(appDir,
                 display.mode = "normal",
                 launch.browser = launch.browser)
