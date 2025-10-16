@@ -2,6 +2,19 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.5.2
+Date: 16.10.2025
+
+
+Changes:
+
+*    fixed scale information in diagnostics (betabinomial and shash), which
+     was not correctly passed to the function
+*    new shiny GUI for parametric modelling
+*    Shiny GUI files restructured
+
+
+
 ### Version in 3.5.1
 Date: 14.10.2025
 

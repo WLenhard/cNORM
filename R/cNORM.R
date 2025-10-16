@@ -99,7 +99,8 @@
 NULL
 
 
-#' Launcher for the graphical user interface of cNORM
+#' Launcher for the graphical user interface of cNORM for distribution free
+#' continuous norming
 #'
 #' @param launch.browser Default TRUE; automatically open browser for GUI
 #'
@@ -129,10 +130,47 @@ cNORM.GUI <- function(launch.browser = TRUE) {
     }
   }
 
-  shiny::runApp(
-    system.file('shiny', package = 'cNORM'),
-    launch.browser = launch.browser  # Use the parameter!
-  )
+  appDir <- system.file("shiny", "app1", package = "cNORM")
+  shiny::runApp(appDir,
+                display.mode = "normal",
+                launch.browser = launch.browser)
+}
+
+#' Launcher for the graphical user interface of cNORM for parametric
+#' continuous norming
+#'
+#' @param launch.browser Default TRUE; automatically open browser for GUI
+#'
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Launch graphical user interface
+#' cNORM.GUI2()
+#' }
+cNORM.GUI2 <- function(launch.browser = TRUE) {
+  packageList <- c("shiny", "shinycssloaders", "foreign", "readxl", "markdown", "rmarkdown")
+
+  # Check which packages are missing
+  missing <- packageList[!sapply(packageList, requireNamespace, quietly = TRUE)]
+
+  if (length(missing) > 0) {
+    cat("Additional packages are needed to start the user interface:\n")
+    cat(paste("-", missing, collapse = "\n"), "\n")
+    cat("\nWould you like to try to install them now?\n")
+    installChoice <- menu(c("yes", "no"))
+
+    if (installChoice == 1) {
+      utils::install.packages(missing)
+    } else {
+      stop("Required packages are missing. Unable to start the GUI")
+    }
+  }
+
+  appDir <- system.file("shiny", "app2", package = "cNORM")
+  shiny::runApp(appDir,
+                display.mode = "normal",
+                launch.browser = launch.browser)
 }
 
 #' Continuous Norming
