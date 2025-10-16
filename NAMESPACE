@@ -29,6 +29,7 @@ export(
     buildCnormObject,
     checkConsistency,
     cNORM.GUI,
+    cNORM.GUI2,
     cnorm,
     cnorm.betabinomial,
     cnorm.cv,
