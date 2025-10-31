@@ -22,6 +22,10 @@ log_likelihood <- function(params, X, Z, y, weights) {
   log_sigma <- Z %*% gamma
   sigma <- exp(log_sigma)
 
+  if (is.null(weights)) {
+    weights <- 1  # Will broadcast in multiplication
+  }
+
   ll <- sum(weights * dnorm(y, mean = mu, sd = sigma, log = TRUE))
   return(-ll)  # Return negative log-likelihood for minimization
 }
@@ -75,18 +79,28 @@ cnorm.betabinomial1 <- function(age,
 
   # Input validation
   if (length(age) != length(score)) {
-    stop("'age' and 'score' must be of the same length.")
+    stop("Length of 'age' and 'score' must be the same.")
   }
 
-  # Check for non finite values
-  if(any(!is.finite(age))){
-    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  if(!is.null(weights) && length(age) != length(weights)) {
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
-  # Check for non-finite values
-  if (any(!is.finite(score))) {
-    stop("'score' contains non-finite values (NA, NaN, or Inf). ",
-         "Beta-binomial modelling requires positive integers (including zero). Please clean the data.")
+  # Prepare vectors
+  vectors_to_check <- list(age = age, score = score)
+  if(!is.null(weights)) {
+    vectors_to_check$weights <- weights
+  }
+
+  # Check if filtering needed
+  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+
+  if(needs_filtering) {
+    message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
+    tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
+    age <- tmp[[1]]
+    score <- tmp[[2]]
+    if(!is.null(weights)) weights <- tmp[[3]]
   }
 
   # Check for negative values
@@ -103,13 +117,6 @@ cnorm.betabinomial1 <- function(age,
          "Beta-binomial modelling requires positive integers (including zero). Please consider using
          Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
          or transform your data to positive integers.")
-  }
-
-  # If weights are not provided, use equal weights
-  if (is.null(weights)) {
-    weights <- rep(1, length(age))
-  } else if (length(weights) != length(age)) {
-    stop("Length of weights must match length of age and score")
   }
 
   # Standardize inputs
@@ -929,16 +936,16 @@ log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
   alpha <- exp(log_alpha)
   beta <- exp(log_beta)
 
-  # Use weights if provided
-  if (is.null(weights)) {
-    weights <- rep(1, length(y))
-  }
 
   # Revision of prior approach for more numerically stable calculation using direct lbeta approach
   logp <- lchoose(n, y) + lbeta(y + alpha, n - y + beta) - lbeta(alpha, beta)
 
   # Handle non-finite values safely
   logp[!is.finite(logp)] <- -709  # Approximately log(.Machine$double.xmin)
+
+  if (is.null(weights)) {
+    weights <- 1  # Will broadcast in multiplication
+  }
 
   ll <- sum(weights * logp)
 
@@ -1019,18 +1026,28 @@ cnorm.betabinomial2 <- function(age,
                                 plot = TRUE) {
   # Input validation
   if (length(age) != length(score)) {
-    stop("'age' and 'score' must be of the same length.")
+    stop("Length of 'age' and 'score' must be the same.")
   }
 
-  # Check for non finite values
-  if(any(!is.finite(age))){
-    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  if(!is.null(weights) && length(age) != length(weights)) {
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
-  # Check for non-finite values
-  if (any(!is.finite(score))) {
-    stop("'score' contains non-finite values (NA, NaN, or Inf). ",
-         "Beta-binomial modelling requires positive integers (including zero). Please clean the data.")
+  # Prepare vectors
+  vectors_to_check <- list(age = age, score = score)
+  if(!is.null(weights)) {
+    vectors_to_check$weights <- weights
+  }
+
+  # Check if filtering needed
+  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+
+  if(needs_filtering) {
+    message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
+    tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
+    age <- tmp[[1]]
+    score <- tmp[[2]]
+    if(!is.null(weights)) weights <- tmp[[3]]
   }
 
   # Check for negative values

@@ -379,15 +379,29 @@ cnorm.shash <- function(age,
     stop("Length of 'age' and 'score' must be the same.")
   }
 
-  # Check for non finite values
-  if(any(!is.finite(age))){
-    stop("Age vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  if(!is.null(weights) && length(age) != length(weights)) {
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
-  if(any(!is.finite(score))){
-    stop("Score vector contains non-finite values (NA, NaN, Inf). Please clean the data.")
+  # Prepare vectors
+  vectors_to_check <- list(age = age, score = score)
+  if(!is.null(weights)) {
+    vectors_to_check$weights <- weights
   }
 
+  # Check if filtering needed
+  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+
+  if(needs_filtering) {
+    message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
+    tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
+    age <- tmp[[1]]
+    score <- tmp[[2]]
+    if(!is.null(weights)) weights <- tmp[[3]]
+  }
+
+
+  # ensure positivity of delta
   if (delta <= 0) {
     stop("Delta parameter must be positive.")
   }

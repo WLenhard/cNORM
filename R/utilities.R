@@ -520,3 +520,11 @@ isParametric <- function(model) {
   return(isSHASH(model)||isBeta(model))
 }
 
+# filter incomplete cases
+#' @keywords internal
+filter_complete <- function(...) {
+  v <- list(...)
+  keep <- Reduce(`&`, lapply(v, is.finite))
+  lapply(v, `[`, keep)
+}
+

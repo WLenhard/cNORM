@@ -3,7 +3,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.2
-Date: 16.10.2025
+Date: 31.10.2025
 
 
 Changes:
@@ -12,6 +12,7 @@ Changes:
      was not correctly passed to the function
 *    new shiny GUI for parametric modelling
 *    Shiny GUI files restructured
+*    input validation checks in cnorm.betabinomial and cnorm.shash
 
 
 

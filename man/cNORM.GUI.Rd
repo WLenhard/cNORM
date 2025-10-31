@@ -2,7 +2,8 @@
 % Please edit documentation in R/cNORM.R
 \name{cNORM.GUI}
 \alias{cNORM.GUI}
-\title{Launcher for the graphical user interface of cNORM}
+\title{Launcher for the graphical user interface of cNORM for distribution free
+continuous norming}
 \usage{
 cNORM.GUI(launch.browser = TRUE)
 }
@@ -10,7 +11,8 @@ cNORM.GUI(launch.browser = TRUE)
 \item{launch.browser}{Default TRUE; automatically open browser for GUI}
 }
 \description{
-Launcher for the graphical user interface of cNORM
+Launcher for the graphical user interface of cNORM for distribution free
+continuous norming
 }
 \examples{
 \dontrun{
