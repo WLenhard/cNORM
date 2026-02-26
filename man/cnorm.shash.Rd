@@ -160,7 +160,7 @@ model_complex <- cnorm.shash(
   mu_degree = 4,         # Complex mean trajectory
   sigma_degree = 3,      # Changing variability pattern
   epsilon_degree = 2,    # Skewness shifts
-  epsilon_degree = NULL, # set to NULL to activate fixed delta
+  delta_degree = NULL, # set to NULL to activate fixed delta
   delta = 1.3            # Slightly heavy tails
 )
 

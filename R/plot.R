@@ -645,8 +645,8 @@ plotPercentiles <- function(model,
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
-
-  return(p)
+  print(p)
+  invisible(p)
 }
 
 
