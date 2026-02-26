@@ -13,6 +13,14 @@ Changes:
 *    new shiny GUI for parametric modelling
 *    Shiny GUI files restructured
 *    input validation checks in cnorm.betabinomial and cnorm.shash
+*    plotPercentile did not minAge and maxAge parameter - fixed
+*    plotPercentile performance improvement
+*    saving plots in plotPercentileSeries, can run out of bounds - fixed
+*    plotNorm object checks improved
+*    plotCnorm helper parameter checks - fixed
+*    fixed geom_hline warning in plotSubset
+*    removed the raw parameter from plotRaw - it always uses the model data
+*    improved model type check in plotDensity
 
 
 

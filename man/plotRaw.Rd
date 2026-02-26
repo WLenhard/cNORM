@@ -4,14 +4,12 @@
 \alias{plotRaw}
 \title{Plot manifest and fitted raw scores}
 \usage{
-plotRaw(model, group = FALSE, raw = NULL, type = 0)
+plotRaw(model, group = FALSE, type = 0)
 }
 \arguments{
 \item{model}{The regression model from the 'cnorm' function}
 
 \item{group}{Should the fit be displayed by group?}
-
-\item{raw}{Vector of the observed raw data}
 
 \item{type}{Type of display: 0 = plot manifest against fitted values, 1 = plot
 manifest against difference values}
