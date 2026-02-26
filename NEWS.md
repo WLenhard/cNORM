@@ -3,16 +3,18 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.2
-Date: 31.10.2025
+Date: 26.02.2025
 
 
 Changes:
 
 *    fixed scale information in diagnostics (betabinomial and shash), which
      was not correctly passed to the function
+*    input validation checks in cnorm.betabinomial and cnorm.shash     
+*    optimization of shash functions
+*    robustness of betabinomial functions
 *    new shiny GUI for parametric modelling
 *    Shiny GUI files restructured
-*    input validation checks in cnorm.betabinomial and cnorm.shash
 *    plotPercentile did not minAge and maxAge parameter - fixed
 *    plotPercentile performance improvement
 *    saving plots in plotPercentileSeries, can run out of bounds - fixed

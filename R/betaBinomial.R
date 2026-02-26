@@ -153,7 +153,12 @@ cnorm.betabinomial1 <- function(age,
   # Extract results and calculate standard errors
   beta_est <- result$par[1:(mu + 1)]
   gamma_est <- result$par[(mu + 2):length(result$par)]
-  se <- sqrt(diag(solve(result$hessian)))
+  se <- tryCatch({
+    sqrt(diag(solve(result$hessian)))
+  }, error = function(e) {
+    warning("Could not compute standard errors: Hessian matrix issue")
+    rep(NA, length(result$par))
+  })
 
   # Store original mean and sd for unstandardizing later
   # add attributes for usage in other functions
@@ -260,6 +265,8 @@ predictCoefficients <- function(model, ages, n = NULL) {
 
   a <- (m2 * n - m3 - m * var) / (n * var - n * m + m2)
   b <- a * ((n - m) / m)
+  a <- pmax(a, 1e-6)    # prevent non-positive parameters
+  b <- pmax(b, 1e-6)
 
   predicted <- data.frame(
     age = ages,
@@ -384,6 +391,9 @@ normTable.betabinomial <- function(model,
 
   result <- list()
 
+  mScale <- attr(model$result, "scaleMean")
+  sdScale <- attr(model$result, "scaleSD")
+
   for (k in 1:length(a)) {
     x <- seq(from = 0, to = m)
 
@@ -405,10 +415,6 @@ normTable.betabinomial <- function(model,
     z[z < -range] <- -range
     z[z > range] <- range
 
-
-
-    mScale <- attr(model$result, "scaleMean")
-    sdScale <- attr(model$result, "scaleSD")
     norm <- rep(NA, length(z))
 
     if (!is.na(mScale) && !is.na(sdScale)) {
@@ -612,6 +618,8 @@ plot.cnormBetaBinomial <- function(x, ...) {
   data <- data.frame(age = age, score = score)
   if (!is.null(weights)) {
     data$w <- weights
+  }else {
+    data$w <- rep(1, nrow(data))
   }
 
   age_range <- range(age)
@@ -848,7 +856,7 @@ diagnostics.betabinomial <- function(model,
         raw = "raw",
         group = "group",
         weights = weights,
-        scale = c(attributes(model$result)$scaleM, attributes(model$result)$scaleSD)
+        scale = c(attr(model$result, "scaleMean"), attr(model$result, "scaleSD"))
       )
       norm_scores <- predict(model, data$group, data$raw)
     } else{
@@ -861,7 +869,7 @@ diagnostics.betabinomial <- function(model,
         raw = "raw",
         width = width,
         weights = weights,
-        scale = c(attributes(model$result)$scaleM, attributes(model$result)$scaleSD)
+        scale = c(attr(model$result, "scaleMean"), attr(model$result, "scaleSD"))
       )
       norm_scores <- predict(model, data$age, data$raw)
     }
@@ -1367,7 +1375,7 @@ cnorm.betabinomial <- function(age,
   }
 
   if (is.null(n)) {
-    n <- max(score)
+    n <- max(score, na.rm = TRUE)
     message("n parameter not specified, using the maximum score in the data instead. Consider to provide n manually.")
   }
 
