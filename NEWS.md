@@ -2,6 +2,18 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+### Version in 3.5.3
+Date: 27.04.2026; in progress
+
+
+Changes:
+
+*    optimized rawTable and normTable to enforce monotonicity of raw and norm scores
+     from the median outward, which leads to less problems with inconsistent and NA results
+     at extreme ends of the model
+
+
+
 ### Version in 3.5.2
 Date: 26.02.2026
 

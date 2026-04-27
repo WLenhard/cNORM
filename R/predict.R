@@ -160,6 +160,13 @@ predictRaw <-
 #' confidence intervals are computed for the true score estimates, including a correction for
 #' regression to the mean (Eid & Schmidt, 2012, p. 272).
 #'
+#' If monotonicity of the raw scores is set to true, this is enforced
+#' from the middle of the table outward. This avoids the problem that a single
+#' inconsistent value at one of the borders propagates through the entire range.
+#' The middle cell is kept fixed; values on either side are clipped to their
+#' neighbor toward the middle if the model produces a non-monotonic prediction.
+#' The direction (ascending vs. descending) is taken from \code{model$descend}.
+#'
 #' @param A the age as single value or a vector of age values
 #' @param model The regression model from the cnorm function
 #' @param minNorm The lower bound of the norm score range
@@ -167,12 +174,15 @@ predictRaw <-
 #' @param minRaw clipping parameter for the lower bound of raw scores
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param step Stepping parameter with lower values indicating higher precision
-#' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
+#' @param monotonic corrects for non-monotonic norm scores in case of model
+#'   inconsistencies (default TRUE). Correction is applied middle-out and respects
+#'   \code{model$descend}.
+#' @param monotonuous Deprecated. Use \code{monotonic} instead.
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
-#' @param reliability coefficient, ranging between  0 to 1
+#' @param reliability coefficient, ranging between 0 to 1
 #' @param pretty Format table by collapsing intervals and rounding to meaningful precision
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
-#' value or a list #' of norm tables if vector of A values was provided
+#'   value or a list of norm tables if vector of A values was provided
 #' @seealso rawTable
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
@@ -189,7 +199,7 @@ predictRaw <-
 #' )
 #'
 #' # conventional norming, set age to arbitrary value
-#' model <- cnorm(raw=elfe$raw)
+#' model <- cnorm(raw = elfe$raw)
 #' normTable(0, model)
 #'
 #' @family predict
@@ -201,147 +211,138 @@ normTable <- function(A,
                       minRaw = NULL,
                       maxRaw = NULL,
                       step = NULL,
-                      monotonuous = TRUE,
+                      monotonic = TRUE,
                       CI = .9,
                       reliability = NULL,
-                      pretty = T) {
+                      pretty = TRUE,
+                      monotonuous) {
 
-  if(isBeta(model)){
+
+  if (!missing(monotonuous)) {
+    warning("Argument 'monotonuous' is deprecated; please use 'monotonic'.")
+    monotonic <- monotonuous
+  }
+
+
+  if (isBeta(model)) {
     return(normTable.betabinomial(model, A, CI = CI, reliability = reliability))
-  }else if(isSHASH(model)){
-    return(normTable.shash(model, A, minRaw, maxRaw, step, CI = CI, reliability = reliability))
-  } else if(isTaylor(model)){
+  } else if (isSHASH(model)) {
+    return(normTable.shash(model, A, minRaw, maxRaw, step,
+                           CI = CI, reliability = reliability))
+  } else if (isTaylor(model)) {
     model <- model$model
-  }else if(!inherits(model, "cnormModel")){
+  } else if (!inherits(model, "cnormModel")) {
     stop("Please provide a cnorm object.")
   }
 
-  if (model$useAge&&!is.numeric(A)){
+
+  if (model$useAge && !is.numeric(A)) {
     stop("Please specify age.")
   }
 
-  if (is.null(model)){
-    stop("No model specified")
-  }
-
-  if(is.null(CI)||is.na(CI)){
+  if (is.null(CI) || is.na(CI)) {
     reliability <- NULL
-  }else if (CI > .99999 || CI < .00001){
+  } else if (CI > .99999 || CI < .00001) {
     stop("Confidence coefficient (CI) out of range. Please specify value between 0 and 1.")
   }
 
   rel <- FALSE
-  if(!is.null(reliability)){
-    if(reliability > .9999 || reliability < .0001){
-    stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
-  }else{
-      se <- qnorm(1 - ((1 - CI)/2)) * sqrt(reliability * (1 - reliability));
-      rel <- TRUE
-  }
+  if (!is.null(reliability)) {
+    if (reliability > .9999 || reliability < .0001) {
+      stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
+    }
+    se  <- qnorm(1 - ((1 - CI) / 2)) * sqrt(reliability * (1 - reliability))
+    rel <- TRUE
   }
 
-  if (is.null(minNorm)||is.na(minNorm)){
+
+  if (is.null(minNorm) || is.na(minNorm)) {
     minNorm <- model$scaleM - 2.5 * model$scaleSD
   }
-
-  if (is.null(maxNorm)||is.na(maxNorm)){
+  if (is.null(maxNorm) || is.na(maxNorm)) {
     maxNorm <- model$scaleM + 2.5 * model$scaleSD
   }
-
-  # in case it still fails
-  if (is.null(minNorm)||is.null(maxNorm)){
+  if (is.null(minNorm) || is.null(maxNorm)) {
     stop("Please specify minNorm and maxNorm.")
   }
-
-  if(is.null(step)||is.na(step)){
+  if (is.null(step) || is.na(step)) {
     step <- model$scaleSD / 10
+  }
+  if (is.null(minRaw) || is.na(minRaw)) {
+    minRaw <- model$minRaw
+  }
+  if (is.null(maxRaw) || is.na(maxRaw)) {
+    maxRaw <- model$maxRaw
   }
 
   descend <- model$descend
 
-
-  if (is.null(minRaw)||is.na(minRaw)) {
-    minRaw <- model$minRaw
-  }
-
-  if (is.null(maxRaw)||is.na(maxRaw)) {
-    maxRaw <- model$maxRaw
-  }
-
   tables <- vector("list", length(A))
 
-  for (x in 1:length(A)) {
-    maxn <- maxNorm
-    minn <- minNorm
-    norm <- vector("list", (maxn - minn) / step + 1)
-    raw <- vector("list", (maxn - minn) / step + 1)
-    i <- 1
-    l <- length(norm)
+  for (x in seq_along(A)) {
 
-      while (i <= l) {
-        r <- predictRaw(minn, A[[x]], model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+    # Vectorized prediction across the whole norm range
+    norm_seq <- seq(minNorm, maxNorm, by = step)
+    raw_seq  <- predictRaw(norm_seq, A[[x]], model$coefficients,
+                           minRaw = minRaw, maxRaw = maxRaw)
 
-        norm[[i]] <- minn
-        raw[[i]] <- r
+    # Middle-out monotonicity correction (respects descend)
+    if (monotonic) {
+      raw_seq <- enforce_monotone_middle(raw_seq, descend = descend)
+    }
 
-        minn <- minn + step
-        i <- i + 1
-      }
-
-
-    normTable <-
-      do.call(rbind, Map(data.frame, norm = norm, raw = raw))
+    nt <- data.frame(norm = norm_seq, raw = raw_seq)
 
     if (!is.na(model$scaleM) && !is.na(model$scaleSD)) {
-      normTable$percentile <- pnorm((normTable$norm - model$scaleM) / model$scaleSD) * 100
+      nt$percentile <- pnorm((nt$norm - model$scaleM) / model$scaleSD) * 100
     }
 
-    if(monotonuous){
-      if(!descend){
-        minRawX <- normTable$raw[[1]]
-      for(y in 1:length(normTable$raw)){
-        if(normTable$raw[[y]] >= minRawX){
-          minRawX <- normTable$raw[[y]]
-        }else{
-          normTable$raw[[y]] <- NA
-        }
-      }
-      }else{
-        y <- length(normTable$raw)
-        maxRawX <- normTable$raw[[y]]
-        while(y > 0){
-          if(normTable$raw[[y]] >= maxRawX){
-            maxRawX <- normTable$raw[[y]]
-          }else{
-            normTable$raw[[y]] <- NA
-          }
-
-          y <- y -1
-        }
-      }
+    if (rel) {
+      zPredicted    <- reliability * (nt$norm - model$scaleM) / model$scaleSD
+      nt$lowerCI    <- (zPredicted - se) * model$scaleSD + model$scaleM
+      nt$upperCI    <- (zPredicted + se) * model$scaleSD + model$scaleM
+      nt$lowerCI_PR <- pnorm(zPredicted - se) * 100
+      nt$upperCI_PR <- pnorm(zPredicted + se) * 100
     }
 
-    if(rel){
-      zPredicted <- reliability * (normTable$norm - model$scaleM)/model$scaleSD
-      normTable$lowerCI <- (zPredicted - se) * model$scaleSD + model$scaleM
-      normTable$upperCI <- (zPredicted + se) * model$scaleSD + model$scaleM
-      normTable$lowerCI_PR <- pnorm(zPredicted - se) * 100
-      normTable$upperCI_PR <- pnorm(zPredicted + se) * 100
-
-    }
-    if(pretty)
-      tables[[x]] <- prettyPrint(normTable)
-    else
-      tables[[x]] <- normTable
+    tables[[x]] <- if (pretty) prettyPrint(nt) else nt
   }
 
   names(tables) <- A
+  if (length(A) == 1L) tables[[1]] else tables
+}
 
-  if (length(A) == 1) {
-    return(tables[[1]])
+
+# -------------------------------------------------------------------------
+# Internal helper: enforce monotonicity of a numeric vector outward from the
+# middle. The middle element is preserved exactly. Toward each end the values
+# are clipped to their neighbor closer to the middle if they violate the
+# expected ordering. This isolates inconsistencies at the borders instead of
+# letting them propagate across the whole table.
+#
+# descend = FALSE  -> raw scores increase with the norm score (default)
+# descend = TRUE   -> raw scores decrease with the norm score
+#                     (e.g. reaction-time-like tests)
+# -------------------------------------------------------------------------
+enforce_monotone_middle <- function(v, descend = FALSE) {
+  n <- length(v)
+  if (n < 2L) return(v)
+  mid <- (n + 1L) %/% 2L
+
+  if (!descend) {
+    # Ascending: each step away from the middle must be >= the previous one
+    v[mid:n] <- cummax(v[mid:n])
+    if (mid > 1L) {
+      v[1:mid] <- rev(cummin(rev(v[1:mid])))
+    }
   } else {
-    return(tables)
+    # Descending: each step away from the middle must be <= the previous one
+    v[mid:n] <- cummin(v[mid:n])
+    if (mid > 1L) {
+      v[1:mid] <- rev(cummax(rev(v[1:mid])))
+    }
   }
+  v
 }
 
 #' Create a table with norm scores assigned to raw scores for a specific age based on the regression model
@@ -354,35 +355,49 @@ normTable <- function(A,
 #' In case a confidence coefficient (CI, default .9) and the reliability is specified,
 #' confidence intervals are computed for the true score estimates, including a correction for
 #' regression to the mean (Eid & Schmidt, 2012, p. 272).
+#'
+#' Monotonicity of the norm scores with respect to the raw scores is enforced
+#' from the middle of the table outward. This avoids the problem that a single
+#' inconsistent value at one of the borders propagates through the entire range.
+#' The middle cell is kept fixed; values on either side are clipped to their
+#' neighbor toward the middle if the model produces a non-monotonic prediction.
+#' For descending tests (\code{model$descend == TRUE}) the table is first
+#' reordered by raw score so that the norm direction is always ascending after
+#' sorting; the same middle-out logic then applies.
+#'
 #' @param A the age, either single value or vector with age values
 #' @param model The regression model or a cnorm object
 #' @param minRaw The lower bound of the raw score range
 #' @param maxRaw The upper bound of the raw score range
-#' @param minNorm Clipping parameter for the lower bound of norm scores (default 25)
-#' @param maxNorm Clipping parameter for the upper bound of norm scores (default 25)
+#' @param minNorm Clipping parameter for the lower bound of norm scores
+#' @param maxNorm Clipping parameter for the upper bound of norm scores
 #' @param step Stepping parameter for the raw scores (default 1)
-#' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
+#' @param monotonic corrects for non-monotonic norm scores in case of model
+#'   inconsistencies (default TRUE). Correction is applied middle-out and
+#'   respects \code{model$descend}.
+#' @param monotonuous Deprecated. Use \code{monotonic} instead.
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
-#' @param reliability coefficient, ranging between  0 to 1
+#' @param reliability coefficient, ranging between 0 to 1
 #' @param pretty Format table by collapsing intervals and rounding to meaningful precision
-#' @return either data.frame with raw scores and the predicted norm scores in case of simple A value or a list
-#' of norm tables if vector of A values was provided
+#' @return either data.frame with raw scores and the predicted norm scores in case of simple A
+#'   value or a list of norm tables if vector of A values was provided
 #' @seealso normTable
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-#' # generate a norm table for the raw value range from 0 to 28 for the time point month 7 of grade 3
+#' # generate a norm table for the raw value range 0..28 at month 7 of grade 3
 #' table <- rawTable(3 + 7 / 12, cnorm.elfe, minRaw = 0, maxRaw = 28)
 #'
 #' # generate several raw tables
 #' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28)
 #'
 #' # additionally compute confidence intervals
-#' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9, reliability = .94)
+#' table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28,
+#'                   CI = .9, reliability = .94)
 #'
 #' # conventional norming, set age to arbitrary value
-#' model <- cnorm(raw=elfe$raw)
+#' model <- cnorm(raw = elfe$raw)
 #' rawTable(0, model)
 #'
 #' @family predict
@@ -394,137 +409,101 @@ rawTable <- function(A,
                      minNorm = NULL,
                      maxNorm = NULL,
                      step = 1,
-                     monotonuous = TRUE,
+                     monotonic = TRUE,
                      CI = .9,
                      reliability = NULL,
-                     pretty = TRUE) {
+                     pretty = TRUE,
+                     monotonuous) {
 
-  if(isTaylor(model)){
+  # ---- Backward compatibility for the old, misspelled argument ------------
+  if (!missing(monotonuous)) {
+    warning("Argument 'monotonuous' is deprecated; please use 'monotonic'.")
+    monotonic <- monotonuous
+  }
+
+  # ---- Dispatch / validation ---------------------------------------------
+  if (isTaylor(model)) {
     model <- model$model
-  }else if(!inherits(model, "cnormModel")){
+  } else if (!inherits(model, "cnormModel")) {
     stop("Please provide a cnorm object.")
   }
 
-  if (model$useAge&&!is.numeric(A)){
+  if (model$useAge && !is.numeric(A)) {
     stop("Please specify age.")
   }
 
-  if (is.null(step)||is.na(step)){
-    step <- 1
-  }
+  # ---- Defaults ----------------------------------------------------------
+  if (is.null(step) || is.na(step)) step <- 1
 
-  if (is.null(model)){
-    stop("No model specified")
-  }
-
-  if (is.null(minNorm)||is.na(minNorm)) {
-    minNorm <- model$minL1
-  }
-
-  if (is.null(maxNorm)||is.na(maxNorm)) {
-    maxNorm <- model$maxL1
-  }
-
-  if (is.null(minRaw)||is.na(minRaw)) {
-    minRaw <- model$minRaw
-  }
-
-  if (is.null(maxRaw)||is.na(maxRaw)) {
-    maxRaw <- model$maxRaw
-  }
+  if (is.null(minNorm) || is.na(minNorm)) minNorm <- model$minL1
+  if (is.null(maxNorm) || is.na(maxNorm)) maxNorm <- model$maxL1
+  if (is.null(minRaw)  || is.na(minRaw))  minRaw  <- model$minRaw
+  if (is.null(maxRaw)  || is.na(maxRaw))  maxRaw  <- model$maxRaw
 
   rel <- FALSE
-  if(!is.null(reliability)){
-    if(reliability > .9999 || reliability < .0001){
+  if (!is.null(reliability)) {
+    if (reliability > .9999 || reliability < .0001) {
       stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
-    }else{
-      se <- qnorm(1 - ((1 - CI)/2)) * sqrt(reliability * (1 - reliability));
-      rel <- TRUE
     }
+    se  <- qnorm(1 - ((1 - CI) / 2)) * sqrt(reliability * (1 - reliability))
+    rel <- TRUE
   }
 
+  descend <- isTRUE(model$descend)
+
+  # ---- Build one table per age value -------------------------------------
   tables <- vector("list", length(A))
 
-  for (x in 1:length(A)) {
-    maxn <- maxNorm
-    minn <- minNorm
-    maxr <- maxRaw
-    minr <- minRaw
-    norm <- vector("list", (maxr - minr) / step)
-    raw <- vector("list", (maxr - minr) / step)
-    i <- 1
-      while (minr <= maxr) {
-        i <- i + 1
-        n <-
-          predictNorm(minr, A[[x]], model, minNorm, maxNorm)
-        norm[[i]] <- n
-        raw[[i]] <- minr
+  for (x in seq_along(A)) {
 
-        minr <- minr + step
+    raw_seq  <- seq(minRaw, maxRaw, by = step)
+    # predictNorm is solved numerically per raw score; vapply for type safety
+    norm_seq <- vapply(
+      raw_seq,
+      function(r) predictNorm(r, A[[x]], model, minNorm, maxNorm),
+      numeric(1)
+    )
+
+    tab <- data.frame(raw = raw_seq, norm = norm_seq)
+
+    # For descending tests the natural order of raw scores is reversed so
+    # that norm scores are ascending after sorting -- the middle-out helper
+    # can then always work in the ascending direction.
+    if (descend) {
+      tab <- tab[order(tab$raw, decreasing = TRUE), , drop = FALSE]
+    }
+
+    # Middle-out monotonicity correction on the norm column
+    if (monotonic) {
+      corrected <- enforce_monotone_middle(tab$norm, descend = FALSE)
+      changed   <- which(!is.na(tab$norm) & corrected != tab$norm)
+      if (length(changed) > 0L) {
+        message("rawTable: ", length(changed),
+                " norm value(s) clipped for monotonicity at raw = ",
+                paste(tab$raw[changed], collapse = ", "),
+                ". Please check the model consistency.")
       }
-
-
-    table <-
-      do.call(rbind, Map(data.frame, raw = raw, norm = norm))
+      tab$norm <- corrected
+    }
 
     if (!is.na(model$scaleM) && !is.na(model$scaleSD)) {
-      table$percentile <- pnorm((table$norm - model$scaleM) / model$scaleSD) * 100
+      tab$percentile <- pnorm((tab$norm - model$scaleM) / model$scaleSD) * 100
     }
 
-    if(model$descend){
-      table <- table[order(table$raw, decreasing = TRUE),]
-    }
-    # checking consistency
-    k <- 1
-    SUCCESS <- TRUE
-    errorText <- ""
-
-    if(monotonuous){
-      minScore <- table$norm[[1]]
-      minPR <- table$percentile[[1]]
-
-      for(y in 1:length(table$norm)){
-        if(table$norm[[y]] >= minScore){
-          minScore <- table$norm[[y]]
-          minPR <- table$percentile[[y]]
-        }else{
-          table$norm[[y]] <- minScore
-          table$percentile[[y]] <- minPR
-
-          SUCCESS <- FALSE
-          errorText <- paste0(errorText, table$raw[y], ",")
-        }
-      }
+    if (rel) {
+      zPredicted     <- reliability * (tab$norm - model$scaleM) / model$scaleSD
+      tab$lowerCI    <- (zPredicted - se) * model$scaleSD + model$scaleM
+      tab$upperCI    <- (zPredicted + se) * model$scaleSD + model$scaleM
+      tab$lowerCI_PR <- pnorm(zPredicted - se) * 100
+      tab$upperCI_PR <- pnorm(zPredicted + se) * 100
     }
 
-    if (!SUCCESS) {
-      message(paste0("The raw table generation yielded indications of inconsistent raw score results: ", errorText, ". Please check the model consistency."))
-    }
-
-    if(rel){
-      zPredicted <- reliability * (table$norm - model$scaleM)/model$scaleSD
-      table$lowerCI <- (zPredicted - se) * model$scaleSD + model$scaleM
-      table$upperCI <- (zPredicted + se) * model$scaleSD + model$scaleM
-      table$lowerCI_PR <- pnorm(zPredicted - se) * 100
-      table$upperCI_PR <- pnorm(zPredicted + se) * 100
-
-    }
-
-    if(pretty)
-      tables[[x]] <- prettyPrint(table)
-    else
-      tables[[x]] <- table
-
-
+    rownames(tab) <- NULL
+    tables[[x]]   <- if (pretty) prettyPrint(tab) else tab
   }
 
   names(tables) <- A
-
-  if (length(A) == 1) {
-    return(tables[[1]])
-  } else {
-    return(tables)
-  }
+  if (length(A) == 1L) tables[[1]] else tables
 }
 
 
