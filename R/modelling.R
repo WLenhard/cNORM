@@ -219,39 +219,58 @@ bestModel <- function(data,
   selectionStrategy <- 0
 
   # take highest consistent model
+  # number of selected predictors in each (possibly filtered) row
+  n_terms_per_row <- rowSums(results$outmat == "*")
+
+  selectionStrategy <- 0
+
   if (is.null(R2) && (terms == 0)) {
-    if(!is.null(results$highestConsistent)){
+    if (!is.null(results$highestConsistent)) {
       i <- results$highestConsistent
       selectionStrategy <- 1
-      report <- paste0("Final solution: ", i, " terms (highest consistent model)")
-    }
-    # no consistent model available, take model with R2 > .99
-    else{
+      report <- paste0("Final solution: ",
+                       n_terms_per_row[i],
+                       " terms (highest consistent model)")
+    } else {
       i <- which(results$adjr2 > 0.99)[1]
-      selectionStrategy <- 2
-      # not available, take last model
       if (is.na(i)) {
-        i <- 5
+        # fall back to the smallest available model
+        i <- which.min(n_terms_per_row)
         selectionStrategy <- 3
-        report <- paste0("Final solution: ", i, " terms (model with highest R2)")
-      }else{
-        report <- paste0("Final solution: ", i, " terms (model exceeding R2 > .99)")
+        report <- paste0("Final solution: ", n_terms_per_row[i],
+                         " terms (smallest available; R2 > .99 not reached)")
+      } else {
+        selectionStrategy <- 2
+        report <- paste0("Final solution: ", n_terms_per_row[i],
+                         " terms (model exceeding R2 > .99)")
       }
     }
-  }else if(terms > 0){
-    i <- terms
+  } else if (terms > 0) {
+    candidate <- which(n_terms_per_row == terms)[1]
+    if (is.na(candidate)) {
+      candidate <- which.min(abs(n_terms_per_row - terms))
+      warning("No model with exactly ", terms,
+              " terms is available after consistency screening; ",
+              "using closest match (", n_terms_per_row[candidate], " terms).")
+    }
+    i <- candidate
     selectionStrategy <- 4
-    report <- paste0("User specified solution: ", i, " terms")
-  } else{
-    i <- which(results$adjr2 > R2)[1]
-    selectionStrategy <- 5
-    # not available, take last model
-    if (is.na(i)) {
-      i <- nvmax
+    report <- paste0("User specified solution: ",
+                     n_terms_per_row[i], " terms")
+  } else {
+    candidates <- which(results$adjr2 > R2)
+    if (length(candidates) == 0L) {
+      i <- which.max(results$adjr2)
       selectionStrategy <- 3
-      report <- paste0("User specified solution: R2 > ", R2, ", but value not reached. Using the highest model instead.")
-    }else{
-      report <- paste0("User specified solution: R2 > ", R2, " resulting in ", i, " terms")
+      report <- paste0("User specified solution: R2 > ", R2,
+                       ", but value not reached. Using best available model (",
+                       n_terms_per_row[i], " terms).")
+    } else {
+      # smallest model meeting the threshold
+      i <- candidates[which.min(n_terms_per_row[candidates])]
+      selectionStrategy <- 5
+      report <- paste0("User specified solution: R2 > ", R2,
+                       " resulting in ", n_terms_per_row[i], " terms")
     }
   }
 
@@ -1046,7 +1065,6 @@ cnorm.cv <- function(data,
 
       } else {
         d      <- d[sample(nrow(d)), ]
-        # FIX: explicit floor to avoid fractional row index
         number <- floor(nrow(d) * 0.8)
         train  <- d[seq_len(number), ]
         test   <- d[(number + 1L):nrow(d), ]
@@ -1059,9 +1077,9 @@ cnorm.cv <- function(data,
         test  <- rankBySlidingWindow(test,  age = age, raw = raw,
                                      weights = weights, width = width, silent = TRUE)
         train <- computePowers(train, age = age, k = k, t = t, silent = TRUE)
+        test  <- computePowers(test,  age = age, k = k, t = t, silent = TRUE)   # FIX
       }
     }
-
     subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max,
                           really.big = n.models > 25)
 
@@ -1450,80 +1468,110 @@ predictionMatrix <- function(minL, maxL, minA, maxA, k, t){
   return(pred_data)
 }
 
-screenSubset <- function(data1, results, raw, k, t){
+#' Screen `regsubsets` output for monotonic consistency
+#'
+#' For every row returned by `regsubsets` (up to `nbest = 20` per term count),
+#' refit the corresponding linear model and test whether the predicted raw
+#' scores are monotonic in the latent norm dimension across the age range.
+#'
+#' For each term count where *no* model is genuinely monotonic, the first
+#' (i.e. best by R^2) model is force-kept so that downstream selection always
+#' has at least one candidate per term count. The `consistent` flag in the
+#' returned object reflects *genuine* consistency, not the forced fallback.
+#'
+#' @param data1 the data frame used for modelling
+#' @param results the `summary(regsubsets(...))` object
+#' @param raw raw score vector (kept for API compatibility)
+#' @param k power degree for the location dimension
+#' @param t power degree for the age dimension
+#'
+#' @return a filtered copy of `results`, augmented with a logical
+#'   `consistent` vector and a scalar `highestConsistent` (or `NULL` if no
+#'   genuinely consistent model was found).
+#' @keywords internal
+#' @noRd
+screenSubset <- function(data1, results, raw, k, t) {
   minRaw <- min(data1$raw)
   maxRaw <- max(data1$raw)
 
-  # Create a data frame for predictions
-  pred_data <- predictionMatrix(min(data1$L1), max(data1$L1), min(data1$A1), max(data1$A1), k, t)
+  # Build the prediction grid once.
+  pred_data <- predictionMatrix(min(data1$L1), max(data1$L1),
+                                min(data1$A1), max(data1$A1),
+                                k, t)
 
-  # prepare variables
-  nTerms <- as.numeric(apply(results$outmat, 1, function(row) sum(row == '*', na.rm = TRUE)))
-  consistent <- rep(FALSE, length(nTerms))
-  norms <- seq(from = min(data1$L1), to = max(data1$L1), length.out = 50)
-  age <- c(min(data1$A1), min(data1$A1) + (max(data1$A1)-min(data1$A1))/2, max(data1$A1))
-  currentNumber <- 0
+  # Number of selected terms in each row of the regsubsets summary.
+  nTerms <- as.integer(apply(results$outmat, 1L,
+                             function(row) sum(row == "*", na.rm = TRUE)))
+  n_models <- length(nTerms)
 
-  # Loop through each possible model to screen consistency
-  for(i in 1:length(nTerms)){
-    if(nTerms[i]>currentNumber){
-      currentNumber <- nTerms[[i]]
+  consistent      <- rep(FALSE, n_models)
+  currentNumber   <- 0L
+  consistentFound <- FALSE   # FIX: initialise before the loop
+
+  # Walk through models in regsubsets order. Within a term count, regsubsets
+  # returns models from best to worst, so we can stop at the first consistent
+  # one for each term count.
+  for (i in seq_len(n_models)) {
+    if (nTerms[i] > currentNumber) {
+      currentNumber   <- nTerms[i]
       consistentFound <- FALSE
     }
 
-    if(!consistentFound){
+    if (!consistentFound) {
       text <- paste0("raw ~ ",
-                     paste(colnames(results$outmat)[results$outmat[i,] == "*"],
+                     paste(colnames(results$outmat)[results$outmat[i, ] == "*"],
                            collapse = " + "))
-      linear.model <- lm(text, data = data1)
-      consistentFound <- check_monotonicity(linear.model, pred_data, minRaw, maxRaw)
-      consistent[i] <- consistentFound
+      linear.model    <- lm(text, data = data1)
+      consistentFound <- check_monotonicity(linear.model, pred_data,
+                                            minRaw, maxRaw)
+      consistent[i]   <- consistentFound
     }
   }
 
+  # Bookkeeping frames. `df` keeps the *genuine* consistency flag,
+  # `df_modified` is the inclusion mask used for subsetting (genuine
+  # consistency OR forced fallback per term count).
+  df          <- data.frame(terms = nTerms,
+                            consistent = consistent,
+                            R2 = results$adjr2)
+  df_modified <- df
 
-
-  # set first occurence of model per term to true, if no consistent one found
-  df_modified <- data.frame(terms = nTerms, consistent = consistent, R2 = results$adjr2)
-  df <- df_modified
-  df_sorted <- df[order(df$R2, decreasing = TRUE), ]
-  df_sorted <- df_sorted[df$consistent, ]
-
-  # Loop through each unique term
-  unique_terms <- unique(nTerms)
-  for (term in unique_terms) {
-    # Get indices for the current term
+  # Ensure that every term count has at least one representative: if no
+  # genuinely consistent model exists for a term count, force the first
+  # (= best R^2) entry of that term count to be kept.
+  for (term in unique(nTerms)) {
     term_indices <- which(df$terms == term)
-
-    # Check if there are any TRUE values for this term
     if (!any(df$consistent[term_indices])) {
-      # If no TRUE values, set the first occurrence to TRUE
       df_modified$consistent[term_indices[1]] <- TRUE
     }
   }
 
-  consistent <- df_modified$consistent
+  keep <- df_modified$consistent
+
+  # Subset the regsubsets summary to kept rows. drop = FALSE preserves
+  # matrix structure when only a single row survives.  The exposed
+  # `consistent` flag retains the *genuine* status.
   results1 <- results
-  results1$consistent <- df$consistent[consistent]
-  results1$which <- results1$which[consistent,]
-  results1$outmat <- results1$outmat[consistent,]
-  results1$adjr2 <- results1$adjr2[consistent]
-  results1$cp <- results1$cp[consistent]
-  results1$bic <- results1$bic[consistent]
-  results1$rss <- results1$rss[consistent]
-  results1$rsq <- results1$rsq[consistent]
+  results1$consistent <- df$consistent[keep]
+  results1$which      <- results1$which [keep, , drop = FALSE]
+  results1$outmat     <- results1$outmat[keep, , drop = FALSE]
+  results1$adjr2      <- results1$adjr2 [keep]
+  results1$cp         <- results1$cp    [keep]
+  results1$bic        <- results1$bic   [keep]
+  results1$rss        <- results1$rss   [keep]
+  results1$rsq        <- results1$rsq   [keep]
 
-  highestConsistent <- NULL
-
-  for(i in 1:(length(results1$consistent))){
-    if(results1$consistent[i]){
-      highestConsistent <- i
-    }
+  # Highest position whose model is *genuinely* consistent (not just forced).
+  consistent_positions <- which(results1$consistent)
+  results1$highestConsistent <- if (length(consistent_positions) > 0L) {
+    max(consistent_positions)
+  } else {
+    NULL
   }
 
-  results1$highestConsistent <- highestConsistent
-  return(results1)
+  results1
 }
+
 
 #' K-fold Resampled Coefficient Estimation for Linear Regression
 #'
@@ -1577,20 +1625,17 @@ subsample_lm <- function(text, data, weights, k = 10) {
                              attr(terms(formula), "term.labels"))
 
   # Perform k-fold CV
-  for(i in 1:k) {
-    # Split data and fit the model
-    fold_idx <- which(folds == i)
+  for (i in 1:k) {
+    fold_idx   <- which(folds == i)
     train_data <- data[-fold_idx, ]
 
-    if(is.null(weights)){
+    if (is.null(weights)) {
       fit <- lm(formula, data = train_data)
-    }else{
-      train_weights <- weights[-folds[[i]]]
+    } else {
+      train_weights <- weights[-fold_idx]      # <-- FIX
       fit <- lm(formula, data = train_data, weights = train_weights)
     }
-
-    # Store coefficients
-    coef_matrix[i,] <- coef(fit)
+    coef_matrix[i, ] <- coef(fit)
   }
 
   # Calculate final coefficients (mean across folds)
