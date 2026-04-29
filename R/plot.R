@@ -391,6 +391,117 @@ plotNormCurves <- function(model,
 }
 
 
+#' Cumulative norm distribution plot for conventional-norming models
+#'
+#' Used internally when `plotPercentiles()` is called on a cnorm object that
+#' was built without age/group (i.e. `useAge == FALSE`). Plots raw score on
+#' the x-axis against the model-implied percentile on the y-axis, with the
+#' empirical cumulative distribution of the manifest sample overlaid.
+#'
+#' @param x A cnorm object.
+#' @param minRaw,maxRaw Plot range on the raw-score axis. Defaults to the
+#'   model's stored raw range.
+#' @param title,subtitle Plot annotations; defaults match `plotPercentiles`.
+#' @noRd
+plotCumulative <- function(x,
+                           minRaw   = NULL,
+                           maxRaw   = NULL,
+                           title    = NULL,
+                           subtitle = NULL) {
+
+  if (!isTaylor(x)) stop("plotCumulative requires a cnorm object.")
+
+  data    <- x$data
+  m       <- x$model
+  raw_var <- m$raw
+  scaleM  <- m$scaleM
+  scaleSD <- m$scaleSD
+
+  if (is.null(minRaw)) minRaw <- m$minRaw
+  if (is.null(maxRaw)) maxRaw <- m$maxRaw
+
+  # ------------------------------------------------------------------
+  # Model-implied curve.
+  #
+  # The grid spans only the *data's* norm range (m$minL1 .. m$maxL1).
+  # Extrapolating beyond the fitted range can let the polynomial swing
+  # outside [minRaw, maxRaw] and then re-enter it on the way to ±Inf,
+  # producing spurious vertical streaks reaching the top/bottom of the
+  # plot. Within the data range the polynomial only interpolates and
+  # the curve stays well-behaved.
+  # ------------------------------------------------------------------
+  norm_grid <- seq(m$minL1, m$maxL1, length.out = 400L)
+  raw_grid  <- predictRaw(norm_grid,
+                          age          = rep(0, length(norm_grid)),
+                          coefficients = m$coefficients)
+  pct_grid  <- pnorm((norm_grid - scaleM) / scaleSD) * 100
+
+  curve_df <- data.frame(raw = raw_grid, percentile = pct_grid)
+  curve_df <- curve_df[curve_df$raw >= minRaw &
+                         curve_df$raw <= maxRaw, , drop = FALSE]
+
+  # ------------------------------------------------------------------
+  # Manifest empirical CDF: one point per unique raw value at its
+  # mid-rank percentile. Plotting per-subject percentiles directly
+  # would produce vertical streaks at each tied raw score, because
+  # weighted.rank() assigns sequential ranks within ties.
+  # ------------------------------------------------------------------
+  raw_obs <- data[[raw_var]]
+  raw_obs <- raw_obs[!is.na(raw_obs)]
+  n_obs   <- length(raw_obs)
+
+  unique_raw <- sort(unique(raw_obs))
+  manifest_df <- data.frame(
+    raw        = unique_raw,
+    percentile = vapply(unique_raw, function(r) {
+      (sum(raw_obs < r) + 0.5 * sum(raw_obs == r)) / n_obs * 100
+    }, numeric(1))
+  )
+
+  # ------------------------------------------------------------------
+  # Title / subtitle (consistent with plotPercentiles)
+  # ------------------------------------------------------------------
+  if (is.null(title)) {
+    title <- "Cumulative Norm Distribution (Conventional Norming)"
+    subtitle <- bquote(paste(
+      "Model: ", .(m$ideal.model),
+      ", R"^2, " = ",
+      .(round(m$subsets$adjr2[[m$ideal.model]], digits = 4))
+    ))
+  }
+
+  # ------------------------------------------------------------------
+  # Plot
+  # ------------------------------------------------------------------
+  p <- ggplot() +
+    geom_point(data = manifest_df,
+               aes(x = .data$raw, y = .data$percentile),
+               colour = "black", alpha = 0.6, size = 1.4) +
+    geom_line(data = curve_df,
+              aes(x = .data$raw, y = .data$percentile),
+              colour = "#1f77b4", linewidth = 0.9) +
+    labs(title    = title,
+         subtitle = subtitle,
+         x        = paste0("Raw Score (", raw_var, ")"),
+         y        = "Percentile") +
+    scale_y_continuous(limits = c(0, 100),
+                       breaks = seq(0, 100, by = 10)) +
+    theme_minimal() +
+    theme(
+      plot.title       = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.subtitle    = element_text(hjust = 0.5, size = 12),
+      axis.title       = element_text(size = 12, face = "bold"),
+      axis.title.x     = element_text(margin = margin(t = 10)),
+      axis.title.y     = element_text(margin = margin(r = 10)),
+      axis.text        = element_text(size = 10),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "gray95")
+    )
+
+  print(p)
+  invisible(p)
+}
+
 #' Plot norm curves against actual percentiles
 #'
 #' The function plots the norm curves based on the regression model against
@@ -444,15 +555,29 @@ plotPercentiles <- function(model,
                             subtitle = NULL,
                             points = FALSE) {
 
-  if(isParametric(model)) {
-    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use 'plot(model, age, raw)' instead.")
+  if (isParametric(model)) {
+    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). ",
+         "Please use 'plot(model, age, raw)' instead.")
   }
 
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     data <- model$data
-    m <- model$model
-  }else{
+    m    <- model$model
+  } else {
     stop("Please provide a cnorm object.")
+  }
+
+  # ------------------------------------------------------------------
+  # Conventional-norming dispatch: no age/group axis available, so the
+  # percentile-curves-over-age plot does not apply. Fall back to a
+  # cumulative chart of raw vs. percentile.
+  # ------------------------------------------------------------------
+  if (!isTRUE(m$useAge)) {
+    return(plotCumulative(model,
+                          minRaw      = minRaw,
+                          maxRaw      = maxRaw,
+                          title       = title,
+                          subtitle    = subtitle))
   }
 
 

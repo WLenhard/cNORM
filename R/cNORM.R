@@ -364,6 +364,7 @@ cnorm <- function(raw = NULL,
     if (plot) {
       cat(model$report, sep = "\n")
       print(rawTable(0, result))
+      plotPercentiles(result)
     }
     return(result)
   }
