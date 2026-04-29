@@ -30,8 +30,6 @@ Age (grouping variable) and the coefficients from a regression model.
 # Prediction of single scores
 model <- cnorm(raw = elfe$raw, group = elfe$group)
 predictRaw(35, 3.5, model)
-
-
 }
 \seealso{
 Other predict: 

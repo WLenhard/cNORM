@@ -15,7 +15,7 @@ normTable(
   monotonuous = TRUE,
   CI = 0.9,
   reliability = NULL,
-  pretty = T
+  pretty = TRUE
 )
 }
 \arguments{
@@ -43,7 +43,7 @@ normTable(
 }
 \value{
 either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
-value or a list #' of norm tables if vector of A values was provided
+value or a list of norm tables if vector of A values was provided
 }
 \description{
 This function generates a norm table for a specific age based on the regression
@@ -71,7 +71,7 @@ norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
 )
 
 # conventional norming, set age to arbitrary value
-model <- cnorm(raw=elfe$raw)
+model <- cnorm(raw = elfe$raw)
 normTable(0, model)
 
 }

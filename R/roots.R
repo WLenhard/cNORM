@@ -60,7 +60,7 @@ calcPolyInLBase2 <- function(raw, age, coeff, k) {
 predictNormByRoots <- function(raw, age, model,
                                 minNorm, maxNorm,
                                 polynom = NULL,
-                                force = FALSE,
+                                force = TRUE,
                                 covariate = NULL) {
 
   if (!is.null(covariate)) {
@@ -153,10 +153,8 @@ predictNormByRoots <- function(raw, age, model,
   # force = TRUE: clip to the bound on the side of the distribution
   # that the raw score lies on.
   if (raw > raw_at_scaleM) {
-    warning(msg, "clipped to upper bound (", maxNorm, ").")
     return(maxNorm)
   } else {
-    warning(msg, "clipped to lower bound (", minNorm, ").")
     return(minNorm)
   }
 }
