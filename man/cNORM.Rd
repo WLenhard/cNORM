@@ -25,60 +25,48 @@ cnorm(
 \arguments{
 \item{raw}{Numeric vector of raw scores}
 
-\item{group}{Numeric vector of grouping variable, e. g. grade. If no group
-or age variable is provided, conventional norming is applied}
+\item{group}{Numeric vector of grouping variable, e.g. grade. If no group
+or age variable is provided, conventional norming is applied.}
 
-\item{age}{Numeric vector with chronological age, please additionally specify
-width of window}
+\item{age}{Numeric vector with chronological age. If used without `group`,
+please additionally specify `width`.}
 
-\item{width}{Size of the sliding window in case an age vector is used}
+\item{width}{Size of the sliding window in case an age vector is used.}
 
-\item{weights}{Vector or variable name in the dataset with weights for each
-individual case. It can be used to compensate for moderate imbalances due to
-insufficient norm data stratification. Weights should be numerical and positive.}
+\item{weights}{Optional numeric vector of case weights for post-stratification.}
 
-\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
-transformation); a double vector with the mean and standard deviation can as
-well, be provided f. e. c(10, 3) for Wechsler scale index points}
+\item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or
+"percentile" (= no transformation); a numeric vector with mean and SD can
+also be provided, e.g. `c(10, 3)` for Wechsler scale index points.}
 
-\item{method}{Ranking method in case of bindings, please provide an index,
-choosing from the following methods: 1 = Blom (1958), 2 = Tukey (1949),
-3 = Van der Warden (1952), 4 = Rankit (default), 5 = Levenbach (1953),
-6 = Filliben (1975), 7 = Yu & Huang (2001)}
+\item{method}{Ranking method in case of ties; an integer index from 1
+(Blom 1958) through 7 (Yu & Huang 2001). Default is 4 (Rankit).}
 
-\item{descend}{ranking order (default descent = FALSE): inverses the
-ranking order with higher raw scores getting lower norm scores; relevant
-for example when norming error scores, where lower scores mean higher
-performance}
+\item{descend}{If TRUE, inverts the ranking order so that higher raw scores
+receive lower norm scores (e.g. for error scores).}
 
-\item{k}{The power constant. Higher values result in more detailed approximations
-but have the danger of over-fit (max = 6). If not set, it uses t and if both
-parameters are NULL, k is set to 5.}
+\item{k}{Power degree for the location dimension (max 6).}
 
-\item{t}{The age power parameter (max = 6). If not set, it uses k and if both
-parameters are NULL, k is set to 3, since age trajectories are most often well
-captured by cubic polynomials.}
+\item{t}{Power degree for the age dimension (max 6).}
 
-\item{terms}{Selection criterion for model building. The best fitting model with
-this number of terms is used}
+\item{terms}{If > 0, fix the model to this number of terms.}
 
-\item{R2}{Adjusted R square as a stopping criterion for the model building
-(default R2 = 0.99)}
+\item{R2}{Stopping criterion (adjusted R-squared) for model selection.}
 
-\item{plot}{Default TRUE; plots the regression model and prints report}
+\item{plot}{If TRUE (default), display percentile plot and report.}
 
-\item{extensive}{If TRUE, screen models for consistency and - if possible, exclude inconsistent ones}
+\item{extensive}{If TRUE (default), screen models for monotonic consistency.}
 
-\item{subsampling}{If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
-This produces more robust estimates with a slight increase in bias.}
+\item{subsampling}{If TRUE (default), use 10-fold subsampled coefficient
+averaging in `bestModel`.}
 }
 \value{
-cnorm object including the ranked raw data and the regression model
+cnorm object including the ranked raw data and the regression model.
 }
 \description{
 Conducts continuous norming in one step and returns an object including ranked
 raw data and the continuous norming model. Please consult the function
-description ' of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
+description of 'rankByGroup', 'rankBySlidingWindow' and 'bestModel' for specifics
 of the steps in the data preparation and modeling process. In addition to the
 raw scores, either provide
 \itemize{
@@ -94,44 +82,18 @@ are missing, cnorm uses k = 5 and t = 3 by default.
 }
 \examples{
 \dontrun{
-# Using this function with the example dataset 'elfe'
+# Conventional norming
+cnorm(raw = elfe$raw)
 
-# Conventional norming (no modelling over age)
-cnorm(raw=elfe$raw)
+# Continuous norming via group
+m1 <- cnorm(raw = elfe$raw, group = elfe$group)
 
-# Continuous norming
-# You can use the 'getGroups()' function to set up grouping variable in case,
-# you have a continuous age variable.
-cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
+# Continuous norming via continuous age + sliding window
+m2 <- cnorm(raw = ppvt$raw, age = ppvt$age, width = 1)
 
-# return norm tables including 90\% confidence intervals for a
-# test with a reliability of r = .85; table are set to mean of quartal
-# in grade 3 (children completed 2 years of schooling)
-normTable(c(2.125, 2.375, 2.625), cnorm.elfe, CI = .90, reliability = .95)
-
-# ... or instead of raw scores for norm scores, the other way round
-rawTable(c(2.125, 2.375, 2.625), cnorm.elfe, CI = .90, reliability = .95)
-
-
-# Using a continuous age variable instead of distinct groups, using a sliding
-# window for percentile estimation. Please specify continuos variable for age
-# and the sliding window size.
-cnorm.ppvt.continuous <- cnorm(raw = ppvt$raw, age = ppvt$age, width=1)
-
-
-# In case of unbalanced datasets, deviating from the census, the norm data
-# can be weighted by the means of raking / post stratification. Please generate
-# the weights with the computeWeights() function and pass them as the weights
-# parameter. For computing the weights, please specify a data.frame with the
-# population margins (further information is available in the computeWeights
-# function). A demonstration based on sex and migration status in vocabulary
-# development (ppvt dataset):
-margins <- data.frame(variables = c("sex", "sex",
-                                    "migration", "migration"),
-                      levels = c(1, 2, 0, 1),
-                      share = c(.52, .48, .7, .3))
-weights <- computeWeights(ppvt, margins)
-model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
+# Norm tables with confidence intervals
+normTable(c(2.125, 2.375, 2.625), m1, CI = .9, reliability = .95)
+rawTable (c(2.125, 2.375, 2.625), m1, CI = .9, reliability = .95)
 }
 }
 \references{
@@ -142,7 +104,6 @@ model <- cnorm(raw = ppvt$raw, group=ppvt$group, weights = weights)
   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
   \item Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. Educational and Psychological Measurement(Online First), 1-33. https://doi.org/10.1177/0013164420928457
-
 }
 }
 \seealso{

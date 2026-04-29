@@ -10,24 +10,22 @@ computePowers(data, k = 5, norm = NULL, age = NULL, t = 3, silent = FALSE)
 \arguments{
 \item{data}{data.frame with the norm data}
 
-\item{k}{degree}
+\item{k}{degree of the location polynomial (1..6)}
 
-\item{norm}{the variable containing the norm data in the data.frame; might be
-T scores, IQ scores, percentiles ...}
+\item{norm}{name of the norm variable in the data.frame (T scores, IQ, percentiles, ...).
+If `NULL`, the `"normValue"` attribute of `data` is used.}
 
-\item{age}{Explanatory variable like age or grade, which was as well used for the grouping.
-Can be either the grouping variable itself or a finer grained variable like the exact age. Other
-explanatory variables can be used here instead an age variable as well, as long as the variable is
-at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
-most common field of application.}
+\item{age}{explanatory variable (e.g. age or grade). May be a column name, a numeric
+vector of `nrow(data)`, `FALSE` to disable age handling, or `NULL` to fall back
+to the `"age"` attribute of `data`.}
 
-\item{t}{the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k}
+\item{t}{age power parameter (1..6). If `NULL`, falls back to `k`.}
 
 \item{silent}{set to TRUE to suppress messages}
 }
 \value{
-data.frame with the powers and interactions of location and explanatory variable / age
+data.frame with the powers and interactions of location and explanatory
+  variable / age
 }
 \description{
 The function computes powers of the norm variable e. g. T scores (location, L),
@@ -39,8 +37,8 @@ allow for modeling the norm sample closer, but might lead to over-fit. In genera
 k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
 k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
 and L2A2 (but k = 2 is usually not sufficient for the modeling). Please note, that
-you do not need to use a normal rank transformed scale like T r IQ, but you can
-as well use the percentiles for the 'normValue' as well.
+you do not need to use a normal rank transformed scale like T or IQ; you can
+use the percentiles for the 'normValue' as well.
 }
 \details{
 The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},

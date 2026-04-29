@@ -10,7 +10,7 @@ predictNorm(
   model,
   minNorm = NULL,
   maxNorm = NULL,
-  force = FALSE,
+  force = TRUE,
   silent = FALSE
 )
 }

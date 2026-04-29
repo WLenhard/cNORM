@@ -143,8 +143,14 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   if (is.na(width)) {
     normData <- rankByGroup(data = normData, group = group, raw = raw, scale = scale, descend = descend, weights = weights)
   } else {
-    normData <- rankBySlidingWindow(data = normData, group = group, raw = raw, width = width, weights = weights, scale = scale, descend = descend)
-  }
+    normData <- rankBySlidingWindow(data    = normData,
+                                    age     = age,                   # FIX
+                                    raw     = raw,
+                                    width   = width,
+                                    weights = weights,
+                                    scale   = scale,
+                                    descend = descend)
+    }
 
   if (typeof(group) != "logical" || group) {
     normData <- computePowers(normData, k = k, t = t, norm = "normValue", age = age, silent = silent)
@@ -550,14 +556,17 @@ rankBySlidingWindow <- function(data = NULL,
       }else{
         weighting <- d[, weights]
       }
-    }else{
-      if(length(weights)!=nrow(data)  & !silent){
-        warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
-
-      }else{
+    } else {
+      if (length(weights) != nrow(d)) {
+        if (!silent) {
+          warning("Length of weights vector does not match the number of cases. ",
+                  "Proceeding without weighting.")
+        }
+        weights <- NULL                     # FIX: actually disable weighting
+      } else {
         d$weights <- as.numeric(weights)
         weighting <- as.numeric(weights)
-        weights <- "weights"
+        weights   <- "weights"
       }
     }
   }
@@ -729,26 +738,24 @@ rankBySlidingWindow <- function(data = NULL,
 #' k = 3 or k = 4 (default) is sufficient to model human performance data. For example,
 #' k = 2 results in the variables L1, L2, A1, A2, and their interactions L1A1, L2A1, L1A2
 #' and L2A2 (but k = 2 is usually not sufficient for the modeling). Please note, that
-#' you do not need to use a normal rank transformed scale like T r IQ, but you can
-#' as well use the percentiles for the 'normValue' as well.
+#' you do not need to use a normal rank transformed scale like T or IQ; you can
+#' use the percentiles for the 'normValue' as well.
 #'
 #' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
 #' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
 #' through other functions like \code{cnorm}.
 #'
 #' @param data data.frame with the norm data
-#' @param k degree
-#' @param norm the variable containing the norm data in the data.frame; might be
-#' T scores, IQ scores, percentiles ...
-#' @param age Explanatory variable like age or grade, which was as well used for the grouping.
-#' Can be either the grouping variable itself or a finer grained variable like the exact age. Other
-#' explanatory variables can be used here instead an age variable as well, as long as the variable is
-#' at least ordered metric, e. g. language or development levels ... The label 'age' is used, as this is the
-#' most common field of application.
-#' @param t the age power parameter (default NULL). If not set, cNORM automatically uses k. The age power parameter
-#' can be used to specify the k to produce rectangular matrices and specify the course of scores per independently from k
+#' @param k degree of the location polynomial (1..6)
+#' @param norm name of the norm variable in the data.frame (T scores, IQ, percentiles, ...).
+#'   If `NULL`, the `"normValue"` attribute of `data` is used.
+#' @param age explanatory variable (e.g. age or grade). May be a column name, a numeric
+#'   vector of `nrow(data)`, `FALSE` to disable age handling, or `NULL` to fall back
+#'   to the `"age"` attribute of `data`.
+#' @param t age power parameter (1..6). If `NULL`, falls back to `k`.
 #' @param silent set to TRUE to suppress messages
-#' @return data.frame with the powers and interactions of location and explanatory variable / age
+#' @return data.frame with the powers and interactions of location and explanatory
+#'   variable / age
 #' @seealso bestModel
 #' @examples
 #' # Dataset with grade levels as grouping
@@ -760,109 +767,140 @@ rankBySlidingWindow <- function(data = NULL,
 #' data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
 #' @export
 #' @family prepare
-computePowers <-
-  function(data,
-           k = 5,
-           norm = NULL,
-           age = NULL,
-           t = 3,
-           silent = FALSE) {
-    d <- as.data.frame(data)
+computePowers <- function(data,
+                          k = 5,
+                          norm = NULL,
+                          age = NULL,
+                          t = 3,
+                          silent = FALSE) {
 
-    # check variables, if NULL take attributes from d
-    if (is.null(norm)) {
-      norm <- attr(d, "normValue")
-    }
+  d <- as.data.frame(data)
 
-    useAge <- TRUE
-
-    if (is.null(age)) {
-      age <- attr(d, "age")
-    }
-
-    if ((typeof(age) == "logical") && !age) {
-      useAge <- FALSE
-    }
-
-    # check if columns exist
-    if (!(norm %in% colnames(d))) {
-      stop(paste0("ERROR: Norm variable '", norm, "' does not exist in data object."))
-    }
-
-    if (!is.numeric(d[, norm])) {
-      warning(paste0("Norm score variable '", norm, "' has to be numeric."))
-    }
-
-    if (is.numeric(age) && (length(age) == nrow(d))) {
-      d$age <- age
-      age <- "age"
-    }
-
-    if (useAge && !is.numeric(d[, age])) {
-      warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
-    }
-
-    if (useAge && !(age %in% colnames(d))) {
-      stop(paste(c("ERROR: Explanatory variable '", age, "' does not exist in data object."), collapse = ""))
-    }
-
-    if ((k < 1) | (k > 6)) {
-      message("Parameter k out of range, setting to 4")
-      k <- 6
-    }
-
-    if(is.null(t)){
-      t <- k
-    }
-
-    if ((t < 1) | (t > 6)) {
-      message("Parameter t out of range, setting to k")
-      t <- k
-    }
-
-    # generate powers and interactions of location and age up to parameters k and A
-    L1 <- as.numeric(d[[norm]])
-    if (useAge) {
-      A1 <- as.numeric(d[[age]])
-
-      for(j in 1:t){
-        d[paste0("A", j)] <- A1^j
-      }
-
-      for(i in 1:k){
-        d[paste0("L", i)] <- L1^i
-      }
-
-      for(i in 1:k){
-        for(j in 1:t){
-          d[paste0("L", i, "A", j)] <- L1^i*A1^j
-        }
-      }
-    } else {
-      for(i in 1:k){
-        d[paste0("L", i)] <- L1^i
-      }
-    }
-
-    # attributes
-    attr(d, "age") <- age
-    attr(d, "normValue") <- norm
-    attr(d, "k") <- k
-    attr(d, "t") <- t
-    attr(d, "useAge") <- useAge
-
-    # check, if it is worthwhile to continue with continuous norming
-    if (useAge&&!silent) {
-      cat(paste0("Powers of location: k = ", k))
-      cat(paste0("\nPowers of age:      t = ", t))
-      r2 <- summary.lm(lm(as.numeric(d[[attr(d, "raw")]]) ~ poly(A1, t, raw=TRUE)))$r.squared
-
-      if (r2 < .05 && t>2) {
-        warning(paste0("\nMultiple R2 between the explanatory variable and the raw score is low with R2 = ", r2, ". Thus, there is not much variance that can be captured by the continuous norming procedure. The models are probably unstable. You can try to reduce the powers of A indepentently from k and/or to reduce the number of age groups. To model a simple linear age effect, this means to reduce the number of groups to 2 and to set t to 1.\n\n"))
-      }else{
-        cat(paste0("\nMultiple R2 between raw score and explanatory variable: R2 = ", round(r2, 4), "\n\n"))
-      }
-    }
-
-    return(d)
+  # ------------------------------------------------------------------
+  # 1.  Resolve `norm` (defaults to the data's "normValue" attribute)
+  # ------------------------------------------------------------------
+  if (is.null(norm)) {
+    norm <- attr(d, "normValue")
   }
+  if (is.null(norm) || !(norm %in% colnames(d))) {
+    stop("ERROR: Norm variable '", norm,
+         "' does not exist in data object.")
+  }
+  if (!is.numeric(d[[norm]])) {
+    warning("Norm score variable '", norm, "' has to be numeric.")
+  }
+
+  # ------------------------------------------------------------------
+  # 2.  Resolve `age`
+  #
+  #     A NULL `age` argument falls back to the data's "age" attribute,
+  #     which may itself still be NULL (e.g. after rankByGroup with
+  #     group = FALSE). Treat a NULL or FALSE `age` as "no age axis".
+  # ------------------------------------------------------------------
+  if (is.null(age)) {
+    age <- attr(d, "age")
+  }
+
+  if (is.numeric(age) && length(age) == nrow(d)) {
+    d$age <- age
+    age   <- "age"
+  }
+
+  useAge <- TRUE
+  if (is.null(age) ||
+      (is.logical(age) && !isTRUE(age))) {
+    useAge <- FALSE
+    age    <- NULL
+  }
+
+  if (useAge) {
+    if (!(age %in% colnames(d))) {
+      stop("ERROR: Explanatory variable '", age,
+           "' does not exist in data object.")
+    }
+    if (!is.numeric(d[[age]])) {
+      warning("Age variable '", age, "' has to be numeric.")
+    }
+  }
+
+  # ------------------------------------------------------------------
+  # 3.  Validate k and t
+  # ------------------------------------------------------------------
+  if (k < 1 || k > 6) {
+    if (!silent) message("Parameter k out of range, setting to 4.")
+    k <- 4
+  }
+
+  if (is.null(t)) {
+    t <- k
+  }
+  if (t < 1 || t > 6) {
+    if (!silent) message("Parameter t out of range, setting to k = ", k, ".")
+    t <- k
+  }
+
+  # ------------------------------------------------------------------
+  # 4.  Build powers and interactions
+  # ------------------------------------------------------------------
+  L1 <- as.numeric(d[[norm]])
+
+  # Powers of L
+  for (i in seq_len(k)) {
+    d[[paste0("L", i)]] <- L1^i
+  }
+
+  if (useAge) {
+    A1 <- as.numeric(d[[age]])
+
+    # Powers of A
+    for (j in seq_len(t)) {
+      d[[paste0("A", j)]] <- A1^j
+    }
+
+    # Interactions L_i * A_j
+    for (i in seq_len(k)) {
+      for (j in seq_len(t)) {
+        d[[paste0("L", i, "A", j)]] <- L1^i * A1^j
+      }
+    }
+  }
+
+  # ------------------------------------------------------------------
+  # 5.  Attributes
+  # ------------------------------------------------------------------
+  attr(d, "age")        <- age
+  attr(d, "normValue")  <- norm
+  attr(d, "k")          <- k
+  attr(d, "t")          <- t
+  attr(d, "useAge")     <- useAge
+
+  # ------------------------------------------------------------------
+  # 6.  Sanity report (only when modelling against age)
+  # ------------------------------------------------------------------
+  if (useAge && !silent) {
+    cat("Powers of location: k = ", k, "\n", sep = "")
+    cat("Powers of age:      t = ", t, "\n", sep = "")
+
+    raw_name <- attr(d, "raw")
+    if (!is.null(raw_name) && raw_name %in% colnames(d)) {
+      A1 <- as.numeric(d[[age]])
+      r2 <- summary.lm(
+        lm(as.numeric(d[[raw_name]]) ~ poly(A1, t, raw = TRUE))
+      )$r.squared
+
+      if (r2 < 0.05 && t > 2) {
+        warning(
+          "Multiple R^2 between the explanatory variable and the raw score is low ",
+          "(R^2 = ", round(r2, 4), "). The continuous norming model may be unstable. ",
+          "Consider reducing t (e.g. to 1 for a linear age effect) and/or the number ",
+          "of age groups."
+        )
+      } else {
+        cat("Multiple R^2 between raw score and explanatory variable: R^2 = ",
+            round(r2, 4), "\n\n", sep = "")
+      }
+    }
+  }
+
+  return(d)
+}
