@@ -18,9 +18,6 @@ A data frame with 45053 rows and 7 variables:
 
 A data frame with 45035 rows and 7 columns
 }
-\source{
-\url{https://www.cdc.gov/nchs/nhanes/}
-}
 \usage{
 CDC
 }
@@ -32,8 +29,10 @@ as public domain. The data was cleaned by removing missing values and it include
 based on the original dataset.
 }
 \references{
-CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets and Related
-Documentation. available \url{https://www.cdc.gov/nchs/nhanes/} (date of retrieval: 25/08/2018)
+Center for Disease Control and Prevention (2012).
+  National Health and Nutrition Examination Survey: Questionnaires,
+  datasets and related documentation. U.S. Department of Health and Human Services
+  (original source not available anymore).
 }
 \concept{Body Mass Index growth curves weight height}
 \keyword{datasets}
