@@ -430,15 +430,8 @@ plotCumulative <- function(x,
   # plot. Within the data range the polynomial only interpolates and
   # the curve stays well-behaved.
   # ------------------------------------------------------------------
-  norm_grid <- seq(m$minL1, m$maxL1, length.out = 400L)
-  raw_grid  <- predictRaw(norm_grid,
-                          age          = rep(0, length(norm_grid)),
-                          coefficients = m$coefficients)
-  pct_grid  <- pnorm((norm_grid - scaleM) / scaleSD) * 100
 
-  curve_df <- data.frame(raw = raw_grid, percentile = pct_grid)
-  curve_df <- curve_df[curve_df$raw >= minRaw &
-                         curve_df$raw <= maxRaw, , drop = FALSE]
+  curve_df <- rawTable(0, x, minRaw, maxRaw, pretty = F)
 
   # ------------------------------------------------------------------
   # Manifest empirical CDF: one point per unique raw value at its
@@ -497,6 +490,7 @@ plotCumulative <- function(x,
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
+
 
   print(p)
   invisible(p)
