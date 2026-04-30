@@ -1,21 +1,32 @@
 ## Resubmission
-This is a minor release of an existing package. In this version I have:
+This is a minor release of an existing package. It has undergone a code review 
+with Anthropic Claude Opus 4.7 to harden the code and to identify edge cases 
+and handle them gracefully. In this version I have:
 
-*    fixed scale information in diagnostics (betabinomial and shash), which
-     was not correctly passed to the function
-*    input validation checks in cnorm.betabinomial and cnorm.shash     
-*    optimization of shash functions
-*    robustness of betabinomial functions
-*    new shiny GUI for parametric modelling
-*    Shiny GUI files restructured
-*    plotPercentile did not minAge and maxAge parameter - fixed
-*    plotPercentile performance improvement
-*    saving plots in plotPercentileSeries, can run out of bounds - fixed
-*    plotNorm object checks improved
-*    plotCnorm helper parameter checks - fixed
-*    fixed geom_hline warning in plotSubset
-*    removed the raw parameter from plotRaw - it always uses the model data
-*    improved model type check in plotDensity
+Changes:
+
+*    rawTable() and normTable() now enforce monotonicity of raw and norm scores
+     outward from the median. This reduces problems with inconsistent or NA
+     results at the extreme ends of the model and is robust against missing values
+     in the predicted series.
+*    predictRaw() is more robust for degenerate models
+*    predictNormByRoots() now correctly honours the force argument. When a
+     raw score is unreachable within [minNorm, maxNorm], the function returns
+     NA (default) or clips to the appropriate boundary (force = TRUE, now default).
+*    Direction-of-search is now based on the unclipped model prediction at the
+     scale mean.
+*    bestModel() selection by terms or R2 is now correct under the
+     extensive consistency screening introduced in 3.3. The chosen model now
+     reflects the requested number of terms (or the smallest model meeting the
+     R² threshold) rather than the row index in the filtered regsubsets
+     summary.
+*    cnorm.cv(): corrected the maximum-model-size formula (k + 1) * (t + 1) - 1;
+     pCutoff, weight handling, and norm-score SE follow Oosterhuis et al.
+     (2016) more faithfully and use safer indexing throughout. Fix when using
+     sliding window ranking.
+*    screenSubset() cleaned up: defensive initialisation, drop = FALSE on
+     matrix subsetting so single-row results survive, removal of dead code.
+*    internal function plotCumulative added for conventional norming
 
 
 ## Test environments

@@ -3,12 +3,12 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.3
-Date: 28.04.2026; in progress
+Date: 30.04.2026
 
 
 Changes:
 
-*    Code review with Anthropic Claude Opus 4.5 to harden the code and to identify
+*    Code review with Anthropic Claude Opus 4.7 to harden the code and to identify
      edge cases and handle them gracefully.
 *    rawTable() and normTable() now enforce monotonicity of raw and norm scores
      outward from the median. This reduces problems with inconsistent or NA
@@ -31,6 +31,7 @@ Changes:
      sliding window ranking.
 *    screenSubset() cleaned up: defensive initialisation, drop = FALSE on
      matrix subsetting so single-row results survive, removal of dead code.
+*    internal function plotCumulative added for conventional norming
 
 
 
