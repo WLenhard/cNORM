@@ -32,6 +32,7 @@ Changes:
 *    screenSubset() cleaned up: defensive initialisation, drop = FALSE on
      matrix subsetting so single-row results survive, removal of dead code.
 *    internal function plotCumulative added for conventional norming
+*    removed link to CDC since server is not available anymore
 
 
 

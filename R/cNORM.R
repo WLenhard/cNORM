@@ -47,9 +47,12 @@
 #'
 #' @references
 #' \enumerate{
-#'   \item CDC (2012). National Health and Nutrition Examination Survey: Questionnaires, Datasets
-#'   and Related Documentation. available: https://wwwn.cdc.gov/nchs/nhanes/.
-#'   date of retrieval: 25/08/2018
+#'   \item Center for Disease Control and Prevention (2012).
+#'   National Health and Nutrition Examination Survey: Questionnaires,
+#'   datasets and related documentation. U.S. Department of Health and Human Services
+#'   (original source not available anymore).
+#'   \item Gary, S., Lenhard, W., Lenhard, A., & Herzberg, D. (2023). A tutorial on automatic post-stratification and weighting in conventional and regression-based norming of psychometric tests. Behavior Research Methods. https://doi.org/10.3758/s13428-023-02207-0
+#'   \item Gary, S., Lenhard, A., Lenhard, W., & Herzberg, D. S. (2023). Reducing the Bias of Norm Scores in Non-Representative Samples: Weighting as an Adjunct to Continuous Norming Methods. Assessment, 30(8), 2491–2509. https://doi.org/10.1177/10731911231153832
 #'   \item Lenhard, W., & Lenhard, A. (2021). Improvement of Norm Score Quality via Regression-Based
 #'   Continuous Norming. Educational and Psychological Measurement, 81(2), 229–261.
 #'   doi: 10.1177/0013164420928457
@@ -248,6 +251,8 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
 #' \enumerate{
 #'   \item Gary, S. & Lenhard, W. (2021). In norming we trust. Diagnostica.
 #'   \item Gary, S., Lenhard, W. & Lenhard, A. (2021). Modelling Norm Scores with the cNORM Package in R. Psych, 3(3), 501-521. https://doi.org/10.3390/psych3030033
+#'   \item Gary, S., Lenhard, W., Lenhard, A., & Herzberg, D. (2023). A tutorial on automatic post-stratification and weighting in conventional and regression-based norming of psychometric tests. Behavior Research Methods. https://doi.org/10.3758/s13428-023-02207-0
+#'   \item Gary, S., Lenhard, A., Lenhard, W., & Herzberg, D. S. (2023). Reducing the Bias of Norm Scores in Non-Representative Samples: Weighting as an Adjunct to Continuous Norming Methods. Assessment, 30(8), 2491–2509. https://doi.org/10.1177/10731911231153832
 #'   \item Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. Assessment, Online first, 1-14. doi:10.1177/1073191116656437
 #'   \item Lenhard, A., Lenhard, W., Gary, S. (2018). Continuous Norming (cNORM). The Comprehensive R Network, Package cNORM, available: https://CRAN.R-project.org/package=cNORM
 #'   \item Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. PLoS ONE, 14(9),  e0222279. doi:10.1371/journal.pone.0222279
