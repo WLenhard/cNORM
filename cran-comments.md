@@ -5,6 +5,7 @@ and handle them gracefully. In this version I have:
 
 Changes:
 
+*    all examples set to dontrun
 *    removed CDC NHANES URL, since data has been depublished
 *    rawTable() and normTable() now enforce monotonicity of raw and norm scores
      outward from the median. This reduces problems with inconsistent or NA
