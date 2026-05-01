@@ -32,6 +32,7 @@
 #' weights/min(weights)
 #' @return a vector with the standardized weights
 #' @examples
+#' \dontrun{
 #' # cNORM features a dataset on vocabulary development (ppvt)
 #' # that includes variables like sex or migration. In order
 #' # to weight the data, we have to specify the population shares.
@@ -66,44 +67,57 @@
 #' model <- cnorm(raw = ppvt$raw,
 #'                group=ppvt$group,
 #'                weights = weights)
+#' }
 #' @export
 computeWeights <- function(data, population.margins, standardized = TRUE) {
   data <- as.data.frame(data)
   names(population.margins) <- c("sv", "level", "proportion")
-  sv <- unique(population.margins[,1])
+  sv <- unique(population.margins[, 1])
 
   # check if all variables are present in the dataset
   missing.variables <- sv[!sv %in% names(data)]
-  if(length(missing.variables) > 0) {
-    stop(paste0("Weighting aborted due to missing variable(s): ",
-                paste(missing.variables, collapse = ", "),
-                " not present in the dataset."))
+  if (length(missing.variables) > 0) {
+    stop(
+      paste0(
+        "Weighting aborted due to missing variable(s): ",
+        paste(missing.variables, collapse = ", "),
+        " not present in the dataset."
+      )
+    )
   }
 
-  props <- as.data.frame(prop.table(xtabs(formula(paste0("~",
-                                                         paste(sv, collapse = " + "))),
-                                          data = data)))
+  props <- as.data.frame(prop.table(xtabs(formula(
+    paste0("~", paste(sv, collapse = " + "))
+  ), data = data)))
   props.adjusted <- props
 
   # Check if every level of every sv in the marginals is contained
   # in the data set and vice versa.
-  for(lev in 1:length(sv)) {
+  for (lev in 1:length(sv)) {
     l1 <- unique(props[sv[lev]])
     l2 <- unique(data[sv[lev]])
 
-    if(!all(as.character(l1[,1]) %in% as.character(l2[,1])) ||
-       !all(as.character(l2[,1]) %in% as.character(l1[,1]))) {
-      stop("Levels of the data and the population marginals in variable ", sv[lev],
-           " do not match.\n  Please make sure, every level of every variable is contained in the data set\n at least once and vice versa.")
+    if (!all(as.character(l1[, 1]) %in% as.character(l2[, 1])) ||
+        !all(as.character(l2[, 1]) %in% as.character(l1[, 1]))) {
+      stop(
+        "Levels of the data and the population marginals in variable ",
+        sv[lev],
+        " do not match.\n  Please make sure, every level of every variable is contained in the data set\n at least once and vice versa."
+      )
     }
   }
 
   # Check if sum of proportions lies between 0.95 and 1.05
-  for(marg in 1:length(sv)) {
-    marg_sum <- abs(sum(population.margins[population.margins$sv == sv[marg],]$proportion) - 1)
-    if(marg_sum > 0.05) {
-      warning(paste("Sum of proportions of variable", sv[marg],
-                    "is not within [0.95;1.05].\nPlease make sure, the proportions for every single stratification variable sum up to almost 1.00"))
+  for (marg in 1:length(sv)) {
+    marg_sum <- abs(sum(population.margins[population.margins$sv == sv[marg], ]$proportion) - 1)
+    if (marg_sum > 0.05) {
+      warning(
+        paste(
+          "Sum of proportions of variable",
+          sv[marg],
+          "is not within [0.95;1.05].\nPlease make sure, the proportions for every single stratification variable sum up to almost 1.00"
+        )
+      )
     }
   }
 
@@ -111,29 +125,42 @@ computeWeights <- function(data, population.margins, standardized = TRUE) {
   w <- rep(1, length.out = nrow(props))
 
   stop.loop <- FALSE
-  for(repetitions in 1:100) {
-    for(i in 1:length(sv)) {
+  for (repetitions in 1:100) {
+    for (i in 1:length(sv)) {
       sv.sum <- aggregate(formula(paste0("Freq ~ ", sv[i])), data = props.adjusted, FUN = sum)
       tmp <- population.margins[which(population.margins$sv %in% sv[i]), ]
 
-      for(j in 1:nrow(sv.sum)) {
+      for (j in 1:nrow(sv.sum)) {
         # Convert current level to character for consistent comparison
         current_level <- as.character(sv.sum[j, 1])
 
         # Find matching row in population margins by comparing character values
         match_idx <- which(as.character(tmp$level) == current_level)
 
-        if(length(match_idx) == 0) {
-          warning(paste("No matching level found for", current_level, "in variable", sv[i],
-                        "- check your population.margins data"))
+        if (length(match_idx) == 0) {
+          warning(
+            paste(
+              "No matching level found for",
+              current_level,
+              "in variable",
+              sv[i],
+              "- check your population.margins data"
+            )
+          )
           next
         }
 
         indizes <- which(as.character(props[, sv[i]]) == current_level)
 
-        if(length(indizes) == 0) {
-          warning(paste("No matching observations found for level", current_level,
-                        "in variable", sv[i]))
+        if (length(indizes) == 0) {
+          warning(
+            paste(
+              "No matching observations found for level",
+              current_level,
+              "in variable",
+              sv[i]
+            )
+          )
           next
         }
 
@@ -143,34 +170,40 @@ computeWeights <- function(data, population.margins, standardized = TRUE) {
 
         props.adjusted$Freq <- props$Freq * weights
 
-        if(sum(abs(w - weights)) < 0.000001) {
-          cat(paste0("Raking converged normally after ", repetitions, " iterations.\n"))
+        if (sum(abs(w - weights)) < 0.000001) {
+          cat(paste0(
+            "Raking converged normally after ",
+            repetitions,
+            " iterations.\n"
+          ))
           stop.loop <- TRUE
           break
         }
 
         w <- weights
       }
-      if(stop.loop)
+      if (stop.loop)
         break
     }
-    if(stop.loop)
+    if (stop.loop)
       break
   }
 
   checkWeights(weights)
 
-  if(standardized)
+  if (standardized)
     weights <- standardizeRakingWeights(weights)
 
   stratification.weights <- rep(1, length.out = nrow(data))
 
-  if(length(sv) > 1) {
+  if (length(sv) > 1) {
     # For multiple stratification variables
-    data_combined <- do.call("paste", c(lapply(sv, function(v) as.character(data[[v]])), sep="|"))
-    props_combined <- do.call("paste", c(lapply(sv, function(v) as.character(props[[v]])), sep="|"))
+    data_combined <- do.call("paste", c(lapply(sv, function(v)
+      as.character(data[[v]])), sep = "|"))
+    props_combined <- do.call("paste", c(lapply(sv, function(v)
+      as.character(props[[v]])), sep = "|"))
 
-    for(i in 1:length(weights)) {
+    for (i in 1:length(weights)) {
       pattern <- props_combined[i]
       stratification.weights[data_combined == pattern] <- weights[i]
     }
@@ -182,7 +215,7 @@ computeWeights <- function(data, population.margins, standardized = TRUE) {
     unique_levels <- unique(props[[sv_name]])
 
     # For each level, assign the appropriate weight
-    for(i in 1:length(unique_levels)) {
+    for (i in 1:length(unique_levels)) {
       level_val <- unique_levels[i]
       level_idx <- which(props[[sv_name]] == level_val)[1]  # Get first matching index
 
@@ -198,11 +231,13 @@ computeWeights <- function(data, population.margins, standardized = TRUE) {
 
 #' Check, if NA or values <= 0 occur and issue warning
 #' @param weights Raking weights
-checkWeights <- function(weights){
+checkWeights <- function(weights) {
   # Get weights from the survey object
-  if(min(weights<=0)){
-    warning("Negative values or zeros occured during raking. Using the raking weights is not recommended.")
-  }else if(sum(is.na(weights)>0)){
+  if (min(weights <= 0)) {
+    warning(
+      "Negative values or zeros occured during raking. Using the raking weights is not recommended."
+    )
+  } else if (sum(is.na(weights) > 0)) {
     warning("Undefined value occured during raking. Using the raking weights is not recommended.")
   }
 }
@@ -214,11 +249,13 @@ checkWeights <- function(weights){
 #' @param weights Raking weights computed by computeRakingWeightsStandardized()
 #' @param weights Raking weights computed by computeWeights()
 #' @return the standardized weights
-standardizeRakingWeights <- function(weights){
+standardizeRakingWeights <- function(weights) {
   weights_min <- min(weights)
-  if(min(weights) <=0){
-    warning("Smallest raking weight is zero or below. Weights can not be standardized.\nTherefore, non-standardized weights are used.")
+  if (min(weights) <= 0) {
+    warning(
+      "Smallest raking weight is zero or below. Weights can not be standardized.\nTherefore, non-standardized weights are used."
+    )
   }
-  weights <- weights/weights_min
+  weights <- weights / weights_min
   return(weights)
 }

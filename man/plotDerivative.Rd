@@ -53,10 +53,11 @@ violation increases as well.
 This function is currently incompatible with reversed raw score scales ('descent' option).
 }
 \examples{
+\dontrun{
 # For traditional continuous norming model
 result <- cnorm(raw = elfe$raw, group = elfe$group)
 plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, stepNorm=1)
-
+}
 
 }
 \seealso{

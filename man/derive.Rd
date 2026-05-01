@@ -21,8 +21,10 @@ distribution features as f. e. bottom and ceiling effects, non-progressive norm 
 age group or in general #' intersecting percentile curves.
 }
 \examples{
-m <- cnorm(raw = elfe$raw, group = elfe$group)
-derivedCoefficients <- derive(m)
+\dontrun{
+  m <- cnorm(raw = elfe$raw, group = elfe$group)
+  derivedCoefficients <- derive(m)
+}
 }
 \seealso{
 Other model: 

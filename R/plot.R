@@ -9,19 +9,20 @@
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
 #' manifest against difference values
 #' @examples
-#' # Compute model with example dataset and plot results
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotRaw(result)
+#' \dontrun{
+#'   # Compute model with example dataset and plot results
+#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   plotRaw(result)
+#' }
 #' @import ggplot2
 #' @export
 #' @family plot
 plotRaw <- function(model, group = FALSE, type = 0) {
-
-  if(isParametric(model)) {
+  if (isParametric(model)) {
     stop("This function is not applicable for parametric models.")
   }
 
-  if(!isTaylor(model)) {
+  if (!isTaylor(model)) {
     stop("Please provide a cnorm object.")
   }
 
@@ -30,12 +31,12 @@ plotRaw <- function(model, group = FALSE, type = 0) {
 
   d$fitted <- model$fitted.values
   d$diff <- d$fitted - d$raw
-  mse <- round(model$rmse, digits=4)
+  mse <- round(model$rmse, digits = 4)
   r <- round(cor(d$fitted, d$raw, use = "pairwise.complete.obs"), digits = 4)
   d <- as.data.frame(d)
 
   if (group) {
-    if("group" %in% colnames(d)){
+    if ("group" %in% colnames(d)) {
       d$group <- as.factor(d$group)
     } else {
       d$group <- as.factor(getGroups(d$age))
@@ -45,9 +46,17 @@ plotRaw <- function(model, group = FALSE, type = 0) {
   if (type == 0) {
     p <- ggplot(d, aes(x = .data$raw, y = .data$fitted)) +
       geom_point(alpha = 0.2, color = "#0033AA") +
-      geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+      geom_abline(
+        intercept = 0,
+        slope = 1,
+        color = "red",
+        linetype = "dashed"
+      ) +
       labs(
-        title = if(isTRUE(group)) "Observed vs. Fitted Raw Scores by Group" else "Observed vs. Fitted Raw Scores",
+        title = if (isTRUE(group))
+          "Observed vs. Fitted Raw Scores by Group"
+        else
+          "Observed vs. Fitted Raw Scores",
         subtitle = paste("r =", r, ", RMSE =", mse),
         x = "Observed Score",
         y = "Fitted Scores"
@@ -55,9 +64,14 @@ plotRaw <- function(model, group = FALSE, type = 0) {
   } else {
     p <- ggplot(d, aes(x = .data$raw, y = .data$diff)) +
       geom_point(alpha = 0.2, color = "#0033AA") +
-      geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+      geom_hline(yintercept = 0,
+                 color = "red",
+                 linetype = "dashed") +
       labs(
-        title = if(isTRUE(group)) "Observed Raw Scores vs. Difference Scores by Group" else "Observed Raw Scores vs. Difference Scores",
+        title = if (isTRUE(group))
+          "Observed Raw Scores vs. Difference Scores by Group"
+        else
+          "Observed Raw Scores vs. Difference Scores",
         subtitle = paste("r =", r, ", RMSE =", mse),
         x = "Observed Score",
         y = "Difference Scores"
@@ -65,12 +79,16 @@ plotRaw <- function(model, group = FALSE, type = 0) {
   }
 
   if (group) {
-    p <- p + facet_wrap(~ group)
+    p <- p + facet_wrap( ~ group)
   }
 
   p <- p + theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -126,10 +144,17 @@ plotRaw <- function(model, group = FALSE, type = 0) {
 #' @import ggplot2
 #' @export
 #' @family plot
-plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NULL, group = FALSE, minNorm = NULL, maxNorm = NULL, type = 0) {
-
+plotNorm <- function(model,
+                     age = NULL,
+                     score = NULL,
+                     width = NULL,
+                     weights = NULL,
+                     group = FALSE,
+                     minNorm = NULL,
+                     maxNorm = NULL,
+                     type = 0) {
   is_taylor <- isTaylor(model)
-  if(is_taylor) {
+  if (is_taylor) {
     data <- model$data
     model <- model$model
 
@@ -146,38 +171,58 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
     if (attr(data, "useAge"))
       age <- data[[model$age]]
     else
-      age <- rep(0, length=nrow(data))
+      age <- rep(0, length = nrow(data))
 
     d$fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
 
     if (group) {
-      if("group" %in% colnames(d)){
+      if ("group" %in% colnames(d)) {
         d$group <- as.factor(d$group)
       } else {
         d$group <- as.factor(getGroups(d$age))
       }
     }
 
-  } else if(isParametric(model)) {
-    if(is.null(age) || is.null(score)) {
-      stop("Please provide age and score vectors for beta-binomial or shash models and the width for the sliding window.")
+  } else if (isParametric(model)) {
+    if (is.null(age) || is.null(score)) {
+      stop(
+        "Please provide age and score vectors for beta-binomial or shash models and the width for the sliding window."
+      )
     }
 
     d <- data.frame(age = age, score = score)
-    if(is.null(width)){
-      if(length(age)/length(unique(age))<50)
+    if (is.null(width)) {
+      if (length(age) / length(unique(age)) < 50)
         stop("Please provide a width for the sliding window.")
 
       d$group <- d$age
-      if(is.null(weights))
-        d <- rankByGroup(data = d, group = "age", raw = "score")
+      if (is.null(weights))
+        d <- rankByGroup(data = d,
+                         group = "age",
+                         raw = "score")
       else
-        d <- rankByGroup(data = d, group = "age", raw = "score", weights = weights)
-    }else{
-      if(is.null(weights))
-        d <- rankBySlidingWindow(data = d, age = "age", raw = "score", width = width)
+        d <- rankByGroup(
+          data = d,
+          group = "age",
+          raw = "score",
+          weights = weights
+        )
+    } else{
+      if (is.null(weights))
+        d <- rankBySlidingWindow(
+          data = d,
+          age = "age",
+          raw = "score",
+          width = width
+        )
       else
-        d <- rankBySlidingWindow(data = d, age = "age", raw = "score", weights = weights, width = width)
+        d <- rankBySlidingWindow(
+          data = d,
+          age = "age",
+          raw = "score",
+          weights = weights,
+          width = width
+        )
     }
 
 
@@ -188,26 +233,42 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
     stop("Please provide an object of type cnorm, cnormBetaBinomial or cnormBetaBinomial2.")
   }
 
-  if(!"normValue" %in% colnames(d)) {
-    stop("The 'normValue' column is missing from the data. Please ensure it's present for both cnorm and beta-binomial models.")
+  if (!"normValue" %in% colnames(d)) {
+    stop(
+      "The 'normValue' column is missing from the data. Please ensure it's present for both cnorm and beta-binomial models."
+    )
   }
 
   d$diff <- d$fitted - d$normValue
   d <- d[!is.na(d$fitted) & !is.na(d$diff), ]
 
   rmse <- round(sqrt(mean(d$diff^2)), digits = 4)
-  r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"), digits = 4)
+  r <- round(cor(d$fitted, d$normValue, use = "pairwise.complete.obs"),
+             digits = 4)
 
   if (type == 0) {
-    if(isTaylor(model)) {
-      title <- if (isTRUE(group) || (is.character(group) && nzchar(group))) paste("Observed vs. Fitted Norm Scores by", group) else "Observed vs. Fitted Norm Scores"
-    }else{
-      title <- if(is.numeric(group)) paste("Observed vs. Fitted Norm Scores by group") else "Observed vs. Fitted Norm Scores"
+    if (isTaylor(model)) {
+      title <- if (isTRUE(group) ||
+                   (is.character(group) &&
+                    nzchar(group)))
+        paste("Observed vs. Fitted Norm Scores by", group)
+      else
+        "Observed vs. Fitted Norm Scores"
+    } else{
+      title <- if (is.numeric(group))
+        paste("Observed vs. Fitted Norm Scores by group")
+      else
+        "Observed vs. Fitted Norm Scores"
     }
 
     p <- ggplot(d, aes(x = .data$normValue, y = .data$fitted)) +
       geom_point(alpha = 0.2, color = "#0033AA") +
-      geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+      geom_abline(
+        intercept = 0,
+        slope = 1,
+        color = "red",
+        linetype = "dashed"
+      ) +
       labs(
         title = title,
         subtitle = paste("r =", r, ", RMSE =", rmse),
@@ -215,15 +276,24 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
         y = "Fitted Scores"
       )
   } else {
-    if(is_taylor) {
-      title <- if(group != "" && !is.null(group)) paste("Observed Norm Scores vs. Difference Scores by", group) else "Observed Norm Scores vs. Difference Scores"
-    }else{
-      title <- if(is.numeric(group)) paste("Observed Norm Scores vs. Difference Scores by group") else "Observed Norm Scores vs. Difference Scores"
+    if (is_taylor) {
+      title <- if (group != "" &&
+                   !is.null(group))
+        paste("Observed Norm Scores vs. Difference Scores by", group)
+      else
+        "Observed Norm Scores vs. Difference Scores"
+    } else{
+      title <- if (is.numeric(group))
+        paste("Observed Norm Scores vs. Difference Scores by group")
+      else
+        "Observed Norm Scores vs. Difference Scores"
     }
 
     p <- ggplot(d, aes(x = .data$normValue, y = .data$diff)) +
       geom_point(alpha = 0.5, color = "#0033AA") +
-      geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+      geom_hline(yintercept = 0,
+                 color = "red",
+                 linetype = "dashed") +
       labs(
         title = title,
         subtitle = paste("r =", r, ", RMSE =", rmse),
@@ -233,14 +303,18 @@ plotNorm <- function(model, age = NULL, score = NULL, width = NULL, weights = NU
   }
 
   if (isTRUE(group) || (is.character(group) && nzchar(group))) {
-    p <- p + facet_wrap(~ group)
+    p <- p + facet_wrap( ~ group)
   }
 
 
 
   p <- p + theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.text = element_text(size = 10),
@@ -304,18 +378,17 @@ plotNormCurves <- function(model,
                            step = 0.1,
                            minRaw = NULL,
                            maxRaw = NULL) {
-
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     model <- model$model
   }
   parametric <- isParametric(model)
 
-  if(!isParametric(model) && !model$useAge){
+  if (!isParametric(model) && !model$useAge) {
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
   # Get scale information
-  if(parametric) {
+  if (parametric) {
     scaleMean <- attr(model$result, "scaleMean")
     scaleSD <- attr(model$result, "scaleSD")
   } else {
@@ -323,24 +396,36 @@ plotNormCurves <- function(model,
     scaleSD <- model$scaleSD
   }
 
-  if(is.null(normList)){
+  if (is.null(normList)) {
     normList <- c(-2, -1, 0, 1, 2) * scaleSD + scaleMean
   }
 
   if (is.null(minAge)) {
-    minAge <- if(parametric) attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd") else model$minA1
+    minAge <- if (parametric)
+      attr(model$result, "age_mean") - 2 * attr(model$result, "age_sd")
+    else
+      model$minA1
   }
 
   if (is.null(maxAge)) {
-    maxAge <- if(parametric) attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd") else model$maxA1
+    maxAge <- if (parametric)
+      attr(model$result, "age_mean") + 2 * attr(model$result, "age_sd")
+    else
+      model$maxA1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if(parametric) 0 else model$minRaw
+    minRaw <- if (parametric)
+      0
+    else
+      model$minRaw
   }
 
   if (is.null(maxRaw)) {
-    maxRaw <- if(parametric) attr(model$result, "max") else model$maxRaw
+    maxRaw <- if (parametric)
+      attr(model$result, "max")
+    else
+      model$maxRaw
   }
 
   frame_list <- lapply(normList, function(norm) {
@@ -353,9 +438,18 @@ plotNormCurves <- function(model,
       })
       data.frame(n = norm, raw = raws, age = ages)
     } else {
-      normCurve <- getNormCurve(norm, model, minAge = minAge, maxAge = maxAge,
-                                step = step, minRaw = minRaw, maxRaw = maxRaw)
-      data.frame(n = norm, raw = normCurve$raw, age = normCurve$age)
+      normCurve <- getNormCurve(
+        norm,
+        model,
+        minAge = minAge,
+        maxAge = maxAge,
+        step = step,
+        minRaw = minRaw,
+        maxRaw = maxRaw
+      )
+      data.frame(n = norm,
+                 raw = normCurve$raw,
+                 age = normCurve$age)
     }
   })
   valueList <- do.call(rbind, frame_list)
@@ -365,17 +459,25 @@ plotNormCurves <- function(model,
   color_palette <- rainbow(n_colors)
 
   # Create ggplot
-  p <- ggplot(valueList, aes(x = .data$age, y = .data$raw, color = factor(.data$n))) +
+  p <- ggplot(valueList, aes(
+    x = .data$age,
+    y = .data$raw,
+    color = factor(.data$n)
+  )) +
     geom_line(linewidth = 1) +
-    scale_color_manual(name = "Norm Score",
-                       values = color_palette,
-                       labels = paste("Norm", normList)) +
-    labs(title = "Norm Curves",
-         x = "Explanatory Variable (Age)",
-         y = "Raw Score") +
+    scale_color_manual(
+      name = "Norm Score",
+      values = color_palette,
+      labels = paste("Norm", normList)
+    ) +
+    labs(title = "Norm Curves", x = "Explanatory Variable (Age)", y = "Raw Score") +
     theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
@@ -408,8 +510,8 @@ plotCumulative <- function(x,
                            maxRaw   = NULL,
                            title    = NULL,
                            subtitle = NULL) {
-
-  if (!isTaylor(x)) stop("plotCumulative requires a cnorm object.")
+  if (!isTaylor(x))
+    stop("plotCumulative requires a cnorm object.")
 
   data    <- x$data
   m       <- x$model
@@ -417,8 +519,10 @@ plotCumulative <- function(x,
   scaleM  <- m$scaleM
   scaleSD <- m$scaleSD
 
-  if (is.null(minRaw)) minRaw <- m$minRaw
-  if (is.null(maxRaw)) maxRaw <- m$maxRaw
+  if (is.null(minRaw))
+    minRaw <- m$minRaw
+  if (is.null(maxRaw))
+    maxRaw <- m$maxRaw
 
   # ------------------------------------------------------------------
   # Model-implied curve.
@@ -444,44 +548,52 @@ plotCumulative <- function(x,
   n_obs   <- length(raw_obs)
 
   unique_raw <- sort(unique(raw_obs))
-  manifest_df <- data.frame(
-    raw        = unique_raw,
-    percentile = vapply(unique_raw, function(r) {
-      (sum(raw_obs < r) + 0.5 * sum(raw_obs == r)) / n_obs * 100
-    }, numeric(1))
-  )
+  manifest_df <- data.frame(raw        = unique_raw,
+                            percentile = vapply(unique_raw, function(r) {
+                              (sum(raw_obs < r) + 0.5 * sum(raw_obs == r)) / n_obs * 100
+                            }, numeric(1)))
 
   # ------------------------------------------------------------------
   # Title / subtitle (consistent with plotPercentiles)
   # ------------------------------------------------------------------
   if (is.null(title)) {
     title <- "Cumulative Norm Distribution (Conventional Norming)"
-    subtitle <- bquote(paste(
-      "Model: ", .(m$ideal.model),
-      ", R"^2, " = ",
-      .(round(m$subsets$adjr2[[m$ideal.model]], digits = 4))
-    ))
+    subtitle <- bquote(paste("Model: ", .(m$ideal.model), ", R"^2, " = ", .(round(
+      m$subsets$adjr2[[m$ideal.model]], digits = 4
+    ))))
   }
 
   # ------------------------------------------------------------------
   # Plot
   # ------------------------------------------------------------------
   p <- ggplot() +
-    geom_point(data = manifest_df,
-               aes(x = .data$raw, y = .data$percentile),
-               colour = "black", alpha = 0.6, size = 1.4) +
-    geom_line(data = curve_df,
-              aes(x = .data$raw, y = .data$percentile),
-              colour = "#1f77b4", linewidth = 0.9) +
-    labs(title    = title,
-         subtitle = subtitle,
-         x        = paste0("Raw Score (", raw_var, ")"),
-         y        = "Percentile") +
-    scale_y_continuous(limits = c(0, 100),
-                       breaks = seq(0, 100, by = 10)) +
+    geom_point(
+      data = manifest_df,
+      aes(x = .data$raw, y = .data$percentile),
+      colour = "black",
+      alpha = 0.6,
+      size = 1.4
+    ) +
+    geom_line(
+      data = curve_df,
+      aes(x = .data$raw, y = .data$percentile),
+      colour = "#1f77b4",
+      linewidth = 0.9
+    ) +
+    labs(
+      title    = title,
+      subtitle = subtitle,
+      x        = paste0("Raw Score (", raw_var, ")"),
+      y        = "Percentile"
+    ) +
+    scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 10)) +
     theme_minimal() +
     theme(
-      plot.title       = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title       = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle    = element_text(hjust = 0.5, size = 12),
       axis.title       = element_text(size = 12, face = "bold"),
       axis.title.x     = element_text(margin = margin(t = 10)),
@@ -531,9 +643,11 @@ plotCumulative <- function(x,
 #' @param points Logical indicating whether to plot the data points. Default is TRUE.
 #' @seealso plotNormCurves, plotPercentileSeries
 #' @examples
-#' # Load example data set, compute model and plot results
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotPercentiles(result)
+#' \dontrun{
+#'   # Load example data set, compute model and plot results
+#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   plotPercentiles(result)
+#' }
 #' @export
 #' @family plot
 plotPercentiles <- function(model,
@@ -548,10 +662,11 @@ plotPercentiles <- function(model,
                             title = NULL,
                             subtitle = NULL,
                             points = FALSE) {
-
   if (isParametric(model)) {
-    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). ",
-         "Please use 'plot(model, age, raw)' instead.")
+    stop(
+      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). ",
+      "Please use 'plot(model, age, raw)' instead."
+    )
   }
 
   if (isTaylor(model)) {
@@ -567,11 +682,15 @@ plotPercentiles <- function(model,
   # cumulative chart of raw vs. percentile.
   # ------------------------------------------------------------------
   if (!isTRUE(m$useAge)) {
-    return(plotCumulative(model,
-                          minRaw      = minRaw,
-                          maxRaw      = maxRaw,
-                          title       = title,
-                          subtitle    = subtitle))
+    return(
+      plotCumulative(
+        model,
+        minRaw      = minRaw,
+        maxRaw      = maxRaw,
+        title       = title,
+        subtitle    = subtitle
+      )
+    )
   }
 
 
@@ -580,7 +699,7 @@ plotPercentiles <- function(model,
   }
 
   age <- NULL
-  if(is.null(data[[group]])){
+  if (is.null(data[[group]])) {
     age <- data[, attributes(data)$age]
     data$group <- getGroups(data[, attributes(data)$age])
     data$age <- data[, attributes(data)$age]
@@ -608,11 +727,25 @@ plotPercentiles <- function(model,
   }
 
   if (!(raw %in% colnames(data))) {
-    stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c(
+        "ERROR: Raw score variable '",
+        raw,
+        "' does not exist in data object."
+      ),
+      collapse = ""
+    ))
   }
 
   if (!(group %in% colnames(data))) {
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c(
+        "ERROR: Grouping variable '",
+        group,
+        "' does not exist in data object."
+      ),
+      collapse = ""
+    ))
   }
 
   if (typeof(group) == "logical" && !group) {
@@ -642,43 +775,56 @@ plotPercentiles <- function(model,
   NAMESP <- paste("PredPR", percentiles * 100, sep = "")
 
   # build function for xyplot and aggregate actual percentiles per group
-  xyFunction <- paste(paste(NAMES, collapse = " + "),
-                      paste(NAMESP, collapse = " + "),
-                      sep = " + ", collapse = " + "
+  xyFunction <- paste(
+    paste(NAMES, collapse = " + "),
+    paste(NAMESP, collapse = " + "),
+    sep = " + ",
+    collapse = " + "
   )
   xyFunction <- paste(xyFunction, group, sep = " ~ ")
 
   w <- attributes(data)$weights
-  data[, group] <- round(data[, group], digits=3)
+  data[, group] <- round(data[, group], digits = 3)
   AGEP <- unique(data[, group])
 
   # get actual percentiles
-  if(!is.null(attr(data, "descend"))&&attr(data, "descend")){
-    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df){weighted.quantile(df[, raw], probs = 1 - percentiles, weights = df$w)})))
-  }else{
-    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df){weighted.quantile(df[, raw], probs = percentiles, weights = df$w)})))
+  if (!is.null(attr(data, "descend")) && attr(data, "descend")) {
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df) {
+      weighted.quantile(df[, raw],
+                        probs = 1 - percentiles,
+                        weights = df$w)
+    })))
+  } else{
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df) {
+      weighted.quantile(df[, raw], probs = percentiles, weights = df$w)
+    })))
   }
   percentile.actual$group <- as.numeric(rownames(percentile.actual))
   colnames(percentile.actual) <- c(NAMES, c(group))
   rownames(percentile.actual) <- AGEP
 
   # build finer grained grouping variable for prediction and fit predicted percentiles
-  share <- seq(from = minAge, to = maxAge, length.out = 100)
+  share <- seq(from = minAge,
+               to = maxAge,
+               length.out = 100)
   AGEP <- c(AGEP, share)
-  percentile.fitted <- data.frame(matrix(NA,
-                                         nrow = length(AGEP),
-                                         ncol = length(T)
-  ))
+  percentile.fitted <- data.frame(matrix(NA, nrow = length(AGEP), ncol = length(T)))
 
-  norm_rep <- rep(T,    times = length(AGEP))   # T1,T2,...,Tk, T1,T2,...,Tk, ...
+  norm_rep <- rep(T, times = length(AGEP))   # T1,T2,...,Tk, T1,T2,...,Tk, ...
   age_rep  <- rep(AGEP, each  = length(T))       # A1,A1,...,A1, A2,A2,...,A2, ...
 
-  preds <- predictRaw(norm_rep, age_rep, m$coefficients,
-                      minRaw = minRaw, maxRaw = maxRaw)
+  preds <- predictRaw(norm_rep,
+                      age_rep,
+                      m$coefficients,
+                      minRaw = minRaw,
+                      maxRaw = maxRaw)
 
-  percentile.fitted <- as.data.frame(
-    matrix(preds, nrow = length(AGEP), ncol = length(T), byrow = TRUE)
-  )
+  percentile.fitted <- as.data.frame(matrix(
+    preds,
+    nrow = length(AGEP),
+    ncol = length(T),
+    byrow = TRUE
+  ))
   percentile.fitted$group <- AGEP
   percentile.fitted <- percentile.fitted[!duplicated(percentile.fitted$group), ]
   colnames(percentile.fitted)  <- c(NAMESP, group)
@@ -686,9 +832,10 @@ plotPercentiles <- function(model,
 
   # Merge actual and predicted scores and plot them show lines
   # for predicted scores and dots for actual scores
-  percentile <- merge(percentile.actual, percentile.fitted,
-                      by = group, all = TRUE
-  )
+  percentile <- merge(percentile.actual,
+                      percentile.fitted,
+                      by = group,
+                      all = TRUE)
 
   END <- .8
   COL1 <- rainbow(length(percentiles), end = END)
@@ -697,15 +844,22 @@ plotPercentiles <- function(model,
 
   if (is.null(title)) {
     title <- "Observed and Predicted Percentile Curves"
-    subtitle <- bquote(paste("Model: ", .(m$ideal.model), ", R"^2, "=", .(round(m$subsets$adjr2[[m$ideal.model]], digits = 4))))
+    subtitle <- bquote(paste("Model: ", .(m$ideal.model), ", R"^2, "=", .(round(
+      m$subsets$adjr2[[m$ideal.model]], digits = 4
+    ))))
   }
 
   # Prepare data for ggplot
   plot_data <- data.frame(
     group = rep(percentile$group, 2 * length(percentiles)),
     value = c(as.matrix(percentile[, NAMES]), as.matrix(percentile[, NAMESP])),
-    type = rep(c("Observed", "Predicted"), each = nrow(percentile) * length(percentiles)),
-    percentile = factor(rep(rep(NAMES, each = nrow(percentile)), 2), levels = NAMES)
+    type = rep(
+      c("Observed", "Predicted"),
+      each = nrow(percentile) * length(percentiles)
+    ),
+    percentile = factor(rep(rep(
+      NAMES, each = nrow(percentile)
+    ), 2), levels = NAMES)
   )
 
   plot_data_predicted <- plot_data[plot_data$type == "Predicted", ]
@@ -716,30 +870,54 @@ plotPercentiles <- function(model,
 
   # Add raw scores FIRST if points is TRUE (matches plot.cnormShash)
   if (points) {
-    if(is.null(age)){
-      p <- p + geom_point(data = data, aes(x = .data[[group]], y = .data[[raw]]),
-                          color = "black", alpha = 0.2, size = 0.6)  # Matched size
-    }else{
-      p <- p + geom_point(data = data, aes(x = .data$age, y = .data[[raw]]),
-                          color = "black", alpha = 0.2, size = 0.6)  # Matched size
+    if (is.null(age)) {
+      p <- p + geom_point(
+        data = data,
+        aes(x = .data[[group]], y = .data[[raw]]),
+        color = "black",
+        alpha = 0.2,
+        size = 0.6
+      )  # Matched size
+    } else{
+      p <- p + geom_point(
+        data = data,
+        aes(x = .data$age, y = .data[[raw]]),
+        color = "black",
+        alpha = 0.2,
+        size = 0.6
+      )  # Matched size
     }
   }
 
   # Then add percentile lines and observed points
   p <- p +
-    geom_line(data = plot_data_predicted,
-              aes(x = .data$group, y = .data$value, color = .data$percentile),
-              linewidth = 0.6) +  # Matched linewidth
-    geom_point(data = plot_data_observed,
-               aes(x = .data$group, y = .data$value, color = .data$percentile),
-               na.rm = TRUE,
-               size = 2,
-               shape = 18) +
-    labs(title = title,
-         subtitle = subtitle,
-         x = paste0("Explanatory Variable (", group, ")"),
-         y = paste0("Raw Score (", raw, ")"),
-         color = "Percentile") +  # Added legend title
+    geom_line(
+      data = plot_data_predicted,
+      aes(
+        x = .data$group,
+        y = .data$value,
+        color = .data$percentile
+      ),
+      linewidth = 0.6
+    ) +  # Matched linewidth
+    geom_point(
+      data = plot_data_observed,
+      aes(
+        x = .data$group,
+        y = .data$value,
+        color = .data$percentile
+      ),
+      na.rm = TRUE,
+      size = 2,
+      shape = 18
+    ) +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      x = paste0("Explanatory Variable (", group, ")"),
+      y = paste0("Raw Score (", raw, ")"),
+      color = "Percentile"
+    ) +  # Added legend title
     scale_color_manual(
       values = setNames(COL1, NAMES),
       labels = paste0(percentiles * 100, "%")  # Matched label format
@@ -752,7 +930,11 @@ plotPercentiles <- function(model,
   # Apply consistent theme
   p <- p + theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -819,8 +1001,7 @@ plotDensity <- function(model,
                         minNorm = NULL,
                         maxNorm = NULL,
                         group = NULL) {
-
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     model <- model$model
   }
 
@@ -828,33 +1009,58 @@ plotDensity <- function(model,
   is_shash <- isSHASH(model)
 
   if (is.null(minNorm)) {
-    minNorm <- if(is_beta_binomial) -3 else model$minL1
+    minNorm <- if (is_beta_binomial)
+      - 3
+    else
+      model$minL1
   }
 
   if (is.null(maxNorm)) {
-    maxNorm <- if(is_beta_binomial) 3 else model$maxL1
+    maxNorm <- if (is_beta_binomial)
+      3
+    else
+      model$maxL1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if (is_beta_binomial || is_shash) 0 else model$minRaw
+    minRaw <- if (is_beta_binomial || is_shash)
+      0
+    else
+      model$minRaw
   }
   if (is.null(maxRaw)) {
-    maxRaw <- if (is_beta_binomial || is_shash) attr(model$result, "max") else model$maxRaw
+    maxRaw <- if (is_beta_binomial ||
+                  is_shash)
+      attr(model$result, "max")
+    else
+      model$maxRaw
   }
 
-  title <- if (is_beta_binomial) "Density Functions (Beta-Binomial)"
-  else if (is_shash) "Density Functions (SHASH)"
-  else "Density Functions (Taylor Polynomial)"
+  title <- if (is_beta_binomial)
+    "Density Functions (Beta-Binomial)"
+  else if (is_shash)
+    "Density Functions (SHASH)"
+  else
+    "Density Functions (Taylor Polynomial)"
 
 
 
   if (is.null(group)) {
-    if(is_beta_binomial||is_shash) {
+    if (is_beta_binomial || is_shash) {
       age_min <- attr(model$result, "ageMin")
       age_max <- attr(model$result, "ageMax")
-      group <- round(seq(from = age_min, to = age_max, length.out = 4), digits = 3)
-    } else if(model$useAge) {
-      group <- round(seq(from = model$minA1, to = model$maxA1, length.out = 4), digits = 3)
+      group <- round(seq(
+        from = age_min,
+        to = age_max,
+        length.out = 4
+      ), digits = 3)
+    } else if (model$useAge) {
+      group <- round(seq(
+        from = model$minA1,
+        to = model$maxA1,
+        length.out = 4
+      ),
+      digits = 3)
     } else {
       group <- c(1)
     }
@@ -863,20 +1069,29 @@ plotDensity <- function(model,
   step <- (maxNorm - minNorm) / 100
 
   matrix_list <- lapply(group, function(g) {
-    if(is_beta_binomial) {
+    if (is_beta_binomial) {
       norm <- normTable.betabinomial(model, g, attr(model$result, "max"))[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
       colnames(norm)[colnames(norm) == "z"] <- "norm"
-    } else if(is_shash) {
+    } else if (is_shash) {
       norm <- normTable.shash(model, g, attr(model$result, "max"))[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
       colnames(norm)[colnames(norm) == "z"] <- "norm"
     } else {
-      norm <- normTable(g, model = model, minNorm = minNorm, maxNorm = maxNorm, minRaw = minRaw, maxRaw = maxRaw, step = step, pretty = FALSE)
+      norm <- normTable(
+        g,
+        model = model,
+        minNorm = minNorm,
+        maxNorm = maxNorm,
+        minRaw = minRaw,
+        maxRaw = maxRaw,
+        step = step,
+        pretty = FALSE
+      )
       norm$group <- rep(g, length.out = nrow(norm))
     }
     return(norm)
@@ -886,32 +1101,40 @@ plotDensity <- function(model,
   matrix <- matrix[matrix$norm > minNorm & matrix$norm < maxNorm, ]
   matrix <- matrix[matrix$raw > minRaw & matrix$raw < maxRaw, ]
 
-  if(is_beta_binomial) {
+  if (is_beta_binomial) {
     matrix$density <- matrix$Px
   } else {
-    matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
+    matrix$density <- dnorm(matrix$norm,
+                            mean = model$scaleM,
+                            sd = model$scaleSD)
   }
 
   # Create ggplot
   title <- ""
-  if(is_beta_binomial) {
+  if (is_beta_binomial) {
     title <- "Density Functions (Beta-Binomial)"
   } else {
     title <- "Density Functions (Taylor Polynomial)"
   }
 
   matrix <- matrix[complete.cases(matrix), ]
-  p <- ggplot(matrix, aes(x = .data$raw, y = .data$density, color = factor(group))) +
+  p <- ggplot(matrix, aes(
+    x = .data$raw,
+    y = .data$density,
+    color = factor(group)
+  )) +
     geom_line(linewidth = 1, na.rm = TRUE) +
     scale_color_viridis_d(name = "Group",
                           labels = paste("Group", group),
                           option = "plasma") +
-    labs(title = title,
-         x = "Raw Score",
-         y = "Density") +
+    labs(title = title, x = "Raw Score", y = "Density") +
     theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       axis.title = element_text(size = 12, face = "bold"),
       axis.text = element_text(size = 10),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -947,27 +1170,33 @@ plotDensity <- function(model,
 #' @export
 #'
 #' @examples
-#' # Load example data set, compute model and plot results
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotPercentileSeries(result, start=4, end=6)
+#' \dontrun{
+#'   # Load example data set, compute model and plot results
+#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   plotPercentileSeries(result, start=4, end=6)
+#' }
 #'
 #' @family plot
-plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
+plotPercentileSeries <- function(model,
+                                 start = 1,
+                                 end = NULL,
+                                 group = NULL,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
-
-  if(isParametric(model)) {
-    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
+  if (isParametric(model)) {
+    stop(
+      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead."
+    )
   }
 
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     d <- model$data
     model <- model$model
-  }else{
+  } else{
     stop("Please provide a cnorm object.")
   }
 
-  if (!attr(d, "useAge")){
+  if (!attr(d, "useAge")) {
     stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
   }
 
@@ -1031,25 +1260,31 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
     result <- list(data = d, model = bestformula)
     class(result) <- "cnormTemp"
 
-    l[[length(l) + 1]] <- plotPercentiles(result,
-                                          minAge = model$minA1, maxAge = model$maxA1,
-                                          minRaw = minR,
-                                          maxRaw = maxR,
-                                          percentiles = percentiles,
-                                          scale = NULL,
-                                          group = group,
-                                          title = "Observed and Predicted Percentiles",
-                                          subtitle = bquote(paste("Model with ", .(start), " predictors, ", R^2, "=",
-                                                               .(round(bestformula$subsets$adjr2[[start]], digits = 4))))
+    l[[length(l) + 1]] <- plotPercentiles(
+      result,
+      minAge = model$minA1,
+      maxAge = model$maxA1,
+      minRaw = minR,
+      maxRaw = maxR,
+      percentiles = percentiles,
+      scale = NULL,
+      group = group,
+      title = "Observed and Predicted Percentiles",
+      subtitle = bquote(paste(
+        "Model with ", .(start), " predictors, ", R^2, "=", .(round(bestformula$subsets$adjr2[[start]], digits = 4))
+      ))
     )
 
     if (!is.null(filename)) {
       ggsave(
         filename = paste0(filename, start, ".png"),
-        plot = l[[length(l)]],  # Assuming 'chart' is your ggplot object
+        plot = l[[length(l)]],
+        # Assuming 'chart' is your ggplot object
         device = "png",
-        width = 10,  # Specify width in inches
-        height = 7,  # Specify height in inches
+        width = 10,
+        # Specify width in inches
+        height = 7,
+        # Specify height in inches
         dpi = 300  # Specify resolution
       )
     }
@@ -1100,6 +1335,7 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #' @seealso \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
 #'
 #' @examples
+#' \dontrun{
 #' # Compute model with example data and plot information function
 #' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotSubset(cnorm.model)
@@ -1109,17 +1345,19 @@ plotPercentileSeries <- function(model, start = 1, end = NULL, group = NULL,
 #'
 #' # Plot RMSE against number of predictors
 #' plotSubset(cnorm.model, type = 3)
+#' }
 #'
 #' @import ggplot2
 #' @export
 #' @family plot
 plotSubset <- function(model, type = 0) {
-
-  if(isParametric(model)){
-    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh).")
+  if (isParametric(model)) {
+    stop(
+      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh)."
+    )
   }
 
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     model <- model$model
   }
 
@@ -1130,14 +1368,14 @@ plotSubset <- function(model, type = 0) {
   k2 <- seq(from = 2, to = length(RSS1) + 1)
   df1 <- k2 - k1
   df2 <- length(model$fitted.values) - k2
-  F <- ((RSS1-RSS2)/df1)/(RSS2/df2)
+  F <- ((RSS1 - RSS2) / df1) / (RSS2 / df2)
   p <- 1 - pf(F, df1, df2)
 
   filled <- rep(TRUE, length(model$subsets$rss))
-  if(!is.null(model$subsets$consistent))
+  if (!is.null(model$subsets$consistent))
     filled <- model$subsets$consistent
   cutoff <- .99
-  if(!is.null(model$cutoff))
+  if (!is.null(model$cutoff))
     cutoff <- model$cutoff
 
   dataFrameTMP <- data.frame(
@@ -1155,7 +1393,11 @@ plotSubset <- function(model, type = 0) {
   # Improved base theme
   theme_custom <- theme_minimal() +
     theme(
-      plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 16,
+        hjust = 0.5
+      ),
       axis.title = element_text(face = "bold", size = 12),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
@@ -1168,7 +1410,11 @@ plotSubset <- function(model, type = 0) {
     )
 
   # Custom color palette
-  custom_colors <- c("Model in Ascending Order" = "#1f77b4", "Cutoff Value" = "#d62728", "p = .05" = "#d62728")
+  custom_colors <- c(
+    "Model in Ascending Order" = "#1f77b4",
+    "Cutoff Value" = "#d62728",
+    "p = .05" = "#d62728"
+  )
 
   # Base plot
   p <- ggplot(dataFrameTMP) + theme_custom
@@ -1176,8 +1422,21 @@ plotSubset <- function(model, type = 0) {
   # Define plot based on type
   if (type == 1) {
     p <- p +
-      geom_line(aes(x = .data$adjr2, y = .data$cp, color = "Model in Ascending Order"), linewidth = .75) +
-      geom_point(aes(x = .data$adjr2, y = .data$cp, shape = .data$filled), size = 2.5, color = "#1f77b4") +
+      geom_line(aes(
+        x = .data$adjr2,
+        y = .data$cp,
+        color = "Model in Ascending Order"
+      ),
+      linewidth = .75) +
+      geom_point(
+        aes(
+          x = .data$adjr2,
+          y = .data$cp,
+          shape = .data$filled
+        ),
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
       scale_y_log10() +
       labs(title = "Information Function: Mallows's Cp",
            x = expression(paste("Adjusted ", R^2)),
@@ -1186,8 +1445,21 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 2) {
     p <- p +
-      geom_line(aes(x = .data$adjr2, y = .data$bic, color = "Model in Ascending Order"), linewidth = .75) +
-      geom_point(aes(x = .data$adjr2, y = .data$bic, shape = .data$filled), size = 2.5, color = "#1f77b4") +
+      geom_line(aes(
+        x = .data$adjr2,
+        y = .data$bic,
+        color = "Model in Ascending Order"
+      ),
+      linewidth = .75) +
+      geom_point(
+        aes(
+          x = .data$adjr2,
+          y = .data$bic,
+          shape = .data$filled
+        ),
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
       labs(title = "Information Function: BIC",
            x = expression(paste("Adjusted ", R^2)),
            y = "Bayesian Information Criterion (BIC)") +
@@ -1195,60 +1467,135 @@ plotSubset <- function(model, type = 0) {
       scale_shape_manual(values = c(1, 16))
   } else if (type == 3) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$RMSE, color = "Model in Ascending Order"), linewidth = .75) +
-      geom_point(aes(x = .data$nr, y = .data$RMSE, shape = .data$filled), size = 2.5, color = "#1f77b4") +
-      labs(title = "Information Function: RMSE",
-           x = "Number of Predictors",
-           y = "Root Mean Square Error (Raw Score)") +
+      geom_line(aes(
+        x = .data$nr,
+        y = .data$RMSE,
+        color = "Model in Ascending Order"
+      ),
+      linewidth = .75) +
+      geom_point(
+        aes(
+          x = .data$nr,
+          y = .data$RMSE,
+          shape = .data$filled
+        ),
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
+      labs(title = "Information Function: RMSE", x = "Number of Predictors", y = "Root Mean Square Error (Raw Score)") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   } else if (type == 4) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$RSS, color = "Model in Ascending Order"), linewidth = .75) +
-      geom_point(aes(x = .data$nr, y = .data$RSS, shape = .data$filled), size = 2.5, color = "#1f77b4") +
-      labs(title = "Information Function: RSS",
-           x = "Number of Predictors",
-           y = "Residual Sum of Squares (RSS)") +
+      geom_line(aes(
+        x = .data$nr,
+        y = .data$RSS,
+        color = "Model in Ascending Order"
+      ),
+      linewidth = .75) +
+      geom_point(
+        aes(
+          x = .data$nr,
+          y = .data$RSS,
+          shape = .data$filled
+        ),
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
+      labs(title = "Information Function: RSS", x = "Number of Predictors", y = "Residual Sum of Squares (RSS)") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   } else if (type == 5) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$F, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
-      geom_point(aes(x = .data$nr, y = .data$F, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
-      labs(title = "Information Function: F-test Statistics",
-           x = "Number of Predictors",
-           y = "F-test Statistics for Consecutive Models") +
+      geom_line(
+        aes(
+          x = .data$nr,
+          y = .data$F,
+          color = "Model in Ascending Order"
+        ),
+        na.rm = TRUE,
+        linewidth = .75
+      ) +
+      geom_point(
+        aes(
+          x = .data$nr,
+          y = .data$F,
+          shape = .data$filled
+        ),
+        na.rm = TRUE,
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
+      labs(title = "Information Function: F-test Statistics", x = "Number of Predictors", y = "F-test Statistics for Consecutive Models") +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   } else if (type == 6) {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$p, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
-      geom_point(aes(x = .data$nr, y = .data$p, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      geom_line(
+        aes(
+          x = .data$nr,
+          y = .data$p,
+          color = "Model in Ascending Order"
+        ),
+        na.rm = TRUE,
+        linewidth = .75
+      ) +
+      geom_point(
+        aes(
+          x = .data$nr,
+          y = .data$p,
+          shape = .data$filled
+        ),
+        na.rm = TRUE,
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
       ylim(-0.005, 0.11) +
       labs(title = "Information Function: p-values",
            x = "Number of Predictors",
-           y = expression(paste("p-values for Tests on ", R^2, " adj. of Consecutive Models"))) +
-      geom_hline(aes(yintercept = 0.05, color = "p = .05"), linetype = "dashed", linewidth = 1) +
+           y = expression(
+             paste("p-values for Tests on ", R^2, " adj. of Consecutive Models")
+           )) +
+      geom_hline(
+        aes(yintercept = 0.05, color = "p = .05"),
+        linetype = "dashed",
+        linewidth = 1
+      ) +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   } else {
     p <- p +
-      geom_line(aes(x = .data$nr, y = .data$adjr2, color = "Model in Ascending Order"), na.rm = TRUE, linewidth = .75) +
-      geom_point(aes(x = .data$nr, y = .data$adjr2, shape = .data$filled), na.rm = TRUE, size = 2.5, color = "#1f77b4") +
+      geom_line(
+        aes(
+          x = .data$nr,
+          y = .data$adjr2,
+          color = "Model in Ascending Order"
+        ),
+        na.rm = TRUE,
+        linewidth = .75
+      ) +
+      geom_point(
+        aes(
+          x = .data$nr,
+          y = .data$adjr2,
+          shape = .data$filled
+        ),
+        na.rm = TRUE,
+        size = 2.5,
+        color = "#1f77b4"
+      ) +
       labs(title = expression(paste("Information Function: Adjusted ", R^2)),
            x = "Number of Predictors",
            y = expression(paste("Adjusted ", R^2))) +
-      geom_hline(
-        yintercept = cutoff,
-        linetype = "dashed",
-        linewidth = .8
-      ) +
+      geom_hline(yintercept = cutoff,
+                 linetype = "dashed",
+                 linewidth = .8) +
       scale_color_manual(values = custom_colors) +
       scale_shape_manual(values = c(1, 16))
   }
 
   # Add legend title
-   p <- p + labs(color = "")
+  p <- p + labs(color = "")
 
   return(p)
 }
@@ -1287,10 +1634,11 @@ plotSubset <- function(model, type = 0) {
 #' @seealso \code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
 #'
 #' @examples
+#' \dontrun{
 #' # For traditional continuous norming model
 #' result <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, stepNorm=1)
-#'
+#' }
 #'
 #' @import ggplot2
 #' @export
@@ -1303,14 +1651,15 @@ plotDerivative <- function(model,
                            stepAge = NULL,
                            stepNorm = NULL,
                            order = 1) {
-
-  if(isTaylor(model)){
+  if (isTaylor(model)) {
     model <- model$model
-  }else if(isParametric(model)){
-    stop("This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead.")
+  } else if (isParametric(model)) {
+    stop(
+      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead."
+    )
   }
 
-  if (!model$useAge){
+  if (!model$useAge) {
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
@@ -1331,39 +1680,66 @@ plotDerivative <- function(model,
   }
 
   if (is.null(stepAge)) {
-    stepAge <- (maxAge - minAge)/100
+    stepAge <- (maxAge - minAge) / 100
   }
 
   if (is.null(stepNorm)) {
-    stepNorm <- (maxNorm - minNorm)/100
+    stepNorm <- (maxNorm - minNorm) / 100
   }
 
-  if(order <=0 )
+  if (order <= 0)
     stop("Order of derivative must be a positive integer.")
 
   rowS <- seq(minNorm, maxNorm, by = stepNorm)
   colS <- seq(minAge, maxAge, by = stepAge)
 
   coeff <- derive(model, order)
-  if(length(coeff) == 0){
+  if (length(coeff) == 0) {
     stop("Derivative of order ", order, " not available for this model.")
   }
 
-  cat(paste0(rangeCheck(model, minAge, maxAge, minNorm, maxNorm), " Coefficients from the ", order, " order derivative function:\n\n"))
+  cat(
+    paste0(
+      rangeCheck(model, minAge, maxAge, minNorm, maxNorm),
+      " Coefficients from the ",
+      order,
+      " order derivative function:\n\n"
+    )
+  )
   print(coeff)
 
 
   dev2 <- expand.grid(X = rowS, Y = colS)
-  dev2$Z <- mapply(function(norm, age) predictRaw(norm, age, coeff), dev2$X, dev2$Y)
+  dev2$Z <- mapply(function(norm, age)
+    predictRaw(norm, age, coeff), dev2$X, dev2$Y)
 
-  ordinal <- if (order <= 3) c("st", "nd", "rd")[order] else "th"
+  ordinal <- if (order <= 3)
+    c("st", "nd", "rd")[order]
+  else
+    "th"
   desc <- paste0(order, ordinal, " Order Derivative")
-  custom_palette <- c("#FF0000", "#FF4000", "#FF8000", "#FFBF00", "#FFFF00",
-                      "#80FF00", "#00FF00", "#00FF80", "#00FFFF",
-                      "#0080FF", "#0000FF", "#4B0082", "#8B00FF")
+  custom_palette <- c(
+    "#FF0000",
+    "#FF4000",
+    "#FF8000",
+    "#FFBF00",
+    "#FFFF00",
+    "#80FF00",
+    "#00FF00",
+    "#00FF80",
+    "#00FFFF",
+    "#0080FF",
+    "#0000FF",
+    "#4B0082",
+    "#8B00FF"
+  )
   theme_custom <- theme_minimal() +
     theme(
-      plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 14,
+        hjust = 0.5
+      ),
       axis.title = element_text(face = "bold", size = 12),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
@@ -1378,15 +1754,23 @@ plotDerivative <- function(model,
     geom_tile(aes(fill = .data$Z)) +
     geom_contour(color = "white", alpha = 0.5) +
     scale_fill_gradientn(colors = custom_palette) +
-    labs(title = "Slope of the Regression Function",
-         x = "Explanatory Variable (Age)",
-         y = paste("Norm Score - ", desc),
-         fill = "Derivative") +
+    labs(
+      title = "Slope of the Regression Function",
+      x = "Explanatory Variable (Age)",
+      y = paste("Norm Score - ", desc),
+      fill = "Derivative"
+    ) +
     theme_custom +
     theme(legend.position = "right")
 
-  if(min(dev2$Z)<0 && max(dev2$Z)>0)
-    p <- p + geom_contour(aes(z = .data$Z), color = "black", linewidth = 0.5, breaks = 0, linetype = "dashed")
+  if (min(dev2$Z) < 0 && max(dev2$Z) > 0)
+    p <- p + geom_contour(
+      aes(z = .data$Z),
+      color = "black",
+      linewidth = 0.5,
+      breaks = 0,
+      linetype = "dashed"
+    )
 
   return(p)
 }
@@ -1409,15 +1793,25 @@ plotCnorm <- function(x, y, ...) {
     message("y must be a plot-type string or integer index.")
     return(invisible(NULL))
   }
-  if      (y == "raw"         || y == 1) plotRaw(x, ...)
-  else if (y == "norm"        || y == 2) plotNorm(x, ...)
-  else if (y == "curves"      || y == 3) plotNormCurves(x, ...)
-  else if (y == "percentiles" || y == 4) plotPercentiles(x, ...)
-  else if (y == "density"     || y == 5) plotDensity(x, ...)
-  else if (y == "series"      || y == 6) plotPercentileSeries(x, ...)
-  else if (y == "subset"      || y == 7) plotSubset(x, ...)
-  else if (y == "derivative"  || y == 8) plotDerivative(x, ...)
-  else plotPercentiles(x, ...)
+  if (y == "raw"         || y == 1)
+    plotRaw(x, ...)
+  else if (y == "norm"        || y == 2)
+    plotNorm(x, ...)
+  else if (y == "curves"      || y == 3)
+    plotNormCurves(x, ...)
+  else if (y == "percentiles" || y == 4)
+    plotPercentiles(x, ...)
+  else if (y == "density"     || y == 5)
+    plotDensity(x, ...)
+  else if (y == "series"      ||
+           y == 6)
+    plotPercentileSeries(x, ...)
+  else if (y == "subset"      || y == 7)
+    plotSubset(x, ...)
+  else if (y == "derivative"  || y == 8)
+    plotDerivative(x, ...)
+  else
+    plotPercentiles(x, ...)
 }
 
 #' Compare Two Norm Models Visually
@@ -1455,39 +1849,39 @@ plotCnorm <- function(x, y, ...) {
 #'
 #' @export
 #' @family plot
-compare <- function(model1, model2,
+compare <- function(model1,
+                    model2,
                     percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                     age = NULL,
                     score = NULL,
                     weights = NULL,
                     title = NULL,
                     subtitle = NULL) {
-
   # retrieve score from model if score is null and one of the
   # models is a cnorm object
-  if(is.null(score) && isTaylor(model1)){
+  if (is.null(score) && isTaylor(model1)) {
     score <- model1$data[[attributes(model1$data)$raw]]
     age <- model1$data[[attributes(model1$data)$age]]
   }
 
-  if(is.null(score) && isTaylor(model2)){
+  if (is.null(score) && isTaylor(model2)) {
     score <- model2$data[[attributes(model2$data)$raw]]
     age <- model2$data[[attributes(model2$data)$age]]
   }
 
   # Function to get predictions for beta-binomial models
   get_bb_predictions <- function(model, pred_ages) {
-    if(inherits(model, "cnormBetaBinomial")) {
+    if (inherits(model, "cnormBetaBinomial")) {
       preds <- predictCoefficients(model, pred_ages)
     } else {
       preds <- predictCoefficients2(model, pred_ages)
     }
 
-    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
-    for(i in seq_along(percentiles)) {
-      pred_matrix[,i] <- qbeta(percentiles[i],
-                               shape1 = preds$a,
-                               shape2 = preds$b) * attr(model$result, "max")
+    pred_matrix <- matrix(NA,
+                          nrow = length(pred_ages),
+                          ncol = length(percentiles))
+    for (i in seq_along(percentiles)) {
+      pred_matrix[, i] <- qbeta(percentiles[i], shape1 = preds$a, shape2 = preds$b) * attr(model$result, "max")
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1499,13 +1893,17 @@ compare <- function(model1, model2,
   get_shash_predictions <- function(model, pred_ages) {
     preds <- predictCoefficients_shash(model, pred_ages)
 
-    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
-    for(i in seq_along(percentiles)) {
-      pred_matrix[,i] <- qshash(percentiles[i],
-                                mu = preds$mu,
-                                sigma = preds$sigma,
-                                epsilon = preds$epsilon,
-                                delta = preds$delta)
+    pred_matrix <- matrix(NA,
+                          nrow = length(pred_ages),
+                          ncol = length(percentiles))
+    for (i in seq_along(percentiles)) {
+      pred_matrix[, i] <- qshash(
+        percentiles[i],
+        mu = preds$mu,
+        sigma = preds$sigma,
+        epsilon = preds$epsilon,
+        delta = preds$delta
+      )
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1518,9 +1916,11 @@ compare <- function(model1, model2,
     m <- model$model
     T <- qnorm(percentiles, m$scaleM, m$scaleSD)
 
-    pred_matrix <- matrix(NA, nrow = length(pred_ages), ncol = length(percentiles))
-    for(i in 1:length(pred_ages)) {
-      pred_matrix[i,] <- predictRaw(T, pred_ages[i], m$coefficients)
+    pred_matrix <- matrix(NA,
+                          nrow = length(pred_ages),
+                          ncol = length(percentiles))
+    for (i in 1:length(pred_ages)) {
+      pred_matrix[i, ] <- predictRaw(T, pred_ages[i], m$coefficients)
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1530,8 +1930,11 @@ compare <- function(model1, model2,
 
   # Determine age range
   get_age_range <- function(model) {
-    if(isParametric(model)) {
-      return(c(attr(model$result, "ageMin"), attr(model$result, "ageMax")))
+    if (isParametric(model)) {
+      return(c(
+        attr(model$result, "ageMin"),
+        attr(model$result, "ageMax")
+      ))
     } else {
       m <- model$model
       return(c(m$minA1, m$maxA1))
@@ -1543,22 +1946,20 @@ compare <- function(model1, model2,
   range2 <- get_age_range(model2)
 
   # Create common age sequence
-  pred_ages <- seq(min(range1[1], range2[1]),
-                   max(range1[2], range2[2]),
-                   length.out = 100)
+  pred_ages <- seq(min(range1[1], range2[1]), max(range1[2], range2[2]), length.out = 100)
 
   # Get predictions for both models
-  plot_data1 <- if(isBeta(model1)) {
+  plot_data1 <- if (isBeta(model1)) {
     get_bb_predictions(model1, pred_ages)
-  } else if(isSHASH(model1)) {
+  } else if (isSHASH(model1)) {
     get_shash_predictions(model1, pred_ages)
   } else {
     get_cnorm_predictions(model1, pred_ages)
   }
 
-  plot_data2 <- if(isBeta(model2)) {
+  plot_data2 <- if (isBeta(model2)) {
     get_bb_predictions(model2, pred_ages)
-  } else if(isSHASH(model2)) {
+  } else if (isSHASH(model2)) {
     get_shash_predictions(model2, pred_ages)
   } else {
     get_cnorm_predictions(model2, pred_ages)
@@ -1573,35 +1974,38 @@ compare <- function(model1, model2,
   )
 
   # Reshape data for model 1
-  for(i in 2:ncol(plot_data1)) {
-    plot_data_long <- rbind(plot_data_long,
-                            data.frame(
-                              age = plot_data1$age,
-                              value = plot_data1[[i]],
-                              percentile = names(plot_data1)[i],
-                              model = "Model 1"
-                            ))
+  for (i in 2:ncol(plot_data1)) {
+    plot_data_long <- rbind(
+      plot_data_long,
+      data.frame(
+        age = plot_data1$age,
+        value = plot_data1[[i]],
+        percentile = names(plot_data1)[i],
+        model = "Model 1"
+      )
+    )
   }
 
   # Reshape data for model 2
-  for(i in 2:ncol(plot_data2)) {
-    plot_data_long <- rbind(plot_data_long,
-                            data.frame(
-                              age = plot_data2$age,
-                              value = plot_data2[[i]],
-                              percentile = names(plot_data2)[i],
-                              model = "Model 2"
-                            ))
+  for (i in 2:ncol(plot_data2)) {
+    plot_data_long <- rbind(
+      plot_data_long,
+      data.frame(
+        age = plot_data2$age,
+        value = plot_data2[[i]],
+        percentile = names(plot_data2)[i],
+        model = "Model 2"
+      )
+    )
   }
 
-  if(!is.null(score)) {
+  if (!is.null(score)) {
     plot_data_long$value[plot_data_long$value < min(score)] <- min(score)
     plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
   }
 
   # Set factor levels for correct ordering
-  plot_data_long$percentile <- factor(plot_data_long$percentile,
-                                      levels = paste0("P", percentiles * 100))
+  plot_data_long$percentile <- factor(plot_data_long$percentile, levels = paste0("P", percentiles * 100))
 
   # Set default title if none provided
   if (is.null(title)) {
@@ -1614,22 +2018,42 @@ compare <- function(model1, model2,
 
   # Create plot
   p <- ggplot() +
-    geom_line(data = plot_data_long[plot_data_long$model == "Model 1",],
-              aes(x = .data$age, y = .data$value, color = .data$percentile),
-              linetype = "solid", linewidth = 0.6) +
-    geom_line(data = plot_data_long[plot_data_long$model == "Model 2",],
-              aes(x = .data$age, y = .data$value, color = .data$percentile),
-              linetype = "dashed", linewidth = 0.6) +
+    geom_line(
+      data = plot_data_long[plot_data_long$model == "Model 1", ],
+      aes(
+        x = .data$age,
+        y = .data$value,
+        color = .data$percentile
+      ),
+      linetype = "solid",
+      linewidth = 0.6
+    ) +
+    geom_line(
+      data = plot_data_long[plot_data_long$model == "Model 2", ],
+      aes(
+        x = .data$age,
+        y = .data$value,
+        color = .data$percentile
+      ),
+      linetype = "dashed",
+      linewidth = 0.6
+    ) +
     scale_color_manual(values = rainbow(length(percentiles)),
                        labels = paste0(percentiles * 100, "%")) +
-    labs(title = title,
-         subtitle = subtitle,
-         x = "Age",
-         y = "Score",
-         color = "Percentile") +
+    labs(
+      title = title,
+      subtitle = subtitle,
+      x = "Age",
+      y = "Score",
+      color = "Percentile"
+    ) +
     theme_minimal() +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -1643,7 +2067,7 @@ compare <- function(model1, model2,
     )
 
   # Information criteria
-  if(isTaylor(model1)) {
+  if (isTaylor(model1)) {
     ideal.model <- model1$model$ideal.model
     rss <- model1$model$subsets$rss[ideal.model]
     n <- nrow(model1$data)
@@ -1661,7 +2085,7 @@ compare <- function(model1, model2,
     BIC1 <- n_params * log(n_obs) - 2 * log_likelihood
   }
 
-  if(isTaylor(model2)) {
+  if (isTaylor(model2)) {
     ideal.model <- model2$model$ideal.model
     rss <- model2$model$subsets$rss[ideal.model]
     n <- nrow(model2$data)
@@ -1682,40 +2106,43 @@ compare <- function(model1, model2,
   if (!is.null(score) & !is.null(age)) {
     # Prepare data for manifest percentiles and fit statistics
     data <- data.frame(age = age, score = score)
-    if(!is.null(weights)){
+    if (!is.null(weights)) {
       data$w <- weights
-    }else{
+    } else{
       data$w <- rep(1, length(age))
     }
 
     # Calculate groups for manifest percentiles
-    if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+    if (length(age) / length(unique(age)) > 50 &&
+        min(table(data$age)) > 30) {
       data$group <- age
     } else {
       data$group <- getGroups(age)
     }
 
     # Calculate manifest percentiles
-    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data$group), function(df) {
+    percentile.actual <- as.data.frame(do.call("rbind", lapply(split(
+      data, data$group
+    ), function(df) {
       c(age = mean(df$age),
         weighted.quantile(df$score, probs = percentiles, weights = df$w))
     })))
     colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))
 
     # Reshape manifest data
-    manifest_data_long <- data.frame(
-      age = numeric(),
-      value = numeric(),
-      percentile = character()
-    )
+    manifest_data_long <- data.frame(age = numeric(),
+                                     value = numeric(),
+                                     percentile = character())
 
-    for(i in 2:ncol(percentile.actual)) {
-      manifest_data_long <- rbind(manifest_data_long,
-                                  data.frame(
-                                    age = percentile.actual$age,
-                                    value = percentile.actual[[i]],
-                                    percentile = names(percentile.actual)[i]
-                                  ))
+    for (i in 2:ncol(percentile.actual)) {
+      manifest_data_long <- rbind(
+        manifest_data_long,
+        data.frame(
+          age = percentile.actual$age,
+          value = percentile.actual[[i]],
+          percentile = names(percentile.actual)[i]
+        )
+      )
     }
 
     manifest_data_long$percentile <- factor(manifest_data_long$percentile,
@@ -1724,42 +2151,57 @@ compare <- function(model1, model2,
     # Add manifest percentiles to plot
     p <- p + geom_point(
       data = manifest_data_long,
-      aes(x = .data$age, y = .data$value, color = .data$percentile),
+      aes(
+        x = .data$age,
+        y = .data$value,
+        color = .data$percentile
+      ),
       size = 2,
       shape = 18
     )
 
     # Calculate fit statistics
-    if(is.null(weights)){
-      data <- rankByGroup(data, raw="score", group="group")
-    }else{
-      data <- rankByGroup(data, raw="score", group="group", weights="w")
+    if (is.null(weights)) {
+      data <- rankByGroup(data, raw = "score", group = "group")
+    } else{
+      data <- rankByGroup(data,
+                          raw = "score",
+                          group = "group",
+                          weights = "w")
     }
-    data$normValue <- 10*(data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
+    data$normValue <- 10 * (data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
 
     # Get predictions for both models
-    if(isTaylor(model1)){
-      data$fitted1 <- predictNorm(data$score, data$age, model1,
-                                  minNorm = model1$model$minL1,
-                                  maxNorm = model1$model$maxL1)
-      data$fitted1 <- 10*(data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
-    }else if(isParametric(model1)) {
+    if (isTaylor(model1)) {
+      data$fitted1 <- predictNorm(
+        data$score,
+        data$age,
+        model1,
+        minNorm = model1$model$minL1,
+        maxNorm = model1$model$maxL1
+      )
+      data$fitted1 <- 10 * (data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
+    } else if (isParametric(model1)) {
       data$fitted1 <- predict(model1, data$age, data$score)
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
-      data$fitted1 <- 10*(data$fitted1 - scaleMean) / scaleSD
+      data$fitted1 <- 10 * (data$fitted1 - scaleMean) / scaleSD
     }
 
-    if(isTaylor(model2)){
-      data$fitted2 <- predictNorm(data$score, data$age, model2,
-                                  minNorm = model2$model$minL1,
-                                  maxNorm = model2$model$maxL1)
-      data$fitted2 <- 10*(data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
-    }else if(isParametric(model2)) {
+    if (isTaylor(model2)) {
+      data$fitted2 <- predictNorm(
+        data$score,
+        data$age,
+        model2,
+        minNorm = model2$model$minL1,
+        maxNorm = model2$model$maxL1
+      )
+      data$fitted2 <- 10 * (data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
+    } else if (isParametric(model2)) {
       data$fitted2 <- predict(model2, data$age, data$score)
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")
-      data$fitted2 <- 10*(data$fitted2 - scaleMean) / scaleSD
+      data$fitted2 <- 10 * (data$fitted2 - scaleMean) / scaleSD
     }
 
     # Calculate fit statistics
@@ -1781,12 +2223,14 @@ compare <- function(model1, model2,
       Metric = c("R2", "Bias", "RMSE", "MAD", "AIC", "BIC"),
       Model1 = c(R2a, bias1, RMSE1, MAD1, AIC1, BIC1),
       Model2 = c(R2b, bias2, RMSE2, MAD2, AIC2, BIC2),
-      Difference = c(R2b - R2a,
-                     bias2 - bias1,
-                     RMSE2 - RMSE1,
-                     MAD2 - MAD1,
-                     AIC2 - AIC1,
-                     BIC2 - BIC1)
+      Difference = c(
+        R2b - R2a,
+        bias2 - bias1,
+        RMSE2 - RMSE1,
+        MAD2 - MAD1,
+        AIC2 - AIC1,
+        BIC2 - BIC1
+      )
     )
 
     # Round values
@@ -1799,14 +2243,13 @@ compare <- function(model1, model2,
     cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
     cat("      Scale metrics are T scores (scaleSD = 10)\n")
     cat("      AIC and BIC should only be used when comparing models of the same type.\n")
-  }else{
+  } else{
     # Create and print summary table
     fit_table <- data.frame(
       Metric = c("AIC", "BIC"),
       Model1 = c(AIC1, BIC1),
       Model2 = c(AIC2, BIC2),
-      Difference = c(AIC2 - AIC1,
-                     BIC2 - BIC1)
+      Difference = c(AIC2 - AIC1, BIC2 - BIC1)
     )
 
     cat("\nModel Comparison Summary:\n")

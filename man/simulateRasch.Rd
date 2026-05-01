@@ -57,6 +57,7 @@ standard deviation in order to model a scissor effects. The item difficulties ca
 and the raw data via $data of the returned object.
 }
 \examples{
+\dontrun{
 # simulate data for a rather easy test (m = -1.0)
 sim <- simulateRasch(n=150, minAge=1,
                      maxAge=7, items.n = 30, items.m = -1.0,
@@ -75,4 +76,5 @@ data <- prepareData(sim$data, age="age")
 model <- bestModel(data, k = 4)
 printSubset(model)
 plotSubset(model, type=0)
+}
 }

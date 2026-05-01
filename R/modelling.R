@@ -155,7 +155,7 @@ bestModel <- function(data,
   big <- FALSE
   if (nvmax > 50) {
     big <- TRUE
-    if(plot)
+    if (plot)
       message("The computation might take some time ...")
   }
 
@@ -175,7 +175,7 @@ bestModel <- function(data,
   }
 
   nbest <- 1
-  if(extensive && useAge)
+  if (extensive && useAge)
     nbest <- 20
 
   # determine best subset
@@ -204,10 +204,10 @@ bestModel <- function(data,
     )
 
   results <- summary(subsets)
-  if(extensive && useAge){
+  if (extensive && useAge) {
     results <- screenSubset(data, results, data[, raw], k, t)
     highestConsistent <- results$highestConsistent
-  }else
+  } else
     highestConsistent <- NULL
 
   # model selection strategy:
@@ -237,11 +237,15 @@ bestModel <- function(data,
         # fall back to the smallest available model
         i <- which.min(n_terms_per_row)
         selectionStrategy <- 3
-        report <- paste0("Final solution: ", n_terms_per_row[i],
-                         " terms (smallest available; R2 > .99 not reached)")
+        report <- paste0(
+          "Final solution: ",
+          n_terms_per_row[i],
+          " terms (smallest available; R2 > .99 not reached)"
+        )
       } else {
         selectionStrategy <- 2
-        report <- paste0("Final solution: ", n_terms_per_row[i],
+        report <- paste0("Final solution: ",
+                         n_terms_per_row[i],
                          " terms (model exceeding R2 > .99)")
       }
     }
@@ -249,28 +253,39 @@ bestModel <- function(data,
     candidate <- which(n_terms_per_row == terms)[1]
     if (is.na(candidate)) {
       candidate <- which.min(abs(n_terms_per_row - terms))
-      warning("No model with exactly ", terms,
-              " terms is available after consistency screening; ",
-              "using closest match (", n_terms_per_row[candidate], " terms).")
+      warning(
+        "No model with exactly ",
+        terms,
+        " terms is available after consistency screening; ",
+        "using closest match (",
+        n_terms_per_row[candidate],
+        " terms)."
+      )
     }
     i <- candidate
     selectionStrategy <- 4
-    report <- paste0("User specified solution: ",
-                     n_terms_per_row[i], " terms")
+    report <- paste0("User specified solution: ", n_terms_per_row[i], " terms")
   } else {
     candidates <- which(results$adjr2 > R2)
     if (length(candidates) == 0L) {
       i <- which.max(results$adjr2)
       selectionStrategy <- 3
-      report <- paste0("User specified solution: R2 > ", R2,
-                       ", but value not reached. Using best available model (",
-                       n_terms_per_row[i], " terms).")
+      report <- paste0(
+        "User specified solution: R2 > ",
+        R2,
+        ", but value not reached. Using best available model (",
+        n_terms_per_row[i],
+        " terms)."
+      )
     } else {
       # smallest model meeting the threshold
       i <- candidates[which.min(n_terms_per_row[candidates])]
       selectionStrategy <- 5
-      report <- paste0("User specified solution: R2 > ", R2,
-                       " resulting in ", n_terms_per_row[i], " terms")
+      report <- paste0("User specified solution: R2 > ",
+                       R2,
+                       " resulting in ",
+                       n_terms_per_row[i],
+                       " terms")
     }
   }
 
@@ -280,19 +295,17 @@ bestModel <- function(data,
 
 
   # build regression formula
-  text <- paste0(raw, " ~ ",
-                 paste(colnames(results$outmat)[results$outmat[i,] == "*"],
-                       collapse = " + "))
+  text <- paste0(raw, " ~ ", paste(colnames(results$outmat)[results$outmat[i, ] == "*"], collapse = " + "))
 
   report[3] <- paste0("Final regression model: ", text)
 
   # determine final lm object; use resampling if specified
-  if(subsampling){
+  if (subsampling) {
     if (is.null(attr(data, "weights")))
       bestformula <- subsample_lm(text, data, NULL)
     else
       bestformula <- subsample_lm(text, data, weights = data$weights)
-  }else{
+  } else{
     if (is.null(attr(data, "weights")))
       bestformula <- lm(text, data)
     else
@@ -304,7 +317,7 @@ bestModel <- function(data,
   tab <-
     data.frame(raw = data[, raw], fitted = bestformula$fitted.values)
   tab <- tab[complete.cases(tab), ]
-  rmse <- sqrt(sum((tab$raw - tab$fitted) ^ 2) / length(tab$raw))
+  rmse <- sqrt(sum((tab$raw - tab$fitted)^2) / length(tab$raw))
 
   # Model information
   bestformula$ideal.model <- i
@@ -385,21 +398,21 @@ bestModel <- function(data,
     )
   }
 
-  if(plot){
-  if (!is.null(data$A1)) {
-    cat(
-      "\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit."
-    )
-  } else{
-    cat(
-      "\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter."
-    )
-  }
+  if (plot) {
+    if (!is.null(data$A1)) {
+      cat(
+        "\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit."
+      )
+    } else{
+      cat(
+        "\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter."
+      )
+    }
   }
 
   class(bestformula) <- "cnormModel"
 
-  if(plot&&bestformula$useAge){
+  if (plot && bestformula$useAge) {
     tmp <- list(data = data, model = bestformula)
     class(tmp) <- "cnormTemp"
     plotPercentiles(tmp)
@@ -420,9 +433,11 @@ bestModel <- function(data,
 #' @export
 #'
 #' @examples
-#' # Using cnorm object from sample data
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' printSubset(result)
+#' \dontrun{
+#'   # Using cnorm object from sample data
+#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   printSubset(result)
+#' }
 #' @family model
 printSubset <- function(x, ...) {
   if (isTaylor(x)) {
@@ -450,7 +465,7 @@ printSubset <- function(x, ...) {
     nr = seq(1, length(x$subsets$adjr2), by = 1)
   )
 
-  if(!is.null(x$subsets$consistent))
+  if (!is.null(x$subsets$consistent))
     table$consistent <- x$subsets$consistent
 
   return(table)
@@ -498,10 +513,11 @@ printSubset <- function(x, ...) {
 #' @param silent turn off messages
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
-#' model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
-#' modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
-#' plotDerivative(model, minNorm = 25, maxNorm = 75)
-#'
+#' \dontrun{
+#'   model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
+#'   modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
+#'   plotDerivative(model, minNorm = 25, maxNorm = 75)
+#' }
 #' @export
 #' @family model
 checkConsistency <- function(model,
@@ -558,7 +574,11 @@ checkConsistency <- function(model,
   norm <- seq(minNorm, maxNorm, by = stepNorm)
 
   while (i <= maxAge) {
-    raw <- predictRaw(norm, rep(i, length(norm)), model$coefficients, minRaw = minRaw, maxRaw = maxRaw)
+    raw <- predictRaw(norm,
+                      rep(i, length(norm)),
+                      model$coefficients,
+                      minRaw = minRaw,
+                      maxRaw = maxRaw)
     correct <- TRUE
 
     if (descend)
@@ -582,8 +602,10 @@ checkConsistency <- function(model,
     if (!silent) {
       message(
         paste0(
-          "Violations of monotonicity found within the specified range of age and norm score at age points: ", paste(results, sep=" "),
-          "\n\nUse 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to identify regions violating the consistency. Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.\n")
+          "Violations of monotonicity found within the specified range of age and norm score at age points: ",
+          paste(results, sep = " "),
+          "\n\nUse 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to identify regions violating the consistency. Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.\n"
+        )
       )
 
       cat(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
@@ -606,8 +628,11 @@ checkConsistency <- function(model,
 #' @return The regression formula as a string
 #'
 #' @examples
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' regressionFunction(result)
+#' \dontrun{
+#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   regressionFunction(result)
+#' }
+#'
 #' @export
 #' @family model
 regressionFunction <- function(model, raw = NULL, digits = NULL) {
@@ -660,12 +685,13 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' @param order The degree of the derivate, default: 1
 #' @return The derived coefficients
 #' @examples
-#' m <- cnorm(raw = elfe$raw, group = elfe$group)
-#' derivedCoefficients <- derive(m)
+#' \dontrun{
+#'   m <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   derivedCoefficients <- derive(m)
+#' }
 #' @export
 #' @family model
-derive <- function(model,
-                   order = 1) {
+derive <- function(model, order = 1) {
   if (isTaylor(model)) {
     model <- model$model
   }
@@ -703,7 +729,7 @@ derive <- function(model,
         }
       }
 
-      if(nchar(newString)==0)
+      if (nchar(newString) == 0)
         newString <- "Intercept"
 
       name[[i]] <- newString
@@ -727,8 +753,13 @@ modelSummary <- function(object, ...) {
   if (isTaylor(object)) {
     object <- object$model
   }
-  strat <- c("largest consistent model", "first model exceeding R2 > .99", "fall back to model with 5 terms",
-    "terms specified manually", "selection based on R2")
+  strat <- c(
+    "largest consistent model",
+    "first model exceeding R2 > .99",
+    "fall back to model with 5 terms",
+    "terms specified manually",
+    "selection based on R2"
+  )
   # Extract relevant information
   terms <- length(object$coefficients) - 1  # Subtract 1 for intercept
   adj_r_squared <- object$subsets$adjr2[object$ideal.model]
@@ -759,17 +790,30 @@ modelSummary <- function(object, ...) {
   cat("cNORM Model Summary\n")
   cat("-------------------\n")
   cat("Number of terms:", summary_list$terms, "\n")
-  cat("Adjusted R-squared:", round(summary_list$adj_r_squared, 4), "\n")
+  cat("Adjusted R-squared:",
+      round(summary_list$adj_r_squared, 4),
+      "\n")
   cat("RMSE:", round(summary_list$rmse, 4), "\n")
   cat("Selection strategy:", summary_list$selection_strategy)
-  if(summary_list$selection_strategy > 0 && summary_list$selection_strategy < 6){
+  if (summary_list$selection_strategy > 0 &&
+      summary_list$selection_strategy < 6) {
     cat(", ", strat[summary_list$selection_strategy])
   }
-  cat("\nHighest consistent model:", summary_list$highest_consistent, "\n")
+  cat("\nHighest consistent model:",
+      summary_list$highest_consistent,
+      "\n")
   cat("Raw score variable:", summary_list$raw_variable, "\n")
-  cat("Raw score range:", summary_list$min_raw, "to", summary_list$max_raw, "\n")
+  cat("Raw score range:",
+      summary_list$min_raw,
+      "to",
+      summary_list$max_raw,
+      "\n")
   if (summary_list$use_age) {
-    cat("Age range:", summary_list$min_age, "to", summary_list$max_age, "\n")
+    cat("Age range:",
+        summary_list$min_age,
+        "to",
+        summary_list$max_age,
+        "\n")
   }
   cat("\nRegression function:\n")
   cat(summary_list$regression_function, "\n")
@@ -792,8 +836,10 @@ modelSummary <- function(object, ...) {
 #' @return the report
 #' @export
 #' @examples
-#' m <- cnorm(raw = elfe$raw, group = elfe$group)
-#' rangeCheck(m)
+#' \dontrun{
+#'   m <- cnorm(raw = elfe$raw, group = elfe$group)
+#'   rangeCheck(m)
+#' }
 #' @family model
 rangeCheck <-
   function(object,
@@ -935,7 +981,6 @@ cnorm.cv <- function(data,
                      group = NULL,
                      age = NULL,
                      weights = NULL) {
-
   if (isTaylor(data)) {
     formula <- data$model$terms
     data    <- data$data
@@ -943,7 +988,10 @@ cnorm.cv <- function(data,
   }
 
   if (is.null(pCutoff)) {
-    pCutoff <- if (nrow(data) < 10000) .2 else .1   # FIX: <- not =
+    pCutoff <- if (nrow(data) < 10000)
+      .2
+    else
+      .1   # FIX: <- not =
   }
 
   d <- data
@@ -956,10 +1004,16 @@ cnorm.cv <- function(data,
 
   # FIX: data[, raw] throws on missing column; use %in% instead
   if (!is.null(raw) && !(raw %in% colnames(data)))
-    stop(paste0("The specified raw score variable '", raw, "' is not present in the dataset."))
+    stop(paste0(
+      "The specified raw score variable '",
+      raw,
+      "' is not present in the dataset."
+    ))
 
-  if (is.null(group)) group <- attr(d, "group")
-  if (is.null(age))   age   <- attr(d, "age")
+  if (is.null(group))
+    group <- attr(d, "group")
+  if (is.null(age))
+    age   <- attr(d, "age")
 
   if (is.na(width) && !is.null(attr(d, "width")))
     width <- attr(d, "width")
@@ -981,11 +1035,19 @@ cnorm.cv <- function(data,
   # FIX: guard against NULL attribute before is.na() to prevent length-zero condition
   scaleM  <- attr(d, "scaleMean")
   scaleSD <- attr(d, "scaleSD")
-  if (is.null(scaleM)  || is.na(scaleM)  || cv == "full") scaleM  <- 50
-  if (is.null(scaleSD) || is.na(scaleSD) || cv == "full") scaleSD <- 10
+  if (is.null(scaleM)  ||
+      is.na(scaleM)  || cv == "full")
+    scaleM  <- 50
+  if (is.null(scaleSD) ||
+      is.na(scaleSD) || cv == "full")
+    scaleSD <- 10
 
-  k <- attr(d, "k"); if (is.null(k)) k <- 5
-  t <- attr(d, "t"); if (is.null(t)) t <- 3
+  k <- attr(d, "k")
+  if (is.null(k))
+    k <- 5
+  t <- attr(d, "t")
+  if (is.null(t))
+    t <- 3
 
   # FIX: correct formula — was (t * k)^2 - 1, which gave 224 for k=5,t=3 instead of 23
   n.models <- (k + 1) * (t + 1) - 1
@@ -994,7 +1056,12 @@ cnorm.cv <- function(data,
     max <- n.models
 
   if (is.null(formula)) {
-    lmX <- buildFunction(raw = raw, k = k, t = t, age = TRUE)
+    lmX <- buildFunction(
+      raw = raw,
+      k = k,
+      t = t,
+      age = TRUE
+    )
   } else {
     lmX <- formula
     # FIX: length(formula) on a terms object returns 3 (call structure), not the
@@ -1041,26 +1108,44 @@ cnorm.cv <- function(data,
         d  <- d[sample(nrow(d)), ]
         d  <- d[order(d[, group]), ]
         sp <- split(d, list(d[, group]))
-        sp <- lapply(sp, function(x) x[sample(nrow(x)), ])
+        sp <- lapply(sp, function(x)
+          x[sample(nrow(x)), ])
 
-        train <- lapply(sp, function(x) x[c(FALSE, rep(TRUE, 4)), ])
-        test  <- lapply(sp, function(x) x[c(TRUE,  rep(FALSE, 4)), ])
+        train <- lapply(sp, function(x)
+          x[c(FALSE, rep(TRUE, 4)), ])
+        test  <- lapply(sp, function(x)
+          x[c(TRUE, rep(FALSE, 4)), ])
 
         # FIX: seq_along instead of 1:length(train)
         p <- vapply(seq_along(train), function(z)
           t.test(train[[z]][, raw], test[[z]][, raw])$p.value, numeric(1))
 
         p.value <- min(p)
-        if (p.value < pCutoff) next
+        if (p.value < pCutoff)
+          next
 
         train <- do.call(rbind, train)
         test  <- do.call(rbind, test)
 
         if (cv == "full") {
-          train <- prepareData(train, raw = raw, group = group, age = age,
-                               width = width, weights = weights, silent = TRUE)
-          test  <- prepareData(test,  raw = raw, group = group, age = age,
-                               width = width, weights = weights, silent = TRUE)
+          train <- prepareData(
+            train,
+            raw = raw,
+            group = group,
+            age = age,
+            width = width,
+            weights = weights,
+            silent = TRUE
+          )
+          test  <- prepareData(
+            test,
+            raw = raw,
+            group = group,
+            age = age,
+            width = width,
+            weights = weights,
+            silent = TRUE
+          )
         }
 
       } else {
@@ -1070,18 +1155,48 @@ cnorm.cv <- function(data,
         test   <- d[(number + 1L):nrow(d), ]
 
         p.value <- t.test(train[, age], test[, age])$p.value
-        if (p.value < pCutoff) next
+        if (p.value < pCutoff)
+          next
 
-        train <- rankBySlidingWindow(train, age = age, raw = raw,
-                                     weights = weights, width = width, silent = TRUE)
-        test  <- rankBySlidingWindow(test,  age = age, raw = raw,
-                                     weights = weights, width = width, silent = TRUE)
-        train <- computePowers(train, age = age, k = k, t = t, silent = TRUE)
-        test  <- computePowers(test,  age = age, k = k, t = t, silent = TRUE)   # FIX
+        train <- rankBySlidingWindow(
+          train,
+          age = age,
+          raw = raw,
+          weights = weights,
+          width = width,
+          silent = TRUE
+        )
+        test  <- rankBySlidingWindow(
+          test,
+          age = age,
+          raw = raw,
+          weights = weights,
+          width = width,
+          silent = TRUE
+        )
+        train <- computePowers(
+          train,
+          age = age,
+          k = k,
+          t = t,
+          silent = TRUE
+        )
+        test  <- computePowers(
+          test,
+          age = age,
+          k = k,
+          t = t,
+          silent = TRUE
+        )   # FIX
       }
     }
-    subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max,
-                          really.big = n.models > 25)
+    subsets <- regsubsets(
+      lmX,
+      data = train,
+      nbest = 1,
+      nvmax = max,
+      really.big = n.models > 25
+    )
 
     if (norms && is.null(formula))
       cat(paste0("Cycle ", a, "\n"))
@@ -1108,18 +1223,26 @@ cnorm.cv <- function(data,
       train.errors[i] <- train.errors[i] +
         sqrt(mean((model$fitted.values - train[, raw])^2, na.rm = TRUE))
       val.errors[i]   <- val.errors[i]   +
-        sqrt(mean((test.fitted          - test[, raw])^2,  na.rm = TRUE))
+        sqrt(mean((test.fitted          - test[, raw])^2, na.rm = TRUE))
 
       if (norms) {
-        train$T <- predictNorm(train[, raw], train[, age], model,
-                               min(train$normValue), max(train$normValue), silent = TRUE)
-        test$T  <- predictNorm(test[, raw],  test[, age],  model,
-                               min(train$normValue), max(train$normValue), silent = TRUE)
+        train$T <- predictNorm(train[, raw],
+                               train[, age],
+                               model,
+                               min(train$normValue),
+                               max(train$normValue),
+                               silent = TRUE)
+        test$T  <- predictNorm(test[, raw],
+                               test[, age],
+                               model,
+                               min(train$normValue),
+                               max(train$normValue),
+                               silent = TRUE)
 
         r2.train[i]  <- r2.train[i]  +
           cor(train$normValue, train$T, use = "pairwise.complete.obs")^2
         r2.test[i]   <- r2.test[i]   +
-          cor(test$normValue,  test$T,  use = "pairwise.complete.obs")^2
+          cor(test$normValue, test$T, use = "pairwise.complete.obs")^2
         norm.rmse[i] <- norm.rmse[i] +
           sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
 
@@ -1134,8 +1257,13 @@ cnorm.cv <- function(data,
   }
 
   norm.rmse.min[1] <- NA
-  complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models,
-                         really.big = n.models > 25)
+  complete <- regsubsets(
+    lmX,
+    data = d,
+    nbest = 1,
+    nvmax = n.models,
+    really.big = n.models > 25
+  )
 
   # FIX: seq_len instead of 1:max
   for (i in seq_len(max)) {
@@ -1157,16 +1285,23 @@ cnorm.cv <- function(data,
 
       if (i > min) {
         delta[i]         <- r2.test[i] - r2.test[i - 1L]
-        norm.rmse.min[i] <- if (norm.rmse[i] > 0) norm.rmse[i] - norm.rmse[i - 1L] else NA
+        norm.rmse.min[i] <- if (norm.rmse[i] > 0)
+          norm.rmse[i] - norm.rmse[i - 1L]
+        else
+          NA
       }
     }
 
     if (i < min) {
-      r2.train[i] <- NA; r2.test[i] <- NA
-      val.errors[i] <- NA; train.errors[i] <- NA; complete.errors[i] <- NA
+      r2.train[i] <- NA
+      r2.test[i] <- NA
+      val.errors[i] <- NA
+      train.errors[i] <- NA
+      complete.errors[i] <- NA
       norm.rmse[i] <- NA
     }
-    if (i <= min) norm.rmse.min[i] <- NA
+    if (i <= min)
+      norm.rmse.min[i] <- NA
   }
 
   # FIX: unlist pre-allocated list
@@ -1188,7 +1323,11 @@ cnorm.cv <- function(data,
 
   theme_custom <- theme_minimal() +
     theme(
-      plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
+      plot.title = element_text(
+        face = "bold",
+        size = 16,
+        hjust = 0.5
+      ),
       axis.title = element_text(face = "bold", size = 12),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
@@ -1207,42 +1346,140 @@ cnorm.cv <- function(data,
   if (is.null(formula)) {
     p1 <- ggplot(tab) + theme_custom
     p1 <- p1 +
-      geom_line(aes(x = .data$terms, y = .data$RMSE.raw.complete, color = "Complete"), linewidth = .75, na.rm = TRUE) +
-      geom_point(aes(x = .data$terms, y = .data$RMSE.raw.complete), size = 2.5, color = "#33aa55", na.rm = TRUE) +
-      geom_line(aes(x = .data$terms, y = .data$RMSE.raw.test, color = "Validation"), linewidth = .75, na.rm = TRUE) +
-      geom_point(aes(x = .data$terms, y = .data$RMSE.raw.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-      geom_line(aes(x = .data$terms, y = .data$RMSE.raw.train, color = "Training"), linewidth = .75, na.rm = TRUE) +
-      geom_point(aes(x = .data$terms, y = .data$RMSE.raw.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
-      labs(title = "Raw Score RMSE (1)",
-           x = "Number of terms",
-           y = "Root Mean Squared Error") +
-      scale_color_manual(values = c("Training" = "#d62728", "Validation" = "#1f77b4", "Complete" = "#33aa55")) +
+      geom_line(
+        aes(
+          x = .data$terms,
+          y = .data$RMSE.raw.complete,
+          color = "Complete"
+        ),
+        linewidth = .75,
+        na.rm = TRUE
+      ) +
+      geom_point(
+        aes(x = .data$terms, y = .data$RMSE.raw.complete),
+        size = 2.5,
+        color = "#33aa55",
+        na.rm = TRUE
+      ) +
+      geom_line(
+        aes(
+          x = .data$terms,
+          y = .data$RMSE.raw.test,
+          color = "Validation"
+        ),
+        linewidth = .75,
+        na.rm = TRUE
+      ) +
+      geom_point(
+        aes(x = .data$terms, y = .data$RMSE.raw.test),
+        size = 2.5,
+        color = "#1f77b4",
+        na.rm = TRUE
+      ) +
+      geom_line(
+        aes(
+          x = .data$terms,
+          y = .data$RMSE.raw.train,
+          color = "Training"
+        ),
+        linewidth = .75,
+        na.rm = TRUE
+      ) +
+      geom_point(
+        aes(x = .data$terms, y = .data$RMSE.raw.train),
+        size = 2.5,
+        color = "#d62728",
+        na.rm = TRUE
+      ) +
+      labs(title = "Raw Score RMSE (1)", x = "Number of terms", y = "Root Mean Squared Error") +
+      scale_color_manual(values = c(
+        "Training" = "#d62728",
+        "Validation" = "#1f77b4",
+        "Complete" = "#33aa55"
+      )) +
       scale_x_continuous(breaks = breaks_step_1)
     print(p1)
 
 
     if (norms) {
       p2 <- ggplot(tab) + theme_custom +
-        geom_line(aes(x = .data$terms, y = .data$R2.norm.test, color = "Validation"), linewidth = .75, na.rm = TRUE) +
-        geom_point(aes(x = .data$terms, y = .data$R2.norm.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-        geom_line(aes(x = .data$terms, y = .data$R2.norm.train, color = "Training"), linewidth = .75, na.rm = TRUE) +
-        geom_point(aes(x = .data$terms, y = .data$R2.norm.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
+        geom_line(
+          aes(
+            x = .data$terms,
+            y = .data$R2.norm.test,
+            color = "Validation"
+          ),
+          linewidth = .75,
+          na.rm = TRUE
+        ) +
+        geom_point(
+          aes(x = .data$terms, y = .data$R2.norm.test),
+          size = 2.5,
+          color = "#1f77b4",
+          na.rm = TRUE
+        ) +
+        geom_line(
+          aes(
+            x = .data$terms,
+            y = .data$R2.norm.train,
+            color = "Training"
+          ),
+          linewidth = .75,
+          na.rm = TRUE
+        ) +
+        geom_point(
+          aes(x = .data$terms, y = .data$R2.norm.train),
+          size = 2.5,
+          color = "#d62728",
+          na.rm = TRUE
+        ) +
         labs(title = expression(paste("Norm Score ", R^2 , " (2)")),
              x = "Number of terms",
              y = expression(R^2)) +
-        scale_color_manual(values = c("Training" = "#d62728", "Validation" = "#1f77b4", "Complete" = "#33aa55")) +
+        scale_color_manual(
+          values = c(
+            "Training" = "#d62728",
+            "Validation" = "#1f77b4",
+            "Complete" = "#33aa55"
+          )
+        ) +
         scale_x_continuous(breaks = breaks_step_1)
       print(p2)
 
       p3 <- ggplot(tab) + theme_custom +
-        geom_line(aes(x = .data$terms, y = .data$Crossfit, color = "Crossfit"), linewidth = .75, na.rm = TRUE) +
-        geom_point(aes(x = .data$terms, y = .data$Crossfit), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-        geom_hline(aes(yintercept = 1.10, color = "Overfit"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
-        geom_hline(aes(yintercept = 0.90, color = "Underfit"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
-        labs(title = "Norm Score CROSSFIT (3)",
-             x = "Number of terms",
-             y = "Crossfit") +
-        scale_color_manual(values = c("Underfit" = "#FF2728", "Crossfit" = "#1f77b4", "Overfit" = "#AA00AA")) +
+        geom_line(
+          aes(
+            x = .data$terms,
+            y = .data$Crossfit,
+            color = "Crossfit"
+          ),
+          linewidth = .75,
+          na.rm = TRUE
+        ) +
+        geom_point(
+          aes(x = .data$terms, y = .data$Crossfit),
+          size = 2.5,
+          color = "#1f77b4",
+          na.rm = TRUE
+        ) +
+        geom_hline(
+          aes(yintercept = 1.10, color = "Overfit"),
+          linetype = "dashed",
+          linewidth = 1,
+          na.rm = TRUE
+        ) +
+        geom_hline(
+          aes(yintercept = 0.90, color = "Underfit"),
+          linetype = "dashed",
+          linewidth = 1,
+          na.rm = TRUE
+        ) +
+        labs(title = "Norm Score CROSSFIT (3)", x = "Number of terms", y = "Crossfit") +
+        scale_color_manual(values = c(
+          "Underfit" = "#FF2728",
+          "Crossfit" = "#1f77b4",
+          "Overfit" = "#AA00AA"
+        )) +
         scale_x_continuous(breaks = breaks_step_1)
 
       print(p3)
@@ -1251,13 +1488,36 @@ cnorm.cv <- function(data,
 
       # plot delta r2 test
       p4 <- ggplot(tab) + theme_custom +
-        geom_line(aes(x = .data$terms, y = .data$Delta.R2.test, color = "Delta R2"), linewidth = .75, na.rm = TRUE) +
-        geom_point(aes(x = .data$terms, y = .data$Delta.R2.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
-        geom_hline(aes(yintercept = 0.00, color = "Equal R2"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
-        labs(title = expression(paste("Norm Score ", Delta, R^2 , " in Validation (4)")),
-             x = "Number of terms",
-             y = "Delta R2") +
-        scale_color_manual(values = c("Equal R2" = "#33aa55", "Delta R2" = "#1f77b4")) +
+        geom_line(
+          aes(
+            x = .data$terms,
+            y = .data$Delta.R2.test,
+            color = "Delta R2"
+          ),
+          linewidth = .75,
+          na.rm = TRUE
+        ) +
+        geom_point(
+          aes(x = .data$terms, y = .data$Delta.R2.test),
+          size = 2.5,
+          color = "#1f77b4",
+          na.rm = TRUE
+        ) +
+        geom_hline(
+          aes(yintercept = 0.00, color = "Equal R2"),
+          linetype = "dashed",
+          linewidth = 1,
+          na.rm = TRUE
+        ) +
+        labs(title = expression(paste(
+          "Norm Score ", Delta, R^2 , " in Validation (4)"
+        )),
+        x = "Number of terms",
+        y = "Delta R2") +
+        scale_color_manual(values = c(
+          "Equal R2" = "#33aa55",
+          "Delta R2" = "#1f77b4"
+        )) +
         scale_x_continuous(breaks = breaks_step_1)
 
       print(p4)
@@ -1279,7 +1539,7 @@ cnorm.cv <- function(data,
     if (norms) {
       cat(paste0("\nNumber of terms with best crossfit: ", which.min((
         1 - tab$Crossfit
-      ) ^ 2)))
+      )^2)))
     }
 
     if (norms) {
@@ -1313,9 +1573,7 @@ cnorm.cv <- function(data,
       cat(
         "\nPlease investigate the plots and the summary table, as the results might vary within a narrow range."
       )
-      cat(
-        "\nEspecially pay attention to RMSE.norm.test delta R2 stops to progress."
-      )
+      cat("\nEspecially pay attention to RMSE.norm.test delta R2 stops to progress.")
     }
 
     cat("\n")
@@ -1370,22 +1628,16 @@ getNormScoreSE <- function(model, type = 2) {
   age <- data[[model$age]]
 
   d$fitted <-
-    predictNorm(
-      raw,
-      age,
-      model,
-      minNorm = minNorm,
-      maxNorm = maxNorm
-    )
+    predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
 
   diff <- d$fitted - data$normValue
   diff <- diff[!is.na(diff)]
 
   #return(sqrt(mean(diff^2)))
   if (type == 1)
-    return(sqrt(sum(diff ^ 2) / (length(diff) - 2)))
+    return(sqrt(sum(diff^2) / (length(diff) - 2)))
   else
-    return(sqrt(mean(diff ^ 2)))
+    return(sqrt(mean(diff^2)))
 }
 
 
@@ -1402,7 +1654,8 @@ buildFunction <- function(raw, k, t, age) {
   terms <- paste0("L", 1:k)
   if (age) {
     terms <- c(terms, paste0("A", 1:t))
-    terms <- c(terms, as.vector(outer(1:k, 1:t, function(i, j) paste0("L", i, "A", j))))
+    terms <- c(terms, as.vector(outer(1:k, 1:t, function(i, j)
+      paste0("L", i, "A", j))))
   }
   formula(paste(raw, paste(terms, collapse = " + "), sep = " ~ "))
 }
@@ -1443,15 +1696,25 @@ check_monotonicity <- function(lm_model, pred_data, minRaw, maxRaw) {
 
   results <- sapply(seq_len(n_ages), function(col) {
     d <- diff(pred_matrix[, col])
-    if (all(d >= 0)) 1L else if (all(d <= 0)) -1L else 0L
+    if (all(d >= 0))
+      1L
+    else if (all(d <= 0))
+      - 1L
+    else
+      0L
   })
 
   length(unique(results)) == 1 && results[1] != 0
 }
 
-predictionMatrix <- function(minL, maxL, minA, maxA, k, t){
+predictionMatrix <- function(minL, maxL, minA, maxA, k, t) {
   # Create a data frame for predictions
-  pred_data <- expand.grid(L = seq(from = minL, to = maxL, length.out=50), A = c(minA, maxA))
+  pred_data <- expand.grid(L = seq(
+    from = minL,
+    to = maxL,
+    length.out = 50
+  ),
+  A = c(minA, maxA))
 
   for (i in 1:k) {
     pred_data[paste0("L", i)] <- pred_data$L^i
@@ -1495,13 +1758,16 @@ screenSubset <- function(data1, results, raw, k, t) {
   maxRaw <- max(data1$raw)
 
   # Build the prediction grid once.
-  pred_data <- predictionMatrix(min(data1$L1), max(data1$L1),
-                                min(data1$A1), max(data1$A1),
-                                k, t)
+  pred_data <- predictionMatrix(min(data1$L1),
+                                max(data1$L1),
+                                min(data1$A1),
+                                max(data1$A1),
+                                k,
+                                t)
 
   # Number of selected terms in each row of the regsubsets summary.
-  nTerms <- as.integer(apply(results$outmat, 1L,
-                             function(row) sum(row == "*", na.rm = TRUE)))
+  nTerms <- as.integer(apply(results$outmat, 1L, function(row)
+    sum(row == "*", na.rm = TRUE)))
   n_models <- length(nTerms)
 
   consistent      <- rep(FALSE, n_models)
@@ -1518,12 +1784,9 @@ screenSubset <- function(data1, results, raw, k, t) {
     }
 
     if (!consistentFound) {
-      text <- paste0("raw ~ ",
-                     paste(colnames(results$outmat)[results$outmat[i, ] == "*"],
-                           collapse = " + "))
+      text <- paste0("raw ~ ", paste(colnames(results$outmat)[results$outmat[i, ] == "*"], collapse = " + "))
       linear.model    <- lm(text, data = data1)
-      consistentFound <- check_monotonicity(linear.model, pred_data,
-                                            minRaw, maxRaw)
+      consistentFound <- check_monotonicity(linear.model, pred_data, minRaw, maxRaw)
       consistent[i]   <- consistentFound
     }
   }
@@ -1593,22 +1856,21 @@ screenSubset <- function(data1, results, raw, k, t) {
 #' and stores the coefficients. This process is repeated k times, and the final
 #' coefficients are averaged across all iterations to provide more stable estimates.
 subsample_lm <- function(text, data, weights, k = 10) {
-
   # Save current random seed state to get reproducible results
   if (exists(".Random.seed", envir = .GlobalEnv)) {
     old_seed <- .Random.seed
     on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv))
-  }else{
+  } else{
     on.exit(rm(".Random.seed", envir = .GlobalEnv))
   }
 
   set.seed(123)
 
   # in case of very small samples, just return linear model
-  if(nrow(data)<100){
-    if(is.null(weights)){
+  if (nrow(data) < 100) {
+    if (is.null(weights)) {
       return(lm(text, data))
-    }else{
+    } else{
       return(lm(text, data, weights = weights))
     }
   }
@@ -1619,10 +1881,8 @@ subsample_lm <- function(text, data, weights, k = 10) {
   folds <- sample(rep(1:k, length.out = nrow(data)))
 
   # Store coefficients from each fold
-  coef_matrix <- matrix(NA, nrow = k,
-                        ncol = length(attr(terms(formula), "term.labels")) + 1)
-  colnames(coef_matrix) <- c("(Intercept)",
-                             attr(terms(formula), "term.labels"))
+  coef_matrix <- matrix(NA, nrow = k, ncol = length(attr(terms(formula), "term.labels")) + 1)
+  colnames(coef_matrix) <- c("(Intercept)", attr(terms(formula), "term.labels"))
 
   # Perform k-fold CV
   for (i in 1:k) {

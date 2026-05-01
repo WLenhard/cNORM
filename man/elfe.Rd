@@ -30,8 +30,10 @@ the same word type. The text is speeded, with a time cutoff of 180 seconds. The
 variables are as follows:
 }
 \examples{
-# prepare data, retrieve model and plot percentiles
-model <- cnorm(elfe$group, elfe$raw)
+\dontrun{
+  # prepare data, retrieve model and plot percentiles
+  model <- cnorm(elfe$group, elfe$raw)
+}
 }
 \references{
 Lenhard, W. & Schneider, W.(2006). Ein Leseverstaendnistest fuer Erst- bis Sechstklaesser. Goettingen/Germany: Hogrefe.

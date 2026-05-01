@@ -76,47 +76,52 @@ cnorm.betabinomial1 <- function(age,
                                 control = NULL,
                                 scale = "T",
                                 plot = T) {
-
   # Input validation
   if (length(age) != length(score)) {
     stop("Length of 'age' and 'score' must be the same.")
   }
 
-  if(!is.null(weights) && length(age) != length(weights)) {
+  if (!is.null(weights) && length(age) != length(weights)) {
     stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
   # Prepare vectors
   vectors_to_check <- list(age = age, score = score)
-  if(!is.null(weights)) {
+  if (!is.null(weights)) {
     vectors_to_check$weights <- weights
   }
 
   # Check if filtering needed
-  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+  needs_filtering <- any(sapply(vectors_to_check, function(x)
+    any(!is.finite(x))))
 
-  if(needs_filtering) {
+  if (needs_filtering) {
     message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
     tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
     age <- tmp[[1]]
     score <- tmp[[2]]
-    if(!is.null(weights)) weights <- tmp[[3]]
+    if (!is.null(weights))
+      weights <- tmp[[3]]
   }
 
   # Check for negative values
   if (any(score < 0)) {
-    stop("'score' contains negative values. ",
-         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+    stop(
+      "'score' contains negative values. ",
+      "Beta-binomial modelling requires positive integers (including zero). Please consider using
          Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
-         or transform your data to positive integers.")
+         or transform your data to positive integers."
+    )
   }
 
   # Check for non-integers
   if (any(score != floor(score))) {
-    stop("'score' contains non-integer values. ",
-         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+    stop(
+      "'score' contains non-integer values. ",
+      "Beta-binomial modelling requires positive integers (including zero). Please consider using
          Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
-         or transform your data to positive integers.")
+         or transform your data to positive integers."
+    )
   }
 
   # Standardize inputs
@@ -258,7 +263,7 @@ predictCoefficients <- function(model, ages, n = NULL) {
     n <- attr(model$result, "max")
 
   m <- predicted_mu
-  var <- predicted_sigma ^ 2
+  var <- predicted_sigma^2
 
   m2 <- m * m
   m3 <- m2 * m
@@ -298,13 +303,6 @@ predictCoefficients <- function(model, ages, n = NULL) {
 #' @return A numeric vector containing the calculated parameters in the following order:
 #' alpha (a), beta (b), mean (m), standard deviation (sd), and the maximum number (n).
 #'
-#' @examples
-#' x <- c(1, 2, 3, 4, 5)
-#' n <- 5
-#'
-#' betaCoefficients(x, n) # or, to set n to max(x)
-#' betaCoefficients(x)
-#'
 #' @export
 betaCoefficients <- function(x, n = NULL) {
   if (is.null(n))
@@ -312,7 +310,7 @@ betaCoefficients <- function(x, n = NULL) {
 
   m <- mean(x)
   sd <- sd(x)
-  var <- sd ^ 2
+  var <- sd^2
 
   m2 <- m * m
   m3 <- m2 * m
@@ -476,13 +474,33 @@ normTable.betabinomial <- function(model,
 #' @export
 #' @family predict
 predict.cnormBetaBinomial <- function(object, ...) {
-
   model <- object
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("range" %in% names(args)) { range <- args$range } else { if(length(args)>2) range <- args[[3]] else range <- 3 }
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("range" %in% names(args)) {
+    range <- args$range
+  } else {
+    if (length(args) > 2)
+      range <- args[[3]]
+    else
+      range <- 3
+  }
 
   if (!isBeta(model)) {
     stop(
@@ -586,17 +604,42 @@ predict.cnormBetaBinomial <- function(object, ...) {
 #' @family plot
 #' @export
 plot.cnormBetaBinomial <- function(x, ...) {
-
   model <- x
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("weights" %in% names(args)) { weights <- args$weights } else { weights <- NULL }
-  if ("percentiles" %in% names(args)) { percentiles <- args$percentiles } else { percentiles <- c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975) }
-  if ("points" %in% names(args)) { points <- args$points } else { points <- TRUE }
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("weights" %in% names(args)) {
+    weights <- args$weights
+  } else {
+    weights <- NULL
+  }
+  if ("percentiles" %in% names(args)) {
+    percentiles <- args$percentiles
+  } else {
+    percentiles <- c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)
+  }
+  if ("points" %in% names(args)) {
+    points <- args$points
+  } else {
+    points <- TRUE
+  }
 
-  if(is.null(age) || is.null(score))
+  if (is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
   if (!isBeta(model)) {
@@ -618,7 +661,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
   data <- data.frame(age = age, score = score)
   if (!is.null(weights)) {
     data$w <- weights
-  }else {
+  } else {
     data$w <- rep(1, nrow(data))
   }
 
@@ -659,15 +702,16 @@ plot.cnormBetaBinomial <- function(x, ...) {
     )
 
   # Calculate and add manifest percentiles
-  if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+  if (length(age) / length(unique(age)) > 50 &&
+      min(table(data$age)) > 30) {
     data$group <- age
   } else {
     data$group <- getGroups(age)
   }
 
   # Limit to max 30 groups for better visibility
-  if(length(unique(data$group))>30){
-    data$group <- getGroups(age, n=30)
+  if (length(unique(data$group)) > 30) {
+    data$group <- getGroups(age, n = 30)
   }
 
   # get actual percentiles
@@ -725,7 +769,11 @@ plot.cnormBetaBinomial <- function(x, ...) {
 
   p <- p +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -849,14 +897,18 @@ diagnostics.betabinomial <- function(model,
   rmse <- NA
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
-    if (length(age) / length(unique(age)) > 50 && min(table(age)) > 30) {
+    if (length(age) / length(unique(age)) > 50 &&
+        min(table(age)) > 30) {
       data <- data.frame(group = age, raw = score)
       data <- rankByGroup(
         data = data,
         raw = "raw",
         group = "group",
         weights = weights,
-        scale = c(attr(model$result, "scaleMean"), attr(model$result, "scaleSD"))
+        scale = c(
+          attr(model$result, "scaleMean"),
+          attr(model$result, "scaleSD")
+        )
       )
       norm_scores <- predict(model, data$group, data$raw)
     } else{
@@ -869,14 +921,17 @@ diagnostics.betabinomial <- function(model,
         raw = "raw",
         width = width,
         weights = weights,
-        scale = c(attr(model$result, "scaleMean"), attr(model$result, "scaleSD"))
+        scale = c(
+          attr(model$result, "scaleMean"),
+          attr(model$result, "scaleSD")
+        )
       )
       norm_scores <- predict(model, data$age, data$raw)
     }
 
     norm_manifest <- data$normValue
-    R2 <- cor(norm_scores, norm_manifest, use="pairwise.complete.obs") ^ 2
-    rmse <- sqrt(mean((norm_scores - norm_manifest) ^ 2))
+    R2 <- cor(norm_scores, norm_manifest, use = "pairwise.complete.obs")^2
+    rmse <- sqrt(mean((norm_scores - norm_manifest)^2))
     bias <- mean(norm_scores - norm_manifest)
   } else {
     message <- "No age and raw scores provided. Cannot calculate R2, RMSE, and bias."
@@ -1037,41 +1092,47 @@ cnorm.betabinomial2 <- function(age,
     stop("Length of 'age' and 'score' must be the same.")
   }
 
-  if(!is.null(weights) && length(age) != length(weights)) {
+  if (!is.null(weights) && length(age) != length(weights)) {
     stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
   # Prepare vectors
   vectors_to_check <- list(age = age, score = score)
-  if(!is.null(weights)) {
+  if (!is.null(weights)) {
     vectors_to_check$weights <- weights
   }
 
   # Check if filtering needed
-  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+  needs_filtering <- any(sapply(vectors_to_check, function(x)
+    any(!is.finite(x))))
 
-  if(needs_filtering) {
+  if (needs_filtering) {
     message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
     tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
     age <- tmp[[1]]
     score <- tmp[[2]]
-    if(!is.null(weights)) weights <- tmp[[3]]
+    if (!is.null(weights))
+      weights <- tmp[[3]]
   }
 
   # Check for negative values
   if (any(score < 0)) {
-    stop("'score' contains negative values. ",
-         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+    stop(
+      "'score' contains negative values. ",
+      "Beta-binomial modelling requires positive integers (including zero). Please consider using
          Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
-         or transform your data to positive integers.")
+         or transform your data to positive integers."
+    )
   }
 
   # Check for non-integers
   if (any(score != floor(score))) {
-    stop("'score' contains non-integer values. ",
-         "Beta-binomial modelling requires positive integers (including zero). Please consider using
+    stop(
+      "'score' contains non-integer values. ",
+      "Beta-binomial modelling requires positive integers (including zero). Please consider using
          Taylor polynomials (function 'cnorm') or SinusH-ArcsinH distributions (function 'cnorm.shash') instead,
-         or transform your data to positive integers.")
+         or transform your data to positive integers."
+    )
   }
 
   # Standardize inputs
@@ -1127,11 +1188,9 @@ cnorm.betabinomial2 <- function(age,
       maxit <- n_param * 200
     }
 
-    control <- list(
-      factr = factr,
-      maxit = maxit,
-      lmm = min(n_param, 20)
-    )
+    control <- list(factr = factr,
+                    maxit = maxit,
+                    lmm = min(n_param, 20))
   }
 
   # Parameter bounds to prevent numerical issues
@@ -1143,7 +1202,10 @@ cnorm.betabinomial2 <- function(age,
     optim(
       initial_params,
       log_likelihood2,
-      X = X, Z = Z, y = y, n = n,
+      X = X,
+      Z = Z,
+      y = y,
+      n = n,
       weights = weights,
       method = "L-BFGS-B",
       lower = lower_bounds,
@@ -1168,7 +1230,10 @@ cnorm.betabinomial2 <- function(age,
     optim(
       initial_params,
       log_likelihood2,
-      X = X, Z = Z, y = y, n = n,
+      X = X,
+      Z = Z,
+      y = y,
+      n = n,
       weights = weights,
       method = "L-BFGS-B",
       lower = lower_bounds,
@@ -1180,8 +1245,11 @@ cnorm.betabinomial2 <- function(age,
 
   # Check convergence
   if (result$convergence != 0) {
-    warning("Optimization did not converge (code: ", result$convergence,
-            "). Consider adjusting control parameters.")
+    warning(
+      "Optimization did not converge (code: ",
+      result$convergence,
+      "). Consider adjusting control parameters."
+    )
   }
 
   # Extract results
@@ -1292,7 +1360,7 @@ predictCoefficients2 <- function(model, ages, n = NULL) {
 
   # Calculate mean and variance of beta-binomial distribution
   mu <- n * alpha / (alpha + beta)
-  var <- (n * alpha * beta * (alpha + beta + n)) / ((alpha + beta) ^ 2 * (alpha + beta + 1))
+  var <- (n * alpha * beta * (alpha + beta + n)) / ((alpha + beta)^2 * (alpha + beta + 1))
   sigma <- sqrt(var)
 
   predicted <- data.frame(
@@ -1376,18 +1444,37 @@ cnorm.betabinomial <- function(age,
 
   if (is.null(n)) {
     n <- max(score, na.rm = TRUE)
-    message("n parameter not specified, using the maximum score in the data instead. Consider to provide n manually.")
+    message(
+      "n parameter not specified, using the maximum score in the data instead. Consider to provide n manually."
+    )
   }
 
-  if(!(all(score >= 0, na.rm = TRUE) & all(score == floor(score), na.rm = TRUE))){
-    warning("The score variable needs to include only positive integers for modelling with beta-binomial distributions. Trying to use Taylor polynomials instead (function 'cnorm').")
-    return(cnorm(raw=score, age=age, weights = weights, scale = scale, plot = plot))
+  if (!(all(score >= 0, na.rm = TRUE) &
+        all(score == floor(score), na.rm = TRUE))) {
+    warning(
+      "The score variable needs to include only positive integers for modelling with beta-binomial distributions. Trying to use Taylor polynomials instead (function 'cnorm')."
+    )
+    return(cnorm(
+      raw = score,
+      age = age,
+      weights = weights,
+      scale = scale,
+      plot = plot
+    ))
   }
 
   if (mode == 2) {
     model <- cnorm.betabinomial2(age, score, n, weights, alpha, beta, control, scale, plot)
   } else{
-    model <- cnorm.betabinomial1(age, score, n, weights, mu = alpha, sigma = beta, control, scale, plot)
+    model <- cnorm.betabinomial1(age,
+                                 score,
+                                 n,
+                                 weights,
+                                 mu = alpha,
+                                 sigma = beta,
+                                 control,
+                                 scale,
+                                 plot)
   }
 
   return(model)
@@ -1436,9 +1523,30 @@ cnorm.betabinomial <- function(age,
 summary.cnormBetaBinomial <- function(object, ...) {
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("weights" %in% names(args)) { weights <- args$weights } else {if(length(args)>2) weights <- args[[3]] else weights <- NULL}
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("weights" %in% names(args)) {
+    weights <- args$weights
+  } else {
+    if (length(args) > 2)
+      weights <- args[[3]]
+    else
+      weights <- NULL
+  }
 
 
   diag <- diagnostics.betabinomial(object, age, score, weights)

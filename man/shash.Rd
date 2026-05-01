@@ -82,6 +82,7 @@ The four parameters control:
 }
 }
 \examples{
+\dontrun{
 # Generate random samples
 x <- rshash(1000, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
 
@@ -103,6 +104,7 @@ plot(x_vals, dshash(x_vals), type = "l", main = "Symmetric (like normal)")
 plot(x_vals, dshash(x_vals, epsilon = 1), type = "l", main = "Right skewed")
 plot(x_vals, dshash(x_vals, delta = 2), type = "l", main = "Heavy tails")
 plot(x_vals, dshash(x_vals, delta = 0.5), type = "l", main = "Light tails")
+}
 
 }
 \references{

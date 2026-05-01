@@ -50,6 +50,7 @@
 #' \link[stats]{Normal} for the normal distribution.
 #'
 #' @examples
+#' \dontrun{
 #' # Generate random samples
 #' x <- rshash(1000, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
 #'
@@ -71,10 +72,16 @@
 #' plot(x_vals, dshash(x_vals, epsilon = 1), type = "l", main = "Right skewed")
 #' plot(x_vals, dshash(x_vals, delta = 2), type = "l", main = "Heavy tails")
 #' plot(x_vals, dshash(x_vals, delta = 0.5), type = "l", main = "Light tails")
+#' }
 #'
 #' @export
 #' @rdname shash
-dshash <- function(x, mu = 0, sigma = 1, epsilon = 0, delta = 1, log = FALSE) {
+dshash <- function(x,
+                   mu = 0,
+                   sigma = 1,
+                   epsilon = 0,
+                   delta = 1,
+                   log = FALSE) {
   z <- (x - mu) / sigma
   z_sq <- z * z
 
@@ -91,13 +98,21 @@ dshash <- function(x, mu = 0, sigma = 1, epsilon = 0, delta = 1, log = FALSE) {
   logdens <- log(delta) - log(sigma) - 0.918938533204673 -  # log(sqrt(2*pi))
     0.5 * log1p(z_sq) - 0.5 * sinh_z * sinh_z + log(cosh_z)
 
-  if (log) return(logdens) else return(exp(logdens))
+  if (log)
+    return(logdens)
+  else
+    return(exp(logdens))
 }
 
 #' @export
 #' @rdname shash
-pshash <- function(q, mu = 0, sigma = 1, epsilon = 0, delta = 1,
-                   lower.tail = TRUE, log.p = FALSE) {
+pshash <- function(q,
+                   mu = 0,
+                   sigma = 1,
+                   epsilon = 0,
+                   delta = 1,
+                   lower.tail = TRUE,
+                   log.p = FALSE) {
   z <- (q - mu) / sigma
   u <- sinh(delta * asinh(z) + epsilon)
 
@@ -107,10 +122,17 @@ pshash <- function(q, mu = 0, sigma = 1, epsilon = 0, delta = 1,
 
 #' @export
 #' @rdname shash
-qshash <- function(p, mu = 0, sigma = 1, epsilon = 0, delta = 1,
-                   lower.tail = TRUE, log.p = FALSE) {
-  if (log.p) p <- exp(p)
-  if (!lower.tail) p <- 1 - p
+qshash <- function(p,
+                   mu = 0,
+                   sigma = 1,
+                   epsilon = 0,
+                   delta = 1,
+                   lower.tail = TRUE,
+                   log.p = FALSE) {
+  if (log.p)
+    p <- exp(p)
+  if (!lower.tail)
+    p <- 1 - p
 
   u <- qnorm(p)
   z <- sinh((asinh(u) - epsilon) / delta)
@@ -121,7 +143,11 @@ qshash <- function(p, mu = 0, sigma = 1, epsilon = 0, delta = 1,
 
 #' @export
 #' @rdname shash
-rshash <- function(n, mu = 0, sigma = 1, epsilon = 0, delta = 1) {
+rshash <- function(n,
+                   mu = 0,
+                   sigma = 1,
+                   epsilon = 0,
+                   delta = 1) {
   u <- rnorm(n)
   z <- sinh((asinh(u) - epsilon) / delta)
   x <- mu + sigma * z
@@ -146,12 +172,21 @@ rshash <- function(n, mu = 0, sigma = 1, epsilon = 0, delta = 1) {
 #' @return The negative log-likelihood of the model
 #'
 #' @keywords internal
-log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NULL,
-                                 y, weights = NULL, fixed_delta = NULL) {
+log_likelihood_shash <- function(params,
+                                 X_mu,
+                                 X_sigma,
+                                 X_epsilon,
+                                 X_delta = NULL,
+                                 y,
+                                 weights = NULL,
+                                 fixed_delta = NULL) {
   n_mu <- ncol(X_mu)
   n_sigma <- ncol(X_sigma)
   n_epsilon <- ncol(X_epsilon)
-  n_delta <- if (!is.null(X_delta)) ncol(X_delta) else 0
+  n_delta <- if (!is.null(X_delta))
+    ncol(X_delta)
+  else
+    0
 
   # Extract coefficients
   mu_coef <- params[seq_len(n_mu)]
@@ -182,7 +217,8 @@ log_likelihood_shash <- function(params, X_mu, X_sigma, X_epsilon, X_delta = NUL
   log_densities <- dshash(y, mu, sigma, epsilon, delta, log = TRUE)
   loglik <- sum(weights * log_densities)
 
-  if (!is.finite(loglik)) return(1e10)
+  if (!is.finite(loglik))
+    return(1e10)
 
   return(-loglik)
 }
@@ -373,31 +409,32 @@ cnorm.shash <- function(age,
                         control = NULL,
                         scale = "T",
                         plot = TRUE) {
-
   # Input validation
   if (length(age) != length(score)) {
     stop("Length of 'age' and 'score' must be the same.")
   }
 
-  if(!is.null(weights) && length(age) != length(weights)) {
+  if (!is.null(weights) && length(age) != length(weights)) {
     stop("Length of 'weights' must match length of 'age' and 'score'.")
   }
 
   # Prepare vectors
   vectors_to_check <- list(age = age, score = score)
-  if(!is.null(weights)) {
+  if (!is.null(weights)) {
     vectors_to_check$weights <- weights
   }
 
   # Check if filtering needed
-  needs_filtering <- any(sapply(vectors_to_check, function(x) any(!is.finite(x))))
+  needs_filtering <- any(sapply(vectors_to_check, function(x)
+    any(!is.finite(x))))
 
-  if(needs_filtering) {
+  if (needs_filtering) {
     message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
     tmp <- do.call(filter_complete, c(vectors_to_check, verbose = FALSE))
     age <- tmp[[1]]
     score <- tmp[[2]]
-    if(!is.null(weights)) weights <- tmp[[3]]
+    if (!is.null(weights))
+      weights <- tmp[[3]]
   }
 
 
@@ -430,25 +467,24 @@ cnorm.shash <- function(age,
 
   # Initial parameter vectors
   initial_params <- c(
-    c(initial_mu, rep(0, mu_degree)),           # mu parameters
-    c(log(initial_sigma), rep(0, sigma_degree)), # sigma parameters
+    c(initial_mu, rep(0, mu_degree)),
+    # mu parameters
+    c(log(initial_sigma), rep(0, sigma_degree)),
+    # sigma parameters
     c(initial_epsilon, rep(0, epsilon_degree))   # epsilon parameters
   )
 
   if (use_varying_delta) {
-    initial_params <- c(initial_params,
-                        c(log(delta), rep(0, delta_degree))) # delta parameters
+    initial_params <- c(initial_params, c(log(delta), rep(0, delta_degree))) # delta parameters
   }
 
 
   # Control parameters
   if (is.null(control)) {
     n_param <- length(initial_params)
-    control <- list(
-      factr = 1e-8,
-      maxit = n_param * 200,
-      lmm = min(n_param, 20)
-    )
+    control <- list(factr = 1e-8,
+                    maxit = n_param * 200,
+                    lmm = min(n_param, 20))
   }
 
   # Parameter bounds
@@ -486,7 +522,10 @@ cnorm.shash <- function(age,
       X_delta = X_delta,
       y = score,
       weights = weights,
-      fixed_delta = if(!use_varying_delta) delta else NULL,
+      fixed_delta = if (!use_varying_delta)
+        delta
+      else
+        NULL,
       method = "L-BFGS-B",
       lower = lower_bounds,
       upper = upper_bounds,
@@ -513,7 +552,10 @@ cnorm.shash <- function(age,
       X_delta = X_delta,
       y = score,
       weights = weights,
-      fixed_delta = if(!use_varying_delta) delta else NULL,
+      fixed_delta = if (!use_varying_delta)
+        delta
+      else
+        NULL,
       method = "L-BFGS-B",
       lower = lower_bounds,
       upper = upper_bounds,
@@ -524,8 +566,11 @@ cnorm.shash <- function(age,
 
   # Check convergence
   if (result$convergence != 0) {
-    warning("Optimization did not converge (code: ", result$convergence,
-            "). Consider adjusting control parameters or degrees of the polynomials. Check percentile curves for plausibility.")
+    warning(
+      "Optimization did not converge (code: ",
+      result$convergence,
+      "). Consider adjusting control parameters or degrees of the polynomials. Check percentile curves for plausibility."
+    )
   }
 
   # Extract parameter estimates
@@ -670,13 +715,39 @@ plot.cnormShash <- function(x, ...) {
   model <- x
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("weights" %in% names(args)) { weights <- args$weights } else { weights <- NULL }
-  if ("percentiles" %in% names(args)) { percentiles <- args$percentiles } else { percentiles <- c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975) }
-  if ("points" %in% names(args)) { points <- args$points } else { points <- TRUE }
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("weights" %in% names(args)) {
+    weights <- args$weights
+  } else {
+    weights <- NULL
+  }
+  if ("percentiles" %in% names(args)) {
+    percentiles <- args$percentiles
+  } else {
+    percentiles <- c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)
+  }
+  if ("points" %in% names(args)) {
+    points <- args$points
+  } else {
+    points <- TRUE
+  }
 
-  if(is.null(age) || is.null(score))
+  if (is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
   if (!isSHASH(model)) {
@@ -708,8 +779,13 @@ plot.cnormShash <- function(x, ...) {
 
   # Calculate percentile lines using shash quantiles
   percentile_lines <- lapply(percentiles, function(p) {
-    qshash(p, mu = preds$mu, sigma = preds$sigma,
-           epsilon = preds$epsilon, delta = preds$delta)
+    qshash(
+      p,
+      mu = preds$mu,
+      sigma = preds$sigma,
+      epsilon = preds$epsilon,
+      delta = preds$delta
+    )
   })
 
   percentile_data <- do.call(cbind, percentile_lines)
@@ -735,15 +811,16 @@ plot.cnormShash <- function(x, ...) {
     )
 
   # Calculate manifest percentiles
-  if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
+  if (length(age) / length(unique(age)) > 50 &&
+      min(table(data$age)) > 30) {
     data$group <- age
   } else {
     data$group <- getGroups(age)
   }
 
   # Limit to max 30 groups for better visibility
-  if(length(unique(data$group))>30){
-    data$group <- getGroups(age, n=30)
+  if (length(unique(data$group)) > 30) {
+    data$group <- getGroups(age, n = 30)
   }
 
   # Get actual percentiles
@@ -800,7 +877,11 @@ plot.cnormShash <- function(x, ...) {
 
   p <- p +
     theme(
-      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+      plot.title = element_text(
+        hjust = 0.5,
+        size = 16,
+        face = "bold"
+      ),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -828,19 +909,33 @@ print.cnormShash <- function(x, ...) {
   cat("Model Parameters:\n")
   cat("- Location (mu) polynomial degree:", x$mu_degree, "\n")
   cat("- Scale (sigma) polynomial degree:", x$sigma_degree, "\n")
-  cat("- Skewness (epsilon) polynomial degree:", x$epsilon_degree, "\n")
+  cat("- Skewness (epsilon) polynomial degree:",
+      x$epsilon_degree,
+      "\n")
   if (!is.null(x$delta_degree)) {
-    cat("- Tail weight (delta): Polynomial degree", x$delta_degree, "\n\n")
+    cat("- Tail weight (delta): Polynomial degree",
+        x$delta_degree,
+        "\n\n")
   } else {
     cat("- Tail weight (delta): Fixed at", x$delta, "\n\n")
   }
 
   cat("Sample size:", attr(x$result, "N"), "\n")
-  cat("Age range:", attr(x$result, "ageMin"), "to", attr(x$result, "ageMax"), "\n")
-  cat("Score range:", attr(x$result, "min"), "to", attr(x$result, "max"), "\n\n")
+  cat("Age range:",
+      attr(x$result, "ageMin"),
+      "to",
+      attr(x$result, "ageMax"),
+      "\n")
+  cat("Score range:",
+      attr(x$result, "min"),
+      "to",
+      attr(x$result, "max"),
+      "\n\n")
 
   cat("Optimization:\n")
-  cat("- Convergence:", ifelse(x$result$convergence == 0, "Successful", "Failed"), "\n")
+  cat("- Convergence:",
+      ifelse(x$result$convergence == 0, "Successful", "Failed"),
+      "\n")
   cat("- Log-likelihood:", -x$result$value, "\n")
   cat("- AIC:", 2 * length(x$result$par) + 2 * x$result$value, "\n")
 }
@@ -893,7 +988,6 @@ normTable.shash <- function(model,
                             step = 1,
                             CI = .9,
                             reliability = NULL) {
-
   # Input validation
   if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
@@ -907,7 +1001,7 @@ normTable.shash <- function(model,
     end <- attr(model$result, "max")
   }
 
-  if(is.null(step)){
+  if (is.null(step)) {
     step <- 1
   }
 
@@ -957,13 +1051,25 @@ normTable.shash <- function(model,
     delta_k <- predictions$delta[k]
 
     # Calculate probability densities
-    Px <- dshash(x, mu = mu_k, sigma = sigma_k, epsilon = epsilon_k, delta = delta_k) * step
+    Px <- dshash(
+      x,
+      mu = mu_k,
+      sigma = sigma_k,
+      epsilon = epsilon_k,
+      delta = delta_k
+    ) * step
 
     # Normalize to ensure sum to approximately 1
     Px <- Px / sum(Px)
 
     # Calculate cumulative probabilities using the continuous CDF
-    cum <- pshash(x, mu = mu_k, sigma = sigma_k, epsilon = epsilon_k, delta = delta_k)
+    cum <- pshash(
+      x,
+      mu = mu_k,
+      sigma = sigma_k,
+      epsilon = epsilon_k,
+      delta = delta_k
+    )
 
     # Calculate percentiles
     perc <- cum
@@ -1056,9 +1162,30 @@ normTable.shash <- function(model,
 summary.cnormShash <- function(object, ...) {
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("weights" %in% names(args)) { weights <- args$weights } else {if(length(args)>2) weights <- args[[3]] else weights <- NULL}
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("weights" %in% names(args)) {
+    weights <- args$weights
+  } else {
+    if (length(args) > 2)
+      weights <- args[[3]]
+    else
+      weights <- NULL
+  }
 
   diag <- diagnostics.shash(object, age, score, weights)
 
@@ -1103,7 +1230,7 @@ summary.cnormShash <- function(object, ...) {
     `z value` = diag$mu_z_values,
     `Pr(>|z|)` = diag$mu_p_values
   )
-  rownames(mu_table) <- paste0("mu_", 0:(length(diag$mu_estimates)-1))
+  rownames(mu_table) <- paste0("mu_", 0:(length(diag$mu_estimates) - 1))
   print(mu_table, digits = 4)
   cat("\n")
 
@@ -1114,7 +1241,8 @@ summary.cnormShash <- function(object, ...) {
     `z value` = diag$sigma_z_values,
     `Pr(>|z|)` = diag$sigma_p_values
   )
-  rownames(sigma_table) <- paste0("log(sigma)_", 0:(length(diag$sigma_estimates)-1))
+  rownames(sigma_table) <- paste0("log(sigma)_", 0:(length(diag$sigma_estimates) -
+                                                      1))
   print(sigma_table, digits = 4)
   cat("\n")
 
@@ -1125,7 +1253,8 @@ summary.cnormShash <- function(object, ...) {
     `z value` = diag$epsilon_z_values,
     `Pr(>|z|)` = diag$epsilon_p_values
   )
-  rownames(epsilon_table) <- paste0("epsilon_", 0:(length(diag$epsilon_estimates)-1))
+  rownames(epsilon_table) <- paste0("epsilon_", 0:(length(diag$epsilon_estimates) -
+                                                     1))
   print(epsilon_table, digits = 4)
 
   if (!is.null(diag$delta_estimates)) {
@@ -1137,7 +1266,8 @@ summary.cnormShash <- function(object, ...) {
       `z value` = diag$delta_z_values,
       `Pr(>|z|)` = diag$delta_p_values
     )
-    rownames(delta_table) <- paste0("log(delta)_", 0:(length(diag$delta_estimates)-1))
+    rownames(delta_table) <- paste0("log(delta)_", 0:(length(diag$delta_estimates) -
+                                                        1))
     print(delta_table, digits = 4)
   }
 
@@ -1157,8 +1287,10 @@ summary.cnormShash <- function(object, ...) {
 #' @return A list containing comprehensive diagnostic information
 #'
 #' @keywords internal
-diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) {
-
+diagnostics.shash <- function(object,
+                              age = NULL,
+                              score = NULL,
+                              weights = NULL) {
   if (!isSHASH(object)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
   }
@@ -1182,7 +1314,10 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
     mu_se <- rep(NA, length(mu_estimates))
     sigma_se <- rep(NA, length(sigma_estimates))
     epsilon_se <- rep(NA, length(epsilon_estimates))
-    delta_se <- if (!is.null(delta_estimates)) rep(NA, length(delta_estimates)) else NULL  # ADD this line
+    delta_se <- if (!is.null(delta_estimates))
+      rep(NA, length(delta_estimates))
+    else
+      NULL  # ADD this line
   } else {
     n_mu <- length(mu_estimates)
     n_sigma <- length(sigma_estimates)
@@ -1201,16 +1336,24 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
   }
 
   # Calculate z-values and p-values
-  mu_z_values <- ifelse(is.na(mu_se) | mu_se == 0, NA, mu_estimates / mu_se)
-  sigma_z_values <- ifelse(is.na(sigma_se) | sigma_se == 0, NA, sigma_estimates / sigma_se)
-  epsilon_z_values <- ifelse(is.na(epsilon_se) | epsilon_se == 0, NA, epsilon_estimates / epsilon_se)
+  mu_z_values <- ifelse(is.na(mu_se) |
+                          mu_se == 0, NA, mu_estimates / mu_se)
+  sigma_z_values <- ifelse(is.na(sigma_se) |
+                             sigma_se == 0, NA, sigma_estimates / sigma_se)
+  epsilon_z_values <- ifelse(is.na(epsilon_se) |
+                               epsilon_se == 0,
+                             NA,
+                             epsilon_estimates / epsilon_se)
 
   mu_p_values <- ifelse(is.na(mu_z_values), NA, 2 * (1 - pnorm(abs(mu_z_values))))
   sigma_p_values <- ifelse(is.na(sigma_z_values), NA, 2 * (1 - pnorm(abs(sigma_z_values))))
   epsilon_p_values <- ifelse(is.na(epsilon_z_values), NA, 2 * (1 - pnorm(abs(epsilon_z_values))))
 
   if (!is.null(delta_estimates)) {
-    delta_z_values <- ifelse(is.na(delta_se) | delta_se == 0, NA, delta_estimates / delta_se)
+    delta_z_values <- ifelse(is.na(delta_se) |
+                               delta_se == 0,
+                             NA,
+                             delta_estimates / delta_se)
     delta_p_values <- ifelse(is.na(delta_z_values), NA, 2 * (1 - pnorm(abs(delta_z_values))))
   } else {
     delta_z_values <- NULL
@@ -1220,13 +1363,15 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
   # Convergence information
   converged <- object$result$convergence == 0
   n_evaluations <- object$result$counts["function"]
-  message <- switch(as.character(object$result$convergence),
-                    "0" = "Successful convergence",
-                    "1" = "Maximum iterations reached",
-                    "10" = "Degeneracy in Nelder-Mead simplex",
-                    "51" = "Warning from L-BFGS-B",
-                    "52" = "Error from L-BFGS-B",
-                    paste("Convergence code:", object$result$convergence))
+  message <- switch(
+    as.character(object$result$convergence),
+    "0" = "Successful convergence",
+    "1" = "Maximum iterations reached",
+    "10" = "Degeneracy in Nelder-Mead simplex",
+    "51" = "Warning from L-BFGS-B",
+    "52" = "Error from L-BFGS-B",
+    paste("Convergence code:", object$result$convergence)
+  )
 
   # Calculate max gradient if available
   max_gradient <- NA
@@ -1244,14 +1389,18 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
   rmse <- NA
   bias <- NA
   if (!is.null(age) && !is.null(score)) {
-    if (length(age) / length(unique(age)) > 50 && min(table(age)) > 30) {
+    if (length(age) / length(unique(age)) > 50 &&
+        min(table(age)) > 30) {
       data <- data.frame(group = age, raw = score)
       data <- rankByGroup(
         data = data,
         raw = "raw",
         group = "group",
         weights = weights,
-        scale = c(attr(object$result, "scaleMean"), attr(object$result, "scaleSD"))
+        scale = c(
+          attr(object$result, "scaleMean"),
+          attr(object$result, "scaleSD")
+        )
       )
       norm_scores <- predict(object, data$group, data$raw)
     } else{
@@ -1264,14 +1413,17 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
         raw = "raw",
         width = width,
         weights = weights,
-        scale = c(attr(object$result, "scaleMean"), attr(object$result, "scaleSD"))
+        scale = c(
+          attr(object$result, "scaleMean"),
+          attr(object$result, "scaleSD")
+        )
       )
       norm_scores <- predict(object, data$age, data$raw)
     }
 
     norm_manifest <- data$normValue
-    R2 <- cor(norm_scores, norm_manifest, use="pairwise.complete.obs") ^ 2
-    rmse <- sqrt(mean((norm_scores - norm_manifest) ^ 2))
+    R2 <- cor(norm_scores, norm_manifest, use = "pairwise.complete.obs")^2
+    rmse <- sqrt(mean((norm_scores - norm_manifest)^2))
     bias <- mean(norm_scores - norm_manifest)
   } else {
     message <- "No age and raw scores provided. Cannot calculate R2, RMSE, and bias."
@@ -1360,13 +1512,33 @@ diagnostics.shash <- function(object, age = NULL, score = NULL, weights = NULL) 
 #' @export
 #' @family predict
 predict.cnormShash <- function(object, ...) {
-
   model <- object
   args <- list(...)
 
-  if ("age" %in% names(args)) { age <- args$age } else {if(length(args)>0) age <- args[[1]] else age <- NULL}
-  if ("score" %in% names(args)) { score <- args$score } else {if(length(args)>1) score <- args[[2]] else score <- NULL}
-  if ("range" %in% names(args)) { range <- args$range } else { if(length(args)>2) range <- args[[3]] else range <- 3 }
+  if ("age" %in% names(args)) {
+    age <- args$age
+  } else {
+    if (length(args) > 0)
+      age <- args[[1]]
+    else
+      age <- NULL
+  }
+  if ("score" %in% names(args)) {
+    score <- args$score
+  } else {
+    if (length(args) > 1)
+      score <- args[[2]]
+    else
+      score <- NULL
+  }
+  if ("range" %in% names(args)) {
+    range <- args$range
+  } else {
+    if (length(args) > 2)
+      range <- args[[3]]
+    else
+      range <- 3
+  }
 
   if (!isSHASH(model)) {
     stop("Wrong object. Please provide object from class 'cnormShash'.")
@@ -1389,7 +1561,13 @@ predict.cnormShash <- function(object, ...) {
   delta <- predictions$delta
 
   # Calculate cumulative probabilities (percentiles) for each score
-  percentiles <- pshash(score, mu = mu, sigma = sigma, epsilon = epsilon, delta = delta)
+  percentiles <- pshash(
+    score,
+    mu = mu,
+    sigma = sigma,
+    epsilon = epsilon,
+    delta = delta
+  )
 
   # Convert percentiles to z-scores
   z_scores <- qnorm(percentiles)

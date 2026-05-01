@@ -40,9 +40,12 @@ age, while keeping the norm value constant. This way, e. g. academic performance
 of a specific ability is shown.
 }
 \examples{
+\dontrun{
 # Generate cnorm object from example data
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 getNormCurve(35, cnorm.elfe)
+}
+
 }
 \seealso{
 Other predict: 

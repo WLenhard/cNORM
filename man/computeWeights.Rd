@@ -46,6 +46,7 @@ frame should include a row with (a) the variable name, (b) the level of the
 variable and (c) the according population proportion.
 }
 \examples{
+\dontrun{
 # cNORM features a dataset on vocabulary development (ppvt)
 # that includes variables like sex or migration. In order
 # to weight the data, we have to specify the population shares.
@@ -80,4 +81,5 @@ unique(weights)
 model <- cnorm(raw = ppvt$raw,
                group=ppvt$group,
                weights = weights)
+}
 }

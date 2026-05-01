@@ -83,6 +83,7 @@ through other functions like \code{cnorm}.
 }
 
 \examples{
+\dontrun{
 # Transformation with default parameters: RankIt and converting to T scores
 data.elfe <- rankByGroup(elfe, group = "group") # using a data frame with vector names
 data.elfe2 <- rankByGroup(raw=elfe$raw, group=elfe$group) # use vectors for raw score and group
@@ -95,6 +96,8 @@ d <- rankByGroup(raw = elfe$raw)
 d <- computePowers(d)
 m <- bestModel(d)
 rawTable(0, m) # please use an arbitrary value for age when generating the tables
+}
+
 }
 \seealso{
 rankBySlidingWindow, computePowers, computeWeights, weighted.rank

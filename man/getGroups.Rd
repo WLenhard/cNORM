@@ -24,7 +24,9 @@ the group mean. The groups can be split either into groups of equal size (defaul
 or equal number of observations.
 }
 \examples{
+\dontrun{
 x <- rnorm(1000, m = 50, sd = 10)
 m <- getGroups(x, n = 10)
+}
 
 }

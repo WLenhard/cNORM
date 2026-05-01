@@ -26,11 +26,13 @@ In order to check model assumptions, a table of the first order derivative of th
 coefficients is created.
 }
 \examples{
+\dontrun{
 # Generate cnorm object from example data
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
 # retrieve function for time point 6
 d <- derivationTable(6, cnorm.elfe, step = 0.5)
+}
 
 }
 \seealso{

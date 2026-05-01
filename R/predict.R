@@ -14,9 +14,12 @@
 #' @param maxRaw upper bound of raw scores
 #' @return data.frame of the variables raw, age and norm
 #' @examples
+#' \dontrun{
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #' getNormCurve(35, cnorm.elfe)
+#' }
+#'
 #' @family predict
 #' @export
 getNormCurve <-
@@ -27,12 +30,12 @@ getNormCurve <-
            step = 0.1,
            minRaw = NULL,
            maxRaw = NULL) {
-
     if (isTaylor(model)) {
       model <- model$model
     }
 
-    if (!inherits(model, "cnorm") && !inherits(model, "cnormModel")) {
+    if (!inherits(model, "cnorm") &&
+        !inherits(model, "cnormModel")) {
       stop("Please provide a cnorm object.")
     }
 
@@ -55,7 +58,9 @@ getNormCurve <-
     ages <- seq(minAge, maxAge, by = step)
     results <- lapply(ages, function(age) {
       r <- predictRaw(norm, age, model$coefficients, minRaw, maxRaw)
-      data.frame(norm = paste(norm, "T"), age = age, raw = r)
+      data.frame(norm = paste(norm, "T"),
+                 age = age,
+                 raw = r)
     })
     curve <- do.call(rbind, results)
 
@@ -77,9 +82,12 @@ getNormCurve <-
 #' usually set to the upper bound of the range of values of the test
 #' @return the predicted raw score or a data.frame of scores in case, lists of norm scores or age is used
 #' @examples
+#' \dontrun{
 #' # Prediction of single scores
 #' model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' predictRaw(35, 3.5, model)
+#' }
+#'
 #' @family predict
 #' @export
 predictRaw <-
@@ -88,7 +96,6 @@ predictRaw <-
            coefficients,
            minRaw = -Inf,
            maxRaw = Inf) {
-
     if (inherits(coefficients, "cnorm")) {
       coef <- coefficients$model$coefficients
     } else if (inherits(coefficients, "cnormModel")) {
@@ -98,26 +105,37 @@ predictRaw <-
     }
 
     if (length(norm) != length(age)) {
-      if (length(norm) == 1L)      norm <- rep_len(norm, length(age))
-      else if (length(age) == 1L)  age  <- rep_len(age,  length(norm))
-      else stop("`norm` and `age` must have the same length, ",
-                "or one of them must be of length 1.")
+      if (length(norm) == 1L)
+        norm <- rep_len(norm, length(age))
+      else if (length(age) == 1L)
+        age  <- rep_len(age, length(norm))
+      else
+        stop("`norm` and `age` must have the same length, ",
+             "or one of them must be of length 1.")
     }
 
     # Robust extraction of L (k) and A (t) max powers
     L_names <- grep("^L[0-9]+", names(coef), value = TRUE)
-    A_names <- grep("A[0-9]+$",  names(coef), value = TRUE)
+    A_names <- grep("A[0-9]+$", names(coef), value = TRUE)
 
     k <- if (length(L_names) > 0L)
       max(as.integer(sub("^L([0-9]+).*", "\\1", L_names)))
-    else 0L
+    else
+      0L
     t <- if (length(A_names) > 0L)
       max(as.integer(sub(".*A([0-9]+)$", "\\1", A_names)))
-    else 0L
+    else
+      0L
 
     # Belt-and-braces guard against -Inf
-    k <- if (is.finite(k)) k else 0
-    t <- if (is.finite(t)) t else 0
+    k <- if (is.finite(k))
+      k
+    else
+      0
+    t <- if (is.finite(t))
+      t
+    else
+      0
 
     # Prepare the matrix for new data
     X_new <- prepare_matrix(norm, age, k, t)
@@ -181,6 +199,7 @@ predictRaw <-
 #' @seealso rawTable
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
+#' \dontrun{
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
@@ -196,6 +215,7 @@ predictRaw <-
 #' # conventional norming, set age to arbitrary value
 #' model <- cnorm(raw = elfe$raw)
 #' normTable(0, model)
+#' }
 #'
 #' @family predict
 #' @export
@@ -210,11 +230,18 @@ normTable <- function(A,
                       CI = .9,
                       reliability = NULL,
                       pretty = TRUE) {
-
   if (isBeta(model)) {
     return(normTable.betabinomial(model, A, CI = CI, reliability = reliability))
   } else if (isSHASH(model)) {
-    return(normTable.shash(model, A, minRaw, maxRaw, step, CI = CI, reliability = reliability))
+    return(normTable.shash(
+      model,
+      A,
+      minRaw,
+      maxRaw,
+      step,
+      CI = CI,
+      reliability = reliability
+    ))
   } else if (isTaylor(model)) {
     model <- model$model
   } else if (!inherits(model, "cnormModel")) {
@@ -282,8 +309,11 @@ normTable <- function(A,
     i <- 1L
 
     while (i <= n_steps) {
-      r <- predictRaw(minn, A[[x]], model$coefficients,
-                      minRaw = minRaw, maxRaw = maxRaw)
+      r <- predictRaw(minn,
+                      A[[x]],
+                      model$coefficients,
+                      minRaw = minRaw,
+                      maxRaw = maxRaw)
 
       norm[[i]] <- minn
       raw[[i]]  <- r
@@ -299,8 +329,7 @@ normTable <- function(A,
     }
 
     if (monotonuous) {
-      normTable$raw <- enforce_monotone_middle(normTable$raw,
-                                               descend = isTRUE(model$descend))
+      normTable$raw <- enforce_monotone_middle(normTable$raw, descend = isTRUE(model$descend))
     }
 
     if (rel) {
@@ -353,6 +382,7 @@ normTable <- function(A,
 #' @seealso normTable
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @examples
+#' \dontrun{
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #' # generate a norm table for the raw value range from 0 to 28 for the time point month 7 of grade 3
@@ -367,6 +397,7 @@ normTable <- function(A,
 #' # conventional norming, set age to arbitrary value
 #' model <- cnorm(raw = elfe$raw)
 #' rawTable(0, model)
+#' }
 #'
 #' @family predict
 #' @export
@@ -381,7 +412,6 @@ rawTable <- function(A,
                      CI = .9,
                      reliability = NULL,
                      pretty = TRUE) {
-
   if (isTaylor(model)) {
     model <- model$model
   } else if (!inherits(model, "cnormModel")) {
@@ -504,11 +534,13 @@ rawTable <- function(A,
 #' derived regression function
 #' @seealso plotDerivative, derive
 #' @examples
+#' \dontrun{
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
 #' # retrieve function for time point 6
 #' d <- derivationTable(6, cnorm.elfe, step = 0.5)
+#' }
 #'
 #' @family predict
 #' @export
@@ -518,7 +550,6 @@ derivationTable <-
            minNorm = NULL,
            maxNorm = NULL,
            step = 0.1) {
-
     if (isTaylor(model)) {
       model <- model$model
     } else if (!inherits(model, "cnormModel")) {
@@ -565,11 +596,13 @@ derivationTable <-
 #' @param silent set to TRUE to suppress messages
 #' @return The predicted norm score for a raw score, either single value or vector
 #' @examples
+#' \dontrun{
 #' # Generate cnorm object from example data
 #' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
 #' # return norm value for raw value 21 for grade 2, month 9
 #' specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
+#' }
 #'
 #' @family predict
 #' @export
@@ -581,7 +614,6 @@ predictNorm <-
            maxNorm = NULL,
            force = TRUE,
            silent = FALSE) {
-
     if (!inherits(model, "cnormModel") && !inherits(model, "cnorm")) {
       stop("Please provide a cnorm object.")
     }
@@ -598,7 +630,8 @@ predictNorm <-
       stop("Please provide a single numeric value or a numeric vector for A.")
     }
 
-    if (length(A) > 1 && length(raw) > 1 && length(raw) != length(A)) {
+    if (length(A) > 1 &&
+        length(raw) > 1 && length(raw) != length(A)) {
       stop("A and raw need to have the same length.")
     }
 
@@ -664,7 +697,9 @@ predictNorm <-
       values <- values[match(hash, normTable$hash)]
       return(values)
     } else {
-      stop("Please check raw and A value. Both have to be either single values or vectors of the same length.")
+      stop(
+        "Please check raw and A value. Both have to be either single values or vectors of the same length."
+      )
     }
   }
 
@@ -729,11 +764,13 @@ prettyPrint <- function(table) {
 enforce_monotone_middle <- function(v, descend = FALSE) {
   v <- as.numeric(v)
   n <- length(v)
-  if (n < 2L) return(v)
+  if (n < 2L)
+    return(v)
 
   # Anchor at the middle of the *non-NA* observations
   non_na_idx <- which(!is.na(v))
-  if (length(non_na_idx) < 2L) return(v)
+  if (length(non_na_idx) < 2L)
+    return(v)
   mid <- non_na_idx[(length(non_na_idx) + 1L) %/% 2L]
 
   # NA-safe running extrema
@@ -742,7 +779,10 @@ enforce_monotone_middle <- function(v, descend = FALSE) {
     cur <- NA_real_
     for (i in seq_along(x)) {
       if (!is.na(x[i])) {
-        cur <- if (is.na(cur)) x[i] else fun(cur, x[i])
+        cur <- if (is.na(cur))
+          x[i]
+        else
+          fun(cur, x[i])
         out[i] <- cur
       }
     }
@@ -751,10 +791,12 @@ enforce_monotone_middle <- function(v, descend = FALSE) {
 
   if (!descend) {
     v[mid:n] <- running(v[mid:n], max)
-    if (mid > 1L) v[1:mid] <- rev(running(rev(v[1:mid]), min))
+    if (mid > 1L)
+      v[1:mid] <- rev(running(rev(v[1:mid]), min))
   } else {
     v[mid:n] <- running(v[mid:n], min)
-    if (mid > 1L) v[1:mid] <- rev(running(rev(v[1:mid]), max))
+    if (mid > 1L)
+      v[1:mid] <- rev(running(rev(v[1:mid]), max))
   }
   v
 }

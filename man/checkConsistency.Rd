@@ -74,10 +74,11 @@ In general, extrapolation (point 1 and 2) can carefully be done to a
  the minNorm and maxNorm parameter.
 }
 \examples{
-model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
-modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
-plotDerivative(model, minNorm = 25, maxNorm = 75)
-
+\dontrun{
+  model <- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
+  modelViolations <- checkConsistency(model, minNorm = 25, maxNorm = 75)
+  plotDerivative(model, minNorm = 25, maxNorm = 75)
+}
 }
 \seealso{
 Other model: 

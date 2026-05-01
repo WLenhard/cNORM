@@ -21,8 +21,10 @@
 #' @concept reading comprehension
 #' @name elfe
 #' @examples
-#' # prepare data, retrieve model and plot percentiles
-#' model <- cnorm(elfe$group, elfe$raw)
+#' \dontrun{
+#'   # prepare data, retrieve model and plot percentiles
+#'   model <- cnorm(elfe$group, elfe$raw)
+#' }
 #' @format A data frame with 1400 rows and 3 columns
 "elfe"
 

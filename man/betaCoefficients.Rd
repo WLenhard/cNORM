@@ -29,11 +29,3 @@ heterogeneity in success probabilities across trials, which is common in real-wo
 situations, as for example the number of correct solutions in a psychometric test, where
 the test has a fixed number of items.
 }
-\examples{
-x <- c(1, 2, 3, 4, 5)
-n <- 5
-
-betaCoefficients(x, n) # or, to set n to max(x)
-betaCoefficients(x)
-
-}

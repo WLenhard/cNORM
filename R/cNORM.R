@@ -115,7 +115,12 @@ NULL
 #' cNORM.GUI()
 #' }
 cNORM.GUI <- function(launch.browser = TRUE) {
-  packageList <- c("shiny", "shinycssloaders", "foreign", "readxl", "markdown", "rmarkdown")
+  packageList <- c("shiny",
+                   "shinycssloaders",
+                   "foreign",
+                   "readxl",
+                   "markdown",
+                   "rmarkdown")
 
   # Check which packages are missing
   missing <- packageList[!sapply(packageList, requireNamespace, quietly = TRUE)]
@@ -134,9 +139,7 @@ cNORM.GUI <- function(launch.browser = TRUE) {
   }
 
   appDir <- system.file("shiny", "app1", package = "cNORM")
-  shiny::runApp(appDir,
-                display.mode = "normal",
-                launch.browser = launch.browser)
+  shiny::runApp(appDir, display.mode = "normal", launch.browser = launch.browser)
 }
 
 #' Launch the cNORM Parametric Modeling Shiny Application
@@ -144,10 +147,14 @@ cNORM.GUI <- function(launch.browser = TRUE) {
 #' @param launch.browser Logical, whether to launch browser automatically (default: TRUE)
 #' @export
 cNORM.GUI2 <- function(launch.browser = TRUE) {
-
   # Required packages for the parametric modeling GUI
-  packageList <- c("shiny", "shinycssloaders", "DT", "ggplot2",
-                   "foreign", "readxl", "haven")
+  packageList <- c("shiny",
+                   "shinycssloaders",
+                   "DT",
+                   "ggplot2",
+                   "foreign",
+                   "readxl",
+                   "haven")
 
   # Check which packages are missing
   missing <- packageList[!sapply(packageList, requireNamespace, quietly = TRUE)]
@@ -165,8 +172,11 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
       # Verify installation succeeded
       still_missing <- missing[!sapply(missing, requireNamespace, quietly = TRUE)]
       if (length(still_missing) > 0) {
-        stop("Failed to install: ", paste(still_missing, collapse = ", "),
-             "\nPlease install manually and try again.")
+        stop(
+          "Failed to install: ",
+          paste(still_missing, collapse = ", "),
+          "\nPlease install manually and try again."
+        )
       }
       cat("Installation complete!\n\n")
     } else {
@@ -178,14 +188,13 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
   appDir <- system.file("shiny", "app2", package = "cNORM")
 
   if (appDir == "") {
-    stop("Could not find app directory. Try re-installing `cNORM`.", call. = FALSE)
+    stop("Could not find app directory. Try re-installing `cNORM`.",
+         call. = FALSE)
   }
 
   # Launch the app
   message("Launching cNORM Parametric Modeling GUI...")
-  shiny::runApp(appDir,
-                display.mode = "normal",
-                launch.browser = launch.browser)
+  shiny::runApp(appDir, display.mode = "normal", launch.browser = launch.browser)
 }
 
 #' Continuous Norming
@@ -273,7 +282,6 @@ cnorm <- function(raw = NULL,
                   plot = TRUE,
                   extensive = TRUE,
                   subsampling = TRUE) {
-
   # ------------------------------------------------------------------
   # 1.  Argument sanity
   # ------------------------------------------------------------------
@@ -299,13 +307,16 @@ cnorm <- function(raw = NULL,
   }
 
   if (!is.null(group) && !is.null(age)) {
-    warning("Specifying both 'group' and 'age' is discouraged; ",
-            "the function will use group for ranking and keep age as a covariate.")
+    warning(
+      "Specifying both 'group' and 'age' is discouraged; ",
+      "the function will use group for ranking and keep age as a covariate."
+    )
   }
 
   # Default smoothing parameters
   if (is.null(k) && is.null(t)) {
-    k <- 5; t <- 3
+    k <- 5
+    t <- 3
   } else if (is.null(t)) {
     t <- k
   } else if (is.null(k)) {
@@ -319,9 +330,12 @@ cnorm <- function(raw = NULL,
   #     (this avoids the "data$age <- age" length-mismatch bug)
   # ------------------------------------------------------------------
   df_in <- data.frame(raw = raw)
-  if (!is.null(group))   df_in$group   <- group
-  if (!is.null(age))     df_in$age     <- age
-  if (!is.null(weights)) df_in$weights <- weights
+  if (!is.null(group))
+    df_in$group   <- group
+  if (!is.null(age))
+    df_in$age     <- age
+  if (!is.null(weights))
+    df_in$weights <- weights
 
   df_in <- df_in[complete.cases(df_in), , drop = FALSE]
 
@@ -345,23 +359,30 @@ cnorm <- function(raw = NULL,
   # 3a. Conventional norming
   # ------------------------------------------------------------------
   if (conventional) {
-    data <- rankByGroup(raw     = df_in$raw,
-                        group   = FALSE,
-                        scale   = scale,
-                        weights = df_in$weights,
-                        descend = descend,
-                        method  = method)
-    data <- computePowers(data, k = k, t = t, silent = silent)
+    data <- rankByGroup(
+      raw     = df_in$raw,
+      group   = FALSE,
+      scale   = scale,
+      weights = df_in$weights,
+      descend = descend,
+      method  = method
+    )
+    data <- computePowers(data,
+                          k = k,
+                          t = t,
+                          silent = silent)
 
-    model <- bestModel(data,
-                       k           = k,
-                       t           = t,
-                       terms       = terms,
-                       R2          = R2,
-                       weights     = data$weights,
-                       plot        = FALSE,
-                       extensive   = extensive,
-                       subsampling = subsampling)
+    model <- bestModel(
+      data,
+      k           = k,
+      t           = t,
+      terms       = terms,
+      R2          = R2,
+      weights     = data$weights,
+      plot        = FALSE,
+      extensive   = extensive,
+      subsampling = subsampling
+    )
 
     result <- list(data = data, model = model)
     class(result) <- "cnorm"
@@ -378,17 +399,26 @@ cnorm <- function(raw = NULL,
   # 3b. Sliding-window ranking (age-driven, no group)
   # ------------------------------------------------------------------
   if (use_window) {
-    if (plot) message("Ranking data with sliding window ...")
+    if (plot)
+      message("Ranking data with sliding window ...")
 
-    data <- rankBySlidingWindow(raw     = df_in$raw,
-                                age     = df_in$age,
-                                scale   = scale,
-                                weights = df_in$weights,
-                                descend = descend,
-                                width   = width,
-                                method  = method)
+    data <- rankBySlidingWindow(
+      raw     = df_in$raw,
+      age     = df_in$age,
+      scale   = scale,
+      weights = df_in$weights,
+      descend = descend,
+      width   = width,
+      method  = method
+    )
     data <- data[complete.cases(data), , drop = FALSE]
-    data <- computePowers(data, k = k, t = t, age = data$age, silent = silent)
+    data <- computePowers(
+      data,
+      k = k,
+      t = t,
+      age = data$age,
+      silent = silent
+    )
 
     # ------------------------------------------------------------------
     # 3c. Group-based ranking
@@ -407,26 +437,29 @@ cnorm <- function(raw = NULL,
     #     to age (the "discouraged but allowed" combination).
     # ------------------------------------------------------------------
   } else if (by_group) {
-
     group_was_synthesised <- is.null(group)
 
     if (group_was_synthesised) {
       if (length(df_in$age) / length(unique(df_in$age)) > 50 &&
           min(table(df_in$age)) > 30) {
-        if (plot) message("Width missing. Using age directly as grouping variable.")
+        if (plot)
+          message("Width missing. Using age directly as grouping variable.")
         df_in$group <- df_in$age
       } else {
-        if (plot) message("Width missing. Discretising age via getGroups().")
+        if (plot)
+          message("Width missing. Discretising age via getGroups().")
         df_in$group <- getGroups(df_in$age)
       }
     }
 
-    data <- rankByGroup(raw     = df_in$raw,
-                        group   = df_in$group,
-                        scale   = scale,
-                        weights = df_in$weights,
-                        descend = descend,
-                        method  = method)
+    data <- rankByGroup(
+      raw     = df_in$raw,
+      group   = df_in$group,
+      scale   = scale,
+      weights = df_in$weights,
+      descend = descend,
+      method  = method
+    )
     data <- data[complete.cases(data), , drop = FALSE]
 
     if (!group_was_synthesised &&
@@ -435,32 +468,44 @@ cnorm <- function(raw = NULL,
       # User supplied a real group AND a separate age vector:
       # rank within group, model with continuous age.
       data$age <- df_in$age
-      data <- computePowers(data, k = k, t = t,
-                            age = data$age, silent = silent)
+      data <- computePowers(
+        data,
+        k = k,
+        t = t,
+        age = data$age,
+        silent = silent
+      )
     } else {
       # Either no age was provided, or the group is itself a
       # discretisation of age. Use the group column for both
       # ranking and the polynomial age axis.
-      data <- computePowers(data, k = k, t = t, silent = silent)
+      data <- computePowers(data,
+                            k = k,
+                            t = t,
+                            silent = silent)
     }
   } else {
     # Should be unreachable given the earlier validation, but guard anyway.
-    stop("Please provide a numeric vector for the raw scores and either a ",
-         "grouping vector, or an age vector together with a sliding window width.")
+    stop(
+      "Please provide a numeric vector for the raw scores and either a ",
+      "grouping vector, or an age vector together with a sliding window width."
+    )
   }
 
   # ------------------------------------------------------------------
   # 4.  Fit and return
   # ------------------------------------------------------------------
-  model <- bestModel(data,
-                     k           = k,
-                     t           = t,
-                     R2          = R2,
-                     terms       = terms,
-                     weights     = data$weights,
-                     plot        = FALSE,
-                     extensive   = extensive,
-                     subsampling = subsampling)
+  model <- bestModel(
+    data,
+    k           = k,
+    t           = t,
+    R2          = R2,
+    terms       = terms,
+    weights     = data$weights,
+    plot        = FALSE,
+    extensive   = extensive,
+    subsampling = subsampling
+  )
 
   result <- list(data = data, model = model)
   class(result) <- "cnorm"

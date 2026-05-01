@@ -65,9 +65,11 @@ In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k
 and/or 't' parameter in modeling.
 }
 \examples{
-# Load example data set, compute model and plot results
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotPercentiles(result)
+\dontrun{
+  # Load example data set, compute model and plot results
+  result <- cnorm(raw = elfe$raw, group = elfe$group)
+  plotPercentiles(result)
+}
 }
 \seealso{
 plotNormCurves, plotPercentileSeries

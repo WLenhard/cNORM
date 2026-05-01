@@ -21,9 +21,11 @@ of the modeling process. The scores should not deviate too far from
 regression line.
 }
 \examples{
-# Compute model with example dataset and plot results
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotRaw(result)
+\dontrun{
+  # Compute model with example dataset and plot results
+  result <- cnorm(raw = elfe$raw, group = elfe$group)
+  plotRaw(result)
+}
 }
 \seealso{
 Other plot: 

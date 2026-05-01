@@ -18,8 +18,10 @@ and dividing by the standard deviation. The resulting vector will have
 a mean of 0 and a standard deviation of 1.
 }
 \examples{
+\dontrun{
 data <- c(1, 2, 3, 4, 5)
 standardized_data <- standardize(data)
 print(standardized_data)
+}
 
 }

@@ -18,7 +18,9 @@
 }
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Good morning star-shine!\ncNORM is free software. Please report bugs: https://github.com/WLenhard/cNORM/issues")
+  packageStartupMessage(
+    "Good morning star-shine!\ncNORM is free software. Please report bugs: https://github.com/WLenhard/cNORM/issues"
+  )
 }
 
 
@@ -60,6 +62,7 @@
 #' @return data frame including the norm scores, powers and interactions of the norm score and
 #' grouping variable
 #' @examples
+#' \dontrun{
 #' # conducts ranking and computation of powers and interactions with the 'elfe' dataset
 #' data.elfe <- prepareData(elfe)
 #'
@@ -67,7 +70,6 @@
 #' data.elfe <- prepareData(raw=elfe$raw, group=elfe$group)
 #'
 #' # variable names can be specified as well, here with the BMI data included in the package
-#' \dontrun{
 #' data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
 #' }
 #'
@@ -77,9 +79,19 @@
 #' m <- bestModel(data.elfe2)
 #' @export
 #' @family prepare
-prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group", k = 4, t = NULL, width = NA, weights = NULL, scale = "T", descend = FALSE, silent = FALSE) {
+prepareData <- function(data = NULL,
+                        group = "group",
+                        raw = "raw",
+                        age = "group",
+                        k = 4,
+                        t = NULL,
+                        width = NA,
+                        weights = NULL,
+                        scale = "T",
+                        descend = FALSE,
+                        silent = FALSE) {
   if (is.null(data)) {
-    normData <- data.frame(raw=raw)
+    normData <- data.frame(raw = raw)
     raw <- "raw"
   } else {
     normData <- as.data.frame(data)
@@ -100,31 +112,57 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
   if (is.numeric(age) && (length(age) == nrow(normData))) {
     normData$age <- age
     age <- "age"
-  }else if(is.character(age)){
-    if(!(age %in% colnames(normData))){
+  } else if (is.character(age)) {
+    if (!(age %in% colnames(normData))) {
       age <- group
       width <- NA
     }
   }
 
-  if ((typeof(group) != "logical") && !(group %in% colnames(normData))) {
-    stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+  if ((typeof(group) != "logical") &&
+      !(group %in% colnames(normData))) {
+    stop(paste(
+      c(
+        "ERROR: Grouping variable '",
+        group,
+        "' does not exist in data object."
+      ),
+      collapse = ""
+    ))
   } else if (!(raw %in% colnames(normData))) {
-    stop(paste(c("ERROR: Raw score variable '", raw, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c(
+        "ERROR: Raw score variable '",
+        raw,
+        "' does not exist in data object."
+      ),
+      collapse = ""
+    ))
   } else if (!(age %in% colnames(normData))) {
-    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c("ERROR: Age variable '", age, "' does not exist in data object."),
+      collapse = ""
+    ))
   }
 
-  if ((typeof(group) != "logical") && !is.numeric(normData[, group])) {
-    warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
+  if ((typeof(group) != "logical") &&
+      !is.numeric(normData[, group])) {
+    warning(paste(
+      c("Grouping variable '", group, "' has to be numeric."),
+      collapse = ""
+    ))
   }
 
   if (!is.numeric(normData[, raw])) {
-    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
+    warning(paste(c(
+      "Raw variable '", raw, "' has to be numeric."
+    ), collapse = ""))
   }
 
   if (!is.numeric(normData[, age])) {
-    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
+    warning(paste(c(
+      "Age variable '", age, "' has to be numeric."
+    ), collapse = ""))
   }
 
   # exclude missings
@@ -132,8 +170,11 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
     normData <- normData[!is.na(normData[, group]), ]
     normData <- normData[!is.na(normData[, age]), ]
 
-    if(max(normData[, age])<min(normData[, group])||min(normData[, age])>max(normData[, group])){
-      warning("The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter.")
+    if (max(normData[, age]) < min(normData[, group]) ||
+        min(normData[, age]) > max(normData[, group])) {
+      warning(
+        "The range of the age and group variable do not match. Please specify a grouping variable whose values relate to the range of the age variable. You can automatically generate a grouping variable by using the 'rankBySlidingWindow' function and setting a desired number of groups with the 'nGroup' parameter."
+      )
       graphics::plot(normData[, age], normData[, group])
     }
   }
@@ -141,21 +182,44 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 
   # ranking and powers
   if (is.na(width)) {
-    normData <- rankByGroup(data = normData, group = group, raw = raw, scale = scale, descend = descend, weights = weights)
+    normData <- rankByGroup(
+      data = normData,
+      group = group,
+      raw = raw,
+      scale = scale,
+      descend = descend,
+      weights = weights
+    )
   } else {
-    normData <- rankBySlidingWindow(data    = normData,
-                                    age     = age,                   # FIX
-                                    raw     = raw,
-                                    width   = width,
-                                    weights = weights,
-                                    scale   = scale,
-                                    descend = descend)
-    }
+    normData <- rankBySlidingWindow(
+      data    = normData,
+      age     = age,
+      # FIX
+      raw     = raw,
+      width   = width,
+      weights = weights,
+      scale   = scale,
+      descend = descend
+    )
+  }
 
   if (typeof(group) != "logical" || group) {
-    normData <- computePowers(normData, k = k, t = t, norm = "normValue", age = age, silent = silent)
+    normData <- computePowers(
+      normData,
+      k = k,
+      t = t,
+      norm = "normValue",
+      age = age,
+      silent = silent
+    )
   } else {
-    normData <- computePowers(normData, k = k, t = t, norm = "normValue", silent = silent)
+    normData <- computePowers(
+      normData,
+      k = k,
+      t = t,
+      norm = "normValue",
+      silent = silent
+    )
   }
 
   return(normData)
@@ -214,6 +278,7 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' @return the dataset with the percentiles and norm scales per group
 #'
 #' @examples
+#' \dontrun{
 #' # Transformation with default parameters: RankIt and converting to T scores
 #' data.elfe <- rankByGroup(elfe, group = "group") # using a data frame with vector names
 #' data.elfe2 <- rankByGroup(raw=elfe$raw, group=elfe$group) # use vectors for raw score and group
@@ -226,6 +291,8 @@ prepareData <- function(data = NULL, group = "group", raw = "raw", age = "group"
 #' d <- computePowers(d)
 #' m <- bestModel(d)
 #' rawTable(0, m) # please use an arbitrary value for age when generating the tables
+#' }
+#'
 #' @seealso rankBySlidingWindow, computePowers, computeWeights, weighted.rank
 #' @export
 #' @family prepare
@@ -240,19 +307,17 @@ rankByGroup <-
            descriptives = TRUE,
            na.rm = TRUE,
            silent = FALSE) {
-
-
-    if(is.null(data)){
-      d <- data.frame(raw=raw)
-      if(is.numeric(group)){
+    if (is.null(data)) {
+      d <- data.frame(raw = raw)
+      if (is.numeric(group)) {
         d$group <- group
         group <- "group"
-      }else{
+      } else{
         group <- FALSE
       }
 
       raw <- "raw"
-    }else{
+    } else{
       d <- as.data.frame(data)
 
 
@@ -260,7 +325,7 @@ rankByGroup <-
       if (is.numeric(group) && (length(group) == nrow(d))) {
         d$group <- group
         group <- "group"
-      }else if(is.character(group)){
+      } else if (is.character(group)) {
         d$group <- d[, group]
         group <- "group"
       }
@@ -268,7 +333,7 @@ rankByGroup <-
       if (is.numeric(raw) && (length(raw) == nrow(d))) {
         d$raw <- raw
         raw <- "raw"
-      }else if(is.character(raw)){
+      } else if (is.character(raw)) {
         d$raw <- d[, raw]
         raw <- "raw"
       }
@@ -276,22 +341,29 @@ rankByGroup <-
 
 
     weighting <- NULL
-    if(!is.null(weights)){
-      if(is.character(weights)){
-
-        if(!(weights %in% colnames(d))){
-          if(!silent)
-            warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+    if (!is.null(weights)) {
+      if (is.character(weights)) {
+        if (!(weights %in% colnames(d))) {
+          if (!silent)
+            warning(
+              paste0(
+                "Weighting variable " ,
+                weights,
+                " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."
+              )
+            )
 
           weights <- NULL
-        }else{
+        } else{
           weighting <- d[, weights]
         }
-      }else{
-        if(length(weights)!=nrow(d) &  !silent){
-          warning("Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting.")
+      } else{
+        if (length(weights) != nrow(d) &  !silent) {
+          warning(
+            "Length of vector with weights has to match the number of cases in the dataset. Proceeding without weighting."
+          )
 
-        }else{
+        } else{
           d$weights <- as.numeric(weights)
           weighting <- as.numeric(weights)
           weights <- "weights"
@@ -301,7 +373,7 @@ rankByGroup <-
     }
 
     if (anyNA(d[, group]) || anyNA(d[, raw])) {
-      if(!silent)
+      if (!silent)
         cat("Missing values found in grouping or raw score variable... excluding from dataset\n")
 
       d <- d[!is.na(d[, group]), ]
@@ -309,20 +381,41 @@ rankByGroup <-
     }
 
     # check if columns exist
-    if ((typeof(group) != "logical") & !(group %in% colnames(d)) & !silent) {
-      stop(paste(c("ERROR: Grouping variable '", group, "' does not exist in data object."), collapse = ""))
+    if ((typeof(group) != "logical") &
+        !(group %in% colnames(d)) & !silent) {
+      stop(paste(
+        c(
+          "ERROR: Grouping variable '",
+          group,
+          "' does not exist in data object."
+        ),
+        collapse = ""
+      ))
     }
 
     if (!(raw %in% colnames(d)) & !silent) {
-      stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
+      stop(paste(
+        c(
+          "ERROR: Raw value variable '",
+          raw,
+          "' does not exist in data object."
+        ),
+        collapse = ""
+      ))
     }
 
-    if ((typeof(group) != "logical") & !is.numeric(d[, group]) & !silent) {
-      warning(paste(c("Grouping variable '", group, "' has to be numeric."), collapse = ""))
+    if ((typeof(group) != "logical") &
+        !is.numeric(d[, group]) & !silent) {
+      warning(paste(
+        c("Grouping variable '", group, "' has to be numeric."),
+        collapse = ""
+      ))
     }
 
     if (!is.numeric(d[, raw]) & !silent) {
-      warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
+      warning(paste(c(
+        "Raw variable '", raw, "' has to be numeric."
+      ), collapse = ""))
     }
 
     # define Q-Q-plot alorithm, use rankit as standard
@@ -339,44 +432,60 @@ rankByGroup <-
       message("Method parameter out of range, setting to RankIt")
     }
 
-      if (typeof(group) == "logical" && !group) {
-        cat("No grouping variable specified. Ranking without grouping ...")
-        d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
-        if (descriptives) {
-          d$n <- length(d[, raw])
-          d$m <- mean(d[, raw])
-          d$md <- median(d[, raw])
-          d$sd <- sd(d[, raw])
-        }
-      } else {
-        d <- d[order(d$group), ]
-        d$percentile <- unlist(by(d, d$group, function(x) {
-          (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
-        }))
-
-        if (descriptives) {
-          d$n <- ave(d[, raw], d[, group], FUN = function(x) {
-            length(x)
-          })
-          d$m <- ave(d[, raw], d[, group], FUN = function(x) {
-            mean(x)
-          })
-          d$md <- ave(d[, raw], d[, group], FUN = function(x) {
-            median(x)
-          })
-          d$sd <- ave(d[, raw], d[, group], FUN = function(x) {
-            sd(x)
-          })
-        }
+    if (typeof(group) == "logical" && !group) {
+      cat("No grouping variable specified. Ranking without grouping ...")
+      d$percentile <- (weighted.rank(sign * (d[, raw]), weights = weighting) + numerator[method]) / (length(d[, raw]) + denominator[method])
+      if (descriptives) {
+        d$n <- length(d[, raw])
+        d$m <- mean(d[, raw])
+        d$md <- median(d[, raw])
+        d$sd <- sd(d[, raw])
       }
+    } else {
+      d <- d[order(d$group), ]
+      d$percentile <- unlist(by(d, d$group, function(x) {
+        (weighted.rank(sign * x$raw, weights = x$weights) + numerator[method]) / (nrow(x) + denominator[method])
+      }))
+
+      if (descriptives) {
+        d$n <- ave(
+          d[, raw],
+          d[, group],
+          FUN = function(x) {
+            length(x)
+          }
+        )
+        d$m <- ave(
+          d[, raw],
+          d[, group],
+          FUN = function(x) {
+            mean(x)
+          }
+        )
+        d$md <- ave(
+          d[, raw],
+          d[, group],
+          FUN = function(x) {
+            median(x)
+          }
+        )
+        d$sd <- ave(
+          d[, raw],
+          d[, group],
+          FUN = function(x) {
+            sd(x)
+          }
+        )
+      }
+    }
 
 
     scaleM <- NA
     scaleSD <- NA
 
     #check boundaries
-    d$percentile[d$percentile<=0] <- 1e-12
-    d$percentile[d$percentile>=1] <- 1 - 1e-12
+    d$percentile[d$percentile <= 0] <- 1e-12
+    d$percentile[d$percentile >= 1] <- 1 - 1e-12
 
     # descriptives
     if ((typeof(scale) == "double" && length(scale) == 2)) {
@@ -412,18 +521,30 @@ rankByGroup <-
     attr(d, "width") <- NA
     attr(d, "weights") <- weights
 
-    if(na.rm){
+    if (na.rm) {
       naPerc <- sum(is.na(d$percentile))
-      if(naPerc>0){
-        if(!silent)
-          message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+      if (naPerc > 0) {
+        if (!silent)
+          message(
+            paste0(
+              "Could not determine manifest percentile for ",
+              naPerc,
+              " cases in weighted ranking. These will be dropped."
+            )
+          )
 
         d <- d[!is.na(d$percentile), ]
       }
     }
 
     if (descriptives & min(d$n) < 30 & !silent) {
-      warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modeling, it might help to reduce the 'k' parameter."))
+      warning(
+        paste0(
+          "The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ",
+          min(d$n),
+          "). Please check the distribution of the cases over the grouping variable. The confidence of the norm scores is low in that part of the scale. Consider redividing the cases over the grouping variable. In cases of disorganized percentile curves after modeling, it might help to reduce the 'k' parameter."
+        )
+      )
     }
 
     return(d)
@@ -522,12 +643,11 @@ rankBySlidingWindow <- function(data = NULL,
                                 group = NA,
                                 na.rm = TRUE,
                                 silent = FALSE) {
-
-  if(is.null(data)){
-    d <- data.frame(raw=raw, age = age)
+  if (is.null(data)) {
+    d <- data.frame(raw = raw, age = age)
     raw <- "raw"
     age <- "age"
-  }else{
+  } else{
     d <- as.data.frame(data)
 
     # check data types
@@ -544,23 +664,29 @@ rankBySlidingWindow <- function(data = NULL,
 
 
   weighting <- NULL
-  if(!is.null(weights)){
-
-    if(is.character(weights)){
-
-      if(!(weights %in% colnames(d))){
-        if(!silent)
-          warning(paste0("Weighting variable " , weights, " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."))
+  if (!is.null(weights)) {
+    if (is.character(weights)) {
+      if (!(weights %in% colnames(d))) {
+        if (!silent)
+          warning(
+            paste0(
+              "Weighting variable " ,
+              weights,
+              " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."
+            )
+          )
 
         weights <- NULL
-      }else{
+      } else{
         weighting <- d[, weights]
       }
     } else {
       if (length(weights) != nrow(d)) {
         if (!silent) {
-          warning("Length of weights vector does not match the number of cases. ",
-                  "Proceeding without weighting.")
+          warning(
+            "Length of weights vector does not match the number of cases. ",
+            "Proceeding without weighting."
+          )
         }
         weights <- NULL                     # FIX: actually disable weighting
       } else {
@@ -572,7 +698,7 @@ rankBySlidingWindow <- function(data = NULL,
   }
 
   if (anyNA(d[, raw]) || anyNA(d[, age])) {
-    if(!silent)
+    if (!silent)
       cat("Missing values found in raw score or age variable... excluding from dataset\n")
 
     d <- d[!is.na(d[, raw]), ]
@@ -581,19 +707,33 @@ rankBySlidingWindow <- function(data = NULL,
 
   # check if columns exist
   if (!(age %in% colnames(d))) {
-    stop(paste(c("ERROR: Age variable '", age, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c("ERROR: Age variable '", age, "' does not exist in data object."),
+      collapse = ""
+    ))
   }
 
   if (!(raw %in% colnames(d))) {
-    stop(paste(c("ERROR: Raw value variable '", raw, "' does not exist in data object."), collapse = ""))
+    stop(paste(
+      c(
+        "ERROR: Raw value variable '",
+        raw,
+        "' does not exist in data object."
+      ),
+      collapse = ""
+    ))
   }
 
   if (!is.numeric(d[, age]) & !silent) {
-    warning(paste(c("Age variable '", age, "' has to be numeric."), collapse = ""))
+    warning(paste(c(
+      "Age variable '", age, "' has to be numeric."
+    ), collapse = ""))
   }
 
   if (!is.numeric(d[, raw]) & !silent) {
-    warning(paste(c("Raw variable '", raw, "' has to be numeric."), collapse = ""))
+    warning(paste(c(
+      "Raw variable '", raw, "' has to be numeric."
+    ), collapse = ""))
   }
 
   # define Q-Q-plot algorithm, use rankit as standard
@@ -635,7 +775,8 @@ rankBySlidingWindow <- function(data = NULL,
     }
 
 
-    observations <- d[which(d[, age] >= minAge & d[, age] <= maxAge), ]
+    observations <- d[which(d[, age] >= minAge &
+                              d[, age] <= maxAge), ]
     nObs <- nrow(observations)
 
     sign <- 1
@@ -643,7 +784,7 @@ rankBySlidingWindow <- function(data = NULL,
       sign <- -1
     }
 
-    if(is.null(weights))
+    if (is.null(weights))
       observations$percentile <- (rank(sign * observations[, raw]) + numerator[method]) / (nObs + denominator[method])
     else
       observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
@@ -691,9 +832,13 @@ rankBySlidingWindow <- function(data = NULL,
   # but necessary for plotting the percentiles
   if (nGroup > 0) {
     group <- as.factor(as.numeric(cut(d[, age], nGroup)))
-    d$group <- ave(d[, age], group, FUN = function(x) {
-      mean(x)
-    })
+    d$group <- ave(
+      d[, age],
+      group,
+      FUN = function(x) {
+        mean(x)
+      }
+    )
   }
 
   # add attributes to d
@@ -709,18 +854,30 @@ rankBySlidingWindow <- function(data = NULL,
 
 
 
-  if(na.rm){
+  if (na.rm) {
     naPerc <- sum(is.na(d$percentile))
-    if(naPerc>0){
-      if(!silent)
-        message(paste0("Could not determine manifest percentile for ", naPerc, " cases in weighted ranking. These will be dropped."))
+    if (naPerc > 0) {
+      if (!silent)
+        message(
+          paste0(
+            "Could not determine manifest percentile for ",
+            naPerc,
+            " cases in weighted ranking. These will be dropped."
+          )
+        )
 
       d <- d[!is.na(d$percentile), ]
     }
   }
 
   if (descriptives & min(d$n) < 30 & !silent) {
-    warning(paste0("The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ", min(d$n), "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."))
+    warning(
+      paste0(
+        "The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ",
+        min(d$n),
+        "). Please check the distribution of the cases over the explanatory variable and have a look at the extreme upper and lower boundary. Increasing the width parameter might help."
+      )
+    )
   }
   return(d)
 }
@@ -758,6 +915,7 @@ rankBySlidingWindow <- function(data = NULL,
 #'   variable / age
 #' @seealso bestModel
 #' @examples
+#' \dontrun{
 #' # Dataset with grade levels as grouping
 #' data.elfe <- rankByGroup(elfe)
 #' data.elfe <- computePowers(data.elfe)
@@ -765,6 +923,7 @@ rankBySlidingWindow <- function(data = NULL,
 #' # Dataset with continuous age variable and k = 5
 #' data.ppvt <- rankByGroup(ppvt)
 #' data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
+#' }
 #' @export
 #' @family prepare
 computePowers <- function(data,
@@ -773,7 +932,6 @@ computePowers <- function(data,
                           age = NULL,
                           t = 3,
                           silent = FALSE) {
-
   d <- as.data.frame(data)
 
   # ------------------------------------------------------------------
@@ -783,7 +941,8 @@ computePowers <- function(data,
     norm <- attr(d, "normValue")
   }
   if (is.null(norm) || !(norm %in% colnames(d))) {
-    stop("ERROR: Norm variable '", norm,
+    stop("ERROR: Norm variable '",
+         norm,
          "' does not exist in data object.")
   }
   if (!is.numeric(d[[norm]])) {
@@ -815,7 +974,8 @@ computePowers <- function(data,
 
   if (useAge) {
     if (!(age %in% colnames(d))) {
-      stop("ERROR: Explanatory variable '", age,
+      stop("ERROR: Explanatory variable '",
+           age,
            "' does not exist in data object.")
     }
     if (!is.numeric(d[[age]])) {
@@ -827,7 +987,8 @@ computePowers <- function(data,
   # 3.  Validate k and t
   # ------------------------------------------------------------------
   if (k < 1 || k > 6) {
-    if (!silent) message("Parameter k out of range, setting to 4.")
+    if (!silent)
+      message("Parameter k out of range, setting to 4.")
     k <- 4
   }
 
@@ -835,7 +996,8 @@ computePowers <- function(data,
     t <- k
   }
   if (t < 1 || t > 6) {
-    if (!silent) message("Parameter t out of range, setting to k = ", k, ".")
+    if (!silent)
+      message("Parameter t out of range, setting to k = ", k, ".")
     t <- k
   }
 
@@ -884,20 +1046,24 @@ computePowers <- function(data,
     raw_name <- attr(d, "raw")
     if (!is.null(raw_name) && raw_name %in% colnames(d)) {
       A1 <- as.numeric(d[[age]])
-      r2 <- summary.lm(
-        lm(as.numeric(d[[raw_name]]) ~ poly(A1, t, raw = TRUE))
-      )$r.squared
+      r2 <- summary.lm(lm(as.numeric(d[[raw_name]]) ~ poly(A1, t, raw = TRUE)))$r.squared
 
       if (r2 < 0.05 && t > 2) {
         warning(
           "Multiple R^2 between the explanatory variable and the raw score is low ",
-          "(R^2 = ", round(r2, 4), "). The continuous norming model may be unstable. ",
+          "(R^2 = ",
+          round(r2, 4),
+          "). The continuous norming model may be unstable. ",
           "Consider reducing t (e.g. to 1 for a linear age effect) and/or the number ",
           "of age groups."
         )
       } else {
-        cat("Multiple R^2 between raw score and explanatory variable: R^2 = ",
-            round(r2, 4), "\n\n", sep = "")
+        cat(
+          "Multiple R^2 between raw score and explanatory variable: R^2 = ",
+          round(r2, 4),
+          "\n\n",
+          sep = ""
+        )
       }
     }
   }

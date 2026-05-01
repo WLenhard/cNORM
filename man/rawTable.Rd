@@ -56,6 +56,7 @@ confidence intervals are computed for the true score estimates, including a corr
 regression to the mean (Eid & Schmidt, 2012, p. 272).
 }
 \examples{
+\dontrun{
 # Generate cnorm object from example data
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 # generate a norm table for the raw value range from 0 to 28 for the time point month 7 of grade 3
@@ -70,6 +71,7 @@ table <- rawTable(c(2.5, 3.5, 4.5), cnorm.elfe, minRaw = 0, maxRaw = 28, CI = .9
 # conventional norming, set age to arbitrary value
 model <- cnorm(raw = elfe$raw)
 rawTable(0, model)
+}
 
 }
 \references{

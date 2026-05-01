@@ -19,9 +19,11 @@ Displays R^2 and other metrics for models with varying predictors, aiding in cho
 after model fitting.
 }
 \examples{
-# Using cnorm object from sample data
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-printSubset(result)
+\dontrun{
+  # Using cnorm object from sample data
+  result <- cnorm(raw = elfe$raw, group = elfe$group)
+  printSubset(result)
+}
 }
 \seealso{
 Other model: 

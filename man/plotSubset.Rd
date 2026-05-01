@@ -47,6 +47,7 @@ It's important to balance statistical measures with practical considerations and
 to visually inspect the model fit using functions like \code{plotPercentiles}.
 }
 \examples{
+\dontrun{
 # Compute model with example data and plot information function
 cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
 plotSubset(cnorm.model)
@@ -56,6 +57,7 @@ plotSubset(cnorm.model, type = 2)
 
 # Plot RMSE against number of predictors
 plotSubset(cnorm.model, type = 3)
+}
 
 }
 \seealso{

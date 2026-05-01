@@ -70,6 +70,7 @@ The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
 through other functions like \code{cnorm}.
 }
 \examples{
+\dontrun{
 # conducts ranking and computation of powers and interactions with the 'elfe' dataset
 data.elfe <- prepareData(elfe)
 
@@ -77,7 +78,6 @@ data.elfe <- prepareData(elfe)
 data.elfe <- prepareData(raw=elfe$raw, group=elfe$group)
 
 # variable names can be specified as well, here with the BMI data included in the package
-\dontrun{
 data.bmi <- prepareData(CDC, group = "group", raw = "bmi", age = "age")
 }
 

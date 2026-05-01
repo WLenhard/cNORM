@@ -46,6 +46,7 @@ The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
 through other functions like \code{cnorm}.
 }
 \examples{
+\dontrun{
 # Dataset with grade levels as grouping
 data.elfe <- rankByGroup(elfe)
 data.elfe <- computePowers(data.elfe)
@@ -53,6 +54,7 @@ data.elfe <- computePowers(data.elfe)
 # Dataset with continuous age variable and k = 5
 data.ppvt <- rankByGroup(ppvt)
 data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
+}
 }
 \seealso{
 bestModel

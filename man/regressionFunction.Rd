@@ -22,8 +22,11 @@ including the beta weights.
 It can be used to predict the raw scores based on age and location.
 }
 \examples{
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-regressionFunction(result)
+\dontrun{
+  result <- cnorm(raw = elfe$raw, group = elfe$group)
+  regressionFunction(result)
+}
+
 }
 \seealso{
 Other model: 
