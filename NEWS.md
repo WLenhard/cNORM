@@ -2,6 +2,19 @@
 This file documents the development of the package as well as open issues or points for further improvements.
 
 
+
+### Version in 3.5.4
+Date: 04.05.2026 - in progress
+
+
+Changes:
+
+*    Set nbest to 8 in exhaustive search
+*    Author name order corrected in README.md
+*    
+
+
+
 ### Version in 3.5.3
 Date: 01.05.2026
 

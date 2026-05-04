@@ -176,7 +176,7 @@ bestModel <- function(data,
 
   nbest <- 1
   if (extensive && useAge)
-    nbest <- 20
+    nbest <- 8
 
   # determine best subset
   if (is.null(weights))

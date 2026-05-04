@@ -5,7 +5,7 @@
 
 # cNORM
 
- cNORM (W. Lenhard, Lenhard & Gary) is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution and since version 3.5 modeling with the Sinh-Arcsinh (ShaSh) distribution.
+ cNORM (A. Lenhard, W. Lenhard & S. Gary) is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution and since version 3.5 modeling with the Sinh-Arcsinh (ShaSh) distribution.
 
 cNORM was developed specifically for achievement tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, the package can be used wherever mental (e.g. reaction time), physical (e.g. body weight) or other test scores depend on continuous (e.g. age, duration of schooling) or discrete explanatory variables (e.g. sex, test form). In addition, the package can also be used for "conventional" norming based on individual groups, i.e. without including explanatory variables.
 
@@ -22,7 +22,8 @@ library(cNORM)
 # Start the graphical user interface (needs shiny installed)
 # The GUI includes the most important functions. For specific cases,
 # please use cNORM on the console.
-cNORM.GUI()
+cNORM.GUI()  // distribution-free modelling with Taylor polynomials
+cNORM.GUI2() // parametric modelling with beta-binomial or the Sinh-Arcsinh (ShaSh) distribution
 
 # Using the syntax on the console: The function 'cnorm' performs
 # all steps automatically. Please specify the raw score and the
@@ -42,8 +43,7 @@ plot(cnorm.elfe, "subset", type=0) # plot R2
 plot(cnorm.elfe, "subset", type=3) # plot MSE
 
 # NOTE! At this point, you usually select a good fitting model and rerun
-# the process with a fixed number of terms, e. g. 4. Avoid models
-# with a high number of terms:
+# the process with a fixed number of terms, e. g. 4:
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
 # Powers of age can be specified via the parameter 't'.
@@ -88,7 +88,8 @@ Modelling norm data using beta-binomial distributions:
 library(cNORM)
 # cNORM can as well model norm data using the beta-binomial
 # distribution, which usually performs well on tests with
-# a fixed number of dichotomous items.
+# a fixed number of dichotomous items without time cutoff.
+# Ideal use case: 1PL IRT scale / Rasch modelling
 model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
 
 # Adapt the power parameters for α and β to increase or decrease
