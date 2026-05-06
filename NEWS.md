@@ -11,6 +11,7 @@ Changes:
 
 *    Set nbest to 8 in exhaustive search
 *    Author name order corrected in README.md
+*    ShinyApp streamlined
 *    
 
 
