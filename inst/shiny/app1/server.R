@@ -1,830 +1,388 @@
-if(!require(shiny)){
-  install.packages("shiny")
-  require(shiny)
+# Required packages
+library(shiny)
+library(shinycssloaders)
+library(cNORM)
+library(DT)
+library(markdown)
+library(foreign)
+library(readxl)
+
+data(elfe, package = "cNORM")
+data(ppvt, package = "cNORM")
+data(CDC,  package = "cNORM")
+
+# Helper: split user-entered numbers separated by space/comma
+parseNums <- function(s) {
+  if (is.null(s) || !nzchar(trimws(s))) return(NULL)
+  as.numeric(unlist(strsplit(s, "[,\\s]+", perl = TRUE)))
 }
 
-if(!require(markdown)){
-  install.packages("markdown")
-  require(markdown)
-}
-
-if(!require(foreign)){
-  install.packages("foreign")
-  require(foreign)
-}
-
-if(!require(readxl)){
-  install.packages("readxl")
-  require(readxl)
-}
-
-# Define server logic required for cNORM-Application
 shinyServer(function(input, output, session) {
 
-  # Stops program by closing browser tab
-  session$onSessionEnded(function() {
-    stopApp()
-  })
+  session$onSessionEnded(function() stopApp())
 
-
-  # Returns currently chosen file; returns null,if no file was chosen
+  # ---- Data loading ----------------------------------------------------------
   currentFile <- reactive({
-
-    inFile <- input$file
-    exData <- input$Example
-
-    # Check for input file; if no file is chosen, check for chosen example data
-    if(is.null(input$file)){
-
-      if(is.null(exData)){
-        return(NULL)
-      }
-      if(!is.null(exData)){
-
-        if(exData == ""){
-          return(NULL)
-        }
-        if(exData == "elfe"){
-          currentData <- as.data.frame(elfe)
-          return(currentData)
-        }
-        if(exData == "ppvt"){
-          currentData <- as.data.frame(ppvt)
-          return(currentData)
-        }
-        if(exData == "CDC"){
-          currentData <- as.data.frame(CDC)
-          return(currentData)
-        }
-      }
+    if (is.null(input$file)) {
+      ex <- input$Example
+      if (is.null(ex) || ex == "") return(NULL)
+      return(switch(ex,
+                    "elfe" = as.data.frame(elfe),
+                    "ppvt" = as.data.frame(ppvt),
+                    "CDC"  = as.data.frame(CDC),
+                    NULL))
     }
-
-    # If a file other than the examples is chosen, the file will be loaded depending on the file type
-    currentData <- NULL
-    currentFilePath <- input$file$datapath
-    fileEnding <- strsplit(currentFilePath, ".", fixed = TRUE)[[1]][2]
-
-    if(fileEnding == "csv"){
-      currentData <- as.data.frame(read.csv2(currentFilePath))
-    }
-    if(fileEnding == "sav"){
-      currentData <- as.data.frame(foreign::read.spss(currentFilePath))
-    }
-    if(fileEnding == "xlsx"){
-      currentData <- as.data.frame(readxl::read_xlsx(currentFilePath))
-    }
-    if (fileEnding == "xls"){
-      currentData <- as.data.frame(readxl::read_xls(currentFilePath))
-    }
-    if(fileEnding == "rda"){
-
-      load_first_object <- function(fname){
-        e <- new.env(parent = parent.frame())
-        load(fname, e)
-        return(e[[ls(e)[1]]])
-      }
-      currentData <- load_first_object(currentFilePath)
-
-    }
-    return(currentData)
+    path <- input$file$datapath
+    ext  <- tolower(tools::file_ext(path))
+    switch(ext,
+           "csv"  = as.data.frame(read.csv2(path)),
+           "sav"  = as.data.frame(foreign::read.spss(path, to.data.frame = TRUE)),
+           "xlsx" = as.data.frame(readxl::read_xlsx(path)),
+           "xls"  = as.data.frame(readxl::read_xls(path)),
+           "rda"  = { e <- new.env(); load(path, e); get(ls(e)[1], envir = e) },
+           NULL)
   })
 
-  # Returns column names of chosen data file
   variableNames <- reactive({
-
-    if (is.null(currentFile())) {
-      return()
-    }
-    return(names(currentFile()))
-
+    req(currentFile())
+    names(currentFile())
   })
 
-  # Generates selectInput for choosing grouping variable for data analysis
+  # ---- Variable selectors ----------------------------------------------------
   output$GroupingVariable <- renderUI({
-
-    currentNames <- names(currentFile())
-    if(is.element("group", currentNames)|| is.element("Group", currentNames))
-    {
-      if(is.element("group", currentNames)){
-        selectInput(inputId = "InputGroupingVariable", "Grouping Variable", choices = variableNames(), selected = "group")
-      }
-      else{
-        selectInput(inputId = "InputGroupingVariable", "Grouping Variable", choices = variableNames(), selected = "group")
-
-      }
-    }
-    else{    selectInput(inputId = "InputGroupingVariable", "Grouping Variable", choices = variableNames(), selected = NULL)
-    }
+    nm  <- variableNames()
+    sel <- if ("group" %in% nm) "group" else if ("Group" %in% nm) "Group" else NULL
+    selectInput("InputGroupingVariable", "Grouping variable", choices = nm, selected = sel)
   })
 
-  # Generates selectINput for choosing explanatory variable for data analysis
-  output$ExplanatoryVariable <- renderUI({
-
-    selectInput(inputId = "InputExplanatoryVariable", "Explanatory variable", choices = variableNames(), selected = input$InputGroupingVariable)
-  })
-
-  # Generates selectINput for choosing explanatory variable for data analysis
-  output$WeightVariable <- renderUI({
-
-    selectInput(inputId = "InputWeightVariable", "Weighting variable", choices = c("---", variableNames()))
-  })
-
-  # Generates selectInput for choosing raw values for data analysis
   output$RawValues <- renderUI({
+    nm  <- variableNames()
+    sel <- if ("raw" %in% nm) "raw" else if ("Raw" %in% nm) "Raw" else NULL
+    selectInput("InputRawValues", "Raw-score variable", choices = nm, selected = sel)
+  })
 
-    currentNames <- names(currentFile())
-    if(is.element("raw", currentNames)||is.element("Raw", currentNames)){
-      if(is.element("raw", currentNames)){
-        selectInput(inputId = "InputRawValues", "Raw Score Variable", choices = variableNames(), selected = "raw")
-      }
-      else{
-        selectInput(inputId = "InputRawValues", "Raw Score Variable", choices = variableNames(), selected = "Raw")
+  # ---- Intro / data preview --------------------------------------------------
+  output$introduction <- renderUI({
+    if (is.null(currentFile())) includeHTML("www/introduction.html") else NULL
+  })
 
-      }
+  output$table <- DT::renderDT({
+    req(currentFile())
+    currentFile()
+  }, options = list(pageLength = 10, scrollX = TRUE))
+
+  # ---- Combined preparation + modeling --------------------------------------
+  # Holds the current model + prepared data; NULL means "no model yet".
+  cnormResult <- reactiveVal(NULL)
+
+  # Whenever a new dataset is loaded (file or example), drop the old model.
+  observeEvent(currentFile(), {
+    cnormResult(NULL)
+  }, ignoreNULL = FALSE)
+
+  # Also clear if the user changes a key model setting after running once,
+  # so stale plots can't be shown against new parameters.
+  observeEvent(list(input$InputGroupingVariable,
+                    input$InputRawValues,
+                    input$Scale,
+                    input$NumberOfPowers,
+                    input$NumberOfPowersAge,
+                    input$InputNumberOfTerms), {
+                      cnormResult(NULL)
+                    }, ignoreInit = TRUE)
+
+  # Build the model when the user clicks "Run model".
+  observeEvent(input$RunModel, {
+    req(currentFile(), input$InputGroupingVariable, input$InputRawValues)
+
+    df    <- currentFile()
+    grp   <- input$InputGroupingVariable
+    raw   <- input$InputRawValues
+    scale <- input$Scale
+    k     <- as.numeric(input$NumberOfPowers)
+    t     <- as.numeric(input$NumberOfPowersAge)
+    nT    <- input$InputNumberOfTerms
+
+    ranked   <- cNORM::rankByGroup(df, group = grp, raw = raw, scale = scale)
+    prepared <- cNORM::computePowers(ranked, k = k, t = t, norm = "normValue")
+
+    model <- if (is.null(nT) || is.na(nT) || nT < 1) {
+      cNORM::bestModel(prepared, raw = raw, k = k, t = t,
+                       terms = 0, plot = FALSE)
+    } else {
+      cNORM::bestModel(prepared, raw = raw, k = k, t = t,
+                       terms = as.integer(nT), plot = FALSE)
     }
-    else{
-      selectInput(inputId = "InputRawValues", "Raw Score Variable", choices = variableNames(), selected = NULL)
+
+    cnormResult(list(data = prepared, model = model,
+                     group = grp, raw = raw, scale = scale))
+  })
+
+  preparedData   <- reactive({ req(cnormResult()); cnormResult()$data })
+  bestModel      <- reactive({ req(cnormResult()); cnormResult()$model })
+  chosenGrouping <- reactive({ req(cnormResult()); cnormResult()$group })
+  chosenRaw      <- reactive({ req(cnormResult()); cnormResult()$raw })
+  chosenScale    <- reactive({ req(cnormResult()); cnormResult()$scale })
+  cnormObj       <- reactive({
+    req(cnormResult())
+    cNORM::buildCnormObject(preparedData(), bestModel())
+  })
+
+  ageRange <- reactive({
+    req(currentFile(), chosenGrouping())
+    range(currentFile()[[chosenGrouping()]], na.rm = TRUE)
+  })
+
+  # ---- Model report ----------------------------------------------------------
+  output$ModelReport <- renderPrint({
+    req(bestModel())
+    cat(bestModel()$report, sep = "\n")
+  })
+
+  output$ModelReportUI <- renderUI({
+    if (is.null(cnormResult())) {
+      tags$div(class = "alert alert-info",
+               "No model yet. Choose your variables and click ",
+               tags$b("Run model"), ".")
+    } else {
+      verbatimTextOutput("ModelReport")
     }
-
   })
 
-  # Shows introduction text until a file was chosen
-  output$introduction <- renderText({
-
-    if(is.null(currentFile())){
-
-      output <- readChar("www/introduction.html", file.info("www/introduction.html")$size)
-      #output <- textreadr::read_html(file = "www/introduction.html")
-      suppressWarnings(includeHTML("www/introduction.html"))
-    }
-    else{
-      return(NULL)
-    }
-
-
-
-  })
-
-  # Shows the current data file
-  output$table <- renderDataTable({
-    if(is.null(currentFile())){ return(NULL)}
-    else{return(currentFile())}
-
-  })
-
-  # Updating chosen variables for group, raw, explanatory and powers
-
-  # Retruns chosen variable for grouping
-  chosenGrouping <- reactive({
-    return(input$InputGroupingVariable)
-  })
-
-  # Returns chosen raw value
-  chosenRaw <- reactive({
-    return(input$InputRawValues)
-  })
-
-  # Returns chosen weighting
-  chosenWeighting <- reactive({
-    return(input$InputWeightVariable)
-  })
-
-  chosenDescend <- reactive({
-    if(input$RankingOrder == "Descending")
-      return(TRUE)
+  output$ConsistencyCheck <- renderText({
+    req(bestModel())
+    if (cNORM::checkConsistency(bestModel()))
+      "⚠ Model may be inconsistent. Check the percentile plot for intersecting curves and try a different number of terms."
     else
-      return(FALSE)
+      "✓ No consistency violations within the data range."
   })
 
-  # Returns chosen explanatory variable
-  chosenExplanatory <- reactive({
-
-    return(input$InputExplanatoryVariable)
+  output$RangeCheck <- renderText({
+    req(bestModel())
+    cNORM::rangeCheck(bestModel())
   })
 
-  chosenMethod <- reactive({
-    methods <- c("Blom (1985)", "Tukey (1949)", "Van der Warden (1952)", "Rankit (Bliss, 1967)", "Levenbach (1953)", "Filliben (1975)", "Yu & Huang (2001)")
-    return(match(input$Method, methods))
+  # ---- Modeling diagnostics --------------------------------------------------
+  output$modelPlot <- renderPlot({
+    rng <- ageRange()
+    cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                           minAge = rng[1], maxAge = rng[2])
   })
-
-  chosenScale <- reactive({
-    return(toString(input$Scale))
-  })
-
-  chosenNumberOfPowers <- reactive({
-    return(as.numeric(input$NumberOfPowers))
-  })
-
-  chosenNumberOfPowersAge <- reactive({
-    return(as.numeric(input$NumberOfPowersAge))
-  })
-
-  # Calculates prepared data by pressing action button
-  preparedData <- eventReactive(input$DoDataPreparation, {
-    # Data preperation for data analysis with cNORM
-    # Returns prepared data, which can be used for calculating best model
-    preparedData <- reactive({
-
-      if(is.null(currentFile())){
-        print("CurrentFile is null")
-        return()}
-
-      if(is.null(chosenGrouping())){
-        print("GroupingVariable is null")
-        return()}
-
-      # Ranky by chosen group
-      weights <- NULL
-      if(chosenWeighting()!="---")
-        weights <- chosenWeighting()
-
-      print(weights)
-      data_to_output <- cNORM::rankByGroup(currentFile(),
-                                           group = chosenGrouping(),
-                                           raw = chosenRaw(),
-                                           method = chosenMethod(),
-                                           scale = chosenScale(),
-                                           descend = chosenDescend(),
-                                           weights = weights)
-      # Computation of powers and linear combinations
-      data_to_output <- cNORM::computePowers(data_to_output,
-                                             k = chosenNumberOfPowers(),
-                                             t = chosenNumberOfPowersAge(),
-                                             age = chosenGrouping(),
-                                             norm = "normValue")
-
-      return(data_to_output)
-    })
-
-
-    return(preparedData())
-  })
-
-  # Shows prepared data for data analysis with cNORM
-  output$preparedData <- renderDataTable({
-    if(is.null(preparedData())){return()}
-
-    return(preparedData())
-  })
-
-  output$downloadData <- downloadHandler(
-    filename = function() {
-      paste(input$dataset, "data.RData", sep = "")
-    },
-    content = function(file) {
-      data.cnorm <- preparedData()
-      attr(data.cnorm, "descend") <- chosenDescend()
-
-      save(data.cnorm, file = file)
-    }
-  )
-
-  output$downloadModel <- downloadHandler(
-    filename = function() {
-      paste(input$dataset, "model.RData", sep = "")
-    },
-    content = function(file) {
-      model.cnorm <- bestModel()
-      save(model.cnorm, file = file)
-    }
-  )
-
-
-
-  output$NumberOfTerms <- renderUI({
-
-    k <- as.numeric(chosenNumberOfPowers())
-    terms_max <- k*k + 2*k
-    numericInput("InputNumberOfTerms", "Number of terms", value = NULL, min = 1, max = terms_max, step = 1)
-  })
-
-  chosenCoeffOfDet <- reactive({
-
-    return(as.numeric(input$ChosenDetCoeff))
-  })
-
-  chosenNumberOfTerms <- reactive({
-
-    if(!is.null(input$InputNumberOfTerms)){
-      return(as.numeric(input$InputNumberOfTerms))
-
-    }
-    else{
-      return(0)
-    }
-  })
-
-  # Calculates best model using cNORM
-  bestModel <- eventReactive(input$CalcBestModel, {
-
-    # CAUTION: The value of a non-specified numericInput-value is NA and not NULL!
-    # Therefore use is.na() to check, whether a specific number of terms were chosen or not
-    if(!is.na(chosenNumberOfTerms()))
-    {
-      currentBestModel <- cNORM::bestModel(data = preparedData(),
-                                           raw = chosenRaw(),
-                                           k = chosenNumberOfPowers(),
-                                           predictors = NULL,
-                                           terms = chosenNumberOfTerms(),
-                                           plot=FALSE)
-    }
-    else{
-      currentBestModel <- cNORM::bestModel(data = preparedData(),
-                                           raw = chosenRaw(),
-                                           k = chosenNumberOfPowers(),
-                                           predictors = NULL,
-                                           R2 = chosenCoeffOfDet(),
-                                           terms = 0,
-                                           plot=FALSE)
-    }
-
-
-
-    return(currentBestModel)
-  })
-
-  modelDerivatives <- eventReactive(input$CalcBestModel, {
-    cNORM::plotDerivative(bestModel())
-
-  })
-
-
-  modelDensity <- reactive({
-    if(input$densities == ""){
-      cNORM::plotDensity(bestModel())
-    }
-    else{
-      densityList <- as.numeric(unlist(strsplit(input$densities, "\\, |\\,| ")))
-      cNORM::plotDensity(bestModel(), group = densityList)
-    }
-  })
-
-
 
   chosenTypeOfPlotSubset <- reactive({
-    method <- c("Adjusted R2 by Number of Predictors", "Log Transformed Mallow's Cp by Adjusted R2", "Bayesian Information Criterion (BIC) by Adjusted R2", "RMSE by Number of Predictors")
-    return(match(input$chosenTypePlotSubset, method) - 1)
-  })
-
-  changeObject <- reactive({
-    paste(input$CalcBestModel, input$chosenTypePlotSubset)
-  })
-
-
-  wlPlot <- eventReactive(changeObject(), {
-    cNORM::plotSubset(bestModel(), type = chosenTypeOfPlotSubset())
-  })
-
-  # Generates and prints norm curves
-  output$NormCurves <- renderPlot({
-    return(normCurves())
-  })
-
-  # Generates and plots percentile curves
-  output$modelPlot <- renderPlot({
-
-    MIN_AGE <- min((currentFile())[chosenGrouping()])
-    MAX_AGE <- max((currentFile())[chosenGrouping()])
-
-    # data <- currentFile()
-    # attr(data, "descend") <- chosenDescend()
-
-    cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
-                             group = chosenGrouping(),
-                             minAge = MIN_AGE,
-                             maxAge = MAX_AGE)
-
-  })
-
-  valuesPlot <- eventReactive(input$CalcBestModel, {
-
-    cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = chosenGrouping(), raw = chosenRaw())
-  })
-
-  normScorePlot <- eventReactive(c(input$grouping, input$differences, input$normScoreButton), {
-    type <- 0
-    if(input$differences)
-      type <- 1
-
-    if(input$grouping){
-      cNORM::plotNorm(buildCnormObject(preparedData(), bestModel()), group = T, type = type)
-    }else{
-      cNORM::plotNorm(buildCnormObject(preparedData(), bestModel()), type = type)
-    }
-  })
-
-
-  crossValidation <- eventReactive(input$CrossValidation, {
-    rep <- input$RepetitionsCV
-    norm <- input$NormsCV
-    maxT <- input$MaxTermsCV
-    g <- chosenGrouping()
-    r <- chosenRaw()
-    e <- chosenExplanatory()
-
-        table <- cNORM::cnorm.cv(preparedData(), repetitions = rep, norms = norm, min = 1, max = maxT, group = g, raw = r, age = e)
-        output$TableCV <- renderDataTable({table})
-  })
-
-
-  rawScorePlot <- eventReactive(c(input$grouping1, input$differences1, input$rawScoreButton), {
-    type <- 0
-    if(input$differences1)
-      type <- 1
-
-    if(input$grouping1){
-      cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = bestModel()$group, type = type)
-    }else{
-      cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), type = type)
-    }
-  })
-
-  # Prints best model
-  output$BestModel1 <- renderText({
-    return(bestModel()$report[1])
-  })
-  output$BestModel2 <- renderText({
-    return(bestModel()$report[2])
-  })
-  output$BestModel3 <- renderText({
-    return(bestModel()$report[3])
-  })
-  output$BestModel4 <- renderText({
-    return(bestModel()$report[4])
-  })
-  output$BestModel5 <- renderText({
-    return(bestModel()$report[5])
-  })
-  output$BestModel6 <- renderText({
-    if(checkConsistency(bestModel())){
-      return("WARNING! The model seems to be inconsistent. Please check the percentile plot for intersecting percentile curves and change the number of terms for a different solution.")
-    }else{
-      return("No violations of model consistency found within the boundaries of the original data.")
-    }
-  })
-  output$BestModel7 <- renderText({
-    return(rangeCheck(bestModel()))
-  })
-
-  # Plots model derivation
-  output$PlotDerivatives <- renderPlot({
-    return(modelDerivatives())
-  })
-
-  output$PlotDensity <- renderPlot({
-    return(modelDensity())
-  })
-
-  output$PlotCV <- renderPlot({
-    return(crossValidation())
+    m <- c("Adjusted R2 by Number of Predictors",
+           "Log Transformed Mallow's Cp by Adjusted R2",
+           "Bayesian Information Criterion (BIC) by Adjusted R2",
+           "RMSE by Number of Predictors")
+    match(input$chosenTypePlotSubset, m) - 1
   })
 
   output$PlotWL <- renderPlot({
-    return(wlPlot())
+    cNORM::plotSubset(bestModel(), type = chosenTypeOfPlotSubset())
   })
 
-  output$PlotValues <- renderPlot({
+  output$PrintSubset <- DT::renderDT({
+    cNORM::printSubset(bestModel())
+  }, options = list(pageLength = 10, scrollX = TRUE))
 
-    return(valuesPlot())
-  })
-
-  output$PlotNormScores <- renderPlot({
-
-    return(normScorePlot())
-  })
-
-  output$PlotRawScores <- renderPlot({
-
-    return(rawScorePlot())
-  })
-
-  output$PrintSubset <- renderDataTable({
-    return(cNORM::printSubset(bestModel()))
+  # ---- Visualization ---------------------------------------------------------
+  output$PlotPercentiles <- renderPlot({
+    rng <- ageRange()
+    pct <- parseNums(input$PercentilesForPercentiles) / 100
+    if (is.null(pct))
+      cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                             minAge = rng[1], maxAge = rng[2])
+    else
+      cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                             minAge = rng[1], maxAge = rng[2], percentiles = pct)
   })
 
   output$Series <- renderPlot({
-
-    return(cNORM::plotPercentileSeries(buildCnormObject(preparedData(), bestModel()), start = input$terms, end = input$terms))
-
+    cNORM::plotPercentileSeries(cnormObj(), start = input$terms, end = input$terms)
   })
 
-
-  chosenPercentilesForNormCurves <- reactive({
-
-
-    if(input$PercentilesForNormCurves == ""){
-      return(NULL)
-  }
-    else{
-    (input$PercentilesForNormCurves)
-  }
-
-  })
-
-  chosenPercentilesForPercentiles <- reactive({
-    if(input$PercentilesForPercentiles == ""){
-      return(NULL)
-    }
-    else{
-      return(input$PercentilesForPercentiles)
-    }
-  })
-
-  normCurves <- reactive({
-
-    MIN_AGE <- min((currentFile())[chosenGrouping()])
-    MAX_AGE <- max((currentFile())[chosenGrouping()])
-
-
-    percentileList <- chosenPercentilesForNormCurves()
-
-    if(is.null(chosenPercentilesForNormCurves())){
-      percentileList <- c(.02276, 0.1587, 0.5000, 0.8413, 0.97724)
-    }
-    else{
-      percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForNormCurves(), "\\, |\\,| ")))/100
-    }
-
-
-
-    # Set different norm lists for different scales
-      currentScale <- chosenScale()
-      if(currentScale == "T"){
-        normList <- qnorm(percentileList, 50, 10)
-      }
-      if(currentScale == "z")
-      {
-        normList <- normList <- qnorm(percentileList, 0, 1)
-      }
-      if(currentScale == "IQ"){
-        normList <- normList <- qnorm(percentileList, 100, 15)
-      }
-
-      normList <- round(normList, digits = 2)
-
-    currentNormCurves <- cNORM::plotNormCurves(bestModel(),
-                                              minAge = MIN_AGE,
-                                              maxAge = MAX_AGE,
-                                              normList = normList)
-    return(currentNormCurves)
-  })
-
-  # Generates and prints norm curves
   output$NormCurves <- renderPlot({
-
-    return(normCurves())
+    rng <- ageRange()
+    pct <- parseNums(input$PercentilesForNormCurves) / 100
+    if (is.null(pct)) pct <- c(.02276, .1587, .5, .8413, .97724)
+    norms <- switch(chosenScale(),
+                    "T"  = qnorm(pct, 50, 10),
+                    "z"  = qnorm(pct),
+                    "IQ" = qnorm(pct, 100, 15))
+    cNORM::plotNormCurves(bestModel(), minAge = rng[1], maxAge = rng[2],
+                          normList = round(norms, 2))
   })
 
-  # Generates and plots percentile curves
-  output$PlotPercentiles <- renderPlot({
-
-    MIN_AGE <- min((currentFile())[chosenGrouping()])
-    MAX_AGE <- max((currentFile())[chosenGrouping()])
-    # data <- currentFile()
-    # attr(data, "descend") <- chosenDescend()
-
-    percentileList <- chosenPercentilesForPercentiles()
-
-    if(is.null(percentileList)){
-      cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
-                             group = chosenGrouping(),
-                             minAge = MIN_AGE,
-                             maxAge = MAX_AGE)
-    }
-    else{
-      percentileList <- as.numeric(unlist(strsplit(chosenPercentilesForPercentiles(), "\\, |\\,| ")))/100
-
-      cNORM::plotPercentiles(buildCnormObject(preparedData(), bestModel()), raw = chosenRaw(),
-                             group = chosenGrouping(),
-                             minAge = MIN_AGE,
-                             maxAge = MAX_AGE,
-                             percentiles = percentileList)
-    }
-
+  output$PlotDensity <- renderPlot({
+    grps <- parseNums(input$densities)
+    if (is.null(grps)) cNORM::plotDensity(bestModel())
+    else cNORM::plotDensity(bestModel(), group = grps)
   })
 
+  output$PlotDerivatives <- renderPlot({
+    rng <- ageRange()
+    cNORM::plotDerivative(bestModel(), minAge = rng[1], maxAge = rng[2])
+  })
 
+  output$PlotNormScores <- renderPlot({
+    input$normScoreButton
+    type <- if (isTRUE(input$differences)) 1 else 0
+    cNORM::plotNorm(cnormObj(), group = isTRUE(input$grouping), type = type)
+  }) |> bindEvent(input$normScoreButton)
+
+  output$PlotRawScores <- renderPlot({
+    input$rawScoreButton
+    type <- if (isTRUE(input$differences1)) 1 else 0
+    if (isTRUE(input$grouping1))
+      cNORM::plotRaw(cnormObj(), group = TRUE, type = type)
+    else
+      cNORM::plotRaw(cnormObj(), type = type)
+  }) |> bindEvent(input$rawScoreButton)
+
+  # ---- Cross validation ------------------------------------------------------
+  cvResult <- eventReactive(input$CrossValidation, {
+    cNORM::cnorm.cv(preparedData(),
+                    repetitions = input$RepetitionsCV,
+                    norms = input$NormsCV,
+                    min = 1, max = input$MaxTermsCV,
+                    group = chosenGrouping(),
+                    raw   = chosenRaw(),
+                    age   = chosenGrouping())
+  })
+  output$PlotCV  <- renderPlot({ cvResult() })
+  output$TableCV <- DT::renderDT({ cvResult() })
+
+  # ---- Predictions -----------------------------------------------------------
   output$InputNormValue <- renderUI({
-    tagList(numericInput(inputId = "NormValueInputAge", label = "Choose age", value = NULL, min = bestModel()$minA1, max = bestModel()$maxA1),
-            numericInput(inputId = "NormValueInputRaw", label = "Choose raw value", value = NULL, min = bestModel()$minRaw, max = bestModel()$maxRaw),
-            actionButton(inputId = "CalcNormValue",label = "Norm Score"))
+    req(bestModel())
+    tagList(
+      numericInput("NormValueInputAge", "Age",  value = NULL,
+                   min = bestModel()$minA1,  max = bestModel()$maxA1),
+      numericInput("NormValueInputRaw", "Raw score", value = NULL,
+                   min = bestModel()$minRaw, max = bestModel()$maxRaw),
+      actionButton("CalcNormValue", "Compute norm score")
+    )
   })
-
-  normValue <- eventReactive(input$CalcNormValue,{
-
-    if(is.null(input$NormValueInputRaw) || is.null(input$NormValueInputRaw)){return()}
-    else{
-      currentAgeForNormValue <- input$NormValueInputAge
-      currentRawForNormValue <- input$NormValueInputRaw
-      currentBestModel <- bestModel()
-      MIN_NORM <- currentBestModel$minL1
-      MAX_NORM <- currentBestModel$maxL1
-      MIN_RAW <- currentBestModel$minRaw
-      MAX_RAW <- currentBestModel$maxRaw
-
-      currentNormValue <- cNORM::predictNorm(currentRawForNormValue, currentAgeForNormValue, model =currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM)
-      return(currentNormValue)
-    }
-  })
-
 
   output$NormValue <- renderText({
-    if(is.null(normValue())){return()}
-
-    return(paste("Predicted norm value:",toString(normValue())))
-  })
+    input$CalcNormValue
+    isolate({
+      req(input$NormValueInputAge, input$NormValueInputRaw)
+      m <- bestModel()
+      v <- cNORM::predictNorm(input$NormValueInputRaw, input$NormValueInputAge,
+                              model = m, minNorm = m$minL1, maxNorm = m$maxL1)
+      paste("Predicted norm score:", round(v, 2))
+    })
+  }) |> bindEvent(input$CalcNormValue)
 
   output$InputRawValue <- renderUI({
-    tagList(numericInput(inputId = "RawValueInputAge", label = "Choose age", value = NULL, min = bestModel()$minA1, max = bestModel()$maxA1),
-            numericInput(inputId = "RawValueInputNorm", label = "Choose norm value", value = NULL, min = bestModel()$minL1, max = bestModel()$maxL1),
-            actionButton(inputId = "CalcRawValue",label = "Raw Score"))
-  })
-
-  rawValue <- eventReactive(input$CalcRawValue,{
-
-    if(is.null(input$RawValueInputAge) || is.null(input$RawValueInputNorm)){return()}
-    else{
-      currentAgeForRawValue <- input$RawValueInputAge
-      currentNormForRawValue <- input$RawValueInputNorm
-      currentBestModel <- bestModel()
-      MIN_NORM <- currentBestModel$minL1
-      MAX_NORM <- currentBestModel$maxL1
-      MIN_RAW <- currentBestModel$minRaw
-      MAX_RAW <- currentBestModel$maxRaw
-
-      currentRawValue <- cNORM::predictRaw(currentNormForRawValue, currentAgeForRawValue, coefficients = currentBestModel$coefficients,
-                                           minRaw = MIN_RAW, maxRaw = MAX_RAW)
-      return(currentRawValue)
-    }
+    req(bestModel())
+    tagList(
+      numericInput("RawValueInputAge", "Age", value = NULL,
+                   min = bestModel()$minA1, max = bestModel()$maxA1),
+      numericInput("RawValueInputNorm", "Norm score", value = NULL,
+                   min = bestModel()$minL1, max = bestModel()$maxL1),
+      actionButton("CalcRawValue", "Compute raw score")
+    )
   })
 
   output$RawValue <- renderText({
-    if(is.null(rawValue())){return()}
-
-    return(paste("Predicted raw value:",toString(rawValue())))
-  })
-
+    input$CalcRawValue
+    isolate({
+      req(input$RawValueInputAge, input$RawValueInputNorm)
+      m <- bestModel()
+      v <- cNORM::predictRaw(input$RawValueInputNorm, input$RawValueInputAge,
+                             coefficients = m$coefficients,
+                             minRaw = m$minRaw, maxRaw = m$maxRaw)
+      paste("Predicted raw score:", round(v, 2))
+    })
+  }) |> bindEvent(input$CalcRawValue)
 
   output$InputNormTable <- renderUI({
-    tagList(numericInput(inputId = "NormTableInput", label = "Choose age for prediction of norm values", value = NULL,min = 0, max = bestModel()$maxA1),
-            numericInput(inputId = "NormTableInputStart", label = "Choose norm start value", value = bestModel()$scaleM - bestModel()$scaleSD*2.5),
-            numericInput(inputId = "NormTableInputEnd", label = "Choose norm end value", value = bestModel()$scaleM + bestModel()$scaleSD*2.5),
-            numericInput(inputId = "NormTableInputStepping", label = "Choose stepping value", value = NULL),
-            numericInput(inputId = "NormTableCI", label = "Confidence Coefficient", value = .9),
-            numericInput(inputId = "NormTableRel", label = "Reliability Coefficient", value = NULL),
-            actionButton(inputId = "CalcNormTables",label = "Generate norm table", value = NULL),
-            downloadButton("DownloadNormTable", "Download norm table"))
-
+    req(bestModel())
+    m <- bestModel()
+    tagList(
+      numericInput("NormTableInput",         "Age",            value = NULL,
+                   min = 0, max = m$maxA1),
+      numericInput("NormTableInputStart",    "Norm start",     value = m$scaleM - 2.5 * m$scaleSD),
+      numericInput("NormTableInputEnd",      "Norm end",       value = m$scaleM + 2.5 * m$scaleSD),
+      numericInput("NormTableInputStepping", "Step width",     value = NULL),
+      numericInput("NormTableCI",            "Confidence",     value = 0.9),
+      numericInput("NormTableRel",           "Reliability",    value = NULL),
+      actionButton("CalcNormTables", "Generate norm table"),
+      downloadButton("DownloadNormTable", "Download")
+    )
   })
-
 
   normTable <- eventReactive(input$CalcNormTables, {
-
-    check_inputs <- is.null(input$NormTableInput) || is.null(input$NormTableInputStart) || is.null(input$NormTableInputEnd) || is.null(input$NormTableInputStepping)
-    if(check_inputs){return()}
-    else{
-      currentAgeForNormTable <- input$NormTableInput
-      currentBestModel <- bestModel()
-      MIN_NORM <- as.numeric(input$NormTableInputStart)
-      MAX_NORM <- as.numeric(input$NormTableInputEnd)
-
-      if(is.null(input$NormTableRel)){
-        REL <- NULL
-      }else{
-        REL <- as.numeric(input$NormTableRel)
-      }
-
-      if(is.na(REL)){
-        REL <- NULL
-      }
-
-      CI <- as.numeric(input$NormTableCI)
-      if(is.na(CI)){
-        CI <- NULL
-      }
-
-      STEPPING <- as.numeric(input$NormTableInputStepping)
-      MIN_RAW <- currentBestModel$minRaw
-      MAX_RAW <- currentBestModel$maxRaw
-
-      currentNormTable <- cNORM::normTable(currentAgeForNormTable, bestModel(), minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                           minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL, pretty = TRUE)
-
-      currentNormTable$raw <- round(currentNormTable$raw, digits = 2)
-      currentNormTable$percentile <- round(currentNormTable$percentile, digits = 2)
-
-      return(currentNormTable)}
+    req(input$NormTableInput, input$NormTableInputStart,
+        input$NormTableInputEnd, input$NormTableInputStepping)
+    m <- bestModel()
+    tab <- cNORM::normTable(input$NormTableInput, m,
+                            minNorm = input$NormTableInputStart,
+                            maxNorm = input$NormTableInputEnd,
+                            minRaw  = m$minRaw, maxRaw = m$maxRaw,
+                            step    = input$NormTableInputStepping,
+                            CI          = if (is.na(input$NormTableCI))  NULL else input$NormTableCI,
+                            reliability = if (is.na(input$NormTableRel)) NULL else input$NormTableRel,
+                            pretty = TRUE)
+    tab$raw        <- round(tab$raw, 2)
+    tab$percentile <- round(tab$percentile, 2)
+    tab
   })
 
-
-
-  output$NormTable <- renderDataTable({
-    if(is.null(normTable())){return()}
-
-    return(normTable())
-  })
-
+  output$NormTable         <- DT::renderDT({ normTable() })
   output$DownloadNormTable <- downloadHandler(
-    filename = function(){
-      "NormTable.csv"
-    },
-    content = function(file){
-      output <- as.data.frame(normTable())
-      write.csv(output, file)
-    }
+    filename = function() "NormTable.csv",
+    content  = function(file) write.csv(normTable(), file, row.names = FALSE)
   )
-
 
   output$InputRawTable <- renderUI({
-    tagList(numericInput(inputId = "RawTableInput", label = "Choose age for prediction of raw values", value = NULL,min = 0, max = bestModel()$maxA1),
-            numericInput(inputId = "RawTableInputStart", label = "Choose raw start value", value = bestModel()$minRaw),
-            numericInput(inputId = "RawTableInputEnd", label = "Choose raw end value", value = bestModel()$maxRaw),
-            numericInput(inputId = "RawTableInputStepping", label = "Choose stepping value", value = NULL),
-            numericInput(inputId = "RawTableCI", label = "Confidence Coefficient", value = .9),
-            numericInput(inputId = "RawTableRel", label = "Reliability Coefficient", value = NULL),
-            actionButton(inputId = "CalcRawTables",label = "Generate raw table"),
-            downloadButton("DownloadRawTable", label = "Download raw table"))
+    req(bestModel())
+    m <- bestModel()
+    tagList(
+      numericInput("RawTableInput",         "Age",         value = NULL,
+                   min = 0, max = m$maxA1),
+      numericInput("RawTableInputStart",    "Raw start",   value = m$minRaw),
+      numericInput("RawTableInputEnd",      "Raw end",     value = m$maxRaw),
+      numericInput("RawTableInputStepping", "Step width",  value = NULL),
+      numericInput("RawTableCI",            "Confidence",  value = 0.9),
+      numericInput("RawTableRel",           "Reliability", value = NULL),
+      actionButton("CalcRawTables", "Generate raw table"),
+      downloadButton("DownloadRawTable", "Download")
+    )
   })
-
 
   rawTable <- eventReactive(input$CalcRawTables, {
-
-    checking_input <- is.null(input$RawTableInputStart) || is.null(input$RawTableInputStart) || is.null(input$RawTableInputEnd) || is.null(input$RawTableInputStepping)
-    if(checking_input){return()}
-    else{
-      currentAgeForRawTable <- input$RawTableInput
-      currentBestModel <- bestModel()
-      MIN_NORM <- currentBestModel$minL1
-      MAX_NORM <- currentBestModel$maxL1
-      MIN_RAW <- input$RawTableInputStart
-      MAX_RAW <- input$RawTableInputEnd
-      STEPPING <- as.numeric(input$RawTableInputStepping)
-
-      if(is.null(input$RawTableRel)){
-        REL <- NULL
-      }else{
-        REL <- as.numeric(input$RawTableRel)
-      }
-
-      if(is.na(REL)){
-        REL <- NULL
-      }
-
-      CI <- as.numeric(input$RawTableCI)
-      if(is.na(CI)){
-        CI <- NULL
-      }
-
-      currentRawTable <- cNORM::rawTable(currentAgeForRawTable, currentBestModel, minNorm = MIN_NORM, maxNorm = MAX_NORM,
-                                         minRaw = MIN_RAW, maxRaw = MAX_RAW, step = STEPPING, CI = CI, reliability = REL, pretty = TRUE)
-      currentRawTable$norm <- round(currentRawTable$norm, digits = 3)
-      currentRawTable$percentile <- round(currentRawTable$percentile, digits = 2)
-
-
-      return(currentRawTable)}
+    req(input$RawTableInput, input$RawTableInputStart,
+        input$RawTableInputEnd, input$RawTableInputStepping)
+    m <- bestModel()
+    tab <- cNORM::rawTable(input$RawTableInput, m,
+                           minNorm = m$minL1, maxNorm = m$maxL1,
+                           minRaw  = input$RawTableInputStart,
+                           maxRaw  = input$RawTableInputEnd,
+                           step    = input$RawTableInputStepping,
+                           CI          = if (is.na(input$RawTableCI))  NULL else input$RawTableCI,
+                           reliability = if (is.na(input$RawTableRel)) NULL else input$RawTableRel,
+                           pretty = TRUE)
+    tab$norm       <- round(tab$norm, 3)
+    tab$percentile <- round(tab$percentile, 2)
+    tab
   })
 
-  output$RawTable <- renderDataTable({
-    if(is.null(rawTable())){return()}
-
-    return(rawTable())
-  })
-
+  output$RawTable         <- DT::renderDT({ rawTable() })
   output$DownloadRawTable <- downloadHandler(
-    filename = function(){
-      "RawTable.csv"
-    },
-    content = function(file){
-      output <- as.data.frame(rawTable())
-      write.csv(output, file)
-    }
+    filename = function() "RawTable.csv",
+    content  = function(file) write.csv(rawTable(), file, row.names = FALSE)
   )
 
-  output$exportData <- downloadHandler(
-    filename = function() {
-      paste("data.RData", sep = "")
-    },
-    content = function(file) {
-      dat <- preparedData()
-      save(dat, filename = file)
+  # ---- Model export ----------------------------------------------------------
+  output$downloadModel <- downloadHandler(
+    filename = function() "cnorm_model.RData",
+    content  = function(file) {
+      model.cnorm <- bestModel()
+      data.cnorm  <- preparedData()
+      save(model.cnorm, data.cnorm, file = file)
     }
   )
-
-  # Generates and plots modelled against actual data values
-  output$PlotValues <- renderPlot({
-
-    cNORM::plotRaw(buildCnormObject(preparedData(), bestModel()), group = chosenGrouping(), raw = chosenRaw())
-  })
-
-  # Generates and plots contour plot of first derivation
-  output$PlotDerivatives <- renderPlot({
-
-
-    MIN_AGE <- min((currentFile())[chosenGrouping()])
-    MAX_AGE <- max((currentFile())[chosenGrouping()])
-
-    cNORM::plotDerivative(bestModel(),
-                          minAge = MIN_AGE,
-                          maxAge = MAX_AGE)
-  })
 })

@@ -1,46 +1,86 @@
- <!DOCTYPE html>
- <body>
-<h1>cNORM - Introduction</h1>
-<img src="plotPercentiles.png" align=right><p>cNORM aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. The method stems from psychological test construction and was developed to create continuous norms for age or grade in performance assessment (e. g. vocabulary development, reading and writing development, intelligence ...). It includes four essential steps:</p>
+<!DOCTYPE html>
+<body>
+<h1>cNORM &mdash; Continuous Norming</h1>
+<img src="plotPercentiles.png" align="right" style="max-width:380px;" />
 
- <ol>
-	<li><b>Preparation</b></li>
-	<li><b>Data Modeling</b></li>
-	<li><b>Model Validation</b></li>
-	<li><b>Generating Norm Tables</b></li>
+<p>This tool generates continuous test norms for psychometric and
+biometric data using regression-based Taylor polynomials. It is
+distribution-free and allows you to compute robust norm scores even with
+moderate sample sizes per age (or grade) group. It is based on the
+<a href="https://www.psychometrica.de/cNorm_en.html">cNORM</a> package
+of the R plattform. For advanced functionality like weighting and fine-grained
+setting (descending scores, types of bindings, predicting norm scorses for
+complete new datasets based on existing models ...), please use
+the cnorm function on the R console.</p>
+
+<p>This GUI guides you through three short steps:</p>
+
+<ol>
+  <li><b>Data</b> &ndash; load an example or upload your own file.</li>
+  <li><b>Modeling</b> &ndash; pick the grouping variable (e. g. age groups,
+  grade ...), raw-score
+      variable, norm scale and polynomial degrees, then click
+      <i>Run model</i>. You can inspect the percentile plot,
+      the consistency check and the model-fit curve to choose the right
+      number of terms.</li>
+  <li><b>Prediction</b> &ndash; predict single norm/raw scores or generate
+      and download full norm tables. Diagnostic plots are available in
+      the <i>Visualization</i> tab and a stratified
+      <i>Cross-validation</i> can be run separately.</li>
 </ol>
 
-<p>You can find these different steps as tabs on the header of the page. For a thorough explanation, please have a look at the tutorial <a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">cNORM</a>. In brief, the different steps have the following purposes:</p>
-
-<br><br>
-<h3>1. Preparation</h3>
-<p>First, please load your data or use the example datasets. Your data should include a variable for the raw scores and a grouping variable (e.g. grade or age groups). Additionally, you can use a continuous variable like the exact chronological age. The data is than ranked per group, and a normal score is assigned through normal rank transformation. Afterwards, powers of the explanatory variable (e.g. age or group) and of the normal score are built up to the power parameter <i>k</i> (default 4), as well as all linear interactions.</p>
-<p>Additional options: You can set the power parameter, the type of norm scale and the algorithm for bindings in the raw data.</p>
-
-<br><br>
-<h3>2. Modeling and Validation</h3>
-<img src="informationFunction.png" align=right><p>In the data modeling, the most predictive terms from the list of powers and interactions are chosen. Per default, an R<sup>2</sup> = .99 is used as a cutoff value. This means, in the modeling, we try to find a regression formula that captures almost all of the variance in the data with as few terms as possible. There is however no definite value to determine the best model and you can as well specify a number of terms. Usually, with 4 terms, a good fit is retrieved with an extremely simple model. In case of inconsistencies in the model, please vary the number of terms and in case of overfit, reduce <i>k</i>. In this step, you as well get an overview of the fit of the different models (R<sup>2</sup> plotted against information criteria). You can use that plot for a model selection. The same data are additionally printed as a table at the bottom of the page.</p>
-
-<br><br>
-<h3>3. Visualization</h3>
-<p>You can now examine the percentiles of the observed data and compare them with the predicted data, check how well the raw data are fitted and how well observed norm scores correspond to the predicted norm scores. Please look out for intersecting percentile curves in the plots, because these indicate possible assumption violations. The series plot gives you an overview on how the percentile curves change with the number of terms in the model.</p>
-
-<br><br>
-<h3>4. Generating Norm Tables</h3>
-<img src="plotNorm.png" align=right><p>The last section can be used to retrieve normal scores for specific raw values at a specific age, or to generate norm tables. These tables can be exported for further processing.</p>
-
-
-<br><br><br><br>
-<h3>General remarks, privacy and references</h3>
-<p>This graphical user interface does not offer all options of the package. For specific cases, please use the command line for more specific parameter settings. If you use the user interface via cNORM.GUI() on your computer, all data stays within your own environment. If you are using the online-version, please consult the <a href="https://docs.rstudio.com/shinyapps.io/security-and-compliance.html" target="_blank">Shinyapps.io User Guide</a> for information on security and compliance of their service. cNORM does not store any data uploaded through the web interface.</p><br>
-
+<h3>Required variables</h3>
 <ul>
-  <li><a href="https://cran.r-project.org/web/packages/cNORM/" target="_blank">R-Package cNORM (CRAN)</a></li>
-  <li><a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">cNORM - Generating Continuous Test Norms (Tutorial)</a></li>
-  <li>Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2018). A continuous solution to the norming problem. <i>Assessment, 25</i>,  112-125. doi: 10.1177/1073191116656437</li>
-  <li>Lenhard, A., Lenhard, W., Gary, S. (2019). Continuous norming of psychometric tests: A simulation study of parametric and semi-parametric approaches. <i>PLoS ONE, 14</i>(9),  e0222279. https://doi.org/10.1371/journal.pone.0222279</li>
-  <li>Lenhard, W., & Lenhard, A. (2020). Improvement of Norm Score Quality via Regression-Based Continuous Norming. <i>Educational and Psychological Measurement(Online First)</i>, 1-33. https://doi.org/10.1177/0013164420928457</li>
-  <li>Gary, S., & Lenhard, W. (2021). In norming we trust: Verfahren zur statistischen Modellierung kontinuierlicher Testnormen auf dem Prüfstand. <i>Diagnostica</i>.</li>
+  <li><b>Grouping variable</b> &ndash; e.g. age group, grade, year. Must be
+      numeric and meaningful (group mean is fine). Sidenote: If you have a
+      continuous variable like age, please use the <a href="https://cnorm.shinyapps.io/cNORM-Parametric/">
+      parametric modelling</a> or the additional parameters available on the
+      R console.</li>
+  <li><b>Raw-score variable</b> &ndash; the test score to be normed.</li>
 </ul>
-<br><br>
-</body></html>
+
+<h3>Built-in example data sets</h3>
+<ul>
+  <li><b>elfe</b> &ndash; reading-comprehension scores in primary school
+      (sentence-completion task, 0&ndash;28).</li>
+  <li><b>ppvt</b> &ndash; Peabody Picture Vocabulary Test IV norming sample,
+      ages 2.5&ndash;17.5, raw 0&ndash;228.</li>
+  <li><b>CDC</b> &ndash; epidemiological growth data (BMI, weight, height),
+      ages 2&ndash;18, from the CDC.</li>
+</ul>
+
+<h3>Model parameters at a glance</h3>
+<ul>
+  <li><b>k</b> &ndash; polynomial degree of the location (norm score) term.
+      Higher values give a closer fit but risk overfitting (default 5).</li>
+  <li><b>t</b> &ndash; polynomial degree of the explanatory term (typically
+      age). Age trajectories are usually smooth, so 2&ndash;3 is enough.</li>
+  <li><b>Number of terms</b> &ndash; leave blank to auto-select model.
+  Otherwise specify a fixed value (look for the
+      &ldquo;elbow&rdquo; in the model-fit curve).</li>
+</ul>
+
+<h3>Privacy</h3>
+<p>When launched locally via <code>cNORM.GUI()</code>, all data stays on
+your computer. The hosted version runs on shinyapps.io
+(<a href="https://docs.rstudio.com/shinyapps.io/security-and-compliance.html"
+target="_blank">security &amp; compliance</a>); cNORM itself does not store
+any uploaded data.</p>
+
+<h3>References</h3>
+<ul>
+  <li><a href="https://cran.r-project.org/package=cNORM" target="_blank">R package cNORM (CRAN)</a></li>
+  <li><a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">Tutorial &amp; manual</a></li>
+  <li>Lenhard, A., Lenhard, W., Suggate, S. &amp; Segerer, R. (2018).
+      A continuous solution to the norming problem. <i>Assessment, 25</i>,
+      112&ndash;125. doi:10.1177/1073191116656437</li>
+  <li>Lenhard, A., Lenhard, W. &amp; Gary, S. (2019). Continuous norming of
+      psychometric tests: A simulation study of parametric and
+      semi-parametric approaches. <i>PLoS ONE, 14</i>(9), e0222279.</li>
+  <li>Lenhard, W. &amp; Lenhard, A. (2021). Improvement of norm score
+      quality via regression-based continuous norming.
+      <i>Educational and Psychological Measurement, 81</i>(2), 229&ndash;261.
+      doi:10.1177/0013164420928457</li>
+</ul>
+</body>
+</html>
