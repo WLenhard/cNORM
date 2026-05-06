@@ -170,9 +170,9 @@ shinyServer(function(input, output, session) {
   })
 
   chosenTypeOfPlotSubset <- reactive({
-    m <- c("Adjusted R2 by Number of Predictors",
-           "Log Transformed Mallow's Cp by Adjusted R2",
-           "Bayesian Information Criterion (BIC) by Adjusted R2",
+    m <- c("R2 by Number of Predictors",
+           "Mallow's (log) Cp by R2",
+           "Bayesian Information Criterion (BIC) by R2",
            "RMSE by Number of Predictors")
     match(input$chosenTypePlotSubset, m) - 1
   })
