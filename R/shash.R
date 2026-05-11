@@ -95,7 +95,7 @@ dshash <- function(x,
   sinh_z <- (exp_arg - exp_neg_arg) * 0.5
   cosh_z <- (exp_arg + exp_neg_arg) * 0.5
 
-  logdens <- log(delta) - log(sigma) - 0.918938533204673 -  # log(sqrt(2*pi))
+  logdens <- log(delta) - log(sigma) - 0.918938533204673 -  # log(sqrt(2*pi)); precomputed
     0.5 * log1p(z_sq) - 0.5 * sinh_z * sinh_z + log(cosh_z)
 
   if (log)
