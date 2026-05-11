@@ -13,7 +13,9 @@ shinyUI(fluidPage(
   # Tabsetpanel for main workflow
   tabsetPanel(
 
+    # ------------------------------------------------------------------
     # Tab 1: Data Input
+    # ------------------------------------------------------------------
     tabPanel(
       "Data Input",
       sidebarLayout(
@@ -59,8 +61,7 @@ shinyUI(fluidPage(
                  other data. It uses parametric modelling techniques like the beta-binomial distribution or the SinH-ArcsinH distribution
                  to derive continuous norms in dependence of an explanatory variable like age. After loading data, review it below before
                  proceeding to modeling. To fit the models, please select the 'Modelling' tab. To generate norm tables, please select 'Norm tables'.",
-                 tags$br(),
-                 tags$br(),
+                 tags$br(), tags$br(),
                  "Further information on the methodology can be found at",
                  tags$a(href = "https://www.psychometrica.de/cNorm_betabinomial_en.html", "Psychometrica", target = "_blank"),
                  "and in the package vignettes on modelling with the ",
@@ -73,7 +74,9 @@ shinyUI(fluidPage(
       )
     ),
 
+    # ------------------------------------------------------------------
     # Tab 2: Modeling
+    # ------------------------------------------------------------------
     tabPanel(
       "Modeling",
       sidebarLayout(
@@ -93,7 +96,7 @@ shinyUI(fluidPage(
             "distributionType",
             "Distribution Type:",
             choices = c("SinH-ArcSinH (SHASH)" = "shash",
-                        "Beta-Binomial" = "betabinomial"),
+                        "Beta-Binomial"        = "betabinomial"),
             selected = "shash"
           ),
 
@@ -105,46 +108,21 @@ shinyUI(fluidPage(
             tags$h4("SHASH Parameters"),
             tags$p("Specify polynomial degrees for each distribution parameter:"),
 
-            sliderInput(
-              "mu_degree",
-              "Degree of μ (location):",
-              min = 0, max = 5, value = 3, step = 1
-            ),
+            sliderInput("mu_degree",      "Degree of \u03BC (location):",
+                        min = 0, max = 5, value = 3, step = 1),
+            sliderInput("sigma_degree",   "Degree of \u03C3 (scale):",
+                        min = 0, max = 5, value = 2, step = 1),
+            sliderInput("epsilon_degree", "Degree of \u03B5 (skewness):",
+                        min = 0, max = 5, value = 2, step = 1),
+            sliderInput("delta_degree",   "Degree of \u03B4 (tail weight):",
+                        min = 0, max = 5, value = 1, step = 1),
 
-            sliderInput(
-              "sigma_degree",
-              "Degree of σ (scale):",
-              min = 0, max = 5, value = 2, step = 1
-            ),
-
-            sliderInput(
-              "epsilon_degree",
-              "Degree of ε (skewness):",
-              min = 0, max = 5, value = 2, step = 1
-            ),
-
-            sliderInput(
-              "delta_degree",
-              "Degree of δ (tail weight):",
-              min = 0, max = 5, value = 1, step = 1
-            ),
-
-            checkboxInput(
-              "fix_delta",
-              "Fix delta (instead of polynomial)?",
-              value = FALSE
-            ),
+            checkboxInput("fix_delta", "Fix delta (instead of polynomial)?", value = FALSE),
 
             conditionalPanel(
               condition = "input.fix_delta == true",
-              numericInput(
-                "delta_value",
-                "Fixed delta value:",
-                value = 1,
-                min = 0.1,
-                max = 5,
-                step = 0.1
-              )
+              numericInput("delta_value", "Fixed delta value:",
+                           value = 1, min = 0.1, max = 5, step = 0.1)
             )
           ),
 
@@ -154,17 +132,10 @@ shinyUI(fluidPage(
             tags$h4("Beta-Binomial Parameters"),
             tags$p("Specify polynomial degrees for alpha and beta:"),
 
-            sliderInput(
-              "alpha_degree",
-              "Degree of α:",
-              min = 0, max = 5, value = 3, step = 1
-            ),
-
-            sliderInput(
-              "beta_degree",
-              "Degree of β:",
-              min = 0, max = 5, value = 3, step = 1
-            )
+            sliderInput("alpha_degree", "Degree of \u03B1:",
+                        min = 0, max = 5, value = 3, step = 1),
+            sliderInput("beta_degree",  "Degree of \u03B2:",
+                        min = 0, max = 5, value = 3, step = 1)
           ),
 
           hr(),
@@ -173,9 +144,9 @@ shinyUI(fluidPage(
           selectInput(
             "scale",
             "Norm Scale:",
-            choices = c("T-scores (M=50, SD=10)" = "T",
+            choices = c("T-scores (M=50, SD=10)"  = "T",
                         "IQ-scores (M=100, SD=15)" = "IQ",
-                        "z-scores (M=0, SD=1)" = "z"),
+                        "z-scores (M=0, SD=1)"    = "z"),
             selected = "T"
           ),
 
@@ -201,7 +172,6 @@ shinyUI(fluidPage(
         mainPanel(
           width = 9,
 
-          # Model summary output
           tags$h3("Model Results"),
 
           conditionalPanel(
@@ -219,7 +189,6 @@ shinyUI(fluidPage(
             condition = "input.computeModel > 0",
             tabsetPanel(
               id = "modelTabs",
-              # Percentile plot
               tabPanel(
                 "Percentile Plot",
                 tags$br(),
@@ -230,7 +199,6 @@ shinyUI(fluidPage(
                   type = 5
                 )
               ),
-              # Summary tab
               tabPanel(
                 "Summary",
                 tags$br(),
@@ -242,7 +210,9 @@ shinyUI(fluidPage(
       )
     ),
 
+    # ------------------------------------------------------------------
     # Tab 3: Norm Tables
+    # ------------------------------------------------------------------
     tabPanel(
       "Norm Tables",
       sidebarLayout(
@@ -263,27 +233,33 @@ shinyUI(fluidPage(
 
           hr(),
 
-          # Score range
-          numericInput(
-            "norm_start",
-            "Start raw score:",
-            value = NULL,
-            step = 1
+          # Score range - only relevant for SHASH (continuous distribution)
+          conditionalPanel(
+            condition = "input.distributionType == 'shash'",
+            numericInput("norm_start", "Start raw score:", value = NULL, step = 1),
+            numericInput("norm_end",   "End raw score:",   value = NULL, step = 1),
+            numericInput("norm_step",  "Step size:",       value = 1, min = 0.1, step = 0.1)
           ),
 
-          numericInput(
-            "norm_end",
-            "End raw score:",
-            value = NULL,
-            step = 1
-          ),
-
-          numericInput(
-            "norm_step",
-            "Step size:",
-            value = 1,
-            min = 0.1,
-            step = 0.1
+          # Note for Beta-Binomial
+          conditionalPanel(
+            condition = "input.distributionType == 'betabinomial'",
+            tags$div(
+              style = "padding: 10px; background-color: #f8f9fa; border-left: 4px solid #0275d8; border-radius: 3px;",
+              tags$p(tags$small(
+                tags$b("Note:"), " For the Beta-Binomial distribution, the norm table is generated automatically
+                across the entire item range (0 to n). Start/End/Step are not required."
+              ))
+            ),
+            # Optional: filtering inputs (will simply trim the resulting table)
+            tags$br(),
+            numericInput("norm_start", "Optional: restrict table to start raw score:",
+                         value = NULL, step = 1),
+            numericInput("norm_end",   "Optional: restrict table to end raw score:",
+                         value = NULL, step = 1),
+            # Hidden default - keeps server reactive happy
+            tags$div(style = "display: none;",
+                     numericInput("norm_step", "step", value = 1))
           ),
 
           hr(),
@@ -305,7 +281,6 @@ shinyUI(fluidPage(
               value = 0.90,
               step = 0.01
             ),
-
             numericInput(
               "reliability",
               "Reliability coefficient:",

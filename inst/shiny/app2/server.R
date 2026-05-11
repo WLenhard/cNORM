@@ -3,6 +3,9 @@ library(cNORM)
 library(DT)
 library(ggplot2)
 
+# Hilfsoperator: NULL-coalescing
+`%||%` <- function(a, b) if (is.null(a)) b else a
+
 shinyServer(function(input, output, session) {
 
   # Reactive values to store data and model
@@ -100,7 +103,7 @@ shinyServer(function(input, output, session) {
       "score_var",
       "Raw Score Variable:",
       choices = names(rv$data),
-      selected = if(ncol(rv$data) > 1) names(rv$data)[2] else names(rv$data)[1]
+      selected = if (ncol(rv$data) > 1) names(rv$data)[2] else names(rv$data)[1]
     )
   })
 
@@ -176,6 +179,9 @@ shinyServer(function(input, output, session) {
           )
         }
 
+        # Reset existing norm tables when a new model is fit
+        rv$normTables <- NULL
+
         incProgress(1, detail = "Model fitted!")
 
         showNotification("Model computed successfully!", type = "message")
@@ -197,7 +203,9 @@ shinyServer(function(input, output, session) {
   # Model summary
   output$modelSummary <- renderPrint({
     req(rv$model)
-    summary(rv$model, age = rv$data[[input$age_var]], score = rv$data[[input$score_var]])
+    summary(rv$model,
+            age = rv$data[[input$age_var]],
+            score = rv$data[[input$score_var]])
   })
 
   # Percentile plot
@@ -214,30 +222,6 @@ shinyServer(function(input, output, session) {
          score = rv$data[[input$score_var]],
          weights = weights,
          points = TRUE)
-  })
-
-  # Model diagnostics
-  output$modelDiagnostics <- renderPrint({
-    req(rv$model)
-
-    if (input$distributionType == "shash") {
-      diag <- diagnostics.shash(rv$model,
-                                age = rv$data[[input$age_var]],
-                                score = rv$data[[input$score_var]])
-    } else {
-      diag <- diagnostics.betabinomial(rv$model,
-                                       age = rv$data[[input$age_var]],
-                                       score = rv$data[[input$score_var]])
-    }
-
-    print(diag)
-  })
-
-  # Derivative plot (SHASH only)
-  output$derivativePlot <- renderPlot({
-    req(rv$model, input$distributionType == "shash")
-
-    plotDerivative(rv$model, age = rv$data[[input$age_var]])
   })
 
   # Download model
@@ -291,18 +275,25 @@ shinyServer(function(input, output, session) {
 
         incProgress(0.3, detail = "Computing percentiles...")
 
-        # Set score range
-        start_score <- input$norm_start
-        end_score <- input$norm_end
-
-        if (is.null(start_score)) start_score <- attr(rv$model$result, "min")
-        if (is.null(end_score)) end_score <- attr(rv$model$result, "max")
+        # CI / Reliability
+        ci_val  <- if (isTRUE(input$include_ci)) input$ci_level    else NULL
+        rel_val <- if (isTRUE(input$include_ci)) input$reliability else NULL
 
         # Generate tables
         if (input$distributionType == "shash") {
 
-          ci_val <- if (input$include_ci) input$ci_level else NULL
-          rel_val <- if (input$include_ci) input$reliability else NULL
+          # Determine score range
+          start_score <- input$norm_start
+          end_score   <- input$norm_end
+
+          if (is.null(start_score) || is.na(start_score)) {
+            start_score <- attr(rv$model$result, "min") %||%
+              floor(min(rv$data[[input$score_var]], na.rm = TRUE))
+          }
+          if (is.null(end_score) || is.na(end_score)) {
+            end_score <- attr(rv$model$result, "max") %||%
+              ceiling(max(rv$data[[input$score_var]], na.rm = TRUE))
+          }
 
           rv$normTables <- normTable.shash(
             rv$model,
@@ -316,18 +307,37 @@ shinyServer(function(input, output, session) {
 
         } else if (input$distributionType == "betabinomial") {
 
-          ci_val <- if (input$include_ci) input$ci_level else NULL
-          rel_val <- if (input$include_ci) input$reliability else NULL
-
+          # Beta-Binomial: keine start/end/step Argumente!
+          # Tabelle wird automatisch ueber den gesamten Itembereich (0:n) erzeugt.
           rv$normTables <- normTable.betabinomial(
             rv$model,
             ages = ages,
-            start = start_score,
-            end = end_score,
-            step = input$norm_step,
             CI = ci_val,
             reliability = rel_val
           )
+
+          # Optional: Tabelle nachtraeglich auf gewuenschten Bereich filtern
+          start_score <- input$norm_start
+          end_score   <- input$norm_end
+
+          if ((!is.null(start_score) && !is.na(start_score)) ||
+              (!is.null(end_score)   && !is.na(end_score))) {
+
+            rv$normTables <- lapply(rv$normTables, function(df) {
+              # Spalte mit Rohwerten ermitteln
+              sc <- if ("raw"   %in% names(df)) "raw"
+              else if ("x"     %in% names(df)) "x"
+              else if ("score" %in% names(df)) "score"
+              else names(df)[1]
+
+              keep <- rep(TRUE, nrow(df))
+              if (!is.null(start_score) && !is.na(start_score))
+                keep <- keep & df[[sc]] >= start_score
+              if (!is.null(end_score) && !is.na(end_score))
+                keep <- keep & df[[sc]] <= end_score
+              df[keep, , drop = FALSE]
+            })
+          }
         }
 
         incProgress(1, detail = "Done!")
@@ -360,31 +370,35 @@ shinyServer(function(input, output, session) {
   })
 
   # Render individual norm tables
-  # Render individual norm tables
   observe({
     req(rv$normTables)
 
     lapply(names(rv$normTables), function(age_name) {
       output[[paste0("normTable_", age_name)]] <- DT::renderDT({
 
-        # Identify columns to round
-        cols_to_round <- c("Px", "Pcum", "Percentile", "z", "norm")
+        df <- rv$normTables[[age_name]]
 
-        # Add CI columns if they exist
-        ci_cols <- c("lowerCI", "upperCI", "lowerCI_PR", "upperCI_PR")
-        existing_ci_cols <- ci_cols[ci_cols %in% names(rv$normTables[[age_name]])]
-        cols_to_round <- c(cols_to_round, existing_ci_cols)
+        # Numerische Spalten, die gerundet werden sollen
+        candidate_cols <- c("Px", "Pcum", "Percentile", "z", "norm",
+                            "lowerCI", "upperCI",
+                            "lowerCI_PR", "upperCI_PR",
+                            "lower", "upper")
+        cols_to_round <- intersect(candidate_cols, names(df))
 
-        DT::datatable(
-          rv$normTables[[age_name]],
+        dt <- DT::datatable(
+          df,
           options = list(
             pageLength = 25,
             scrollX = TRUE,
             dom = 'Bfrtip'
           ),
           rownames = FALSE
-        ) %>%
-          DT::formatRound(columns = cols_to_round, digits = 2)
+        )
+
+        if (length(cols_to_round) > 0) {
+          dt <- DT::formatRound(dt, columns = cols_to_round, digits = 2)
+        }
+        dt
       })
     })
   })
@@ -400,7 +414,7 @@ shinyServer(function(input, output, session) {
       # Combine all tables with age column
       combined <- do.call(rbind, lapply(names(rv$normTables), function(age_name) {
         df <- rv$normTables[[age_name]]
-        df$age <- as.numeric(age_name)
+        df$age <- suppressWarnings(as.numeric(age_name))
         df
       }))
 
