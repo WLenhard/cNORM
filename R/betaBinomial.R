@@ -578,6 +578,11 @@ predict.cnormBetaBinomial <- function(object, ...) {
 #'
 #' This function creates a visualization of a fitted cnormBetaBinomial model,
 #' including the original data points manifest percentiles and specified percentile lines.
+#' Note that the beta-binomial model aims at discrete raw scores. We decided to display
+#' continuous percentile lines nonetheless on order to maintain visual comparability with
+#' other modelling techniques. If you prefer discretization, set the "discrete"
+#' parameter to TRUE.
+#'
 #'
 #' @param x A fitted model object of class "cnormBetaBinomial" or "cnormBetaBinomial2".
 #' @param ... Additional arguments passed to the plot method.
@@ -587,6 +592,7 @@ predict.cnormBetaBinomial <- function(object, ...) {
 #'      \item weights An optional numeric vector of weights for each observation.
 #'      \item percentiles An optional vector with the percentiles to plot.
 #'      \item points Logical indicating whether to plot the data points. Default is TRUE.
+#'      \item discrete Logical indicating whether to plot the discrete raw scores. Default is FALSE.
 #'    }
 #'
 #' @return A ggplot object.
@@ -629,6 +635,11 @@ plot.cnormBetaBinomial <- function(x, ...) {
     points <- TRUE
   }
 
+  discrete <- FALSE
+  if ("discrete" %in% names(args)) {
+    discrete <- args$discrete
+  }
+
   if (is.null(age) || is.null(score))
     stop("Please provide 'age' and 'score' vectors.")
 
@@ -666,42 +677,57 @@ plot.cnormBetaBinomial <- function(x, ...) {
     preds <- predictCoefficients2(model, pred_ages)
   }
 
-  # Helper function to compute quantiles from a Beta-Binomial distribution
-  # Takes a vector of probabilities `p_vec` and returns corresponding quantiles.
-  qbetabinom_vec <- function(p_vec, n, alpha, beta) {
-    if (any(is.na(c(alpha, beta))) || alpha <= 0 || beta <= 0) {
-      return(rep(NA, length(p_vec)))
+  if(discrete){
+    # Helper function to compute quantiles from a Beta-Binomial distribution
+    # Takes a vector of probabilities `p_vec` and returns corresponding quantiles.
+    qbetabinom_vec <- function(p_vec, n, alpha, beta) {
+      if (any(is.na(c(alpha, beta))) || alpha <= 0 || beta <= 0) {
+        return(rep(NA, length(p_vec)))
+      }
+      x_range <- 0:n
+      log_pmf <- lchoose(n, x_range) + lbeta(x_range + alpha, n - x_range + beta) - lbeta(alpha, beta)
+      pmf <- exp(log_pmf)
+      cdf <- cumsum(pmf / sum(pmf)) # Normalize to ensure sum is exactly 1
+
+      # For each probability in p_vec, find the smallest x where CDF >= p
+      sapply(p_vec, function(p) x_range[which.max(cdf >= p)])
     }
-    x_range <- 0:n
-    log_pmf <- lchoose(n, x_range) + lbeta(x_range + alpha, n - x_range + beta) - lbeta(alpha, beta)
-    pmf <- exp(log_pmf)
-    cdf <- cumsum(pmf / sum(pmf)) # Normalize to ensure sum is exactly 1
 
-    # For each probability in p_vec, find the smallest x where CDF >= p
-    sapply(p_vec, function(p) x_range[which.max(cdf >= p)])
+    # Calculate percentile lines for all predicted points
+    # This returns a matrix where rows are percentiles and columns are age points
+    percentile_matrix <- mapply(
+      FUN = qbetabinom_vec,
+      alpha = preds$a,
+      beta = preds$b,
+      MoreArgs = list(p_vec = percentiles, n = n_max)
+    )
+
+    # Transpose the matrix and convert to a data frame for plotting
+    percentile_data <- as.data.frame(t(percentile_matrix))
+    colnames(percentile_data) <- paste0("P", percentiles * 100)
+
+    plot_data <- data.frame(
+      age = pred_ages,
+      mu = preds$mu,
+      sigma = preds$sigma,
+      percentile_data
+    )
+  }else{
+    # Calculate percentile lines
+    percentile_lines <- lapply(percentiles, function(p) {
+      qbeta(p, shape1 = preds$a, shape2 = preds$b) * attr(model$result, "max")
+    })
+
+    percentile_data <- do.call(cbind, percentile_lines)
+    colnames(percentile_data) <- paste0("P", percentiles * 100)
+
+    plot_data <- data.frame(
+      age = pred_ages,
+      mu = preds$mu,
+      sigma = preds$sigma,
+      percentile_data
+    )
   }
-
-  # Calculate percentile lines for all predicted points
-  # This returns a matrix where rows are percentiles and columns are age points
-  percentile_matrix <- mapply(
-    FUN = qbetabinom_vec,
-    alpha = preds$a,
-    beta = preds$b,
-    MoreArgs = list(p_vec = percentiles, n = n_max)
-  )
-
-  # Transpose the matrix and convert to a data frame for plotting
-  percentile_data <- as.data.frame(t(percentile_matrix))
-  colnames(percentile_data) <- paste0("P", percentiles * 100)
-
-  plot_data <- data.frame(
-    age = pred_ages,
-    mu = preds$mu,
-    sigma = preds$sigma,
-    percentile_data
-  )
-
-  # The rest of the function remains the same...
 
   # Create the plot
   p <- ggplot()

@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.4
-Date: 04.05.2026 - in progress
+Date: 12.05.2026 - in progress
 
 
 Changes:
@@ -12,6 +12,7 @@ Changes:
 *    Set nbest to 8 in exhaustive search
 *    Author name order corrected in README.md
 *    ShinyApp streamlined
+*    discrete parameter when plotting betabinomial models added
 *    
 
 
