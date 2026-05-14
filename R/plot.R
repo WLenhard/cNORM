@@ -110,17 +110,17 @@ plotRaw <- function(model, group = FALSE, type = 0) {
 #' This function plots the manifest norm score against the fitted norm score from
 #' the inverse regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
-#' the regression line. Applicable for Taylor polynomial models.
+#' the regression line. Applicable for Taylor polynomial, beta-binomial, and shash models.
 #'
-#' @param model The regression model, usually from the 'cnorm' or 'cnorm.betabinomial' function
-#' @param age In case of beta binomial model, please provide the age vector
-#' @param score In case of beta binomial model, please provide the score vector
-#' @param width In case of beta binomial model, please provide the width for the sliding window.
+#' @param model The regression model, usually from the 'cnorm', 'cnorm.betabinomial', or 'cnorm.shash' function
+#' @param age In case of parametric models, please provide the age vector
+#' @param score In case of parametric models, please provide the score vector
+#' @param width In case of parametric models, please provide the width for the sliding window.
 #'              If null, the function tries to determine a sensible setting.
 #' @param weights Vector or variable name in the dataset with weights for each
 #' individual case. If NULL, no weights are used.
 #' @param group On optional grouping variable, use empty string for no group, the variable name
-#'              for Taylor polynomial models or a vector with the groups for beta binomial models
+#'              for Taylor polynomial models or a vector with the groups for parametric models
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
 #' @param type Type of display: 0 = plot manifest against fitted values, 1 = plot
@@ -190,6 +190,11 @@ plotNorm <- function(model,
       )
     }
 
+    # Extract model scale ensuring manifest norm scores match fitted norm scores
+    scaleMean <- attr(model$result, "scaleMean")
+    scaleSD <- attr(model$result, "scaleSD")
+    model_scale <- c(scaleMean, scaleSD)
+
     d <- data.frame(age = age, score = score)
     if (is.null(width)) {
       if (length(age) / length(unique(age)) < 50)
@@ -199,13 +204,15 @@ plotNorm <- function(model,
       if (is.null(weights))
         d <- rankByGroup(data = d,
                          group = "age",
-                         raw = "score")
+                         raw = "score",
+                         scale = model_scale)
       else
         d <- rankByGroup(
           data = d,
           group = "age",
           raw = "score",
-          weights = weights
+          weights = weights,
+          scale = model_scale
         )
     } else{
       if (is.null(weights))
@@ -213,7 +220,8 @@ plotNorm <- function(model,
           data = d,
           age = "age",
           raw = "score",
-          width = width
+          width = width,
+          scale = model_scale
         )
       else
         d <- rankBySlidingWindow(
@@ -221,21 +229,21 @@ plotNorm <- function(model,
           age = "age",
           raw = "score",
           weights = weights,
-          width = width
+          width = width,
+          scale = model_scale
         )
     }
 
-
-    d$fitted <- predict.cnormBetaBinomial(model, d$age, d$score)
-
+    # Generic S3 dispatch so predict.cnormShash OR predict.cnormBetaBinomial is correctly used
+    d$fitted <- predict(model, d$age, d$score)
 
   } else {
-    stop("Please provide an object of type cnorm, cnormBetaBinomial or cnormBetaBinomial2.")
+    stop("Please provide an object of type cnorm, cnormBetaBinomial, cnormBetaBinomial2, or cnormShash.")
   }
 
   if (!"normValue" %in% colnames(d)) {
     stop(
-      "The 'normValue' column is missing from the data. Please ensure it's present for both cnorm and beta-binomial models."
+      "The 'normValue' column is missing from the data. Please ensure it's present for both cnorm and parametric models."
     )
   }
 
@@ -247,7 +255,7 @@ plotNorm <- function(model,
              digits = 4)
 
   if (type == 0) {
-    if (isTaylor(model)) {
+    if (is_taylor) {
       title <- if (isTRUE(group) ||
                    (is.character(group) &&
                     nzchar(group)))
@@ -306,8 +314,6 @@ plotNorm <- function(model,
     p <- p + facet_wrap( ~ group)
   }
 
-
-
   p <- p + theme_minimal() +
     theme(
       plot.title = element_text(
@@ -328,7 +334,6 @@ plotNorm <- function(model,
   return(p)
 }
 
-
 #' @import ggplot2
 #' @export
 #' @family plot
@@ -337,9 +342,9 @@ plotNorm <- function(model,
 #'
 #' @description
 #' This function plots the norm curves based on the regression model. It supports both
-#' Taylor polynomial models and beta-binomial models.
+#' Taylor polynomial models, beta-binomial models, and shash models.
 #'
-#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 object.
+#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormShash object.
 #' @param normList Vector with norm scores to display. If NULL, default values are used.
 #' @param minAge Age to start with checking. If NULL, it's automatically determined from the model.
 #' @param maxAge Upper end of the age check. If NULL, it's automatically determined from the model.
@@ -381,9 +386,12 @@ plotNormCurves <- function(model,
   if (isTaylor(model)) {
     model <- model$model
   }
-  parametric <- isParametric(model)
 
-  if (!isParametric(model) && !model$useAge) {
+  parametric <- isParametric(model)
+  is_beta_binomial <- isBeta(model)
+  is_shash <- isSHASH(model)
+
+  if (!parametric && !model$useAge) {
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
@@ -415,8 +423,10 @@ plotNormCurves <- function(model,
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if (parametric)
+    minRaw <- if (is_beta_binomial)
       0
+    else if (is_shash)
+      attr(model$result, "min")
     else
       model$minRaw
   }
@@ -431,11 +441,24 @@ plotNormCurves <- function(model,
   frame_list <- lapply(normList, function(norm) {
     if (parametric) {
       ages <- seq(minAge, maxAge, by = step)
-      raws <- sapply(ages, function(a) {
-        pred <- predictCoefficients2(model, a, attr(model$result, "max"))
-        qbeta(pnorm((norm - scaleMean) / scaleSD), pred$a, pred$b) *
-          attr(model$result, "max")
-      })
+      p_val <- pnorm((norm - scaleMean) / scaleSD)
+
+      if (is_beta_binomial) {
+        # Loop for backwards compat with un-vectorized underlying coefficient variants
+        raws <- sapply(ages, function(a) {
+          if (inherits(model, "cnormBetaBinomial")) {
+            pred <- predictCoefficients(model, a)
+          } else {
+            pred <- predictCoefficients2(model, a, attr(model$result, "max"))
+          }
+          qbeta(p_val, pred$a, pred$b) * attr(model$result, "max")
+        })
+      } else if (is_shash) {
+        # Predict parameters vectorized and calculate exact inverse quantiles
+        preds <- predictCoefficients_shash(model, ages)
+        raws <- qshash(p_val, mu = preds$mu, sigma = preds$sigma, epsilon = preds$epsilon, delta = preds$delta)
+      }
+
       data.frame(n = norm, raw = raws, age = ages)
     } else {
       normCurve <- getNormCurve(
@@ -492,7 +515,6 @@ plotNormCurves <- function(model,
   return(p)
 }
 
-
 #' Cumulative norm distribution plot for conventional-norming models
 #'
 #' Used internally when `plotPercentiles()` is called on a cnorm object that
@@ -524,25 +546,7 @@ plotCumulative <- function(x,
   if (is.null(maxRaw))
     maxRaw <- m$maxRaw
 
-  # ------------------------------------------------------------------
-  # Model-implied curve.
-  #
-  # The grid spans only the *data's* norm range (m$minL1 .. m$maxL1).
-  # Extrapolating beyond the fitted range can let the polynomial swing
-  # outside [minRaw, maxRaw] and then re-enter it on the way to ±Inf,
-  # producing spurious vertical streaks reaching the top/bottom of the
-  # plot. Within the data range the polynomial only interpolates and
-  # the curve stays well-behaved.
-  # ------------------------------------------------------------------
-
   curve_df <- rawTable(0, x, minRaw, maxRaw, pretty = F)
-
-  # ------------------------------------------------------------------
-  # Manifest empirical CDF: one point per unique raw value at its
-  # mid-rank percentile. Plotting per-subject percentiles directly
-  # would produce vertical streaks at each tied raw score, because
-  # weighted.rank() assigns sequential ranks within ties.
-  # ------------------------------------------------------------------
   raw_obs <- data[[raw_var]]
   raw_obs <- raw_obs[!is.na(raw_obs)]
   n_obs   <- length(raw_obs)
@@ -553,9 +557,6 @@ plotCumulative <- function(x,
                               (sum(raw_obs < r) + 0.5 * sum(raw_obs == r)) / n_obs * 100
                             }, numeric(1)))
 
-  # ------------------------------------------------------------------
-  # Title / subtitle (consistent with plotPercentiles)
-  # ------------------------------------------------------------------
   if (is.null(title)) {
     title <- "Cumulative Norm Distribution (Conventional Norming)"
     subtitle <- bquote(paste("Model: ", .(m$ideal.model), ", R"^2, " = ", .(round(
@@ -563,9 +564,6 @@ plotCumulative <- function(x,
     ))))
   }
 
-  # ------------------------------------------------------------------
-  # Plot
-  # ------------------------------------------------------------------
   p <- ggplot() +
     geom_point(
       data = manifest_df,
@@ -676,11 +674,6 @@ plotPercentiles <- function(model,
     stop("Please provide a cnorm object.")
   }
 
-  # ------------------------------------------------------------------
-  # Conventional-norming dispatch: no age/group axis available, so the
-  # percentile-curves-over-age plot does not apply. Fall back to a
-  # cumulative chart of raw vs. percentile.
-  # ------------------------------------------------------------------
   if (!isTRUE(m$useAge)) {
     return(
       plotCumulative(
@@ -1009,41 +1002,33 @@ plotDensity <- function(model,
   is_shash <- isSHASH(model)
 
   if (is.null(minNorm)) {
-    minNorm <- if (is_beta_binomial)
-      - 3
+    minNorm <- if (is_beta_binomial || is_shash)
+      -3
     else
       model$minL1
   }
 
   if (is.null(maxNorm)) {
-    maxNorm <- if (is_beta_binomial)
+    maxNorm <- if (is_beta_binomial || is_shash)
       3
     else
       model$maxL1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if (is_beta_binomial || is_shash)
+    minRaw <- if (is_beta_binomial)
       0
+    else if (is_shash)
+      attr(model$result, "min")
     else
       model$minRaw
   }
   if (is.null(maxRaw)) {
-    maxRaw <- if (is_beta_binomial ||
-                  is_shash)
+    maxRaw <- if (is_beta_binomial || is_shash)
       attr(model$result, "max")
     else
       model$maxRaw
   }
-
-  title <- if (is_beta_binomial)
-    "Density Functions (Beta-Binomial)"
-  else if (is_shash)
-    "Density Functions (SHASH)"
-  else
-    "Density Functions (Taylor Polynomial)"
-
-
 
   if (is.null(group)) {
     if (is_beta_binomial || is_shash) {
@@ -1068,15 +1053,22 @@ plotDensity <- function(model,
 
   step <- (maxNorm - minNorm) / 100
 
+  # Calculate step size uniquely required for continuous density approximation for shash
+  step_shash <- NULL
+  if (is_shash) {
+    step_shash <- (maxRaw - minRaw) / 100
+    if (step_shash <= 0) step_shash <- 1
+  }
+
   matrix_list <- lapply(group, function(g) {
     if (is_beta_binomial) {
-      norm <- normTable.betabinomial(model, g, attr(model$result, "max"))[[1]]
+      norm <- normTable.betabinomial(model, ages = g, n = attr(model$result, "max"))[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
       colnames(norm)[colnames(norm) == "z"] <- "norm"
     } else if (is_shash) {
-      norm <- normTable.shash(model, g, attr(model$result, "max"))[[1]]
+      norm <- normTable.shash(model, ages = g, start = minRaw, end = maxRaw, step = step_shash)[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
@@ -1103,6 +1095,9 @@ plotDensity <- function(model,
 
   if (is_beta_binomial) {
     matrix$density <- matrix$Px
+  } else if (is_shash) {
+    # Re-scale back to pure density utilizing defined step_shash
+    matrix$density <- matrix$Px / step_shash
   } else {
     matrix$density <- dnorm(matrix$norm,
                             mean = model$scaleM,
@@ -1113,6 +1108,8 @@ plotDensity <- function(model,
   title <- ""
   if (is_beta_binomial) {
     title <- "Density Functions (Beta-Binomial)"
+  } else if (is_shash) {
+    title <- "Density Functions (SHASH)"
   } else {
     title <- "Density Functions (Taylor Polynomial)"
   }
@@ -1811,7 +1808,7 @@ plotCnorm <- function(x, y, ...) {
   else if (y == "derivative"  || y == 8)
     plotDerivative(x, ...)
   else
-    plotPercentiles(x, ...)
+    stop("Unkown plot type")
 }
 
 #' Compare Two Norm Models Visually

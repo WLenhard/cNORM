@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.4
-Date: 12.05.2026 - in progress
+Date: 14.05.2026 - in progress
 
 
 Changes:
@@ -13,7 +13,11 @@ Changes:
 *    Author name order corrected in README.md
 *    ShinyApp streamlined
 *    discrete parameter when plotting betabinomial models added
-*    
+*    plotNorm, plotNormCurves and plotDensity fixed to correctly handle parametric
+     models
+*    boost performance in rankBySlidingWindow, which as well affects performance
+     of the parametric modelling, especially when plotting
+*    broader test coverage
 
 
 

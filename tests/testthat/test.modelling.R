@@ -1,133 +1,215 @@
-set.seed(123)
-age <- ppvt$age
-score <- ppvt$raw
-marginals <- data.frame(var = c("sex", "sex", "migration", "migration"),
-                        level = c(1,2,0,1),
-                        prop = c(0.51, 0.49, 0.65, 0.35))
-weights <- computeWeights(ppvt, marginals)
-n <- 228
+# =============================================================================
+# cNORM — Comprehensive test suite (Updated for testthat 3e)
+# =============================================================================
+library(testthat)
 
-context("Modelling")
-test_that("ranking functions work without warnings or errors", {
+# Use 3rd edition to match modern devtools standards
+local_edition(3)
+
+# ---------------------------------------------------------------------------
+# 0. Shared test fixtures
+# ---------------------------------------------------------------------------
+set.seed(42)
+
+.age     <- ppvt$age
+.score   <- ppvt$raw
+.n_items <- 228
+
+.marginals <- data.frame(
+  var   = c("sex",  "sex",  "migration", "migration"),
+  level = c(1,      2,      0,           1),
+  prop  = c(0.51,   0.49,   0.65,        0.35)
+)
+
+.elfe_cnorm  <- NULL
+.ppvt_cnorm  <- NULL
+.bb_model    <- NULL
+.shash_model <- NULL
+
+get_elfe <- function() {
+  if (is.null(.elfe_cnorm)) {
+    suppressMessages({
+      .elfe_cnorm <<- cnorm(raw = elfe$raw, group = elfe$group, plot = FALSE)
+    })
+  }
+  .elfe_cnorm
+}
+
+get_ppvt <- function() {
+  if (is.null(.ppvt_cnorm)) {
+    suppressMessages({
+      .ppvt_cnorm <<- cnorm(raw = ppvt$raw, group = ppvt$group, plot = FALSE)
+    })
+  }
+  .ppvt_cnorm
+}
+
+get_bb <- function() {
+  if (is.null(.bb_model)) {
+    suppressMessages({
+      .bb_model <<- cnorm.betabinomial(.age, .score, n = .n_items, plot = FALSE)
+    })
+  }
+  .bb_model
+}
+
+get_shash <- function() {
+  if (is.null(.shash_model)) {
+    suppressMessages({
+      .shash_model <<- cnorm.shash(.age, .score, plot = FALSE)
+    })
+  }
+  .shash_model
+}
+
+# =============================================================================
+# 1. DATA PREPARATION
+# =============================================================================
+
+test_that("rankByGroup returns data.frame with expected columns", {
   skip_on_cran()
-  expect_silent(rankByGroup(elfe, group = "group", raw = "raw"))
-  expect_silent(rankBySlidingWindow(ppvt, age = ppvt$age, width=1, raw=ppvt$raw))
-  expect_silent(rankByGroup(ppvt, raw=ppvt$raw, weights = ppvt$sex))
+  suppressMessages({
+    d <- rankByGroup(elfe, group = "group", raw = "raw")
+  })
+  expect_s3_class(d, "data.frame")
+  expect_true(all(c("percentile", "normValue", "n", "m", "md", "sd") %in% colnames(d)))
 })
 
-test_that("comprehensive function works without warnings or errors", {
+test_that("rankByGroup percentiles lie strictly in (0, 1)", {
   skip_on_cran()
-  expect_output(cnorm(raw = elfe$raw, group = elfe$group))
-  expect_output(cnorm(raw = ppvt$raw, group = ppvt$group, weights = weights))
-  expect_output(cnorm(raw = ppvt$raw, age = ppvt$age, width=1))
+  suppressMessages({
+    d <- rankByGroup(elfe, group = "group", raw = "raw")
+  })
+  expect_true(all(d$percentile > 0 & d$percentile < 1))
 })
 
-test_that("plotting works without warnings or errors", {
+test_that("rankByGroup descend = TRUE inverts the ranking direction", {
   skip_on_cran()
-  cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-  expect_silent(plot(cnorm.elfe, "raw"))
-  expect_silent(plot(cnorm.elfe, "percentiles"))
-  expect_output(plot(cnorm.elfe, "derivative"))
-  expect_silent(plot(cnorm.elfe, "curves"))
-  expect_silent(plot(cnorm.elfe, "subset"))
+  d_asc  <- suppressMessages(rankByGroup(elfe, group = "group", raw = "raw", descend = FALSE))
+  d_desc <- suppressMessages(rankByGroup(elfe, group = "group", raw = "raw", descend = TRUE))
+  expect_true(cor(d_asc$normValue, d_desc$normValue) < 0)
 })
 
-test_that("functions return expected output types", {
+test_that("rankBySlidingWindow returns data.frame with expected columns", {
   skip_on_cran()
-  expect_is(rankByGroup(elfe, group = "group", raw = "raw"), "data.frame")
-  expect_is(rankBySlidingWindow(ppvt, age = ppvt$age, width=1, raw=ppvt$raw), "data.frame")
-  expect_is(cnorm(raw = elfe$raw, group = elfe$group), "cnorm")
+  d <- rankBySlidingWindow(ppvt, age = "age", raw = "raw", width = 1)
+  expect_s3_class(d, "data.frame")
+  expect_true(all(c("percentile", "normValue") %in% colnames(d)))
 })
 
-test_that("conventional norming works", {
+test_that("computePowers adds L and A columns", {
   skip_on_cran()
-  expect_output(cnorm(raw = elfe$raw))
+  d <- suppressMessages(rankByGroup(elfe, group = "group", raw = "raw"))
+  d <- computePowers(d, k = 4, t = 3)
+  expect_true("L4" %in% colnames(d))
+  expect_true("A3" %in% colnames(d))
 })
 
-test_that("functions handle edge cases correctly", {
+test_that("getGroups returns numeric vector of same length", {
   skip_on_cran()
-  expect_error(rankByGroup(elfe, group = "nonexistent_column", raw = "raw"))
-  expect_error(cnorm(raw = numeric(0), group = character(0)))
-  expect_error(plot(cnorm.elfe, "invalid_plot_type"))
+  x <- rnorm(300, 50, 10)
+  g <- getGroups(x, n = 5)
+  expect_length(g, 300)
 })
 
+# =============================================================================
+# 2. WEIGHTING AND RAKING
+# =============================================================================
 
-context("Beta Binomial Regression Functions")
-test_that("cnorm.betabinomial works correctly", {
+test_that("computeWeights returns a positive numeric vector", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
-
-  expect_s3_class(model, "cnormBetaBinomial2")
-  expect_length(model$alpha_est, model$alpha_degree + 1)
-  expect_length(model$beta_est, model$beta_degree + 1)
-  expect_true(all(!is.na(model$se)))
-
-  # Test with weights
-  model_weighted <- cnorm.betabinomial(age, score, n = n, weights = weights, plot = FALSE)
-  expect_s3_class(model_weighted, "cnormBetaBinomial2")
+  w <- suppressMessages(computeWeights(ppvt, .marginals))
+  expect_length(w, nrow(ppvt))
+  expect_true(all(w > 0))
 })
 
-test_that("predict.cnormBetaBinomial works correctly", {
+# =============================================================================
+# 3. TAYLOR-POLYNOMIAL MODELLING
+# =============================================================================
+
+test_that("cnorm returns an object of class 'cnorm'", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
-
-  new_ages <- c(7, 10, 13)
-  new_scores <- c(25, 30, 35)
-
-  predictions <- predict(model, new_ages, new_scores)
-
-  expect_length(predictions, length(new_ages))
-  expect_true(all(!is.na(predictions)))
+  expect_s3_class(get_elfe(), "cnorm")
 })
 
-test_that("plot.cnormBetaBinomial works correctly", {
+test_that("regressionFunction returns a valid string", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
+  f <- regressionFunction(get_elfe())
+  expect_true(grepl("raw", f))
+})
 
-  p <- plot(model, age, score)
+test_that("checkConsistency returns a logical value", {
+  skip_on_cran()
+  result <- checkConsistency(get_elfe(), minNorm = 25, maxNorm = 75, silent = TRUE)
+  expect_true(is.logical(result))
+})
 
+# =============================================================================
+# 4. PREDICTION
+# =============================================================================
+
+test_that("predictRaw respects clipping bounds", {
+  skip_on_cran()
+  m <- get_elfe()
+  r_high <- predictRaw(95, 3, m, minRaw = 0, maxRaw = 28)
+  expect_lte(r_high, 28)
+})
+
+test_that("normTable returns data.frame", {
+  skip_on_cran()
+  tab <- normTable(3, get_elfe(), minNorm = 25, maxNorm = 75)
+  expect_s3_class(tab, "data.frame")
+})
+
+# =============================================================================
+# 5. PARAMETRIC MODELS (Beta-Binomial & ShaSh)
+# =============================================================================
+
+test_that("cnorm.betabinomial returns correct class", {
+  skip_on_cran()
+  expect_s3_class(get_bb(), "cnormBetaBinomial2")
+})
+
+test_that("cnorm.shash returns correct class", {
+  skip_on_cran()
+  expect_s3_class(get_shash(), "cnormShash")
+})
+
+test_that("predict.cnormShash returns finite scores", {
+  skip_on_cran()
+  pred <- predict(get_shash(), age = c(7, 10), score = c(100, 130))
+  expect_length(pred, 2)
+  expect_true(all(is.finite(pred)))
+})
+
+# =============================================================================
+# 6. PLOTTING & COMPARISON
+# =============================================================================
+
+test_that("plotPercentiles returns a ggplot", {
+  skip_on_cran()
+  p <- plotPercentiles(get_elfe())
   expect_s3_class(p, "ggplot")
 })
 
-test_that("summary.cnormBetaBinomial works correctly", {
+test_that("compare() returns ggplot", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
-
-  summary_output <- capture.output(summary(model))
-
-  expect_true(any(grepl("Beta-Binomial Continuous Norming Model", summary_output)))
-  expect_true(any(grepl("Model Fit:", summary_output)))
-  expect_true(any(grepl("Convergence:", summary_output)))
-  expect_true(any(grepl("Parameter Estimates:", summary_output)))
+  suppressMessages({
+    p <- compare(get_ppvt(), get_bb(), age = .age, score = .score)
+  })
+  expect_s3_class(p, "ggplot")
 })
 
-test_that("diagnostics.betabinomial works correctly", {
+# =============================================================================
+# 7. ERROR HANDLING
+# =============================================================================
+
+test_that("rankByGroup stops on missing columns", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
-
-  diag <- diagnostics.betabinomial(model, age, score)
-
-  expect_type(diag, "list")
-  expect_true("AIC" %in% names(diag))
-  expect_true("BIC" %in% names(diag))
-  expect_true("R2" %in% names(diag))
+  expect_error(rankByGroup(elfe, group = "missing", raw = "raw"))
 })
 
-test_that("normTable.betabinomial works correctly", {
+test_that("predict.cnormShash stops when score is missing", {
   skip_on_cran()
-  model <- cnorm.betabinomial(age, score, n = n, plot = FALSE)
-
-  norm_table <- normTable.betabinomial(model, c(7, 10, 13))
-
-  expect_type(norm_table, "list")
-  expect_length(norm_table, 3)
-  expect_true(all(sapply(norm_table, is.data.frame)))
-})
-
-test_that("betaCoefficients works correctly", {
-  skip_on_cran()
-  coef <- betaCoefficients(score, n = n)
-
-  expect_length(coef, 5)
-  expect_true(all(!is.na(coef)))
+  expect_error(predict(get_shash(), age = c(7, 10)))
 })

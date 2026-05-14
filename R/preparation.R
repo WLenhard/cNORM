@@ -647,10 +647,9 @@ rankBySlidingWindow <- function(data = NULL,
     d <- data.frame(raw = raw, age = age)
     raw <- "raw"
     age <- "age"
-  } else{
+  } else {
     d <- as.data.frame(data)
 
-    # check data types
     if (is.numeric(raw) && (length(raw) == nrow(d))) {
       d$raw <- raw
       raw <- "raw"
@@ -662,8 +661,8 @@ rankBySlidingWindow <- function(data = NULL,
     }
   }
 
-
   weighting <- NULL
+  has_weights <- FALSE
   if (!is.null(weights)) {
     if (is.character(weights)) {
       if (!(weights %in% colnames(d))) {
@@ -675,10 +674,10 @@ rankBySlidingWindow <- function(data = NULL,
               " does not exist in dataset. Please provide the name of an existing column or a numeric vector. Proceeding without weighting."
             )
           )
-
         weights <- NULL
-      } else{
+      } else {
         weighting <- d[, weights]
+        has_weights <- TRUE
       }
     } else {
       if (length(weights) != nrow(d)) {
@@ -688,11 +687,12 @@ rankBySlidingWindow <- function(data = NULL,
             "Proceeding without weighting."
           )
         }
-        weights <- NULL                     # FIX: actually disable weighting
+        weights <- NULL
       } else {
         d$weights <- as.numeric(weights)
         weighting <- as.numeric(weights)
-        weights   <- "weights"
+        weights <- "weights"
+        has_weights <- TRUE
       }
     }
   }
@@ -701,108 +701,135 @@ rankBySlidingWindow <- function(data = NULL,
     if (!silent)
       cat("Missing values found in raw score or age variable... excluding from dataset\n")
 
-    d <- d[!is.na(d[, raw]), ]
-    d <- d[!is.na(d[, age]), ]
+    valid_idx <- !is.na(d[, raw]) & !is.na(d[, age])
+    d <- d[valid_idx, ]
+    if(has_weights) weighting <- weighting[valid_idx]
   }
 
-  # check if columns exist
   if (!(age %in% colnames(d))) {
-    stop(paste(
-      c("ERROR: Age variable '", age, "' does not exist in data object."),
-      collapse = ""
-    ))
+    stop(paste0("ERROR: Age variable '", age, "' does not exist in data object."))
   }
 
   if (!(raw %in% colnames(d))) {
-    stop(paste(
-      c(
-        "ERROR: Raw value variable '",
-        raw,
-        "' does not exist in data object."
-      ),
-      collapse = ""
-    ))
+    stop(paste0("ERROR: Raw value variable '", raw, "' does not exist in data object."))
   }
 
-  if (!is.numeric(d[, age]) & !silent) {
-    warning(paste(c(
-      "Age variable '", age, "' has to be numeric."
-    ), collapse = ""))
+  if (!is.numeric(d[, age]) && !silent) {
+    warning(paste0("Age variable '", age, "' has to be numeric."))
   }
 
-  if (!is.numeric(d[, raw]) & !silent) {
-    warning(paste(c(
-      "Raw variable '", raw, "' has to be numeric."
-    ), collapse = ""))
+  if (!is.numeric(d[, raw]) && !silent) {
+    warning(paste0("Raw variable '", raw, "' has to be numeric."))
   }
 
-  # define Q-Q-plot algorithm, use rankit as standard
-  # 1 = Blom (1958), 2 = Tukey (1949), 3 = Van der Warden (1952), 4 = Rankit, 5 = Levenbach (1953),
-  # 6 = Filliben (1975), 7 = Yu & Huang (2001)
+  # define Q-Q-plot algorithm
   numerator <- c(-3.75, -1 / 3, 0, -0.5, -1 / 3, -0.3175, -0.326)
   denominator <- c(0.25, 1 / 3, 1, 0, 0.4, 0.365, 0.348)
 
-  # add columns to data.frame
-  d$percentile <- NA
-  if (descriptives) {
-    d$n <- NA
-    d$m <- NA
-    d$md <- NA
-    d$sd <- NA
-  }
+  num <- numerator[method]
+  den <- denominator[method]
 
-  # upper and lower bounds
-  i <- 1
   n <- nrow(d)
-  MIN.AGE <- min(d[, age])
-  MAX.AGE <- max(d[, age])
 
-  while (i <= n) {
-    a <- d[i, age]
-    r <- d[i, raw]
+  # Preserve original order to return data in the exact same sequence
+  d$orig_id <- seq_len(n)
 
+  # Sort by age to optimize window search
+  ord <- order(d[, age])
+  d <- d[ord, ]
 
-    minAge <- a - (width / 2)
-    maxAge <- a + (width / 2)
+  a_vec <- d[, age]
+  r_vec <- d[, raw]
+  w_vec <- if (has_weights) d[, weights] else NULL
 
-    # limitation at the upper and lower end of the distribution
-    if (minAge < MIN.AGE) {
-      minAge <- MIN.AGE
-      maxAge <- MIN.AGE + width
-    } else if (maxAge > MAX.AGE) {
-      minAge <- MAX.AGE - width
-      maxAge <- MAX.AGE
-    }
+  MIN.AGE <- a_vec[1]
+  MAX.AGE <- a_vec[n]
 
+  # Precompute window bounds for all cases
+  minAge <- a_vec - (width / 2)
+  maxAge <- a_vec + (width / 2)
 
-    observations <- d[which(d[, age] >= minAge &
-                              d[, age] <= maxAge), ]
-    nObs <- nrow(observations)
+  idx_low <- minAge < MIN.AGE
+  idx_high <- (maxAge > MAX.AGE) & !idx_low
 
-    sign <- 1
-    if (descend) {
-      sign <- -1
-    }
-
-    if (is.null(weights))
-      observations$percentile <- (rank(sign * observations[, raw]) + numerator[method]) / (nObs + denominator[method])
-    else
-      observations$percentile <- (weighted.rank(sign * observations[, raw], weights = observations[, weights]) + numerator[method]) / (nObs + denominator[method])
-
-    # get percentile for raw value in sliding window subsample
-    d$percentile[[i]] <- tail(observations$percentile[which(observations[, raw] == r)], n = 1)
-    if (descriptives) {
-      d$n[[i]] <- nObs
-      d$m[[i]] <- mean(observations[, raw])
-      d$md[[i]] <- median(observations[, raw])
-      d$sd[[i]] <- sd(observations[, raw])
-    }
-    i <- i + 1
+  if (any(idx_low)) {
+    minAge[idx_low] <- MIN.AGE
+    maxAge[idx_low] <- MIN.AGE + width
+  }
+  if (any(idx_high)) {
+    minAge[idx_high] <- MAX.AGE - width
+    maxAge[idx_high] <- MAX.AGE
   }
 
+  # Find indices for the sliding windows using fast C-level Interval search
+  left_idx <- findInterval(minAge - 1e-12, a_vec) + 1
+  right_idx <- findInterval(maxAge + 1e-12, a_vec)
 
+  # Pre-allocate output vectors
+  percentile_vec <- numeric(n)
 
+  if (descriptives) {
+    n_vec <- integer(n)
+    m_vec <- numeric(n)
+    md_vec <- numeric(n)
+    sd_vec <- numeric(n)
+  }
 
+  # Fast vectorized ranking within the pre-calculated window bounds
+  for (i in seq_len(n)) {
+    l <- left_idx[i]
+    r <- right_idx[i]
+
+    window_raw <- r_vec[l:r]
+    nObs <- r - l + 1L
+
+    target_raw <- r_vec[i]
+
+    if (has_weights) {
+      window_w <- w_vec[l:r]
+      sum_w_all <- sum(window_w)
+
+      if (descend) {
+        num_less_w <- sum(window_w[window_raw > target_raw])
+      } else {
+        num_less_w <- sum(window_w[window_raw < target_raw])
+      }
+      num_equal_w <- sum(window_w[window_raw == target_raw])
+
+      # Mathematically equivalent to weighted.rank without array instantiation
+      rank_val <- (2 * num_less_w + num_equal_w + 1) / 2 / sum_w_all * nObs
+    } else {
+      if (descend) {
+        num_less <- sum(window_raw > target_raw)
+      } else {
+        num_less <- sum(window_raw < target_raw)
+      }
+      num_equal <- sum(window_raw == target_raw)
+
+      rank_val <- num_less + (num_equal + 1) / 2
+    }
+
+    percentile_vec[i] <- (rank_val + num) / (nObs + den)
+
+    if (descriptives) {
+      n_vec[i] <- nObs
+      m_vec[i] <- mean(window_raw)
+      md_vec[i] <- median(window_raw)
+      sd_vec[i] <- sd(window_raw)
+    }
+  }
+
+  d$percentile <- percentile_vec
+  if (descriptives) {
+    d$n <- n_vec
+    d$m <- m_vec
+    d$md <- md_vec
+    d$sd <- sd_vec
+  }
+
+  # Restore original order
+  d <- d[order(d$orig_id), ]
+  d$orig_id <- NULL
 
   # norm scale definition
   scaleM <- NA
@@ -828,13 +855,12 @@ rankBySlidingWindow <- function(data = NULL,
     d$normValue <- d$percentile
   }
 
-  # build grouping variable - unnecessary for norming,
-  # but necessary for plotting the percentiles
+  # build grouping variable
   if (nGroup > 0) {
-    group <- as.factor(as.numeric(cut(d[, age], nGroup)))
+    group_cut <- as.factor(as.numeric(cut(d[, age], nGroup)))
     d$group <- ave(
       d[, age],
-      group,
+      group_cut,
       FUN = function(x) {
         mean(x)
       }
@@ -852,8 +878,6 @@ rankBySlidingWindow <- function(data = NULL,
   attr(d, "group") <- "group"
   attr(d, "weights") <- weights
 
-
-
   if (na.rm) {
     naPerc <- sum(is.na(d$percentile))
     if (naPerc > 0) {
@@ -870,7 +894,7 @@ rankBySlidingWindow <- function(data = NULL,
     }
   }
 
-  if (descriptives & min(d$n) < 30 & !silent) {
+  if (descriptives && min(d$n) < 30 && !silent) {
     warning(
       paste0(
         "The dataset includes cases, whose percentile depends on less than 30 cases (minimum is ",
@@ -934,9 +958,6 @@ computePowers <- function(data,
                           silent = FALSE) {
   d <- as.data.frame(data)
 
-  # ------------------------------------------------------------------
-  # 1.  Resolve `norm` (defaults to the data's "normValue" attribute)
-  # ------------------------------------------------------------------
   if (is.null(norm)) {
     norm <- attr(d, "normValue")
   }
@@ -949,13 +970,6 @@ computePowers <- function(data,
     warning("Norm score variable '", norm, "' has to be numeric.")
   }
 
-  # ------------------------------------------------------------------
-  # 2.  Resolve `age`
-  #
-  #     A NULL `age` argument falls back to the data's "age" attribute,
-  #     which may itself still be NULL (e.g. after rankByGroup with
-  #     group = FALSE). Treat a NULL or FALSE `age` as "no age axis".
-  # ------------------------------------------------------------------
   if (is.null(age)) {
     age <- attr(d, "age")
   }
@@ -983,13 +997,10 @@ computePowers <- function(data,
     }
   }
 
-  # ------------------------------------------------------------------
-  # 3.  Validate k and t
-  # ------------------------------------------------------------------
   if (k < 1 || k > 6) {
     if (!silent)
-      message("Parameter k out of range, setting to 4.")
-    k <- 4
+      message("Parameter k out of range, setting to 5.")
+    k <- 5
   }
 
   if (is.null(t)) {
@@ -997,13 +1008,10 @@ computePowers <- function(data,
   }
   if (t < 1 || t > 6) {
     if (!silent)
-      message("Parameter t out of range, setting to k = ", k, ".")
-    t <- k
+      message("Parameter t out of range, setting to 3.")
+    t <- 3
   }
 
-  # ------------------------------------------------------------------
-  # 4.  Build powers and interactions
-  # ------------------------------------------------------------------
   L1 <- as.numeric(d[[norm]])
 
   # Powers of L
@@ -1027,18 +1035,12 @@ computePowers <- function(data,
     }
   }
 
-  # ------------------------------------------------------------------
-  # 5.  Attributes
-  # ------------------------------------------------------------------
   attr(d, "age")        <- age
   attr(d, "normValue")  <- norm
   attr(d, "k")          <- k
   attr(d, "t")          <- t
   attr(d, "useAge")     <- useAge
 
-  # ------------------------------------------------------------------
-  # 6.  Sanity report (only when modelling against age)
-  # ------------------------------------------------------------------
   if (useAge && !silent) {
     cat("Powers of location: k = ", k, "\n", sep = "")
     cat("Powers of age:      t = ", t, "\n", sep = "")
