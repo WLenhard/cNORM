@@ -23,7 +23,7 @@ age group or in general #' intersecting percentile curves.
 \examples{
 \dontrun{
   m <- cnorm(raw = elfe$raw, group = elfe$group)
-  derivedCoefficients <- derive(m)
+  derivedCoefficients <- derive(m, order=1)
 }
 }
 \seealso{

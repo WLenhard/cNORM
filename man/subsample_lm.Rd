@@ -29,3 +29,4 @@ The function splits the data into k subsets, fits a linear model on k-1 subsets,
 and stores the coefficients. This process is repeated k times, and the final
 coefficients are averaged across all iterations to provide more stable estimates.
 }
+\keyword{deprecated}

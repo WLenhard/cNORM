@@ -12,10 +12,11 @@
 \item{...}{Additional arguments passed to the plot method.
 \itemize{
    \item age A vector the age data.
-   \item A vector of the score data.
+   \item score A vector of the score data.
    \item weights An optional numeric vector of weights for each observation.
    \item percentiles An optional vector with the percentiles to plot.
    \item points Logical indicating whether to plot the data points. Default is TRUE.
+   \item discrete Logical indicating whether to plot the discrete raw scores. Default is FALSE.
  }}
 }
 \value{
@@ -24,17 +25,10 @@ A ggplot object.
 \description{
 This function creates a visualization of a fitted cnormBetaBinomial model,
 including the original data points manifest percentiles and specified percentile lines.
-}
-\examples{
-
-\dontrun{
-# Computing beta binomial models already displays plot
-model.bb <- cnorm.betabinomial(elfe$group, elfe$raw)
-
-# Without data points
-plot(model.bb, age = elfe$group, score = elfe$raw, weights=NULL, points=FALSE)
-
-}
+Note that the beta-binomial model aims at discrete raw scores. We decided to display
+continuous percentile lines nonetheless on order to maintain visual comparability with
+other modelling techniques. If you prefer discretization, set the "discrete"
+parameter to TRUE.
 }
 \seealso{
 Other plot: 

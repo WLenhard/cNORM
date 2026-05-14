@@ -19,7 +19,7 @@ cnorm(
   R2 = NULL,
   plot = TRUE,
   extensive = TRUE,
-  subsampling = TRUE
+  subsampling = FALSE
 )
 }
 \arguments{

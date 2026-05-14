@@ -4,7 +4,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.4
-Date: 14.05.2026 - in progress
+Date: 15.05.2026 - preparing minor release
 
 
 Changes:
@@ -18,6 +18,9 @@ Changes:
 *    boost performance in rankBySlidingWindow, which as well affects performance
      of the parametric modelling, especially when plotting
 *    broader test coverage
+*    subsampling set to FALSE on default; the internal function is deprecated and  
+     will be removed in a future release
+*    Monotinicity with performance improvements
 
 
 

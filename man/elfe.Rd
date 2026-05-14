@@ -32,7 +32,7 @@ variables are as follows:
 \examples{
 \dontrun{
   # prepare data, retrieve model and plot percentiles
-  model <- cnorm(elfe$group, elfe$raw)
+  model <- cnorm(group = elfe$group, raw = elfe$raw)
 }
 }
 \references{

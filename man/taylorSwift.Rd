@@ -19,7 +19,7 @@ taylorSwift(
   R2 = NULL,
   plot = TRUE,
   extensive = TRUE,
-  subsampling = TRUE
+  subsampling = FALSE
 )
 }
 \arguments{
@@ -69,8 +69,7 @@ this number of terms is used}
 
 \item{extensive}{If TRUE, screen models for consistency and - if possible, exclude inconsistent ones}
 
-\item{subsampling}{If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
-This produces more robust estimates with a slight increase in bias.}
+\item{subsampling}{If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.}
 }
 \value{
 cnorm object including the ranked raw data and the regression model

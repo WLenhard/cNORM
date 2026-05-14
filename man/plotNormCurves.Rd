@@ -15,7 +15,7 @@ plotNormCurves(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 object.}
+\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormShash object.}
 
 \item{normList}{Vector with norm scores to display. If NULL, default values are used.}
 
@@ -34,7 +34,7 @@ A ggplot object representing the norm curves.
 }
 \description{
 This function plots the norm curves based on the regression model. It supports both
-Taylor polynomial models and beta-binomial models.
+Taylor polynomial models, beta-binomial models, and shash models.
 }
 \details{
 Please check the function for inconsistent curves: The different curves should not intersect.

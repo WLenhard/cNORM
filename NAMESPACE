@@ -4,8 +4,8 @@ importFrom(stats,
            mad, model.matrix, terms, setNames, qbeta, optim, pf, xtabs,
            as.formula, summary.lm, pbeta, approx, poly, na.omit,
            complete.cases, predict, predict.lm, t.test, formula, ave,
-           aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, runif,
-           optimize, cor, quantile, coef)
+           aggregate, median, sd, qnorm, rnorm, dnorm, pnorm, lm, .lm.fit,
+           runif, optimize, cor, quantile, coef)
 importFrom(utils, menu, head, tail)
 
 # Imports from suggested packages (with checks in code)

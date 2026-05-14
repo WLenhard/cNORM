@@ -33,7 +33,7 @@
 #'
 #' # Example with sample data
 #' \dontrun{
-#' # It is not recommende to use this function. Rather use 'cnorm' instead.
+#' # It is not recommended to directly use this function. Rather use 'cnorm' instead.
 #' normData <- prepareData(elfe)
 #' model <- bestModel(normData)
 #' plotSubset(model)
@@ -57,7 +57,7 @@ bestModel <- function(data,
                       force.in = NULL,
                       plot = TRUE,
                       extensive = TRUE,
-                      subsampling = TRUE) {
+                      subsampling = FALSE) {
   # retrieve attributes
   if (is.null(raw)) {
     raw <- attr(data, "raw")
@@ -176,7 +176,7 @@ bestModel <- function(data,
 
   nbest <- 1
   if (extensive && useAge)
-    nbest <- 8
+    nbest <- 10
 
   # determine best subset
   if (is.null(weights))
@@ -687,7 +687,7 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 #' @examples
 #' \dontrun{
 #'   m <- cnorm(raw = elfe$raw, group = elfe$group)
-#'   derivedCoefficients <- derive(m)
+#'   derivedCoefficients <- derive(m, order=1)
 #' }
 #' @export
 #' @family model
@@ -1116,7 +1116,6 @@ cnorm.cv <- function(data,
         test  <- lapply(sp, function(x)
           x[c(TRUE, rep(FALSE, 4)), ])
 
-        # FIX: seq_along instead of 1:length(train)
         p <- vapply(seq_along(train), function(z)
           t.test(train[[z]][, raw], test[[z]][, raw])$p.value, numeric(1))
 
@@ -1187,7 +1186,7 @@ cnorm.cv <- function(data,
           k = k,
           t = t,
           silent = TRUE
-        )   # FIX
+        )
       }
     }
     subsets <- regsubsets(
@@ -1202,7 +1201,6 @@ cnorm.cv <- function(data,
       cat(paste0("Cycle ", a, "\n"))
 
     for (i in min:max) {
-      # FIX: variables[-1] is cleaner than variables[2:length(variables)]
       variables <- names(coef(subsets, id = i))[-1]
       reg       <- paste0(raw, " ~ ", paste(variables, collapse = " + "))
       model     <- lm(reg, train)
@@ -1246,9 +1244,6 @@ cnorm.cv <- function(data,
         norm.rmse[i] <- norm.rmse[i] +
           sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
 
-        # FIX: (1) sqrt(sum(e^2)/(n-2)) matches Oosterhuis et al. formula,
-        #      not sum(|e|)/(n-2) as in original;
-        #      (2) sum(!is.na()) counts valid observations, length(!is.na()) does not
         n_valid    <- sum(!is.na(test$T))
         norm.se[i] <- norm.se[i] +
           sqrt(sum((test$T - test$normValue)^2, na.rm = TRUE) / max(n_valid - 2L, 1L))
@@ -1265,7 +1260,6 @@ cnorm.cv <- function(data,
     really.big = n.models > 25
   )
 
-  # FIX: seq_len instead of 1:max
   for (i in seq_len(max)) {
     variables <- names(coef(complete, id = i))[-1]
     reg       <- paste0(raw, " ~ ", paste(variables, collapse = " + "))
@@ -1273,7 +1267,6 @@ cnorm.cv <- function(data,
 
     complete.errors[i] <- sqrt(mean((model$fitted.values - d[, raw])^2, na.rm = TRUE))
 
-    # FIX: plain division — RMSE was accumulated, not MSE, so no sqrt needed
     train.errors[i] <- train.errors[i] / repetitions
     val.errors[i]   <- val.errors[i]   / repetitions
 
@@ -1304,7 +1297,6 @@ cnorm.cv <- function(data,
       norm.rmse.min[i] <- NA
   }
 
-  # FIX: unlist pre-allocated list
   Terms <- unlist(terms_list)
 
   tab <- data.frame(
@@ -1484,8 +1476,6 @@ cnorm.cv <- function(data,
 
       print(p3)
 
-
-
       # plot delta r2 test
       p4 <- ggplot(tab) + theme_custom +
         geom_line(
@@ -1633,7 +1623,6 @@ getNormScoreSE <- function(model, type = 2) {
   diff <- d$fitted - data$normValue
   diff <- diff[!is.na(diff)]
 
-  #return(sqrt(mean(diff^2)))
   if (type == 1)
     return(sqrt(sum(diff^2) / (length(diff) - 2)))
   else
@@ -1669,10 +1658,12 @@ buildFunction <- function(raw, k, t, age) {
 #' monotonically increasing or decreasing across a range of L values for
 #' multiple age points.
 #'
-#' @param lm_model An object of class 'lm' representing the fitted linear model.
-#' @param pred_data Matrix with prediction values
-#' @param minRaw lowest raw score in prediction
-#' @param maxRaw highest raw score in prediction
+#' @param coefs   numeric vector of regression coefficients, aligned with
+#'   the columns of `X_pred`.
+#' @param X_pred  numeric design matrix on the prediction grid
+#'   (intercept + selected predictors, columns aligned with `coefs`).
+#' @param n_ages,n_norms grid dimensions: `nrow(X_pred) == n_norms * n_ages`.
+#' @param minRaw,maxRaw clipping range.
 #'
 #' @return A named character vector where each element corresponds to an age point.
 #'         Possible values for each element are 1 for "Monotonically increasing"
@@ -1683,28 +1674,24 @@ buildFunction <- function(raw, k, t, age) {
 #'          using the provided linear model and checks if these predictions are
 #'          monotonically increasing or decreasing for each age point across the
 #'          range of L values.
+#' @keywords internal
+#' @noRd
 #'
-#'
-check_monotonicity <- function(lm_model, pred_data, minRaw, maxRaw) {
-  n_ages  <- length(unique(pred_data$A))
-  n_norms <- nrow(pred_data) / n_ages
-
-  predictions <- predict(lm_model, newdata = pred_data)
-  predictions  <- pmax(pmin(predictions, maxRaw), minRaw)
-
+check_monotonicity_fast <- function(coefs, X_pred,
+                                    n_ages, n_norms,
+                                    minRaw, maxRaw) {
+  predictions <- as.vector(X_pred %*% coefs)
+  predictions <- pmax(pmin(predictions, maxRaw), minRaw)
   pred_matrix <- matrix(predictions, nrow = n_norms, ncol = n_ages)
 
-  results <- sapply(seq_len(n_ages), function(col) {
+  signs <- vapply(seq_len(n_ages), function(col) {
     d <- diff(pred_matrix[, col])
-    if (all(d >= 0))
-      1L
-    else if (all(d <= 0))
-      - 1L
-    else
-      0L
-  })
+    if (all(d >= 0))      1L
+    else if (all(d <= 0)) -1L
+    else                  0L
+  }, integer(1))
 
-  length(unique(results)) == 1 && results[1] != 0
+  length(unique(signs)) == 1L && signs[1] != 0L
 }
 
 predictionMatrix <- function(minL, maxL, minA, maxA, k, t) {
@@ -1754,16 +1741,25 @@ predictionMatrix <- function(minL, maxL, minA, maxA, k, t) {
 #' @keywords internal
 #' @noRd
 screenSubset <- function(data1, results, raw, k, t) {
-  minRaw <- min(data1$raw)
-  maxRaw <- max(data1$raw)
+  # The third argument is the raw vector; use it directly rather than
+  # data1$raw, which would silently fail when the raw column is renamed.
+  y_train <- as.numeric(raw)
+  minRaw  <- min(y_train, na.rm = TRUE)
+  maxRaw  <- max(y_train, na.rm = TRUE)
 
-  # Build the prediction grid once.
-  pred_data <- predictionMatrix(min(data1$L1),
-                                max(data1$L1),
-                                min(data1$A1),
-                                max(data1$A1),
-                                k,
-                                t)
+  # Prediction grid (norm x age combinations)
+  pred_data <- predictionMatrix(min(data1$L1), max(data1$L1),
+                                min(data1$A1), max(data1$A1),
+                                k, t)
+  n_ages  <- length(unique(pred_data$A))
+  n_norms <- nrow(pred_data) / n_ages
+
+  # Full design matrices, built once.
+  all_vars <- colnames(results$outmat)
+  X_train_full <- cbind(`(Intercept)` = 1,
+                        as.matrix(data1[,    all_vars, drop = FALSE]))
+  X_pred_full  <- cbind(`(Intercept)` = 1,
+                        as.matrix(pred_data[, all_vars, drop = FALSE]))
 
   # Number of selected terms in each row of the regsubsets summary.
   nTerms <- as.integer(apply(results$outmat, 1L, function(row)
@@ -1772,11 +1768,11 @@ screenSubset <- function(data1, results, raw, k, t) {
 
   consistent      <- rep(FALSE, n_models)
   currentNumber   <- 0L
-  consistentFound <- FALSE   # FIX: initialise before the loop
+  consistentFound <- FALSE
 
-  # Walk through models in regsubsets order. Within a term count, regsubsets
-  # returns models from best to worst, so we can stop at the first consistent
-  # one for each term count.
+  # Walk through models in regsubsets order. Within a term count
+  # regsubsets returns models best-first, so we can stop at the first
+  # monotone hit per term count.
   for (i in seq_len(n_models)) {
     if (nTerms[i] > currentNumber) {
       currentNumber   <- nTerms[i]
@@ -1784,24 +1780,32 @@ screenSubset <- function(data1, results, raw, k, t) {
     }
 
     if (!consistentFound) {
-      text <- paste0("raw ~ ", paste(colnames(results$outmat)[results$outmat[i, ] == "*"], collapse = " + "))
-      linear.model    <- lm(text, data = data1)
-      consistentFound <- check_monotonicity(linear.model, pred_data, minRaw, maxRaw)
-      consistent[i]   <- consistentFound
+      selected   <- c(TRUE, results$outmat[i, ] == "*")
+      X_sub      <- X_train_full[, selected, drop = FALSE]
+      X_pred_sub <- X_pred_full [, selected, drop = FALSE]
+
+      fit <- .lm.fit(X_sub, y_train)
+
+      if (anyNA(fit$coefficients)) {
+        # Rank-deficient subset; treat as not consistent and move on.
+        consistent[i] <- FALSE
+      } else {
+        consistentFound <- check_monotonicity_fast(fit$coefficients,
+                                                   X_pred_sub,
+                                                   n_ages, n_norms,
+                                                   minRaw, maxRaw)
+        consistent[i]   <- consistentFound
+      }
     }
   }
 
-  # Bookkeeping frames. `df` keeps the *genuine* consistency flag,
-  # `df_modified` is the inclusion mask used for subsetting (genuine
-  # consistency OR forced fallback per term count).
-  df          <- data.frame(terms = nTerms,
-                            consistent = consistent,
-                            R2 = results$adjr2)
+  # Bookkeeping: keep the *genuine* consistency flag in `df` and use a
+  # fallback-augmented inclusion mask in `df_modified`.
+  df          <- data.frame(terms       = nTerms,
+                            consistent  = consistent,
+                            R2          = results$adjr2)
   df_modified <- df
 
-  # Ensure that every term count has at least one representative: if no
-  # genuinely consistent model exists for a term count, force the first
-  # (= best R^2) entry of that term count to be kept.
   for (term in unique(nTerms)) {
     term_indices <- which(df$terms == term)
     if (!any(df$consistent[term_indices])) {
@@ -1811,9 +1815,6 @@ screenSubset <- function(data1, results, raw, k, t) {
 
   keep <- df_modified$consistent
 
-  # Subset the regsubsets summary to kept rows. drop = FALSE preserves
-  # matrix structure when only a single row survives.  The exposed
-  # `consistent` flag retains the *genuine* status.
   results1 <- results
   results1$consistent <- df$consistent[keep]
   results1$which      <- results1$which [keep, , drop = FALSE]
@@ -1824,7 +1825,6 @@ screenSubset <- function(data1, results, raw, k, t) {
   results1$rss        <- results1$rss   [keep]
   results1$rsq        <- results1$rsq   [keep]
 
-  # Highest position whose model is *genuinely* consistent (not just forced).
   consistent_positions <- which(results1$consistent)
   results1$highestConsistent <- if (length(consistent_positions) > 0L) {
     max(consistent_positions)
@@ -1834,7 +1834,6 @@ screenSubset <- function(data1, results, raw, k, t) {
 
   results1
 }
-
 
 #' K-fold Resampled Coefficient Estimation for Linear Regression
 #'
@@ -1855,7 +1854,9 @@ screenSubset <- function(data1, results, raw, k, t) {
 #' The function splits the data into k subsets, fits a linear model on k-1 subsets,
 #' and stores the coefficients. This process is repeated k times, and the final
 #' coefficients are averaged across all iterations to provide more stable estimates.
+#' @keywords deprecated
 subsample_lm <- function(text, data, weights, k = 10) {
+  warning("Function deprecated")
   # Save current random seed state to get reproducible results
   if (exists(".Random.seed", envir = .GlobalEnv)) {
     old_seed <- .Random.seed

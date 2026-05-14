@@ -17,20 +17,20 @@ plotNorm(
 )
 }
 \arguments{
-\item{model}{The regression model, usually from the 'cnorm' or 'cnorm.betabinomial' function}
+\item{model}{The regression model, usually from the 'cnorm', 'cnorm.betabinomial', or 'cnorm.shash' function}
 
-\item{age}{In case of beta binomial model, please provide the age vector}
+\item{age}{In case of parametric models, please provide the age vector}
 
-\item{score}{In case of beta binomial model, please provide the score vector}
+\item{score}{In case of parametric models, please provide the score vector}
 
-\item{width}{In case of beta binomial model, please provide the width for the sliding window.
+\item{width}{In case of parametric models, please provide the width for the sliding window.
 If null, the function tries to determine a sensible setting.}
 
 \item{weights}{Vector or variable name in the dataset with weights for each
 individual case. If NULL, no weights are used.}
 
 \item{group}{On optional grouping variable, use empty string for no group, the variable name
-for Taylor polynomial models or a vector with the groups for beta binomial models}
+for Taylor polynomial models or a vector with the groups for parametric models}
 
 \item{minNorm}{lower bound of fitted norm scores}
 
@@ -46,7 +46,7 @@ A ggplot object representing the norm scores plot.
 This function plots the manifest norm score against the fitted norm score from
 the inverse regression model per group. This helps to inspect the precision
 of the modeling process. The scores should not deviate too far from
-the regression line. Applicable for Taylor polynomial models.
+the regression line. Applicable for Taylor polynomial, beta-binomial, and shash models.
 }
 \examples{
 \dontrun{

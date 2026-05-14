@@ -16,7 +16,7 @@ bestModel(
   force.in = NULL,
   plot = TRUE,
   extensive = TRUE,
-  subsampling = TRUE
+  subsampling = FALSE
 )
 }
 \arguments{
@@ -69,7 +69,7 @@ Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid i
 
 # Example with sample data
 \dontrun{
-# It is not recommende to use this function. Rather use 'cnorm' instead.
+# It is not recommended to directly use this function. Rather use 'cnorm' instead.
 normData <- prepareData(elfe)
 model <- bestModel(normData)
 plotSubset(model)

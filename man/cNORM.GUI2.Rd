@@ -12,3 +12,9 @@ cNORM.GUI2(launch.browser = TRUE)
 \description{
 Launch the cNORM Parametric Modeling Shiny Application
 }
+\examples{
+\dontrun{
+# Launch graphical user interface
+cNORM.GUI2()
+}
+}

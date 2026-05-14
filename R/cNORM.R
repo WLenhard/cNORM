@@ -74,7 +74,7 @@
 #' @examples
 #' \dontrun{
 #' # Model internal 'elfe' dataset with the default k = 4 regression on T scores
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
+#' results <- cnorm(raw = elfe$raw, group = elfe$group)
 #'
 #' # Show model fit of models with progressing number of predictors
 #' print(results)
@@ -145,6 +145,11 @@ cNORM.GUI <- function(launch.browser = TRUE) {
 #' Launch the cNORM Parametric Modeling Shiny Application
 #'
 #' @param launch.browser Logical, whether to launch browser automatically (default: TRUE)
+#' @examples
+#' \dontrun{
+#' # Launch graphical user interface
+#' cNORM.GUI2()
+#' }
 #' @export
 cNORM.GUI2 <- function(launch.browser = TRUE) {
   # Required packages for the parametric modeling GUI
@@ -281,10 +286,7 @@ cnorm <- function(raw = NULL,
                   R2 = NULL,
                   plot = TRUE,
                   extensive = TRUE,
-                  subsampling = TRUE) {
-  # ------------------------------------------------------------------
-  # 1.  Argument sanity
-  # ------------------------------------------------------------------
+                  subsampling = FALSE) {
   if (is.null(raw) || !is.numeric(raw)) {
     stop("Please provide a numeric vector for the raw scores.")
   }
@@ -325,10 +327,6 @@ cnorm <- function(raw = NULL,
 
   silent <- !plot
 
-  # ------------------------------------------------------------------
-  # 2.  Build a single, length-aligned input frame and drop NAs once
-  #     (this avoids the "data$age <- age" length-mismatch bug)
-  # ------------------------------------------------------------------
   df_in <- data.frame(raw = raw)
   if (!is.null(group))
     df_in$group   <- group
@@ -343,21 +341,11 @@ cnorm <- function(raw = NULL,
     stop("After removing missing values no observations remain.")
   }
 
-  # ------------------------------------------------------------------
-  # 3.  Decide ranking strategy
-  #
-  #     Conventional .... raw only
-  #     By group .......  group provided                       (group OR age-as-group fallback)
-  #     Sliding window .. age + width provided
-  # ------------------------------------------------------------------
   conventional <- is.null(group) && is.null(age)
   use_window   <- is.null(group) && !is.null(age) && !is.na(width)
   by_group     <- !is.null(group) ||
     (is.null(group) && !is.null(age) && is.na(width))
 
-  # ------------------------------------------------------------------
-  # 3a. Conventional norming
-  # ------------------------------------------------------------------
   if (conventional) {
     data <- rankByGroup(
       raw     = df_in$raw,
@@ -395,9 +383,6 @@ cnorm <- function(raw = NULL,
     return(result)
   }
 
-  # ------------------------------------------------------------------
-  # 3b. Sliding-window ranking (age-driven, no group)
-  # ------------------------------------------------------------------
   if (use_window) {
     if (plot)
       message("Ranking data with sliding window ...")
@@ -420,22 +405,6 @@ cnorm <- function(raw = NULL,
       silent = silent
     )
 
-    # ------------------------------------------------------------------
-    # 3c. Group-based ranking
-    #
-    #     If the user supplied an age vector but no width, fall back to
-    #     ranking by group. The "group" is either the user's group
-    #     vector or a discretisation of age (via getGroups()) when only
-    #     age was given.
-    #
-    #     Important: when the group is *synthesised* from age, ranking
-    #     and modelling must operate on the same (discrete) scale,
-    #     otherwise the polynomial sees normValue jumps at group
-    #     boundaries while age varies smoothly.
-    #     We therefore only pass continuous age into computePowers()
-    #     when the user supplied a *real* grouping variable in addition
-    #     to age (the "discouraged but allowed" combination).
-    # ------------------------------------------------------------------
   } else if (by_group) {
     group_was_synthesised <- is.null(group)
 
@@ -492,9 +461,6 @@ cnorm <- function(raw = NULL,
     )
   }
 
-  # ------------------------------------------------------------------
-  # 4.  Fit and return
-  # ------------------------------------------------------------------
   model <- bestModel(
     data,
     k           = k,
@@ -559,7 +525,6 @@ cnorm <- function(raw = NULL,
 #' @param plot Default TRUE; plots the regression model and prints report
 #' @param extensive If TRUE, screen models for consistency and - if possible, exclude inconsistent ones
 #' @param subsampling If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
-#'                    This produces more robust estimates with a slight increase in bias.
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel

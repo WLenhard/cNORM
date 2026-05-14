@@ -23,7 +23,7 @@
 #' @examples
 #' \dontrun{
 #'   # prepare data, retrieve model and plot percentiles
-#'   model <- cnorm(elfe$group, elfe$raw)
+#'   model <- cnorm(group = elfe$group, raw = elfe$raw)
 #' }
 #' @format A data frame with 1400 rows and 3 columns
 "elfe"
