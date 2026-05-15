@@ -87,9 +87,9 @@ data.elfe2 <- prepareData(data = elfe, group = FALSE)
 m <- bestModel(data.elfe2)
 }
 \seealso{
-Other prepare: 
-\code{\link{computePowers}()},
-\code{\link{rankByGroup}()},
-\code{\link{rankBySlidingWindow}()}
+Other prepare:
+\code{\link[=computePowers]{computePowers()}},
+\code{\link[=rankByGroup]{rankByGroup()}},
+\code{\link[=rankBySlidingWindow]{rankBySlidingWindow()}}
 }
 \concept{prepare}

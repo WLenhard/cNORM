@@ -4,12 +4,17 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.5.4
-Date: 15.05.2026 - preparing minor release
+Date: 15.05.2026 - release
 
+This release aims at a better integration of parametric functions for the 
+plotting functions, an overhaul of the Shiny Apps and huge performance
+improvements in the Taylor modelling (rankBySlidingWindows and checking for
+monotonicity). The subsampling will be deprecated and deleted from a future
+release of cNORM.
 
 Changes:
 
-*    Set nbest to 8 in exhaustive search
+*    Set nbest to 10 in exhaustive search
 *    Author name order corrected in README.md
 *    ShinyApp streamlined
 *    discrete parameter when plotting betabinomial models added

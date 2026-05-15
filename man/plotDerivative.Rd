@@ -63,17 +63,17 @@ plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, s
 \seealso{
 \code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
 
-Other plot: 
-\code{\link{compare}()},
-\code{\link{plot.cnorm}()},
-\code{\link{plot.cnormBetaBinomial}()},
-\code{\link{plot.cnormBetaBinomial2}()},
-\code{\link{plotDensity}()},
-\code{\link{plotNorm}()},
-\code{\link{plotNormCurves}()},
-\code{\link{plotPercentileSeries}()},
-\code{\link{plotPercentiles}()},
-\code{\link{plotRaw}()},
-\code{\link{plotSubset}()}
+Other plot:
+\code{\link[=compare]{compare()}},
+\code{\link[=plot.cnorm]{plot.cnorm()}},
+\code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
+\code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
+\code{\link[=plotDensity]{plotDensity()}},
+\code{\link[=plotNorm]{plotNorm()}},
+\code{\link[=plotNormCurves]{plotNormCurves()}},
+\code{\link[=plotPercentileSeries]{plotPercentileSeries()}},
+\code{\link[=plotPercentiles]{plotPercentiles()}},
+\code{\link[=plotRaw]{plotRaw()}},
+\code{\link[=plotSubset]{plotSubset()}}
 }
 \concept{plot}

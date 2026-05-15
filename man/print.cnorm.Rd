@@ -20,15 +20,15 @@ model has to be chosen. The print function shows the R2 and other information
 on the different best fitting models with increasing number of predictors.
 }
 \seealso{
-Other model: 
-\code{\link{bestModel}()},
-\code{\link{checkConsistency}()},
-\code{\link{cnorm.cv}()},
-\code{\link{derive}()},
-\code{\link{modelSummary}()},
-\code{\link{printSubset}()},
-\code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+Other model:
+\code{\link[=bestModel]{bestModel()}},
+\code{\link[=checkConsistency]{checkConsistency()}},
+\code{\link[=cnorm.cv]{cnorm.cv()}},
+\code{\link[=derive]{derive()}},
+\code{\link[=modelSummary]{modelSummary()}},
+\code{\link[=printSubset]{printSubset()}},
+\code{\link[=rangeCheck]{rangeCheck()}},
+\code{\link[=regressionFunction]{regressionFunction()}},
+\code{\link[=summary.cnorm]{summary.cnorm()}}
 }
 \concept{model}

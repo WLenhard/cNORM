@@ -57,8 +57,8 @@ receive lower norm scores (e.g. for error scores).}
 
 \item{extensive}{If TRUE (default), screen models for monotonic consistency.}
 
-\item{subsampling}{If TRUE (default), use 10-fold subsampled coefficient
-averaging in `bestModel`.}
+\item{subsampling}{(deprecated) If TRUE (default is FALSE), use 10-fold
+subsampled coefficient averaging in `bestModel`.}
 }
 \value{
 cnorm object including the ranked raw data and the regression model.

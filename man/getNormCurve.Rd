@@ -48,14 +48,14 @@ getNormCurve(35, cnorm.elfe)
 
 }
 \seealso{
-Other predict: 
-\code{\link{derivationTable}()},
-\code{\link{normTable}()},
-\code{\link{predict.cnormBetaBinomial}()},
-\code{\link{predict.cnormBetaBinomial2}()},
-\code{\link{predict.cnormShash}()},
-\code{\link{predictNorm}()},
-\code{\link{predictRaw}()},
-\code{\link{rawTable}()}
+Other predict:
+\code{\link[=derivationTable]{derivationTable()}},
+\code{\link[=normTable]{normTable()}},
+\code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
+\code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
+\code{\link[=predict.cnormShash]{predict.cnormShash()}},
+\code{\link[=predictNorm]{predictNorm()}},
+\code{\link[=predictRaw]{predictRaw()}},
+\code{\link[=rawTable]{rawTable()}}
 }
 \concept{predict}

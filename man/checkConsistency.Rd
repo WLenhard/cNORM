@@ -81,15 +81,15 @@ In general, extrapolation (point 1 and 2) can carefully be done to a
 }
 }
 \seealso{
-Other model: 
-\code{\link{bestModel}()},
-\code{\link{cnorm.cv}()},
-\code{\link{derive}()},
-\code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
-\code{\link{printSubset}()},
-\code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+Other model:
+\code{\link[=bestModel]{bestModel()}},
+\code{\link[=cnorm.cv]{cnorm.cv()}},
+\code{\link[=derive]{derive()}},
+\code{\link[=modelSummary]{modelSummary()}},
+\code{\link[=print.cnorm]{print.cnorm()}},
+\code{\link[=printSubset]{printSubset()}},
+\code{\link[=rangeCheck]{rangeCheck()}},
+\code{\link[=regressionFunction]{regressionFunction()}},
+\code{\link[=summary.cnorm]{summary.cnorm()}}
 }
 \concept{model}

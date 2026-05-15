@@ -49,17 +49,17 @@ additional model check to determine the best fitting model. Please have a look a
 \seealso{
 plotPercentiles
 
-Other plot: 
-\code{\link{compare}()},
-\code{\link{plot.cnorm}()},
-\code{\link{plot.cnormBetaBinomial}()},
-\code{\link{plot.cnormBetaBinomial2}()},
-\code{\link{plotDensity}()},
-\code{\link{plotDerivative}()},
-\code{\link{plotNorm}()},
-\code{\link{plotNormCurves}()},
-\code{\link{plotPercentiles}()},
-\code{\link{plotRaw}()},
-\code{\link{plotSubset}()}
+Other plot:
+\code{\link[=compare]{compare()}},
+\code{\link[=plot.cnorm]{plot.cnorm()}},
+\code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
+\code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
+\code{\link[=plotDensity]{plotDensity()}},
+\code{\link[=plotDerivative]{plotDerivative()}},
+\code{\link[=plotNorm]{plotNorm()}},
+\code{\link[=plotNormCurves]{plotNormCurves()}},
+\code{\link[=plotPercentiles]{plotPercentiles()}},
+\code{\link[=plotRaw]{plotRaw()}},
+\code{\link[=plotSubset]{plotSubset()}}
 }
 \concept{plot}

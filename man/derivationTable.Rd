@@ -38,14 +38,14 @@ d <- derivationTable(6, cnorm.elfe, step = 0.5)
 \seealso{
 plotDerivative, derive
 
-Other predict: 
-\code{\link{getNormCurve}()},
-\code{\link{normTable}()},
-\code{\link{predict.cnormBetaBinomial}()},
-\code{\link{predict.cnormBetaBinomial2}()},
-\code{\link{predict.cnormShash}()},
-\code{\link{predictNorm}()},
-\code{\link{predictRaw}()},
-\code{\link{rawTable}()}
+Other predict:
+\code{\link[=getNormCurve]{getNormCurve()}},
+\code{\link[=normTable]{normTable()}},
+\code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
+\code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
+\code{\link[=predict.cnormShash]{predict.cnormShash()}},
+\code{\link[=predictNorm]{predictNorm()}},
+\code{\link[=predictRaw]{predictRaw()}},
+\code{\link[=rawTable]{rawTable()}}
 }
 \concept{predict}

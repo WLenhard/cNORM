@@ -44,14 +44,6 @@ A list of class "cnormBetaBinomial2" containing:
   \item{alpha_degree}{Degree of the polynomial for the alpha model}
   \item{beta_degree}{Degree of the polynomial for the beta model}
   \item{result}{Full result from the optimization procedure}
-
-A list of class "cnormBetaBinomial2" containing:
-  \item{alpha_est}{Estimated coefficients for the alpha model}
-  \item{beta_est}{Estimated coefficients for the beta model}
-  \item{se}{Standard errors of the estimated coefficients}
-  \item{alpha_degree}{Degree of the polynomial for the alpha model}
-  \item{beta_degree}{Degree of the polynomial for the beta model}
-  \item{result}{Full result from the optimization procedure}
 }
 \description{
 This function fits a beta-binomial regression model where both the alpha and beta
@@ -65,33 +57,3 @@ The function standardizes the input variables, fits polynomial models for both
 the alpha and beta parameters, and uses maximum likelihood estimation to
 find the optimal parameters. The optimization is performed using the L-BFGS-B method.
 }
-\keyword{(typically}
-\keyword{Fit}
-\keyword{This}
-\keyword{a}
-\keyword{age).}
-\keyword{alpha}
-\keyword{and}
-\keyword{are}
-\keyword{as}
-\keyword{beta}
-\keyword{beta-binomial}
-\keyword{both}
-\keyword{continuous}
-\keyword{distribution}
-\keyword{fits}
-\keyword{for}
-\keyword{function}
-\keyword{functions}
-\keyword{internal}
-\keyword{model}
-\keyword{modeled}
-\keyword{norming}
-\keyword{of}
-\keyword{parameters}
-\keyword{polynomial}
-\keyword{predictor}
-\keyword{regression}
-\keyword{the}
-\keyword{variable}
-\keyword{where}

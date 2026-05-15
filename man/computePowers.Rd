@@ -59,9 +59,9 @@ data.ppvt <- computePowers(data.ppvt, age = "age", k = 5)
 \seealso{
 bestModel
 
-Other prepare: 
-\code{\link{prepareData}()},
-\code{\link{rankByGroup}()},
-\code{\link{rankBySlidingWindow}()}
+Other prepare:
+\code{\link[=prepareData]{prepareData()}},
+\code{\link[=rankByGroup]{rankByGroup()}},
+\code{\link[=rankBySlidingWindow]{rankBySlidingWindow()}}
 }
 \concept{prepare}

@@ -102,9 +102,9 @@ rawTable(0, m) # please use an arbitrary value for age when generating the table
 \seealso{
 rankBySlidingWindow, computePowers, computeWeights, weighted.rank
 
-Other prepare: 
-\code{\link{computePowers}()},
-\code{\link{prepareData}()},
-\code{\link{rankBySlidingWindow}()}
+Other prepare:
+\code{\link[=computePowers]{computePowers()}},
+\code{\link[=prepareData]{prepareData()}},
+\code{\link[=rankBySlidingWindow]{rankBySlidingWindow()}}
 }
 \concept{prepare}

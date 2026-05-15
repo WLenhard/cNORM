@@ -35,14 +35,14 @@ predictRaw(35, 3.5, model)
 
 }
 \seealso{
-Other predict: 
-\code{\link{derivationTable}()},
-\code{\link{getNormCurve}()},
-\code{\link{normTable}()},
-\code{\link{predict.cnormBetaBinomial}()},
-\code{\link{predict.cnormBetaBinomial2}()},
-\code{\link{predict.cnormShash}()},
-\code{\link{predictNorm}()},
-\code{\link{rawTable}()}
+Other predict:
+\code{\link[=derivationTable]{derivationTable()}},
+\code{\link[=getNormCurve]{getNormCurve()}},
+\code{\link[=normTable]{normTable()}},
+\code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
+\code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
+\code{\link[=predict.cnormShash]{predict.cnormShash()}},
+\code{\link[=predictNorm]{predictNorm()}},
+\code{\link[=rawTable]{rawTable()}}
 }
 \concept{predict}

@@ -18,15 +18,15 @@ A report on the regression function, weights, R2 and RMSE
 S3 method for printing the results and regression function of a cnorm model
 }
 \seealso{
-Other model: 
-\code{\link{bestModel}()},
-\code{\link{checkConsistency}()},
-\code{\link{cnorm.cv}()},
-\code{\link{derive}()},
-\code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
-\code{\link{printSubset}()},
-\code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()}
+Other model:
+\code{\link[=bestModel]{bestModel()}},
+\code{\link[=checkConsistency]{checkConsistency()}},
+\code{\link[=cnorm.cv]{cnorm.cv()}},
+\code{\link[=derive]{derive()}},
+\code{\link[=modelSummary]{modelSummary()}},
+\code{\link[=print.cnorm]{print.cnorm()}},
+\code{\link[=printSubset]{printSubset()}},
+\code{\link[=rangeCheck]{rangeCheck()}},
+\code{\link[=regressionFunction]{regressionFunction()}}
 }
 \concept{model}

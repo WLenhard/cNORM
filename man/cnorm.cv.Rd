@@ -97,15 +97,15 @@ Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requ
 and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
 }
 \seealso{
-Other model: 
-\code{\link{bestModel}()},
-\code{\link{checkConsistency}()},
-\code{\link{derive}()},
-\code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
-\code{\link{printSubset}()},
-\code{\link{rangeCheck}()},
-\code{\link{regressionFunction}()},
-\code{\link{summary.cnorm}()}
+Other model:
+\code{\link[=bestModel]{bestModel()}},
+\code{\link[=checkConsistency]{checkConsistency()}},
+\code{\link[=derive]{derive()}},
+\code{\link[=modelSummary]{modelSummary()}},
+\code{\link[=print.cnorm]{print.cnorm()}},
+\code{\link[=printSubset]{printSubset()}},
+\code{\link[=rangeCheck]{rangeCheck()}},
+\code{\link[=regressionFunction]{regressionFunction()}},
+\code{\link[=summary.cnorm]{summary.cnorm()}}
 }
 \concept{model}

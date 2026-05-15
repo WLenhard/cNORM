@@ -29,15 +29,15 @@ It can be used to predict the raw scores based on age and location.
 
 }
 \seealso{
-Other model: 
-\code{\link{bestModel}()},
-\code{\link{checkConsistency}()},
-\code{\link{cnorm.cv}()},
-\code{\link{derive}()},
-\code{\link{modelSummary}()},
-\code{\link{print.cnorm}()},
-\code{\link{printSubset}()},
-\code{\link{rangeCheck}()},
-\code{\link{summary.cnorm}()}
+Other model:
+\code{\link[=bestModel]{bestModel()}},
+\code{\link[=checkConsistency]{checkConsistency()}},
+\code{\link[=cnorm.cv]{cnorm.cv()}},
+\code{\link[=derive]{derive()}},
+\code{\link[=modelSummary]{modelSummary()}},
+\code{\link[=print.cnorm]{print.cnorm()}},
+\code{\link[=printSubset]{printSubset()}},
+\code{\link[=rangeCheck]{rangeCheck()}},
+\code{\link[=summary.cnorm]{summary.cnorm()}}
 }
 \concept{model}

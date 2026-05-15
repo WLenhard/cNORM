@@ -116,9 +116,9 @@ mean(data.elfe$normValue - data.elfe2$normValue)
 \seealso{
 rankByGroup, computePowers, computeWeights, weighted.rank, weighted.quantile
 
-Other prepare: 
-\code{\link{computePowers}()},
-\code{\link{prepareData}()},
-\code{\link{rankByGroup}()}
+Other prepare:
+\code{\link[=computePowers]{computePowers()}},
+\code{\link[=prepareData]{prepareData()}},
+\code{\link[=rankByGroup]{rankByGroup()}}
 }
 \concept{prepare}

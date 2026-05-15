@@ -240,8 +240,8 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
 #' @param t Power degree for the age dimension (max 6).
 #' @param plot If TRUE (default), display percentile plot and report.
 #' @param extensive If TRUE (default), screen models for monotonic consistency.
-#' @param subsampling If TRUE (default), use 10-fold subsampled coefficient
-#'   averaging in `bestModel`.
+#' @param subsampling (deprecated) If TRUE (default is FALSE), use 10-fold
+#'  subsampled coefficient averaging in `bestModel`.
 #'
 #' @return cnorm object including the ranked raw data and the regression model.
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel

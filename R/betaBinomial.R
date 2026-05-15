@@ -1092,31 +1092,6 @@ log_likelihood2 <- function(params, X, Z, y, n, weights = NULL) {
 #' the alpha and beta parameters, and uses maximum likelihood estimation to
 #' find the optimal parameters. The optimization is performed using the L-BFGS-B method.
 #'
-#' @keywords internal
-#' Fit a beta-binomial regression model for continuous norming
-#'
-#' This function fits a beta-binomial regression model where both the alpha and beta
-#' parameters of the beta-binomial distribution are modeled as polynomial functions
-#' of the predictor variable (typically age).
-#'
-#' @param age A numeric vector of predictor values (e.g., age).
-#' @param score A numeric vector of response values.
-#' @param n The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.
-#' @param weights A numeric vector of weights for each observation. Default is NULL (equal weights).
-#' @param alpha_degree Integer specifying the degree of the polynomial for the alpha model. Default is 3.
-#' @param beta_degree Integer specifying the degree of the polynomial for the beta model. Default is 3.
-#' @param control A list of control parameters to be passed to the `optim` function.
-#'   If NULL, default values are used.
-#' @param scale Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.
-#' @param plot Logical indicating whether to plot the model. Default is TRUE.
-#'
-#' @return A list of class "cnormBetaBinomial2" containing:
-#'   \item{alpha_est}{Estimated coefficients for the alpha model}
-#'   \item{beta_est}{Estimated coefficients for the beta model}
-#'   \item{se}{Standard errors of the estimated coefficients}
-#'   \item{alpha_degree}{Degree of the polynomial for the alpha model}
-#'   \item{beta_degree}{Degree of the polynomial for the beta model}
-#'   \item{result}{Full result from the optimization procedure}
 cnorm.betabinomial2 <- function(age,
                                 score,
                                 n = NULL,

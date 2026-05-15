@@ -26,17 +26,17 @@ This function creates a visualization of a fitted cnormBetaBinomial model,
 including the original data points manifest percentiles and specified percentile lines.
 }
 \seealso{
-Other plot: 
-\code{\link{compare}()},
-\code{\link{plot.cnorm}()},
-\code{\link{plot.cnormBetaBinomial}()},
-\code{\link{plotDensity}()},
-\code{\link{plotDerivative}()},
-\code{\link{plotNorm}()},
-\code{\link{plotNormCurves}()},
-\code{\link{plotPercentileSeries}()},
-\code{\link{plotPercentiles}()},
-\code{\link{plotRaw}()},
-\code{\link{plotSubset}()}
+Other plot:
+\code{\link[=compare]{compare()}},
+\code{\link[=plot.cnorm]{plot.cnorm()}},
+\code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
+\code{\link[=plotDensity]{plotDensity()}},
+\code{\link[=plotDerivative]{plotDerivative()}},
+\code{\link[=plotNorm]{plotNorm()}},
+\code{\link[=plotNormCurves]{plotNormCurves()}},
+\code{\link[=plotPercentileSeries]{plotPercentileSeries()}},
+\code{\link[=plotPercentiles]{plotPercentiles()}},
+\code{\link[=plotRaw]{plotRaw()}},
+\code{\link[=plotSubset]{plotSubset()}}
 }
 \concept{plot}

@@ -74,17 +74,17 @@ and/or 't' parameter in modeling.
 \seealso{
 plotNormCurves, plotPercentileSeries
 
-Other plot: 
-\code{\link{compare}()},
-\code{\link{plot.cnorm}()},
-\code{\link{plot.cnormBetaBinomial}()},
-\code{\link{plot.cnormBetaBinomial2}()},
-\code{\link{plotDensity}()},
-\code{\link{plotDerivative}()},
-\code{\link{plotNorm}()},
-\code{\link{plotNormCurves}()},
-\code{\link{plotPercentileSeries}()},
-\code{\link{plotRaw}()},
-\code{\link{plotSubset}()}
+Other plot:
+\code{\link[=compare]{compare()}},
+\code{\link[=plot.cnorm]{plot.cnorm()}},
+\code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
+\code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
+\code{\link[=plotDensity]{plotDensity()}},
+\code{\link[=plotDerivative]{plotDerivative()}},
+\code{\link[=plotNorm]{plotNorm()}},
+\code{\link[=plotNormCurves]{plotNormCurves()}},
+\code{\link[=plotPercentileSeries]{plotPercentileSeries()}},
+\code{\link[=plotRaw]{plotRaw()}},
+\code{\link[=plotSubset]{plotSubset()}}
 }
 \concept{plot}
