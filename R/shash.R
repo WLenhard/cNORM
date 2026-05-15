@@ -940,6 +940,275 @@ print.cnormShash <- function(x, ...) {
   cat("- AIC:", 2 * length(x$result$par) + 2 * x$result$value, "\n")
 }
 
+#' Automatic model selection for SinH-ArcSinH continuous norming via BIC
+#'
+#' Selects the polynomial degrees for the four components of a
+#' \code{\link{cnorm.shash}} model (\eqn{\mu}, \eqn{\sigma}, \eqn{\epsilon},
+#' \eqn{\delta}) by minimizing BIC over a full grid.
+#'
+#' A degree of \code{0} for \eqn{\delta} is interpreted as a **fixed**
+#' \eqn{\delta} (passed to \code{\link{cnorm.shash}} as \code{delta_degree = NULL})
+#' with value taken from the \code{delta} argument. This allows the grid
+#' search to choose between a fixed and a varying tail-weight model.
+#'
+#' Parallel execution is attempted by default. If the workers cannot access
+#' the \pkg{cNORM} namespace, the function transparently falls
+#' back to sequential execution.
+#'
+#' @param age,score Numeric vectors of predictor and response values.
+#' @param weights Optional numeric vector of observation weights.
+#' @param max_mu,max_sigma,max_epsilon,max_delta Maximum polynomial degrees for
+#'   the four shash parameters. Defaults: \code{4, 3, 3, 1}.
+#' @param min_mu,min_sigma,min_epsilon Minimum polynomial degrees (default 1).
+#' @param min_delta Minimum degree for \eqn{\delta}. \code{0} (default) means
+#'   the fixed-delta variant is included in the search.
+#' @param delta Value of \eqn{\delta} used whenever the candidate uses
+#'   \code{delta_degree = 0} (i.e. fixed delta). Default 1.
+#' @param control Optional control list passed to \code{\link[stats]{optim}}.
+#' @param scale Norm scale (default \code{"T"}).
+#' @param parallel Logical; attempt parallel execution. Default \code{TRUE}.
+#' @param n_cores Number of cores. Defaults to all logical cores.
+#' @param plot Logical; plot the selected model. Default \code{TRUE}.
+#' @param verbose Logical; print progress. Default \code{TRUE}.
+#'
+#' @return The selected fitted \code{cnormShash} model with an additional
+#'   element \code{$selection} containing:
+#'   \itemize{
+#'     \item \code{evaluated}: data frame of every combination tried, sorted by BIC.
+#'     \item \code{selected}: list with the chosen degrees and BIC.
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' m <- autoselect.shash(elfe$group, elfe$raw)
+#' m$selection$evaluated
+#' summary(m, age = elfe$group, score = elfe$raw)
+#' }
+#'
+#' @seealso \code{\link{cnorm.shash}}, \code{\link{autoselect.betabinomial}}
+#' @export
+autoselect.shash <- function(age,
+                              score,
+                              weights      = NULL,
+                              max_mu       = 4,
+                              max_sigma    = 3,
+                              max_epsilon  = 3,
+                              max_delta    = 1,
+                              min_mu       = 1,
+                              min_sigma    = 1,
+                              min_epsilon  = 1,
+                              min_delta    = 0,
+                              delta        = 1,
+                              control      = NULL,
+                              scale        = "T",
+                              parallel     = TRUE,
+                              n_cores      = NULL,
+                              plot         = TRUE,
+                              verbose      = TRUE) {
+
+  # ---- Input validation -------------------------------------------------
+  if (length(age) != length(score))
+    stop("Length of 'age' and 'score' must be the same.")
+  if (!is.null(weights) && length(weights) != length(age))
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
+  if (max_mu      < min_mu)      stop("'max_mu' must be >= 'min_mu'.")
+  if (max_sigma   < min_sigma)   stop("'max_sigma' must be >= 'min_sigma'.")
+  if (max_epsilon < min_epsilon) stop("'max_epsilon' must be >= 'min_epsilon'.")
+  if (max_delta   < min_delta)   stop("'max_delta' must be >= 'min_delta'.")
+  if (min_mu < 1 || min_sigma < 1 || min_epsilon < 1)
+    stop("Minimum degrees for mu, sigma, epsilon must be >= 1.")
+  if (min_delta < 0)
+    stop("'min_delta' must be >= 0 (0 means fixed delta).")
+  if (delta <= 0) stop("'delta' must be > 0.")
+
+  say <- function(...) {
+    if (verbose) { cat(..., sep = ""); utils::flush.console() }
+  }
+
+  # ---- Build the 4-D grid ----------------------------------------------
+  grid <- expand.grid(mu      = min_mu:max_mu,
+                      sigma   = min_sigma:max_sigma,
+                      epsilon = min_epsilon:max_epsilon,
+                      delta   = min_delta:max_delta,
+                      KEEP.OUT.ATTRS = FALSE)
+  pairs <- lapply(seq_len(nrow(grid)),
+                  function(i) c(grid$mu[i], grid$sigma[i],
+                                grid$epsilon[i], grid$delta[i]))
+  say(sprintf(
+    "Search grid: %d candidate models (mu %d:%d, sigma %d:%d, epsilon %d:%d, delta %d:%d).\n",
+    length(pairs),
+    min_mu, max_mu, min_sigma, max_sigma,
+    min_epsilon, max_epsilon, min_delta, max_delta
+  ))
+
+  # ---- Parallel setup with dev-mode fallback ---------------------------
+  use_parallel <- FALSE
+  cl <- NULL
+  if (isTRUE(parallel)) {
+    avail <- tryCatch(parallel::detectCores(logical = TRUE),
+                      error = function(e) 1L)
+    if (is.null(n_cores)) n_cores <- avail
+    n_cores <- max(1L, min(n_cores, length(pairs), avail))
+
+    if (n_cores > 1L && length(pairs) > 1L) {
+      cl <- tryCatch(parallel::makeCluster(n_cores),
+                     error = function(e) NULL)
+      if (!is.null(cl)) {
+        worker_ok <- tryCatch({
+          res <- parallel::clusterCall(cl, function() {
+            requireNamespace("cNORM", quietly = TRUE) &&
+              exists("cnorm.shash",      envir = asNamespace("cNORM")) &&
+              exists("diagnostics.shash", envir = asNamespace("cNORM"))
+          })
+          all(vapply(res, isTRUE, logical(1)))
+        }, error = function(e) FALSE)
+
+        if (worker_ok) {
+          use_parallel <- TRUE
+          on.exit(try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
+          parallel::clusterExport(
+            cl,
+            varlist = c("age", "score", "weights",
+                        "delta", "control", "scale"),
+            envir = environment()
+          )
+          say(sprintf("Parallel mode: using %d cores.\n", n_cores))
+        } else {
+          try(parallel::stopCluster(cl), silent = TRUE); cl <- NULL
+          say("Note: cNORM is not installed in the worker library path ",
+              "(typical during devtools::load_all). ",
+              "Falling back to sequential execution.\n")
+        }
+      }
+    }
+  }
+
+  # ---- Worker --------------------------------------------------------
+  fit_worker <- function(p) {
+    # p = c(mu_deg, sigma_deg, epsilon_deg, delta_deg)
+    # delta_deg == 0  -> pass delta_degree = NULL (fixed delta)
+    dd <- if (p[4] == 0L) NULL else p[4]
+    tryCatch({
+      m <- suppressMessages(suppressWarnings(
+        cNORM::cnorm.shash(
+          age = age, score = score, weights = weights,
+          mu_degree      = p[1],
+          sigma_degree   = p[2],
+          epsilon_degree = p[3],
+          delta_degree   = dd,
+          delta          = delta,
+          control        = control,
+          scale          = scale,
+          plot           = FALSE
+        )
+      ))
+      d <- cNORM::diagnostics.shash(m)
+      list(mu = p[1], sigma = p[2], epsilon = p[3], delta = p[4],
+           model = m,
+           BIC = if (is.finite(d$BIC)) d$BIC else Inf,
+           AIC = d$AIC, logLik = d$log_likelihood,
+           converged = isTRUE(d$converged),
+           status  = if (!is.finite(d$BIC)) "error"
+           else if (!isTRUE(d$converged)) "not_converged"
+           else "ok",
+           message = NA_character_)
+    }, error = function(e) {
+      list(mu = p[1], sigma = p[2], epsilon = p[3], delta = p[4],
+           model = NULL, BIC = Inf, AIC = NA_real_, logLik = NA_real_,
+           converged = FALSE, status = "error",
+           message = conditionMessage(e))
+    })
+  }
+
+  # ---- Cache + reporting -----------------------------------------------
+  cache <- new.env(hash = TRUE, parent = emptyenv())
+  ck <- function(p) sprintf("%d_%d_%d_%d", p[1], p[2], p[3], p[4])
+
+  fmt_delta <- function(d) if (d == 0L) "fixed" else as.character(d)
+
+  report <- function(r) {
+    tag <- switch(r$status,
+                  ok            = "",
+                  not_converged = "  (not strictly converged)",
+                  error         = paste0("  [error: ", r$message, "]"))
+    say(sprintf("  mu=%d, sigma=%d, epsilon=%d, delta=%s : BIC = %s%s\n",
+                r$mu, r$sigma, r$epsilon, fmt_delta(r$delta),
+                formatC(r$BIC, digits = 3, format = "f"), tag))
+  }
+
+  evaluate_pairs <- function(pairs) {
+    todo <- pairs[!vapply(pairs,
+                          function(p) exists(ck(p), envir = cache),
+                          logical(1))]
+    if (length(todo) == 0L) return(invisible(NULL))
+
+    say(sprintf("Evaluating %d model%s ...\n",
+                length(todo), if (length(todo) == 1) "" else "s"))
+
+    if (use_parallel && length(todo) > 1L) {
+      chunks <- split(todo, ceiling(seq_along(todo) / n_cores))
+      for (chunk in chunks) {
+        results <- parallel::parLapply(cl, chunk, fit_worker)
+        for (r in results) {
+          assign(ck(c(r$mu, r$sigma, r$epsilon, r$delta)), r, envir = cache)
+          report(r)
+        }
+      }
+    } else {
+      for (p in todo) {
+        r <- fit_worker(p)
+        assign(ck(c(r$mu, r$sigma, r$epsilon, r$delta)), r, envir = cache)
+        report(r)
+      }
+    }
+    invisible(NULL)
+  }
+
+  # ---- Run the search --------------------------------------------------
+  evaluate_pairs(pairs)
+  all_res <- mget(ls(envir = cache), envir = cache)
+  bics    <- vapply(all_res, `[[`, numeric(1), "BIC")
+  if (all(!is.finite(bics)))
+    stop("Selection failed: no model produced a finite BIC. ",
+         "Inspect $selection$evaluated for per-fit messages.")
+  current <- all_res[[which.min(bics)]]
+
+  # ---- Compile results --------------------------------------------------
+  evaluated <- do.call(rbind, lapply(
+    all_res,
+    function(r) data.frame(mu = r$mu, sigma = r$sigma,
+                           epsilon = r$epsilon, delta = r$delta,
+                           BIC = r$BIC, AIC = r$AIC,
+                           logLik = r$logLik,
+                           converged = r$converged,
+                           status = r$status,
+                           message = r$message,
+                           stringsAsFactors = FALSE)))
+  evaluated <- evaluated[order(evaluated$BIC), , drop = FALSE]
+  rownames(evaluated) <- NULL
+
+  say(sprintf("\nSelected model: mu=%d, sigma=%d, epsilon=%d, delta=%s (BIC = %.3f)\n",
+              current$mu, current$sigma, current$epsilon,
+              fmt_delta(current$delta), current$BIC))
+
+  final_model <- current$model
+  if (is.null(final_model))
+    stop("Selection failed: the best candidate did not produce a usable model.")
+
+  final_model$selection <- list(
+    evaluated = evaluated,
+    selected  = list(mu_degree      = current$mu,
+                     sigma_degree   = current$sigma,
+                     epsilon_degree = current$epsilon,
+                     delta_degree   = if (current$delta == 0L) NULL else current$delta,
+                     delta          = delta,
+                     BIC            = current$BIC)
+  )
+
+  if (plot) print(plot(final_model, age = age, score = score, weights = weights))
+  return(final_model)
+}
+
 #' Calculate Norm Tables for Sinh-Arcsinh Distribution
 #'
 #' Generates norm tables for specific ages based on a fitted SinH-ArcSinH (shash) regression model.

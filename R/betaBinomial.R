@@ -1603,6 +1603,238 @@ summary.cnormBetaBinomial <- function(object, ...) {
   invisible(diag)
 }
 
+#' Automatic model selection for beta-binomial continuous norming via BIC
+#'
+#' Selects polynomial degrees for the two components of a beta-binomial model
+#' (\eqn{\alpha}/\eqn{\beta} when \code{mode = 2} or \eqn{\mu}/\eqn{\sigma} when
+#' \code{mode = 1}) by minimizing BIC.
+#'
+#' Parallel execution is attempted by default. If the workers cannot access the
+#' \pkg{cNORM} namespace, the function transparently falls
+#' back to sequential execution.
+#'
+#' @param age,score Numeric vectors of predictor and response values.
+#' @param n Maximum score. Defaults to \code{max(score)}.
+#' @param weights Optional numeric vector of weights.
+#' @param mode 1 for \eqn{\mu}/\eqn{\sigma}, 2 for direct \eqn{\alpha}/\eqn{\beta} (default).
+#' @param max_alpha,max_beta Maximum polynomial degrees. Default 4.
+#' @param min_alpha,min_beta Minimum polynomial degrees. Default 1.
+#' @param control Optional control list passed to \code{\link[stats]{optim}}.
+#' @param scale Norm scale (default \code{"T"}).
+#' @param parallel Logical; attempt parallel execution. Default \code{TRUE}.
+#' @param n_cores Number of cores. Defaults to all logical cores.
+#' @param plot Logical; plot the selected model. Default \code{TRUE}.
+#' @param verbose Logical; print progress. Default \code{TRUE}.
+#'
+#' @return The selected fitted model
+#'
+#' @export
+autoselect.betabinomial <- function(age,
+                                     score,
+                                     n         = NULL,
+                                     weights   = NULL,
+                                     mode      = 2,
+                                     max_alpha = 4,
+                                     max_beta  = 4,
+                                     min_alpha = 1,
+                                     min_beta  = 1,
+                                     control   = NULL,
+                                     scale     = "T",
+                                     parallel  = TRUE,
+                                     n_cores   = NULL,
+                                     plot      = TRUE,
+                                     verbose   = TRUE) {
+
+  # ---- Input validation -------------------------------------------------
+  if (length(age) != length(score))
+    stop("Length of 'age' and 'score' must be the same.")
+  if (!is.null(weights) && length(weights) != length(age))
+    stop("Length of 'weights' must match length of 'age' and 'score'.")
+  if (max_alpha < min_alpha) stop("'max_alpha' must be >= 'min_alpha'.")
+  if (max_beta  < min_beta)  stop("'max_beta' must be >= 'min_beta'.")
+  if (min_alpha < 1 || min_beta < 1) stop("Minimum degrees must be >= 1.")
+  if (!(mode %in% c(1, 2))) stop("'mode' must be 1 or 2.")
+
+  if (is.null(n)) {
+    n <- max(score, na.rm = TRUE)
+    if (verbose) message("n not specified; using max(score) = ", n)
+  }
+
+  say <- function(...) {
+    if (verbose) { cat(..., sep = ""); utils::flush.console() }
+  }
+
+  # ---- Pair list -------------------------------------------------------
+    grid <- expand.grid(alpha = min_alpha:max_alpha,
+                        beta  = min_beta:max_beta,
+                        KEEP.OUT.ATTRS = FALSE)
+    pairs <- lapply(seq_len(nrow(grid)),
+                    function(i) c(grid$alpha[i], grid$beta[i]))
+
+
+  # ---- Parallel setup with dev-mode fallback --------------------------
+  use_parallel <- FALSE
+  cl <- NULL
+  if (isTRUE(parallel)) {
+    avail <- tryCatch(parallel::detectCores(logical = TRUE),
+                      error = function(e) 1L)
+    if (is.null(n_cores)) n_cores <- avail   # use all cores by default
+    n_cores <- max(1L, min(n_cores, length(pairs), avail))
+
+    if (n_cores > 1L && length(pairs) > 1L) {
+      cl <- tryCatch(parallel::makeCluster(n_cores),
+                     error = function(e) NULL)
+      if (!is.null(cl)) {
+        # Probe workers: can they load cNORM (i.e. is the package installed)?
+        worker_ok <- tryCatch({
+          res <- parallel::clusterCall(cl, function() {
+            requireNamespace("cNORM", quietly = TRUE) &&
+              exists("cnorm.betabinomial",       envir = asNamespace("cNORM")) &&
+              exists("diagnostics.betabinomial", envir = asNamespace("cNORM"))
+          })
+          all(vapply(res, isTRUE, logical(1)))
+        }, error = function(e) FALSE)
+
+        if (worker_ok) {
+          use_parallel <- TRUE
+          on.exit(try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
+          parallel::clusterExport(
+            cl,
+            varlist = c("age", "score", "n", "weights",
+                        "mode", "control", "scale"),
+            envir = environment()
+          )
+          say(sprintf("Parallel mode: using %d cores.\n", n_cores))
+        } else {
+          try(parallel::stopCluster(cl), silent = TRUE); cl <- NULL
+          say("Note: cNORM is not installed in the worker library path ",
+              "(typical during devtools::load_all). ",
+              "Falling back to sequential execution.\n")
+        }
+      }
+    }
+  }
+
+  # ---- Worker function -------------------------------------------------
+  fit_worker <- function(p) {
+    tryCatch({
+      m <- suppressMessages(suppressWarnings(
+        cNORM::cnorm.betabinomial(
+          age = age, score = score, n = n, weights = weights,
+          mode = mode, alpha = p[1], beta = p[2],
+          control = control, scale = scale, plot = FALSE
+        )
+      ))
+      d <- cNORM::diagnostics.betabinomial(m)
+      list(alpha = p[1], beta = p[2], model = m,
+           BIC = if (is.finite(d$BIC)) d$BIC else Inf,
+           AIC = d$AIC, logLik = d$log_likelihood,
+           converged = isTRUE(d$converged),
+           status  = if (!is.finite(d$BIC)) "error"
+           else if (!isTRUE(d$converged)) "not_converged"
+           else "ok",
+           message = NA_character_)
+    }, error = function(e) {
+      list(alpha = p[1], beta = p[2], model = NULL,
+           BIC = Inf, AIC = NA_real_, logLik = NA_real_,
+           converged = FALSE, status = "error",
+           message = conditionMessage(e))
+    })
+  }
+
+  # ---- Cache + reporting -----------------------------------------------
+  cache <- new.env(hash = TRUE, parent = emptyenv())
+  ck    <- function(a, b) sprintf("%d_%d", a, b)
+
+  report <- function(r) {
+    tag <- switch(r$status,
+                  ok            = "",
+                  not_converged = "  (not strictly converged)",
+                  error         = paste0("  [error: ", r$message, "]"))
+    say(sprintf("  alpha = %d, beta = %d : BIC = %s%s\n",
+                r$alpha, r$beta,
+                formatC(r$BIC, digits = 3, format = "f"), tag))
+  }
+
+  evaluate_pairs <- function(pairs) {
+    todo <- pairs[!vapply(pairs,
+                          function(p) exists(ck(p[1], p[2]), envir = cache),
+                          logical(1))]
+    if (length(todo) == 0L) return(invisible(NULL))
+
+    say(sprintf("Evaluating %d model%s ...\n",
+                length(todo), if (length(todo) == 1) "" else "s"))
+
+    if (use_parallel && length(todo) > 1L) {
+      # Process in chunks of size n_cores so output appears progressively
+      chunks <- split(todo,
+                      ceiling(seq_along(todo) / n_cores))
+      for (chunk in chunks) {
+        results <- parallel::parLapply(cl, chunk, fit_worker)
+        for (r in results) {
+          assign(ck(r$alpha, r$beta), r, envir = cache); report(r)
+        }
+      }
+    } else {
+      for (p in todo) {
+        r <- fit_worker(p)
+        assign(ck(r$alpha, r$beta), r, envir = cache); report(r)
+      }
+    }
+    invisible(NULL)
+  }
+
+  get_res <- function(a, b) get(ck(a, b), envir = cache)
+
+  # ---- Run the chosen strategy -----------------------------------------
+  path <- NULL
+
+    evaluate_pairs(pairs)
+    all_res <- mget(ls(envir = cache), envir = cache)
+    bics    <- vapply(all_res, `[[`, numeric(1), "BIC")
+    if (all(!is.finite(bics)))
+      stop("Selection failed: no model produced a finite BIC. ",
+           "Inspect $selection$evaluated for per-fit messages.")
+    current <- all_res[[which.min(bics)]]
+
+  # ---- Compile results --------------------------------------------------
+  evaluated <- do.call(rbind, lapply(
+    mget(ls(envir = cache), envir = cache),
+    function(r) data.frame(alpha = r$alpha, beta = r$beta,
+                           BIC = r$BIC, AIC = r$AIC,
+                           logLik = r$logLik,
+                           converged = r$converged,
+                           status = r$status,
+                           message = r$message,
+                           stringsAsFactors = FALSE)))
+  evaluated <- evaluated[order(evaluated$BIC), , drop = FALSE]
+  rownames(evaluated) <- NULL
+
+  path_df <- if (!is.null(path))
+    do.call(rbind, lapply(path, function(r)
+      data.frame(alpha = r$alpha, beta = r$beta, BIC = r$BIC)))
+  else NULL
+
+  say(sprintf("\nSelected model: alpha = %d, beta = %d (BIC = %.3f)\n",
+              current$alpha, current$beta, current$BIC))
+
+  final_model <- current$model
+  if (is.null(final_model))
+    stop("Selection failed: the best candidate did not produce a usable model.")
+
+  final_model$selection <- list(
+    evaluated = evaluated,
+    selected  = list(alpha = current$alpha,
+                     beta  = current$beta,
+                     BIC   = current$BIC),
+    mode      = mode,
+    path      = path_df
+  )
+
+  if (plot) print(plot(final_model, age = age, score = score, weights = weights))
+  return(final_model)
+}
+
 #' Summarize a Beta-Binomial Continuous Norming Model
 #'
 #' This function provides a summary of a fitted beta-binomial continuous norming model,

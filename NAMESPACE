@@ -8,6 +8,14 @@ importFrom(stats,
            runif, optimize, cor, quantile, coef)
 importFrom(utils, menu, head, tail)
 
+importFrom(parallel, clusterCall)
+importFrom(parallel, clusterExport)
+importFrom(parallel, detectCores)
+importFrom(parallel, makeCluster)
+importFrom(parallel, parLapply)
+importFrom(parallel, stopCluster)
+importFrom(utils, flush.console)
+
 # Imports from suggested packages (with checks in code)
 importFrom(leaps, regsubsets)
 
@@ -24,6 +32,8 @@ importFrom(ggplot2,
 
 # Exported functions
 export(
+    autoselect.betabinomial,
+    autoselect.shash,
     bestModel,
     betaCoefficients,
     buildCnormObject,
