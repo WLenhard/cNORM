@@ -228,54 +228,64 @@ wquantile.generic <- function(x, probs, cdf.gen, weights = NULL) {
 
 #' Determine groups and group means
 #'
-#' Helps to split the continuous explanatory variable into groups and assigns
-#' the group mean. The groups can be split either into groups of equal size (default)
-#' or equal number of observations.
+#' Splits a continuous variable into \code{n} groups (either equidistant or
+#' with equal number of observations) and returns the group mean for every
+#' observation.
 #'
-#' @param x The continuous variable to be split
-#' @param n The number of groups; if NULL then the function determines a number
-#' of groups with usually 100 cases or 3 <= n <= 20.
-#' @param equidistant If set to TRUE, builds equidistant interval, otherwise (default)
-#' with equal number of observations
+#' @param x Numeric vector to be split.
+#' @param n Desired number of groups. If \code{NULL}, the function chooses
+#'   roughly one group per 100 observations, constrained to 3 \eqn{\le} n \eqn{\le} 20.
+#' @param equidistant If \code{TRUE}, intervals have equal width; otherwise
+#'   (default) each interval contains roughly the same number of observations.
 #'
-#' @return vector with group means for each observation
+#' @return Numeric vector of the same length as \code{x} with the group mean
+#'   assigned to each observation.
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' x <- rnorm(1000, m = 50, sd = 10)
+#' x <- rnorm(1000, mean = 50, sd = 10)
 #' m <- getGroups(x, n = 10)
 #' }
-#'
 getGroups <- function(x, n = NULL, equidistant = FALSE) {
+
+  if (!is.numeric(x))
+    stop("'x' must be a numeric vector.")
+
+  # Auto rule: ~one group per 100 obs, clamped to [3, 20]; ensure integer.
   if (is.null(n)) {
-    n <- length(x) / 100
-
-    if (n < 3)
-      n <- 3
-    else if (n > 20)
-      n <- 20
+    n <- floor(length(x) / 100)
+    n <- max(3L, min(20L, n))
+  } else {
+    if (!is.numeric(n) || length(n) != 1L || n < 2)
+      stop("'n' must be a single integer >= 2.")
+    n <- as.integer(n)
   }
 
-  # define grouping variable
+  # Build group codes
   if (equidistant) {
-    groups <- as.numeric(cut(x, n))
-  } else{
-    groups <- findInterval(x, quantile(x, probs = seq(
-      from = 0,
-      to = 1,
-      length.out = n + 1
-    )), all.inside = TRUE)
+    groups <- as.integer(cut(x, breaks = n, include.lowest = TRUE))
+  } else {
+    breaks <- stats::quantile(
+      x,
+      probs   = seq(0, 1, length.out = n + 1L),
+      na.rm   = TRUE,
+      names   = FALSE,
+      type    = 7
+    )
+    # Collapse duplicate breaks (heavy ties).  Warn if effective n < requested.
+    ubreaks <- unique(breaks)
+    if (length(ubreaks) < length(breaks)) {
+      warning(sprintf(
+        "Requested %d groups, but only %d distinct quantile breakpoints could be formed (ties in 'x'). Effective number of groups: %d.",
+        n, length(ubreaks), length(ubreaks) - 1L
+      ))
+    }
+    groups <- findInterval(x, ubreaks, all.inside = TRUE)
   }
 
-  # determine group means and assign to intervals
-  return(ave(
-    x,
-    groups,
-    FUN = function(x) {
-      mean(x, na.rm = TRUE)
-    }
-  ))
+  # Group means, broadcast back to each observation.
+  ave(x, groups, FUN = function(z) mean(z, na.rm = TRUE))
 }
 
 
