@@ -293,6 +293,29 @@ table <- rawTable(c(2.5, 3.5, 4.5), model, minRaw = 0, maxRaw = 28)
 
 You need these kind of tables if you want to determine the exact percentile or the exact normal score for all occurring raw scores.
 
+## Combining cNORM with IRT-based ability estimates
+
+So far, all examples in this vignette have modelled norms directly from **raw scores**. cNORM is, however, agnostic to the metric of the score variable — any quantitative person parameter can serve as input. A particularly attractive option is to combine continuous norming with **Item Response Theory (IRT)**: instead of summing item responses, one estimates a latent ability $\theta$ for every person via an IRT model and then norms these $\theta$ values against age (or any other explanatory variable). This has two advantages: ability estimates are placed on an interval-level metric, and item-level information (difficulty, discrimination, missing responses) is taken into account by the measurement model.
+
+The following snippet illustrates the workflow with a simulated Rasch dataset. Person abilities are estimated using the `TAM` package [@TAM] via weighted likelihood estimation (WLE), and the resulting $\theta$ values are passed to `cnorm()` together with the grouping variable. 
+
+```{r irt-cnorm, eval = FALSE}
+library(TAM)
+
+# 1. Simulate a Rasch dataset with 700 persons and 30 items
+data <- simulateRasch(n = 700, items.n = 30)
+data <- data$sim[, (ncol(data$sim) - 30):(ncol(data$sim) - 1)] # only use item data
+
+# 2. Fit a Rasch model and extract WLE person abilities
+tam.model <- tam(data)
+theta     <- tam.wle(tam.model)$theta
+
+# 3. Model continuous norms for the latent ability scores
+cnorm.model <- cnorm(raw = theta, group = data$sim$group)
+```
+
+The call to `cnorm()` is identical to the one used for raw scores — only the input variable changes. All subsequent functions (`predictNorm()`, `plot()`, `getNormCurve()`, …) work exactly as before, but now operate on IRT-scaled ability estimates. This makes the Taylor polynomial approach a flexible post-processing step for virtually any psychometric scoring procedure, including 2PL, 3PL, partial credit or rating-scale models.
+
 
 # Useful Tools
 ## Plot of raw scores
