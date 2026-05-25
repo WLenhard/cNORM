@@ -295,7 +295,7 @@ You need these kind of tables if you want to determine the exact percentile or t
 
 ## Combining cNORM with IRT-based ability estimates
 
-So far, all examples in this vignette have modelled norms directly from **raw scores**. cNORM is, however, agnostic to the metric of the score variable — any quantitative person parameter can serve as input. A particularly attractive option is to combine continuous norming with **Item Response Theory (IRT)**: instead of summing item responses, one estimates a latent ability $\theta$ for every person via an IRT model and then norms these $\theta$ values against age (or any other explanatory variable). This has two advantages: ability estimates are placed on an interval-level metric, and item-level information (difficulty, discrimination, missing responses) is taken into account by the measurement model.
+So far, all examples in this vignette have modelled norms directly from **raw scores**. cNORM is, however, agnostic to the metric of the score variable — any quantitative person parameter can serve as input. A particularly attractive option is to combine continuous norming with **Item Response Theory (IRT)**: instead of summing item responses, one estimates a latent ability $\theta$ for every person via an IRT model and then norms these $\theta$ values against age (or any other explanatory variable). This has two advantages: ability estimates are already placed on an interval-level metric, which can be modelled with Taylor polynomials and item-level information (difficulty, discrimination, missing responses) is taken into account by the measurement model.
 
 The following snippet illustrates the workflow with a simulated Rasch dataset. Person abilities are estimated using the `TAM` package [@TAM] via weighted likelihood estimation (WLE), and the resulting $\theta$ values are passed to `cnorm()` together with the grouping variable. 
 
@@ -314,8 +314,9 @@ theta     <- tam.wle(tam.model)$theta
 cnorm.model <- cnorm(raw = theta, group = data$sim$group)
 ```
 
-The call to `cnorm()` is identical to the one used for raw scores — only the input variable changes. All subsequent functions (`predictNorm()`, `plot()`, `getNormCurve()`, …) work exactly as before, but now operate on IRT-scaled ability estimates. This makes the Taylor polynomial approach a flexible post-processing step for virtually any psychometric scoring procedure, including 2PL, 3PL, partial credit or rating-scale models.
+The call to `cnorm()` is identical to the one used for raw scores — only the input variable changes. All subsequent functions (`predictNorm()`, `plot()`, `getNormCurve()`, …) work exactly as before, but now operate on IRT-scaled ability estimates. This makes the Taylor polynomial approach a flexible post-processing step for virtually any psychometric scoring procedure, including 2PL, 3PL, partial credit, or rating-scale models, or adaptive testing.
 
+Note: Logits can also be modeled parametrically if an appropriate distribution is chosen. However, this is not possible with beta-binomial distributions, as they can only handle discrete, integer, positive values within a fixed range, nor is it possible with the commonly used distributions of the Box-Cox family, as these require positive values greater than 0. An alternative would therefore be, for example, SHASH (please consult the according vignette).
 
 # Useful Tools
 ## Plot of raw scores
