@@ -7,26 +7,26 @@
 getGroups(x, n = NULL, equidistant = FALSE)
 }
 \arguments{
-\item{x}{The continuous variable to be split}
+\item{x}{Numeric vector to be split.}
 
-\item{n}{The number of groups; if NULL then the function determines a number
-of groups with usually 100 cases or 3 <= n <= 20.}
+\item{n}{Desired number of groups. If \code{NULL}, the function chooses
+roughly one group per 100 observations, constrained to 3 \eqn{\le} n \eqn{\le} 20.}
 
-\item{equidistant}{If set to TRUE, builds equidistant interval, otherwise (default)
-with equal number of observations}
+\item{equidistant}{If \code{TRUE}, intervals have equal width; otherwise
+(default) each interval contains roughly the same number of observations.}
 }
 \value{
-vector with group means for each observation
+Numeric vector of the same length as \code{x} with the group mean
+  assigned to each observation.
 }
 \description{
-Helps to split the continuous explanatory variable into groups and assigns
-the group mean. The groups can be split either into groups of equal size (default)
-or equal number of observations.
+Splits a continuous variable into \code{n} groups (either equidistant or
+with equal number of observations) and returns the group mean for every
+observation.
 }
 \examples{
 \dontrun{
-x <- rnorm(1000, m = 50, sd = 10)
+x <- rnorm(1000, mean = 50, sd = 10)
 m <- getGroups(x, n = 10)
 }
-
 }

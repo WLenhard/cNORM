@@ -31,7 +31,7 @@ autoselect.shash(
 \item{weights}{Optional numeric vector of observation weights.}
 
 \item{max_mu, max_sigma, max_epsilon, max_delta}{Maximum polynomial degrees for
-the four shash parameters. Defaults: \code{4, 3, 3, 2}.}
+the four shash parameters. Defaults: \code{4, 3, 3, 1}.}
 
 \item{min_mu, min_sigma, min_epsilon}{Minimum polynomial degrees (default 1).}
 
@@ -73,8 +73,7 @@ with value taken from the \code{delta} argument. This allows the grid
 search to choose between a fixed and a varying tail-weight model.
 
 Parallel execution is attempted by default. If the workers cannot access
-the \pkg{cNORM} namespace (e.g. when running via \code{devtools::load_all()}
-without an installed copy of the package), the function transparently falls
+the \pkg{cNORM} namespace, the function transparently falls
 back to sequential execution.
 }
 \examples{

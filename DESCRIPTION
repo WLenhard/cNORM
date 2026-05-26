@@ -15,7 +15,7 @@ Authors@R: c(
     person("WPS", "Publisher", 
            role = "fnd",
            comment = "https://www.wpspublish.com/"))
-Description: A comprehensive toolkit for generating continuous test norms in 
+Description: Generates continuous test norms in 
      psychometrics and biometrics, and analyzing model fit. The package offers 
      both distribution-free modeling using Taylor polynomials and parametric 
      modeling using the beta-binomial and the 'Sinh-Arcsinh' distribution. 
@@ -27,10 +27,10 @@ Description: A comprehensive toolkit for generating continuous test norms in
      the required sample size compared to conventional norming per age group. 
      cNORM enables graphical and analytical evaluation of model fit, 
      accommodates a wide range of scales including those with negative and 
-     descending values, and even supports conventional norming. It generates 
-     norm tables including confidence intervals. It also includes methods for 
-     addressing representativeness issues through Iterative Proportional Fitting. 
-     Based on Lenhard et al. (2016) 
+     descending values, and as well supports conventional norming. It generates 
+     norm tables including confidence intervals. Methods for addressing 
+     representativeness issues are available through Iterative Proportional 
+     Fitting.  Based on Lenhard et al. (2016) 
     <doi:10.1177/1073191116656437>, Lenhard et al. (2019) 
     <doi:10.1371/journal.pone.0222279>, Lenhard and Lenhard (2021) 
     <doi:10.1177/0013164420928457> and Gary et al. (2023) 
@@ -44,7 +44,9 @@ Depends:
 Imports:
     ggplot2 (>= 3.5.0),
     leaps (>= 3.1),
+    grDevices,
     parallel,
+    stats,
     utils
 Suggests: 
     DT,
