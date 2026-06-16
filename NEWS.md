@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.6.0
-Date: 26.05.2026 - in progress
+Date: 16.06.2026 - in progress
 
 This release includes autoselect methods for shash and betabinomial models 
 using parallel code execution.
@@ -15,6 +15,9 @@ Changes:
 *    new methods: autoselect.betabinomial, autoselect.shash
 *    Information on modelling Logits from IRT models added to vignette
 *    function getGroups hardened for rare exceptions
+*    Stricter check on monotonicity in Taylor polynomials
+*    Cleaned up derive function
+*    Vectorization in regressionFunction()
 
 
 
