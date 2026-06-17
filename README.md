@@ -90,21 +90,28 @@ library(cNORM)
 # distribution, which usually performs well on tests with
 # a fixed number of dichotomous items without time cutoff.
 # Ideal use case: 1PL IRT scale / Rasch modelling
-model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw)
+# The example uses the inbuilt ELFE demo dataset.
+model.betabinomial <- cnorm.betabinomial(elfe$group, elfe$raw)
 
 # Adapt the power parameters for α and β to increase or decrease
 # the fit:
-model.betabinomial <- cnorm.betabinomial(ppvt$age, ppvt$raw, alpha = 4)
+model.betabinomial <- cnorm.betabinomial(elfe$group, elfe$raw, alpha = 4)
+
+# Automatic grid search to determine the model with the lowest BIC
+model.betabinomial <- autoselect.betabinomial(elfe$group, elfe$raw)
+
 
 # Plot percentile curves and display manifest and modelled norm scores.
-plot(model.betabinomial, ppvt$age, ppvt$raw)
-plotNorm(model.betabinomial, ppvt$age, ppvt$raw, width = 1)
+plot(model.betabinomial, elfe$group, elfe$raw)
+plotNorm(model.betabinomial, elfe$group, elfe$raw, width = 1)
 
 # Display fit statistics:
 summary(model.betabinomial)
 
-# Prediction of norm scores for new data and generating norm tables
-predict(model.betabinomial, c(8.9, 10.1), c(153, 121))
+# Prediction of norm scores for new data
+predict(model.betabinomial, c(2.0, 2.2, 2.4, 2.6), c(10, 15, 13, 22))
+
+# generate norm tables
 tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
                                  reliability=0.9)
 ```
@@ -116,7 +123,11 @@ library(cNORM)
 # It can handle raw score value ranges including zeros and negative
 # values, which pose a problem to Box Cox distributions.
 # Shape parameters mu, sigma, epsilon and delta can be adjusted as well.
+# The following example uses the inbuilt PPVT4 demo dataset.
 model.shash <- cnorm.shash(ppvt$age, ppvt$raw)
+
+# Automatic grid search to determine the model with the lowest BIC
+model.shash <- autoselect.shash(ppvt$age, ppvt$raw)
 
 # Plot percentile curves and display manifest and modelled norm scores.
 plot(model.shash, ppvt$age, ppvt$raw)
