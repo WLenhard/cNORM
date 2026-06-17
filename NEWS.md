@@ -5,7 +5,7 @@ This file documents the development of the package as well as open issues or poi
 
 
 ### Version in 3.6.0
-Date: 16.06.2026 - in progress
+Date: 17.06.2026 - release
 
 This release includes autoselect methods for shash and betabinomial models 
 using parallel code execution. The raking and weighting was revised and 
