@@ -22,6 +22,7 @@ Changes:
 *    Code review of the raking code and the weighted.rank
 *    Code review for rankByGroups and rankBySlidingWindow; performance improvements
 *    prepareData and cnorm functions hardened
+*    added example code for new functions to vignette and README.md
 
 
 
