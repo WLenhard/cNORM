@@ -8,7 +8,8 @@ This file documents the development of the package as well as open issues or poi
 Date: 16.06.2026 - in progress
 
 This release includes autoselect methods for shash and betabinomial models 
-using parallel code execution.
+using parallel code execution. The raking and weighting was revised and 
+ranking methods optimized. The monotonicity checks are now much more strict. 
 
 Changes:
 
@@ -18,6 +19,9 @@ Changes:
 *    Stricter check on monotonicity in Taylor polynomials
 *    Cleaned up derive function
 *    Vectorization in regressionFunction()
+*    Code review of the raking code and the weighted.rank
+*    Code review for rankByGroups and rankBySlidingWindow; performance improvements
+*    prepareData and cnorm functions hardened
 
 
 

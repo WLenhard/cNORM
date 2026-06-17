@@ -1426,7 +1426,7 @@ predictionMatrix_fast <- function(minL, maxL, minA, maxA, k, t, n_L = 50) {
 #' @noRd
 check_monotonicity_matrix <- function(coefs, X_pred, n_ages, n_norms,
                                       minRaw = -Inf, maxRaw = Inf,
-                                      tol = 1e-10) {
+                                      tol = 1e-8) {
   pred <- as.vector(X_pred %*% coefs)
 
   # optional clipping (set bounds to keep old behaviour; leave Inf to disable)

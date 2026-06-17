@@ -287,94 +287,67 @@ cnorm <- function(raw = NULL,
                   plot = TRUE,
                   extensive = TRUE,
                   subsampling = FALSE) {
-  if (is.null(raw) || !is.numeric(raw)) {
+
+  # ---- input validation -----------------------------------------------------
+  if (is.null(raw) || !is.numeric(raw))
     stop("Please provide a numeric vector for the raw scores.")
-  }
-
-  if (!is.null(group) && !is.numeric(group)) {
+  if (!is.null(group) && !is.numeric(group))
     stop("`group` must be a numeric vector.")
-  }
-  if (!is.null(age) && !is.numeric(age)) {
+  if (!is.null(age) && !is.numeric(age))
     stop("`age` must be a numeric vector.")
-  }
-
-  if (!is.null(group) && length(group) != length(raw)) {
+  if (!is.null(weights) && !is.numeric(weights))
+    stop("`weights` must be a numeric vector.")
+  if (!is.null(group) && length(group) != length(raw))
     stop("`raw` and `group` must have the same length.")
-  }
-  if (!is.null(age) && length(age) != length(raw)) {
+  if (!is.null(age) && length(age) != length(raw))
     stop("`raw` and `age` must have the same length.")
-  }
-  if (!is.null(weights) && length(weights) != length(raw)) {
+  if (!is.null(weights) && length(weights) != length(raw))
     stop("`weights` must have the same length as `raw`.")
+  if (!is.null(weights) && any(weights <= 0, na.rm = TRUE))
+    stop("`weights` must be positive, non-zero values (see computeWeights).")
+
+  silent <- !plot
+
+  if (!is.null(group) && !is.null(age) && !silent) {
+    message("Both 'group' and 'age' supplied: ranking within 'group' and ",
+            "modelling on the continuous 'age' variable.")
   }
 
-  if (!is.null(group) && !is.null(age)) {
-    warning(
-      "Specifying both 'group' and 'age' is discouraged; ",
-      "the function will use group for ranking and keep age as a covariate."
-    )
-  }
-
-  # Default smoothing parameters
+  # ---- default smoothing parameters -----------------------------------------
   if (is.null(k) && is.null(t)) {
-    k <- 5
-    t <- 3
+    k <- 5; t <- 3
   } else if (is.null(t)) {
     t <- k
   } else if (is.null(k)) {
     k <- t
   }
 
-  silent <- !plot
-
+  # ---- assemble & clean (single source of NA removal, weights kept aligned) --
   df_in <- data.frame(raw = raw)
-  if (!is.null(group))
-    df_in$group   <- group
-  if (!is.null(age))
-    df_in$age     <- age
-  if (!is.null(weights))
-    df_in$weights <- weights
-
-  df_in <- df_in[complete.cases(df_in), , drop = FALSE]
-
-  if (nrow(df_in) == 0L) {
+  if (!is.null(group))   df_in$group   <- group
+  if (!is.null(age))     df_in$age     <- age
+  if (!is.null(weights)) df_in$weights <- weights
+  df_in <- df_in[stats::complete.cases(df_in), , drop = FALSE]
+  if (nrow(df_in) == 0L)
     stop("After removing missing values no observations remain.")
-  }
+
+  weights_name <- if (!is.null(weights)) "weights" else NULL
 
   conventional <- is.null(group) && is.null(age)
   use_window   <- is.null(group) && !is.null(age) && !is.na(width)
-  by_group     <- !is.null(group) ||
-    (is.null(group) && !is.null(age) && is.na(width))
 
+  # ============================ CONVENTIONAL =================================
   if (conventional) {
-    data <- rankByGroup(
-      raw     = df_in$raw,
-      group   = FALSE,
-      scale   = scale,
-      weights = df_in$weights,
-      descend = descend,
-      method  = method
-    )
-    data <- computePowers(data,
-                          k = k,
-                          t = t,
-                          silent = silent)
+    data <- rankByGroup(data = df_in, group = FALSE, raw = "raw",
+                        scale = scale, weights = weights_name,
+                        descend = descend, method = method, silent = silent)
+    data <- computePowers(data, k = k, t = t, silent = silent)
 
-    model <- bestModel(
-      data,
-      k           = k,
-      t           = t,
-      terms       = terms,
-      R2          = R2,
-      weights     = data$weights,
-      plot        = FALSE,
-      extensive   = extensive,
-      subsampling = subsampling
-    )
+    model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2,
+                       weights = data$weights, plot = FALSE,
+                       extensive = extensive, subsampling = subsampling)
 
-    result <- list(data = data, model = model)
-    class(result) <- "cnorm"
-
+    result <- structure(list(data = data, model = model), class = "cnorm")
     if (plot) {
       cat(model$report, sep = "\n")
       print(rawTable(0, result))
@@ -383,99 +356,59 @@ cnorm <- function(raw = NULL,
     return(result)
   }
 
+  # ============================ SLIDING WINDOW ==============================
   if (use_window) {
-    if (plot)
-      message("Ranking data with sliding window ...")
+    if (!silent) message("Ranking data with sliding window ...")
 
-    data <- rankBySlidingWindow(
-      raw     = df_in$raw,
-      age     = df_in$age,
-      scale   = scale,
-      weights = df_in$weights,
-      descend = descend,
-      width   = width,
-      method  = method
-    )
-    data <- data[complete.cases(data), , drop = FALSE]
-    data <- computePowers(
-      data,
-      k = k,
-      t = t,
-      age = data$age,
-      silent = silent
-    )
+    # Synthesise a grouping variable for display / manifest percentiles only;
+    # the model itself is fitted on the continuous age.
+    if (is.null(df_in$group)) df_in$group <- getGroups(df_in$age)
 
-  } else if (by_group) {
+    data <- rankBySlidingWindow(data = df_in, age = "age", raw = "raw",
+                                group = "group", width = width, scale = scale,
+                                weights = weights_name, descend = descend,
+                                method = method, silent = silent)
+    data <- data[!is.na(data$normValue), , drop = FALSE]
+    data <- computePowers(data, k = k, t = t, age = "age", silent = silent)
+
+    # ============================ BY GROUP ====================================
+  } else {
     group_was_synthesised <- is.null(group)
 
     if (group_was_synthesised) {
       if (length(df_in$age) / length(unique(df_in$age)) > 50 &&
           min(table(df_in$age)) > 30) {
-        if (plot)
-          message("Width missing. Using age directly as grouping variable.")
+        if (!silent) message("Width missing. Using age directly as grouping variable.")
         df_in$group <- df_in$age
       } else {
-        if (plot)
-          message("Width missing. Discretising age via getGroups().")
+        if (!silent) message("Width missing. Discretising age via getGroups().")
         df_in$group <- getGroups(df_in$age)
       }
     }
 
-    data <- rankByGroup(
-      raw     = df_in$raw,
-      group   = df_in$group,
-      scale   = scale,
-      weights = df_in$weights,
-      descend = descend,
-      method  = method
-    )
-    data <- data[complete.cases(data), , drop = FALSE]
+    data <- rankByGroup(data = df_in, group = "group", raw = "raw",
+                        scale = scale, weights = weights_name,
+                        descend = descend, method = method, silent = silent)
+    data <- data[!is.na(data$normValue), , drop = FALSE]
 
-    if (!group_was_synthesised &&
-        !is.null(df_in$age) &&
-        nrow(data) == nrow(df_in)) {
-      # User supplied a real group AND a separate age vector:
-      # rank within group, model with continuous age.
-      data$age <- df_in$age
-      data <- computePowers(
-        data,
-        k = k,
-        t = t,
-        age = data$age,
-        silent = silent
-      )
+    # Model on the continuous age only when the user supplied a *real* group
+    # together with a separate age vector; otherwise the group already IS the
+    # (discretised) age axis. 'age' rides along as a column of `data`, so it
+    # stays row-aligned even if cases were dropped during ranking.
+    model_on_age <- (!group_was_synthesised) && !is.null(df_in$age)
+    if (model_on_age) {
+      data <- computePowers(data, k = k, t = t, age = "age", silent = silent)
     } else {
-      # Either no age was provided, or the group is itself a
-      # discretisation of age. Use the group column for both
-      # ranking and the polynomial age axis.
-      data <- computePowers(data,
-                            k = k,
-                            t = t,
-                            silent = silent)
+      data <- computePowers(data, k = k, t = t, silent = silent)
     }
-  } else {
-    # Should be unreachable given the earlier validation, but guard anyway.
-    stop(
-      "Please provide a numeric vector for the raw scores and either a ",
-      "grouping vector, or an age vector together with a sliding window width."
-    )
   }
 
-  model <- bestModel(
-    data,
-    k           = k,
-    t           = t,
-    R2          = R2,
-    terms       = terms,
-    weights     = data$weights,
-    plot        = FALSE,
-    extensive   = extensive,
-    subsampling = subsampling
-  )
+  # ---- model, assemble, report ----------------------------------------------
+  model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2,
+                     weights = data$weights, plot = FALSE,
+                     extensive = extensive, subsampling = subsampling)
 
-  result <- list(data = data, model = model)
-  class(result) <- "cnorm"
-
+  result <- structure(list(data = data, model = model), class = "cnorm")
   if (plot) {
     cat(model$report, sep = "\n")
     plotPercentiles(result)

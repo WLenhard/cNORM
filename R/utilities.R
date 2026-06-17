@@ -24,9 +24,11 @@ standardize <- function(x) {
 #' Weighted rank estimation
 #'
 #' Conducts weighted ranking on the basis of sums of weights per unique raw score.
-#' Please provide a vector with raw values and an additional vector with the weight of each
-#' observation. In case the weight vector is NULL, a normal ranking is done. The vectors may not
-#' include NAs and the weights should be positive non-zero values.
+#' Please provide a vector with raw values and an additional vector with the weight
+#' of each observation. In case the weight vector is NULL, a normal ranking is done.
+#' The vectors may not include NAs and the weights should be positive non-zero
+#' values. With equal weights, the result reproduces the mid-ranks of base R's
+#' \code{rank()} (\code{ties.method = "average"}).
 #'
 #' @param x A numerical vector
 #' @param weights A numerical vector with weights; should have the same length as x
@@ -35,28 +37,45 @@ standardize <- function(x) {
 weighted.rank <- function(x, weights = NULL) {
   if (is.null(weights)) {
     return(rank(x))
-  } else{
-    # increase granularity for relative rank estimation
-    fact <- 1000000
-
-    # we use integers only and thus multiply to catch enough digits
-    w <- round((weights * fact), digits = 0)
-    average.rank <- rep(x = 1, times = length(x))
-
-    # for relative ranks, unique values are sufficient
-    u <- unique(x)
-
-    # compute rank sums for unique scores and assign to vector according to x
-    for (i in 1:length(u)) {
-      average.rank[which(x == u[i])] <- (sum(w[x < u[i]]) + fact + sum(w[x <= u[i]])) /
-        2
-    }
-
-    # return absolute weighted ranks
-    return(average.rank / sum(w) * length(x))
   }
-}
 
+  # Input validation
+  if (length(x) != length(weights)) {
+    stop("x and weights must have the same length.")
+  }
+  if (anyNA(x) || anyNA(weights)) {
+    stop("x and weights must not contain NAs.")
+  }
+  if (any(weights <= 0)) {
+    stop("weights must be positive non-zero values.")
+  }
+
+  # 1. Aggregate weights by unique x value.
+  #    factor() orders the levels numerically, so the cumulative ("strictly
+  #    less than") logic below is valid, and the final mapping is done through
+  #    the integer factor codes - this avoids the numeric -> character ->
+  #    numeric round-trip and the floating-point match() failures it can cause.
+  f          <- factor(x)
+  sum_weights <- tapply(weights, f, sum)
+  W_eq        <- as.numeric(sum_weights)
+
+  # 2. Cumulative weight strictly below each unique value
+  W_less <- cumsum(c(0, W_eq[-length(W_eq)]))
+
+  # 3. Empirical mid-rank probability for each unique value
+  S        <- sum(weights)
+  mid_prob <- (W_less + (W_eq / 2)) / S
+
+  # 4. Map the probability onto the continuous rank scale [1, N];
+  #    reproduces base R rank() (ties.method = "average") for equal weights.
+  N            <- length(x)
+  unique_ranks <- (mid_prob * N) + 0.5
+
+  # 5. Map the unique ranks back onto the original layout of x via factor codes
+  final_ranks <- unique_ranks[as.integer(f)]
+
+  return(final_ranks)
+}
 
 #' Weighted quantile estimator
 #'
