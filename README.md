@@ -90,7 +90,8 @@ library(cNORM)
 # distribution, which usually performs well on tests with
 # a fixed number of dichotomous items without time cutoff.
 # Ideal use case: 1PL IRT scale / Rasch modelling
-# The example uses the inbuilt ELFE demo dataset.
+# The example uses the inbuilt ELFE demo dataset (reading comprehension test
+# for elementary school with grade variable; 28 items).
 model.betabinomial <- cnorm.betabinomial(elfe$group, elfe$raw)
 
 # Adapt the power parameters for α and β to increase or decrease
@@ -123,7 +124,8 @@ library(cNORM)
 # It can handle raw score value ranges including zeros and negative
 # values, which pose a problem to Box Cox distributions.
 # Shape parameters mu, sigma, epsilon and delta can be adjusted as well.
-# The following example uses the inbuilt PPVT4 demo dataset.
+# The following example uses the inbuilt PPVT4 demo dataset for receptive
+# vocabulary development from 3 to 18.
 model.shash <- cnorm.shash(ppvt$age, ppvt$raw)
 
 # Automatic grid search to determine the model with the lowest BIC
