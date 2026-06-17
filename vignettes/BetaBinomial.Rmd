@@ -100,7 +100,7 @@ The 'Raw Scores by Age' plot exhibits a pronounced curvilinear pattern, which is
 We will initially conduct the modeling without stratification or weighting.
 
 ## Model Fitting
-To fit the beta-binomial distribution to the data, we employ the 'cnorm.betabinomial()' function. You have to specify the variables 'age' for the explanatory variable and 'score' for the raw score to be modeled. Additionally, it is necessary to indicate the number of items, which for the PPVT-4, is 228. Note that it is important to employ the actual number of items here, not the maximum achievable score.
+To fit the beta-binomial distribution to the data, we employ the 'cnorm.betabinomial()' function. You have to specify the variables 'age' for the explanatory variable and 'score' for the raw score to be modeled. Additionally, it is necessary to indicate the number of items, which for the PPVT-4, is 228. Note that it is important to employ the actual number of items here, not the maximum score achieved. 
 
 ```{r fig1, fig.height = 4, fig.width = 7}
 # Models the data across a continuos explanatroy variable such as age,
@@ -110,7 +110,7 @@ To fit the beta-binomial distribution to the data, we employ the 'cnorm.betabino
 model.betabinomial <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 ```
 
-Fit indices can be obtained using the 'diagnostic.betabinomial()' function or the 'summary()' function. If the age variable and raw score variable are additionally specified, the output will also include R2, RMSE, and bias in relation to the observed data.
+Fit indices can be obtained using the 'diagnostic.betabinomial()' function or the 'summary()' function. If the age variable and raw score variable are additionally specified, the output will also include R2, RMSE, and bias in relation to the observed data. 
 
 ```{r}
 # Provides fit indices
@@ -118,7 +118,7 @@ Fit indices can be obtained using the 'diagnostic.betabinomial()' function or th
 diagnostics.betabinomial(model.betabinomial, age = ppvt$age, score = ppvt$raw)
 ```
 
-By default, the function fits a third-degree polynomial for both $\alpha$ and $\beta$. However, you can also specify the degrees of the polynomials yourself. Use the parameters 'alpha' and 'beta' for this purpose. When the 'mode' parameter of the function is set to 1, the adjustment is performed using the parameters for mean and standard deviation ($\mu$ and $\sigma$) instead of $\alpha$ and $\beta$. If the number of items is not specified using the 'n' parameter, the function will use the maximum raw score (which we do not recommend).
+By default, the function fits a third-degree polynomial for both $\alpha$ and $\beta$. However, you can also specify the degrees of the polynomials yourself. Use the parameters 'alpha' and 'beta' for this purpose. When the 'mode' parameter of the function is set to 1, the adjustment is performed using the parameters for mean and standard deviation ($\mu$ and $\sigma$) instead of $\alpha$ and $\beta$. If the number of items is not specified using the 'n' parameter, the function will use the maximum raw score (which we do not recommend). For an automatic selection of the model, you can use the autoselect.betabinomial function (and for shash accordingly autoselect.shah), which applies a full grid search for the model with the lowest BIC.
 
 Norm scores are returned as T-scores by default, but IQ scores, z-scores, percentiles, or customized norm scores specified by a vector 'c(M, SD)' are also possible.
 
