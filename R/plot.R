@@ -1147,30 +1147,44 @@ plotDensity <- function(model,
 }
 
 
-#' Generates a series of plots with number curves by percentile for different models
+#' Generates a series of plots with percentile curves for different models
 #'
-#' This functions makes use of 'plotPercentiles' to generate a series of plots
-#' with different number of predictors. It draws on the information provided by the model object
-#' to determine the bounds of the modeling (age and standard score range). It can be used as an
-#' additional model check to determine the best fitting model. Please have a look at the
-#'' plotPercentiles' function for further information.
-#' @param model The Taylor polynomial regression model object from the cNORM
-#' @param start Number of predictors to start with
-#' @param end Number of predictors to end with
-#' @param group The name of the grouping variable; the distinct groups are automatically
-#' determined
-#' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
-#' @param filename Prefix of the filename. If specified, the plots are saves as
-#' png files in the directory of the workspace, instead of displaying them
+#' This function makes use of 'plotPercentiles' to generate a series of plots
+#' for models with an increasing number of terms. It draws on the information
+#' provided by the model object to determine the bounds of the modeling (age
+#' and standard score range). It can be used as an additional model check to
+#' determine the best fitting model. Please have a look at the
+#' 'plotPercentiles' function for further information.
+#'
+#' Each model of the series is refitted on the complete norm sample (applying
+#' case weights, if the norm data were post stratified). Models are identified
+#' by their actual number of terms, which - after consistency screening in
+#' \code{bestModel} - is not necessarily identical to the row number of the
+#' model selection table. The subtitle of each plot reports the number of
+#' terms, the adjusted R2 and, if available, the result of the consistency
+#' check.
+#'
+#' @param model The Taylor polynomial regression model object or a cnorm object
+#' @param start Number of terms to start with (default 1)
+#' @param end Number of terms to end with; defaults to the largest available
+#'   model
+#' @param group The name of the grouping variable; the distinct groups are
+#'   automatically determined
+#' @param percentiles Vector with percentile scores, ranging from 0 to 1
+#'   (exclusive)
+#' @param filename Prefix of the filename. If specified, the plots are saved as
+#'   png files in the directory of the workspace, instead of only displaying
+#'   them. The number of terms is appended to the prefix.
 #' @seealso plotPercentiles
-#' @return the complete list of plots
+#' @return A named list of plots (names indicate the number of terms),
+#'   returned invisibly
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #'   # Load example data set, compute model and plot results
 #'   result <- cnorm(raw = elfe$raw, group = elfe$group)
-#'   plotPercentileSeries(result, start=4, end=6)
+#'   plotPercentileSeries(result, start = 4, end = 6)
 #' }
 #'
 #' @family plot
@@ -1181,83 +1195,99 @@ plotPercentileSeries <- function(model,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
   if (isParametric(model)) {
-    stop(
-      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead."
-    )
+    stop("This function is not applicable for parametric models (Beta Binomial ",
+         "or Sinh-Arcsinh). Please use the plotDensity function instead.")
   }
 
   if (isTaylor(model)) {
     d <- model$data
     model <- model$model
-  } else{
+  } else {
     stop("Please provide a cnorm object.")
   }
 
-  if (!attr(d, "useAge")) {
-    stop("Age or group variable explicitely set to FALSE in dataset. No plotting available.")
+  if (!isTRUE(attr(d, "useAge"))) {
+    stop("Age or group variable explicitly set to FALSE in dataset. ",
+         "No plotting available.")
   }
 
-  if ((is.null(end)) || (end > length(model$subsets$rss))) {
-    end <- length(model$subsets$rss)
+  subsets <- model$subsets
+  outmat  <- subsets$outmat
+  nTerms  <- rowSums(outmat == "*")   # actual model sizes (row index is
+  # NOT reliable after screening)
+  maxTerms <- max(nTerms)
+
+  # sanitize requested range
+  if (is.null(end) || end > maxTerms) end <- maxTerms
+  if (start < 1) start <- 1
+  if (start > end) start <- end
+
+  # select the rows whose term count falls into the requested range;
+  # after screening there is one model per size, otherwise take the first
+  rows <- which(nTerms >= start & nTerms <= end)
+  rows <- rows[!duplicated(nTerms[rows])]
+  if (length(rows) == 0L) {
+    stop("No models with ", start, " to ", end, " terms available.")
   }
 
-  if (start < 1) {
-    start <- 1
-  }
+  # case weights (post stratification), analogous to bestModel
+  w <- if (!is.null(attr(d, "weights")) && !is.null(d$weights))
+    d$weights else NULL
 
-  if (start > end) {
-    start <- end
-  }
+  # static model information, assembled once
+  minR <- min(d[[model$raw]])
+  maxR <- max(d[[model$raw]])
 
-  minR <- min(d[, model$raw])
-  maxR <- max(d[, model$raw])
-  l <- list()
+  fields <- list(
+    ideal.model = model$ideal.model,
+    cutoff  = model$cutoff,
+    useAge  = model$useAge,
+    minA1   = model$minA1,
+    maxA1   = model$maxA1,
+    minL1   = model$minL1,
+    maxL1   = model$maxL1,
+    minRaw  = minR,
+    maxRaw  = maxR,
+    raw     = model$raw,
+    scaleSD = attr(d, "scaleSD"),
+    scaleM  = attr(d, "scaleM"),
+    descend = attr(d, "descend"),
+    group   = attr(d, "group"),
+    age     = attr(d, "age"),
+    k       = attr(d, "k"),
+    A       = attr(d, "A")
+  )
 
-  while (start <= end) {
-    message(paste0("Plotting model ", start))
-    # compute model
-    text <- paste0(model$raw, " ~ ")
-    names <- colnames(model$subsets$outmat)
+  termNames <- colnames(outmat)
+  l <- vector("list", length(rows))
+  names(l) <- as.character(nTerms[rows])
 
-    j <- 1
-    nr <- 0
-    while (j <= length(names)) {
-      if (model$subsets$outmat[start, j] == "*") {
-        text1 <- names[j]
-        if (nr == 0) {
-          text <- paste(text, text1, sep = "")
-        } else {
-          text <- paste(text, text1, sep = " + ")
-        }
+  for (idx in seq_along(rows)) {
+    row <- rows[idx]
+    size <- nTerms[row]
+    message("Plotting model with ", size, " terms ...")
 
-        nr <- nr + 1
-      }
-      j <- j + 1
-    }
+    # refit the candidate model on the complete sample
+    selected <- termNames[outmat[row, ] == "*"]
+    f <- stats::reformulate(selected, response = model$raw)
+    bestformula <- if (is.null(w)) stats::lm(f, data = d)
+    else stats::lm(f, data = d, weights = w)
 
-    bestformula <- lm(text, d)
-    bestformula$ideal.model <- model$ideal.model
-    bestformula$cutoff <- model$cutoff
-    bestformula$subsets <- model$subsets
-    bestformula$useAge <- model$useAge
-    bestformula$maxA1 <- model$maxA1
-    bestformula$minA1 <- model$minA1
-    bestformula$minL1 <- model$minL1
-    bestformula$maxL1 <- model$maxL1
-    bestformula$minRaw <- minR
-    bestformula$maxRaw <- maxR
-    bestformula$raw <- model$raw
-    bestformula$scaleSD <- attributes(d)$scaleSD
-    bestformula$scaleM <- attributes(d)$scaleM
-    bestformula$descend <- attributes(d)$descend
-    bestformula$group <- attributes(d)$group
-    bestformula$age <- attributes(d)$age
-    bestformula$k <- attributes(d)$k
+    # attach the static model information
+    bestformula[names(fields)] <- fields
 
     result <- list(data = d, model = bestformula)
     class(result) <- "cnormTemp"
 
-    l[[length(l) + 1]] <- plotPercentiles(
+    # subtitle: actual size, fit and consistency information
+    r2 <- round(subsets$adjr2[row], digits = 4)
+    consInfo <- if (!is.null(subsets$consistent) && !is.na(subsets$consistent[row])) {
+      if (subsets$consistent[row]) ", consistent" else ", inconsistent"
+    } else {
+      ""
+    }
+
+    l[[idx]] <- plotPercentiles(
       result,
       minAge = model$minA1,
       maxAge = model$maxA1,
@@ -1267,47 +1297,47 @@ plotPercentileSeries <- function(model,
       scale = NULL,
       group = group,
       title = "Observed and Predicted Percentiles",
-      subtitle = bquote(paste(
-        "Model with ", .(start), " predictors, ", R^2, "=", .(round(bestformula$subsets$adjr2[[start]], digits = 4))
-      ))
+      subtitle = bquote(paste("Model with ", .(size), " terms, ",
+                              R^2, " = ", .(r2), .(consInfo)))
     )
 
     if (!is.null(filename)) {
       ggsave(
-        filename = paste0(filename, start, ".png"),
-        plot = l[[length(l)]],
-        # Assuming 'chart' is your ggplot object
+        filename = paste0(filename, size, ".png"),
+        plot = l[[idx]],
         device = "png",
         width = 10,
-        # Specify width in inches
         height = 7,
-        # Specify height in inches
-        dpi = 300  # Specify resolution
+        dpi = 300
       )
     }
-    start <- start + 1
   }
-  return(l)
+
+  invisible(l)
 }
 
 
-#' Evaluate information criteria for regression model
+#' #' Evaluate information criteria for regression model
 #'
-#' This function plots various information criteria and model fit statistics against
-#' the number of predictors or adjusted R-squared, depending on the type of plot selected.
-#' It helps in model selection by visualizing different aspects of model performance. Models,
-#' which did not pass the initial consistency check are depicted with an empty circle.
+#' This function plots various information criteria and model fit statistics
+#' against the number of terms or the adjusted R-squared, depending on the type
+#' of plot selected. It helps in model selection by visualizing different
+#' aspects of model performance. Models which did not pass the consistency
+#' check are depicted with an empty circle; the automatically selected model is
+#' highlighted in red. If BIC-weighted model averaging was applied
+#' (\code{averaging = TRUE}), a caption indicates that the final coefficients
+#' are a weighted combination of the consistent candidate models shown.
 #'
 #' @param model The regression model from the bestModel function or a cnorm object.
 #' @param type Integer specifying the type of plot to generate:
 #'   \itemize{
-#'     \item 0: Adjusted R2 by number of predictors (default)
-#'     \item 1: Log-transformed Mallow's Cp by adjusted R2
+#'     \item 0: Adjusted R2 by number of terms (default)
+#'     \item 1: Log-transformed Mallows's Cp by adjusted R2
 #'     \item 2: Bayesian Information Criterion (BIC) by adjusted R2
-#'     \item 3: Root Mean Square Error (RMSE) by number of predictors
-#'     \item 4: Residual Sum of Squares (RSS) by number of predictors
-#'     \item 5: F-test statistic for consecutive models by number of predictors
-#'     \item 6: p-value for model tests by number of predictors
+#'     \item 3: Root Mean Square Error (RMSE) by number of terms
+#'     \item 4: Residual Sum of Squares (RSS) by number of terms
+#'     \item 5: F-test statistic for consecutive models by number of terms
+#'     \item 6: p-value for model tests by number of terms
 #'   }
 #'
 #' @return A ggplot object representing the selected information criterion plot.
@@ -1315,19 +1345,26 @@ plotPercentileSeries <- function(model,
 #' @details
 #' The function generates different plots to help in model selection:
 #'
-#' - For types 1 and 2 (Mallow's Cp and BIC), look for the "elbow" in the curve where
-#'   the information criterion begins to drop. This often indicates a good balance
-#'   between model fit and complexity.
+#' - For types 1 and 2 (Mallows's Cp and BIC), look for the "elbow" in the curve
+#'   where the information criterion begins to drop. This often indicates a good
+#'   balance between model fit and complexity.
 #' - For type 0 (Adjusted R2), higher values indicate better fit, but be cautious
 #'   of overfitting with values approaching 1.
 #' - For types 3 and 4 (RMSE and RSS), lower values indicate better fit.
-#' - For type 5 (F-test), higher values suggest significant improvement with added predictors.
+#' - For type 5 (F-test), higher values suggest significant improvement with
+#'   added terms.
 #' - For type 6 (p-values), values below the significance level (typically 0.05)
-#'   suggest significant improvement with added predictors.
+#'   suggest significant improvement with added terms.
+#'
+#' The F-tests and p-values compare each model with the preceding (smaller) one,
+#' with degrees of freedom based on the actual difference in the number of
+#' parameters. After consistency screening, consecutive models may differ by
+#' more than one term.
 #'
 #' @note
-#' It's important to balance statistical measures with practical considerations and
-#' to visually inspect the model fit using functions like \code{plotPercentiles}.
+#' It's important to balance statistical measures with practical considerations
+#' and to visually inspect the model fit using functions like
+#' \code{plotPercentiles}.
 #'
 #' @seealso \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
 #'
@@ -1340,7 +1377,7 @@ plotPercentileSeries <- function(model,
 #' # Plot BIC against adjusted R-squared
 #' plotSubset(cnorm.model, type = 2)
 #'
-#' # Plot RMSE against number of predictors
+#' # Plot RMSE against number of terms
 #' plotSubset(cnorm.model, type = 3)
 #' }
 #'
@@ -1349,252 +1386,166 @@ plotPercentileSeries <- function(model,
 #' @family plot
 plotSubset <- function(model, type = 0) {
   if (isParametric(model)) {
-    stop(
-      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh)."
-    )
+    stop("This function is not applicable for parametric models ",
+         "(Beta Binomial or Sinh-Arcsinh).")
   }
 
   if (isTaylor(model)) {
     model <- model$model
   }
 
-  # Compute F and significance
-  RSS1 <- c(NA, model$subsets$rss)
-  RSS2 <- c(model$subsets$rss, NA)
-  k1 <- seq(from = 1, to = length(RSS1))
-  k2 <- seq(from = 2, to = length(RSS1) + 1)
-  df1 <- k2 - k1
-  df2 <- length(model$fitted.values) - k2
-  F <- ((RSS1 - RSS2) / df1) / (RSS2 / df2)
-  p <- 1 - pf(F, df1, df2)
+  if (is.null(model$subsets)) {
+    stop("The model object does not contain model selection information ('subsets').")
+  }
 
-  filled <- rep(TRUE, length(model$subsets$rss))
-  if (!is.null(model$subsets$consistent))
-    filled <- model$subsets$consistent
-  cutoff <- .99
-  if (!is.null(model$cutoff))
-    cutoff <- model$cutoff
+  if (!(type %in% 0:6)) {
+    warning("Unknown plot type; using type = 0 (adjusted R2).")
+    type <- 0
+  }
 
-  dataFrameTMP <- data.frame(
-    adjr2 = model$subsets$adjr2,
-    bic = model$subsets$bic,
-    cp = model$subsets$cp,
-    RSS = model$subsets$rss,
-    RMSE = sqrt(model$subsets$rss / length(model$fitted.values)),
-    F = head(F, -1),
-    p = head(p, -1),
-    nr = seq(1, length(model$subsets$adjr2), by = 1),
-    filled = filled
+  subsets <- model$subsets
+  nModels <- length(subsets$rss)
+  n       <- length(model$fitted.values)
+
+  # actual model complexity per row (row index != number of terms
+  # after consistency screening!)
+  nTerms  <- rowSums(subsets$outmat == "*")
+  nParams <- nTerms + 1L
+
+  # F-tests between consecutive models, df from actual parameter counts
+  Fvals <- rep(NA_real_, nModels)
+  pvals <- rep(NA_real_, nModels)
+  if (nModels > 1L) {
+    df1 <- diff(nParams)
+    df1[df1 < 1L] <- NA                      # guard non-nested comparisons
+    df2 <- n - nParams[-1L]
+    Fs  <- (-diff(subsets$rss) / df1) / (subsets$rss[-1L] / df2)
+    Fvals[-1L] <- Fs
+    pvals[-1L] <- stats::pf(Fs, df1, df2, lower.tail = FALSE)
+  }
+
+  # consistency flags: NA (unscreened, e.g. custom predictors) shown as filled
+  consistent <- subsets$consistent
+  if (is.null(consistent)) consistent <- rep(TRUE, nModels)
+  consistent[is.na(consistent)] <- TRUE
+
+  cutoff <- if (!is.null(model$cutoff)) model$cutoff else .99
+  sel    <- if (!is.null(model$ideal.model)) model$ideal.model else NA_integer_
+
+  dat <- data.frame(
+    adjr2 = subsets$adjr2,
+    bic   = subsets$bic,
+    cp    = subsets$cp,
+    RSS   = subsets$rss,
+    RMSE  = sqrt(subsets$rss / n),
+    Fstat = Fvals,
+    pval  = pvals,
+    nr    = nTerms,
+    consistency = factor(ifelse(consistent, "consistent", "inconsistent"),
+                         levels = c("consistent", "inconsistent"))
   )
 
-  # Improved base theme
+  # ---- plot configuration per type -----------------------------------------
+  xlab_terms <- "Number of terms"
+  xlab_r2    <- expression(paste("Adjusted ", R^2))
+
+  cfg <- switch(type + 1L,
+                list(x = "nr",    y = "adjr2",                                     # 0
+                     title = expression(paste("Information Function: Adjusted ", R^2)),
+                     xlab = xlab_terms,
+                     ylab = expression(paste("Adjusted ", R^2))),
+                list(x = "adjr2", y = "cp",                                        # 1
+                     title = "Information Function: Mallows's Cp",
+                     xlab = xlab_r2,
+                     ylab = "Mallows's Cp"),
+                list(x = "adjr2", y = "bic",                                       # 2
+                     title = "Information Function: BIC",
+                     xlab = xlab_r2,
+                     ylab = "Bayesian Information Criterion (BIC)"),
+                list(x = "nr",    y = "RMSE",                                      # 3
+                     title = "Information Function: RMSE",
+                     xlab = xlab_terms,
+                     ylab = "Root Mean Square Error (Raw Score)"),
+                list(x = "nr",    y = "RSS",                                       # 4
+                     title = "Information Function: RSS",
+                     xlab = xlab_terms,
+                     ylab = "Residual Sum of Squares (RSS)"),
+                list(x = "nr",    y = "Fstat",                                     # 5
+                     title = "Information Function: F-test Statistics",
+                     xlab = xlab_terms,
+                     ylab = "F-test Statistics for Consecutive Models"),
+                list(x = "nr",    y = "pval",                                      # 6
+                     title = "Information Function: p-values",
+                     xlab = xlab_terms,
+                     ylab = expression(paste("p-values for Tests on ", R^2,
+                                             " adj. of Consecutive Models")))
+  )
+
   theme_custom <- theme_minimal() +
     theme(
-      plot.title = element_text(
-        face = "bold",
-        size = 16,
-        hjust = 0.5
-      ),
-      axis.title = element_text(face = "bold", size = 12),
+      plot.title   = element_text(face = "bold", size = 16, hjust = 0.5),
+      axis.title   = element_text(face = "bold", size = 12),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
-      axis.text = element_text(size = 10),
-      legend.position = "none",
+      axis.text    = element_text(size = 10),
       legend.title = element_blank(),
-      legend.text = element_text(size = 10),
+      legend.text  = element_text(size = 10),
+      # show the shape legend only if inconsistent models are present
+      legend.position = if (any(dat$consistency == "inconsistent"))
+        "bottom" else "none",
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
 
-  # Custom color palette
-  custom_colors <- c(
-    "Model in Ascending Order" = "#1f77b4",
-    "Cutoff Value" = "#d62728",
-    "p = .05" = "#d62728"
-  )
+  # ---- base plot -------------------------------------------------------------
+  plt <- ggplot(dat, aes(x = .data[[cfg$x]], y = .data[[cfg$y]])) +
+    theme_custom +
+    geom_line(color = "#1f77b4", linewidth = .75, na.rm = TRUE) +
+    geom_point(aes(shape = .data$consistency),
+               color = "#1f77b4", size = 2.5, na.rm = TRUE) +
+    # named values: robust even when only one level is present
+    scale_shape_manual(values = c(consistent = 16, inconsistent = 1),
+                       drop = FALSE) +
+    labs(title = cfg$title, x = cfg$xlab, y = cfg$ylab, shape = NULL)
 
-  # Base plot
-  p <- ggplot(dataFrameTMP) + theme_custom
-
-  # Define plot based on type
-  if (type == 1) {
-    p <- p +
-      geom_line(aes(
-        x = .data$adjr2,
-        y = .data$cp,
-        color = "Model in Ascending Order"
-      ),
-      linewidth = .75) +
-      geom_point(
-        aes(
-          x = .data$adjr2,
-          y = .data$cp,
-          shape = .data$filled
-        ),
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      scale_y_log10() +
-      labs(title = "Information Function: Mallows's Cp",
-           x = expression(paste("Adjusted ", R^2)),
-           y = "log-transformed Mallows's Cp") +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else if (type == 2) {
-    p <- p +
-      geom_line(aes(
-        x = .data$adjr2,
-        y = .data$bic,
-        color = "Model in Ascending Order"
-      ),
-      linewidth = .75) +
-      geom_point(
-        aes(
-          x = .data$adjr2,
-          y = .data$bic,
-          shape = .data$filled
-        ),
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      labs(title = "Information Function: BIC",
-           x = expression(paste("Adjusted ", R^2)),
-           y = "Bayesian Information Criterion (BIC)") +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else if (type == 3) {
-    p <- p +
-      geom_line(aes(
-        x = .data$nr,
-        y = .data$RMSE,
-        color = "Model in Ascending Order"
-      ),
-      linewidth = .75) +
-      geom_point(
-        aes(
-          x = .data$nr,
-          y = .data$RMSE,
-          shape = .data$filled
-        ),
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      labs(title = "Information Function: RMSE", x = "Number of Predictors", y = "Root Mean Square Error (Raw Score)") +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else if (type == 4) {
-    p <- p +
-      geom_line(aes(
-        x = .data$nr,
-        y = .data$RSS,
-        color = "Model in Ascending Order"
-      ),
-      linewidth = .75) +
-      geom_point(
-        aes(
-          x = .data$nr,
-          y = .data$RSS,
-          shape = .data$filled
-        ),
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      labs(title = "Information Function: RSS", x = "Number of Predictors", y = "Residual Sum of Squares (RSS)") +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else if (type == 5) {
-    p <- p +
-      geom_line(
-        aes(
-          x = .data$nr,
-          y = .data$F,
-          color = "Model in Ascending Order"
-        ),
-        na.rm = TRUE,
-        linewidth = .75
-      ) +
-      geom_point(
-        aes(
-          x = .data$nr,
-          y = .data$F,
-          shape = .data$filled
-        ),
-        na.rm = TRUE,
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      labs(title = "Information Function: F-test Statistics", x = "Number of Predictors", y = "F-test Statistics for Consecutive Models") +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else if (type == 6) {
-    p <- p +
-      geom_line(
-        aes(
-          x = .data$nr,
-          y = .data$p,
-          color = "Model in Ascending Order"
-        ),
-        na.rm = TRUE,
-        linewidth = .75
-      ) +
-      geom_point(
-        aes(
-          x = .data$nr,
-          y = .data$p,
-          shape = .data$filled
-        ),
-        na.rm = TRUE,
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      ylim(-0.005, 0.11) +
-      labs(title = "Information Function: p-values",
-           x = "Number of Predictors",
-           y = expression(
-             paste("p-values for Tests on ", R^2, " adj. of Consecutive Models")
-           )) +
-      geom_hline(
-        aes(yintercept = 0.05, color = "p = .05"),
-        linetype = "dashed",
-        linewidth = 1
-      ) +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
-  } else {
-    p <- p +
-      geom_line(
-        aes(
-          x = .data$nr,
-          y = .data$adjr2,
-          color = "Model in Ascending Order"
-        ),
-        na.rm = TRUE,
-        linewidth = .75
-      ) +
-      geom_point(
-        aes(
-          x = .data$nr,
-          y = .data$adjr2,
-          shape = .data$filled
-        ),
-        na.rm = TRUE,
-        size = 2.5,
-        color = "#1f77b4"
-      ) +
-      labs(title = expression(paste("Information Function: Adjusted ", R^2)),
-           x = "Number of Predictors",
-           y = expression(paste("Adjusted ", R^2))) +
-      geom_hline(yintercept = cutoff,
-                 linetype = "dashed",
-                 linewidth = .8) +
-      scale_color_manual(values = custom_colors) +
-      scale_shape_manual(values = c(1, 16))
+  # highlight the selected model
+  if (!is.na(sel) && sel >= 1L && sel <= nModels) {
+    plt <- plt +
+      geom_point(data = dat[sel, , drop = FALSE],
+                 aes(shape = .data$consistency),
+                 color = "#3322AA", size = 2.5, stroke = 1.1, na.rm = TRUE)
   }
 
-  # Add legend title
-  p <- p + labs(color = "")
+  # ---- type-specific decorations ----------------------------------------------
+  if (type == 0) {
+    plt <- plt +
+      geom_hline(yintercept = cutoff, linetype = "dashed",
+                 linewidth = .8, color = "#d62728")
+  } else if (type == 1) {
+    # Mallows's Cp can legitimately be <= 0; log scale only when valid
+    if (all(dat$cp > 0, na.rm = TRUE)) {
+      plt <- plt + scale_y_log10() +
+        labs(y = "log-transformed Mallows's Cp")
+    } else {
+      message("Mallows's Cp contains non-positive values; ",
+              "using a linear scale instead of log10.")
+    }
+  } else if (type == 6) {
+    plt <- plt +
+      geom_hline(yintercept = 0.05, linetype = "dashed",
+                 linewidth = 1, color = "#d62728") +
+      # clip the view without silently removing observations (unlike ylim)
+      coord_cartesian(ylim = c(-0.005, 0.11))
+  }
 
-  return(p)
+  # indicate model averaging
+  if (isTRUE(model$averaged)) {
+    plt <- plt + labs(caption = paste0(
+      "Final coefficients: BIC-weighted average over ",
+      length(model$averagingWeights), " consistent candidate models."))
+  }
+
+  return(plt)
 }
 
 #'

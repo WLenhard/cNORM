@@ -27,6 +27,7 @@ Other model:
 \code{\link[=print.cnorm]{print.cnorm()}},
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
-\code{\link[=regressionFunction]{regressionFunction()}}
+\code{\link[=regressionFunction]{regressionFunction()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

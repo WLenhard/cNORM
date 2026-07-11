@@ -2,10 +2,7 @@
 % Please edit documentation in R/raking.R
 \name{standardizeRakingWeights}
 \alias{standardizeRakingWeights}
-\title{Function for standardizing raking weights
-Raking weights get divided by the smallest weight. Thereby, all weights
-become larger or equal to 1 without changing the ratio of the weights
-to each other.}
+\title{Function for standardizing raking weights}
 \usage{
 standardizeRakingWeights(weights)
 }
@@ -16,8 +13,8 @@ standardizeRakingWeights(weights)
 the standardized weights
 }
 \description{
-Function for standardizing raking weights
 Raking weights get divided by the smallest weight. Thereby, all weights
 become larger or equal to 1 without changing the ratio of the weights
 to each other.
 }
+\keyword{internal}

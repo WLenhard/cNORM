@@ -12,3 +12,4 @@ checkWeights(weights)
 \description{
 Check, if NA or values <= 0 occur and issue warning
 }
+\keyword{internal}

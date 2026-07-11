@@ -9,8 +9,8 @@ cnorm.cv(
   formula = NULL,
   repetitions = 5,
   norms = TRUE,
-  min = 1,
-  max = 12,
+  min = 4,
+  max = 20,
   cv = "full",
   pCutoff = NULL,
   width = NA,
@@ -21,23 +21,29 @@ cnorm.cv(
 )
 }
 \arguments{
-\item{data}{Data frame of norm sample or a cnorm object. Should have ranking, powers, and interaction of L and A.}
+\item{data}{Data frame of norm sample or a cnorm object. Should have ranking,
+powers, and interaction of L and A.}
 
-\item{formula}{Formula from an existing regression model; min/max functions ignored. If using a cnorm object, this is automatically fetched.}
+\item{formula}{Formula from an existing regression model; min/max functions
+ignored. If using a cnorm object, this is automatically fetched.}
 
 \item{repetitions}{Number of repetitions for cross-validation.}
 
-\item{norms}{If TRUE, computes norm score crossfit and R^2. Note: Computationally intensive.}
+\item{norms}{If TRUE, computes norm score crossfit and R^2. Note:
+Computationally intensive.}
 
-\item{min}{Start with a minimum number of terms (default = 1).}
+\item{min}{Start with a minimum number of terms (default = 4).}
 
-\item{max}{Maximum terms in model, up to (k + 1) * (t + 1) - 1.}
+\item{max}{Maximum terms in model, up to (k + 1) * (t + 1) - 1 (default = 20).}
 
-\item{cv}{"full" (default) splits data into training/validation, then ranks. Otherwise, expects a pre-ranked dataset.}
+\item{cv}{"full" (default) splits data into training/validation, then ranks.
+Otherwise, expects a pre-ranked dataset.}
 
-\item{pCutoff}{Checks stratification for unbalanced data. Performs a t-test per group. Default set to 0.2 to minimize beta error.}
+\item{pCutoff}{Checks stratification for unbalanced data. Performs a t-test
+per group. Default set to 0.2 to minimize beta error.}
 
-\item{width}{If provided, ranking done via `rankBySlidingWindow`. Otherwise, by group.}
+\item{width}{If provided, ranking done via `rankBySlidingWindow`. Otherwise,
+by group.}
 
 \item{raw}{Name of the raw score variable.}
 
@@ -48,31 +54,39 @@ cnorm.cv(
 \item{weights}{Name of the weighting parameter.}
 }
 \value{
-Table with results per term number: RMSE for raw scores, R^2 for norm scores, and crossfit measure.
+Table with results per term number: RMSE for raw scores, R^2 for
+  norm scores, and crossfit measure.
 }
 \description{
-Assists in determining the optimal number of terms for the regression model using repeated Monte Carlo
-cross-validation. It leverages an 80-20 split between training and validation data, with stratification by norm group
-or random sample in case of using sliding window ranking.
+Assists in determining the optimal number of terms for the regression model
+using repeated Monte Carlo cross-validation. It leverages an 80-20 split
+between training and validation data, with stratification by norm group or
+random sample in case of using sliding window ranking.
 }
 \details{
-Successive models, with an increasing number of terms, are evaluated, and the RMSE for raw scores plotted. This
-encompasses the training, validation, and entire dataset. If `norms` is set to TRUE (default), the function will also
-calculate the mean norm score reliability and crossfit measures. Note that due to the computational requirements
-of norm score calculations, execution can be slow, especially with numerous repetitions or terms.
+Successive models, with an increasing number of terms, are evaluated, and the
+RMSE for raw scores plotted. This encompasses the training, validation, and
+entire dataset. If `norms` is set to TRUE (default), the function will also
+calculate the mean norm score reliability and crossfit measures. Note that
+due to the computational requirements of norm score calculations, execution
+can be slow, especially with numerous repetitions or terms.
 
-When `cv` is set to "full" (default), both test and validation datasets are ranked separately, providing comprehensive
-cross-validation. For a more streamlined validation process focused only on modeling, a pre-ranked dataset can be used.
-The output comprises RMSE for raw score models, norm score R^2, delta R^2, crossfit, and the norm score SE according
-to Oosterhuis, van der Ark, & Sijtsma (2016).
+When `cv` is set to "full" (default), both test and validation datasets are
+ranked separately, providing comprehensive cross-validation. For a more
+streamlined validation process focused only on modeling, a pre-ranked dataset
+can be used. The output comprises RMSE for raw score models, norm score R^2,
+delta R^2, crossfit, and the norm score SE according to Oosterhuis, van der
+Ark, & Sijtsma (2016).
 
-This function is not yet prepared for the 'extensive' search strategy, introduced in version 3.3, but instead
-relies on the first model per number of terms, without consistency check.
+This function is not yet prepared for the 'extensive' search strategy,
+introduced in version 3.3, but instead relies on the first model per number
+of terms, without consistency check.
 
 For assessing overfitting:
 \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
-A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and values around 1 are optimal,
-given a low raw score RMSE and high norm score validation R^2.
+A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and
+values around 1 are optimal, given a low raw score RMSE and high norm score
+validation R^2.
 
 Suggestions for ideal model selection:
 \itemize{
@@ -93,8 +107,9 @@ cnorm.cv(result, repetitions = 1)
 
 }
 \references{
-Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
-and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016).
+  Sample Size Requirements for Traditional and Regression-Based Norms.
+  Assessment, 23(2), 191-202. https://doi.org/10.1177/1073191115580638
 }
 \seealso{
 Other model:
@@ -106,6 +121,7 @@ Other model:
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

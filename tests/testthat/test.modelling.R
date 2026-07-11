@@ -213,3 +213,19 @@ test_that("predict.cnormShash stops when score is missing", {
   skip_on_cran()
   expect_error(predict(get_shash(), age = c(7, 10)))
 })
+
+# =============================================================================
+# 8. WEIGHTED MODELLING
+# =============================================================================
+
+test_that("bestModel works with case weights", {
+  data <- prepareData(elfe)
+  w <- runif(nrow(data), 0.5, 2)
+  m <- bestModel(data, weights = w, plot = FALSE)
+  expect_s3_class(m, "cnormModel")
+  expect_false(anyNA(m$coefficients))
+
+  # weights = FALSE must ignore existing weights without error
+  m2 <- bestModel(data, weights = FALSE, plot = FALSE)
+  expect_s3_class(m2, "cnormModel")
+})

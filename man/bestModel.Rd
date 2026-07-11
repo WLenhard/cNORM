@@ -16,58 +16,79 @@ bestModel(
   force.in = NULL,
   plot = TRUE,
   extensive = TRUE,
+  averaging = FALSE,
   subsampling = FALSE
 )
 }
 \arguments{
-\item{data}{Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).}
+\item{data}{Preprocessed dataset with 'raw' scores, powers, interactions, and
+usually an explanatory variable (like age).}
 
 \item{raw}{Name of the raw score variable (default: 'raw').}
 
 \item{R2}{Adjusted R^2 stopping criterion for model building.}
 
-\item{k}{Power constant influencing model complexity (default: 4, max: 6).}
+\item{k}{Power constant influencing model complexity (default: taken from the
+data preparation, max: 6).}
 
-\item{t}{Age power parameter. If unset, defaults to `k`.}
+\item{t}{Age power parameter. If unset, taken from the data preparation
+(default 3).}
 
-\item{predictors}{List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.}
+\item{predictors}{List of predictors or regression formula for model
+selection. Overrides 'k' and can include additional variables.}
 
 \item{terms}{Desired number of terms in the model.}
 
-\item{weights}{Optional case weights. If set to FALSE, default weights (if any) are ignored.}
+\item{weights}{Optional case weights. If set to FALSE, default weights
+(if any) are ignored.}
 
 \item{force.in}{Variables forcibly included in the regression.}
 
-\item{plot}{If TRUE (default), displays a percentile plot of the model and information about the
-regression object. FALSE turns off plotting and report.}
+\item{plot}{If TRUE (default), displays a percentile plot of the model and
+information about the regression object. FALSE turns off plotting and report.}
 
-\item{extensive}{If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones}
+\item{extensive}{If TRUE (default), screen models for consistency and - if
+possible - exclude inconsistent ones.}
 
-\item{subsampling}{(deprecated) If TRUE (default is FALSE), use 10-fold
-subsampled coefficient averaging in `bestModel`.}
+\item{averaging}{If TRUE (default FALSE), apply BIC-weighted model averaging
+across the consistency-screened candidate models instead of selecting a
+single model. Requires \code{extensive = TRUE} and age-based norming.}
+
+\item{subsampling}{Deprecated and ignored. Use \code{averaging} instead.}
 }
 \value{
-The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
+The model. Further exploration can be done using
+  \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 }
 \description{
-Computes Taylor polynomial regression models by evaluating a series of models with increasing predictors.
-It aims to find a consistent model that effectively captures the variance in the data. It draws on the
-regsubsets function from the leaps package and builds up to 20 models for each number of predictors, evaluates
-these models regarding model consistency and selects consistent model with the highest R^2.
-This automatic model selection should usually be accompanied with visual inspection of the percentile plots
-and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonious model,
-if desired.
+Computes Taylor polynomial regression models by evaluating a series of models
+with increasing number of predictors. It aims to find a consistent model that
+effectively captures the variance in the data. It draws on the regsubsets
+function from the leaps package, builds up to 10 models per number of
+predictors, screens them for model consistency (monotonicity of the mapping
+between norm score and raw score over the complete age range) and selects the
+consistent model with the highest R^2. This automatic model selection should
+usually be accompanied by visual inspection of the percentile plots and
+assessment of fit statistics. Set R^2 or the number of terms manually to
+retrieve a more parsimonious model, if desired.
 }
 \details{
 The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
-\code{computePowers} and \code{prepareData} are usually not called directly, but accessed
-through other functions like \code{cnorm}.
+\code{computePowers} and \code{prepareData} are usually not called directly,
+but accessed through other functions like \code{cnorm}.
 
-Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
+Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can
+aid in model evaluation.
+
+If \code{averaging = TRUE}, the final coefficients are not taken from a
+single selected model, but computed as a BIC-weighted average across all
+consistency-screened candidate models (weights \eqn{w_j \propto
+exp(-\Delta BIC_j / 2)}). Since a convex combination of functions that are
+all monotone in the same direction is itself monotone, the averaged model is
+guaranteed to remain consistent, while reducing model selection variance.
+This replaces the deprecated \code{subsampling} approach.
 }
 \examples{
-
-# Example with sample data
 \dontrun{
 # It is not recommended to directly use this function. Rather use 'cnorm' instead.
 normData <- prepareData(elfe)
@@ -92,6 +113,7 @@ Other model:
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

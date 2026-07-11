@@ -21,3 +21,4 @@ regression function
 \description{
 Build regression function for bestModel
 }
+\keyword{internal}

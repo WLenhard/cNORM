@@ -16,7 +16,9 @@ the weighted absolute ranks
 }
 \description{
 Conducts weighted ranking on the basis of sums of weights per unique raw score.
-Please provide a vector with raw values and an additional vector with the weight of each
-observation. In case the weight vector is NULL, a normal ranking is done. The vectors may not
-include NAs and the weights should be positive non-zero values.
+Please provide a vector with raw values and an additional vector with the weight
+of each observation. In case the weight vector is NULL, a normal ranking is done.
+The vectors may not include NAs and the weights should be positive non-zero
+values. With equal weights, the result reproduces the mid-ranks of base R's
+\code{rank()} (\code{ties.method = "average"}).
 }

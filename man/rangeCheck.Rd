@@ -33,9 +33,10 @@ rangeCheck(
 the report
 }
 \description{
-Regression model only work in a specific range and extrapolation horizontally (outside
-the original range) or vertically (extreme norm scores) might lead to inconsistent
-results. The function generates a message, indicating extrapolation and the range of the original data.
+Regression models only work in a specific range and extrapolation
+horizontally (outside the original range) or vertically (extreme norm
+scores) might lead to inconsistent results. The function generates a
+message, indicating extrapolation and the range of the original data.
 }
 \examples{
 \dontrun{
@@ -53,6 +54,7 @@ Other model:
 \code{\link[=print.cnorm]{print.cnorm()}},
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

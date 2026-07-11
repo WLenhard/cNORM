@@ -9,21 +9,22 @@ derive(model, order = 1)
 \arguments{
 \item{model}{The regression model or a cnorm object}
 
-\item{order}{The degree of the derivate, default: 1}
+\item{order}{The degree of the derivative, default: 1}
 }
 \value{
 The derived coefficients
 }
 \description{
-Calculates the derivative of the location / norm value from the regression model with the first
-derivative as the default. This is useful for finding violations of model assumptions and problematic
-distribution features as f. e. bottom and ceiling effects, non-progressive norm scores within an
-age group or in general #' intersecting percentile curves.
+Calculates the derivative of the location / norm value from the regression
+model with the first derivative as the default. This is useful for finding
+violations of model assumptions and problematic distribution features as
+f. e. bottom and ceiling effects, non-progressive norm scores within an age
+group or in general intersecting percentile curves.
 }
 \examples{
 \dontrun{
   m <- cnorm(raw = elfe$raw, group = elfe$group)
-  derivedCoefficients <- derive(m, order=1)
+  derivedCoefficients <- derive(m, order = 1)
 }
 }
 \seealso{
@@ -36,6 +37,7 @@ Other model:
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

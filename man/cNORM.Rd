@@ -19,6 +19,7 @@ cnorm(
   R2 = NULL,
   plot = TRUE,
   extensive = TRUE,
+  averaging = TRUE,
   subsampling = FALSE
 )
 }
@@ -56,6 +57,10 @@ receive lower norm scores (e.g. for error scores).}
 \item{plot}{If TRUE (default), display percentile plot and report.}
 
 \item{extensive}{If TRUE (default), screen models for monotonic consistency.}
+
+\item{averaging}{If TRUE (default FALSE), apply BIC-weighted model averaging
+across the consistency-screened candidate models instead of selecting a
+single model. Requires \code{extensive = TRUE} and age-based norming.}
 
 \item{subsampling}{(deprecated) If TRUE (default is FALSE), use 10-fold
 subsampled coefficient averaging in `bestModel`.}

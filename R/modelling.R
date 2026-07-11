@@ -1,37 +1,61 @@
+# ---------------------------------------------------------------------------
+# modelling.R -- model estimation, selection, consistency screening and
+#                validation for cNORM
+# ---------------------------------------------------------------------------
+
 #' Determine Regression Model
 #'
-#' Computes Taylor polynomial regression models by evaluating a series of models with increasing predictors.
-#' It aims to find a consistent model that effectively captures the variance in the data. It draws on the
-#' regsubsets function from the leaps package and builds up to 20 models for each number of predictors, evaluates
-#' these models regarding model consistency and selects consistent model with the highest R^2.
-#' This automatic model selection should usually be accompanied with visual inspection of the percentile plots
-#' and assessment of fit statistics. Set R^2 or number of terms manually to retrieve a more parsimonious model,
-#' if desired.
+#' Computes Taylor polynomial regression models by evaluating a series of models
+#' with increasing number of predictors. It aims to find a consistent model that
+#' effectively captures the variance in the data. It draws on the regsubsets
+#' function from the leaps package, builds up to 10 models per number of
+#' predictors, screens them for model consistency (monotonicity of the mapping
+#' between norm score and raw score over the complete age range) and selects the
+#' consistent model with the highest R^2. This automatic model selection should
+#' usually be accompanied by visual inspection of the percentile plots and
+#' assessment of fit statistics. Set R^2 or the number of terms manually to
+#' retrieve a more parsimonious model, if desired.
 #'
 #' The functions \code{rankBySlidingWindow}, \code{rankByGroup}, \code{bestModel},
-#' \code{computePowers} and \code{prepareData} are usually not called directly, but accessed
-#' through other functions like \code{cnorm}.
+#' \code{computePowers} and \code{prepareData} are usually not called directly,
+#' but accessed through other functions like \code{cnorm}.
 #'
-#' Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can aid in model evaluation.
+#' Additional functions like \code{plotSubset(model)} and \code{cnorm.cv} can
+#' aid in model evaluation.
 #'
-#' @param data Preprocessed dataset with 'raw' scores, powers, interactions, and usually an explanatory variable (like age).
+#' If \code{averaging = TRUE}, the final coefficients are not taken from a
+#' single selected model, but computed as a BIC-weighted average across all
+#' consistency-screened candidate models (weights \eqn{w_j \propto
+#' exp(-\Delta BIC_j / 2)}). Since a convex combination of functions that are
+#' all monotone in the same direction is itself monotone, the averaged model is
+#' guaranteed to remain consistent, while reducing model selection variance.
+#' This replaces the deprecated \code{subsampling} approach.
+#'
+#' @param data Preprocessed dataset with 'raw' scores, powers, interactions, and
+#'   usually an explanatory variable (like age).
 #' @param raw Name of the raw score variable (default: 'raw').
 #' @param terms Desired number of terms in the model.
 #' @param R2 Adjusted R^2 stopping criterion for model building.
-#' @param k Power constant influencing model complexity (default: 4, max: 6).
-#' @param t Age power parameter. If unset, defaults to `k`.
-#' @param predictors List of predictors or regression formula for model selection. Overrides 'k' and can include additional variables.
+#' @param k Power constant influencing model complexity (default: taken from the
+#'   data preparation, max: 6).
+#' @param t Age power parameter. If unset, taken from the data preparation
+#'   (default 3).
+#' @param predictors List of predictors or regression formula for model
+#'   selection. Overrides 'k' and can include additional variables.
 #' @param force.in Variables forcibly included in the regression.
-#' @param weights Optional case weights. If set to FALSE, default weights (if any) are ignored.
-#' @param plot If TRUE (default), displays a percentile plot of the model and information about the
-#'             regression object. FALSE turns off plotting and report.
-#' @param extensive If TRUE (default), screen models for consistency and - if possible, exclude inconsistent ones
-#' @param subsampling (deprecated) If TRUE (default is FALSE), use 10-fold
-#'        subsampled coefficient averaging in `bestModel`.
-#' @return The model. Further exploration can be done using \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
+#' @param weights Optional case weights. If set to FALSE, default weights
+#'   (if any) are ignored.
+#' @param plot If TRUE (default), displays a percentile plot of the model and
+#'   information about the regression object. FALSE turns off plotting and report.
+#' @param extensive If TRUE (default), screen models for consistency and - if
+#'   possible - exclude inconsistent ones.
+#' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
+#'   across the consistency-screened candidate models instead of selecting a
+#'   single model. Requires \code{extensive = TRUE} and age-based norming.
+#' @param subsampling Deprecated and ignored. Use \code{averaging} instead.
+#' @return The model. Further exploration can be done using
+#'   \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
-#'
-#' # Example with sample data
 #' \dontrun{
 #' # It is not recommended to directly use this function. Rather use 'cnorm' instead.
 #' normData <- prepareData(elfe)
@@ -57,53 +81,61 @@ bestModel <- function(data,
                       force.in = NULL,
                       plot = TRUE,
                       extensive = TRUE,
+                      averaging = FALSE,
                       subsampling = FALSE) {
-  # retrieve attributes
-  if (is.null(raw)) {
-    raw <- attr(data, "raw")
+
+  if (isTRUE(subsampling)) {
+    warning("'subsampling' is deprecated and ignored. Coefficient averaging over ",
+            "subsamples cannot improve on the full-sample least squares fit. ",
+            "Use 'averaging = TRUE' for BIC-weighted model averaging instead.")
   }
 
-  if (!is.null(weights)) {
-    if (is.numeric(weights) && length(weights) == nrow(data)) {
-      data$weights <- weights
-      attr(data, "weights") <- "weights"
-    } else{
-      weights <- NULL
-    }
+  # --- retrieve attributes and consolidate defaults -------------------------
+  if (is.null(raw)) raw <- attr(data, "raw")
+  if (is.null(raw)) raw <- "raw"
+
+  # consolidate case weights into a single vector 'w'
+  w <- NULL
+  if (is.null(weights)) {
+    if (!is.null(attr(data, "weights")) && !is.null(data$weights))
+      w <- data$weights
+  } else if (isFALSE(weights)) {
+    w <- NULL
+  } else if (is.numeric(weights) && length(weights) == nrow(data)) {
+    w <- weights
+  } else {
+    warning("Invalid 'weights' argument (must be numeric and of length nrow(data)); ignored.")
   }
 
+  kData <- attr(data, "k")
   if (is.null(k)) {
-    k <- attr(data, "k")
-  } else if (k > attr(data, "k")) {
-    warning(
-      paste0(
-        "k parameter exceeds the power degrees in the dataset. Setting to default of k = ",
-        attr(data, "k")
-      )
-    )
-    k <- attr(data, "k")
+    k <- if (!is.null(kData)) kData else 5
+  } else if (!is.null(kData) && k > kData) {
+    warning("k parameter exceeds the power degrees in the dataset. ",
+            "Setting to default of k = ", kData)
+    k <- kData
   }
-
-
 
   if (is.null(t)) {
-    if (is.null(attr(data, "t"))) {
-      t <- 3
-    } else if (!is.null(attr(data, "t"))) {
-      t <- attr(data, "t")
-    }
+    t <- if (!is.null(attr(data, "t"))) attr(data, "t") else 3
   }
 
-  if ((k < 1 || k > 6) & is.null(predictors)) {
-    warning(
-      "k parameter out of bounds. Please specify a value between 1 and 6. Setting to default = 5."
-    )
+  if (is.null(predictors) && (k < 1 || k > 6)) {
+    warning("k parameter out of bounds. Please specify a value between 1 and 6. ",
+            "Setting to default = 5.")
     k <- 5
   }
 
-  nvmax <- (t + 1) * (k + 1) - 1 + length(predictors)
+  # number of candidate terms
+  if (is.null(predictors)) {
+    nvmax <- (t + 1) * (k + 1) - 1
+  } else if (inherits(predictors, "formula")) {
+    nvmax <- length(attr(stats::terms(predictors), "term.labels"))
+  } else {
+    nvmax <- length(predictors)
+  }
 
-  # check variable range
+  # --- check parameter ranges ------------------------------------------------
   if (!is.null(R2) && (R2 <= 0 || R2 >= 1)) {
     warning("R2 parameter out of bounds. Setting to default R2 = .99")
     R2 <- .99
@@ -114,138 +146,93 @@ bestModel <- function(data,
     terms <- 5
   }
 
-  if (!(raw %in% colnames(data)) &&
-      (!inherits(predictors, "formula"))) {
-    stop(paste(
-      c(
-        "ERROR: Raw value variable '",
-        raw,
-        "' does not exist in data object."
-      ),
-      collapse = ""
-    ))
+  if (!(raw %in% colnames(data)) && !inherits(predictors, "formula")) {
+    stop("Raw value variable '", raw, "' does not exist in data object.")
   }
 
-  if ((!is.null(predictors)) &&
-      (!inherits(predictors, "formula")) &&
-      (!(all(predictors %in% colnames(data))))) {
-    stop("ERROR: Missing variables from predictors variable. Please check variable list.")
+  if (!is.null(predictors) && !inherits(predictors, "formula") &&
+      !all(predictors %in% colnames(data))) {
+    stop("Missing variables from predictors variable. Please check variable list.")
   }
 
-  # set up regression function
+  # --- set up regression formula ---------------------------------------------
   useAge <- isTRUE(attr(data, "useAge"))
   if (is.null(predictors)) {
-    useAge <- attr(data, "useAge")
-    lmX <-
-      buildFunction(
-        raw = raw,
-        k = k,
-        t = t,
-        age = useAge
-      )
+    lmX <- buildFunction(raw = raw, k = k, t = t, age = useAge)
+  } else if (inherits(predictors, "formula")) {
+    lmX <- predictors
   } else {
-    if (inherits(predictors, "formula")) {
-      lmX <- predictors
-    } else {
-      lmX <-
-        formula(paste(raw, paste(predictors, collapse = " + "), sep = " ~ "))
-    }
+    lmX <- stats::reformulate(predictors, response = raw)
   }
 
-  big <- FALSE
-  if (nvmax > 50) {
-    big <- TRUE
-    if (plot)
-      message("The computation might take some time ...")
-  }
+  big <- nvmax > 50
+  if (big && plot)
+    message("The computation might take some time ...")
 
-
+  index <- NULL
   if (!is.null(force.in)) {
-    c <- strsplit(format(paste0(lmX))[[3]], " \\+ ")
-    index <- match(force.in, c[[1]])
+    rhs <- attr(stats::terms(lmX), "term.labels")
+    index <- match(force.in, rhs)
+    if (anyNA(index))
+      stop("'force.in' contains variables that are not part of the model formula.")
+  }
+
+  nbest <- if (extensive && useAge) 10 else 1
+
+  # --- best subset search -----------------------------------------------------
+  # regsubsets() evaluates its 'weights' argument via model.frame(), i.e.
+  # first in 'data', then in the environment of the formula. Since lmX was
+  # created in buildFunction() (or supplied by the user), 'w' is not visible
+  # there. We therefore wrap the formula environment: 'w' becomes findable,
+  # while the original environment remains accessible as parent.
+  if (!is.null(w)) {
+    wEnv <- new.env(parent = environment(lmX))
+    wEnv$w <- w
+    environment(lmX) <- wEnv
+
+    subsets <- regsubsets(lmX, data = data, nbest = nbest, nvmax = nvmax,
+                          force.in = index, really.big = big,
+                          weights = w, method = "exhaustive")
   } else {
-    index <- NULL
+    subsets <- regsubsets(lmX, data = data, nbest = nbest, nvmax = nvmax,
+                          force.in = index, really.big = big,
+                          method = "exhaustive")
   }
-
-
-  # rename variable, otherwise it would be automatically used
-  if (is.null(weights) && !is.null(data$weights)) {
-    data$weights.old <- data$weights
-    data$weights <- NULL
-  }
-
-  nbest <- 1
-  if (extensive && useAge)
-    nbest <- 10
-
-  # determine best subset
-  if (is.null(weights))
-    subsets <-
-    regsubsets(
-      lmX,
-      data = data,
-      nbest = nbest,
-      nvmax = nvmax,
-      force.in = index,
-      really.big = big,
-      method = "exhaustive"
-    )
-  else
-    subsets <-
-    regsubsets(
-      lmX,
-      data = data,
-      nbest = nbest,
-      nvmax = nvmax,
-      force.in = index,
-      really.big = big,
-      weights = weights,
-      method = "exhaustive"
-    )
 
   results <- summary(subsets)
+  highestConsistent <- NULL
   if (extensive && useAge) {
-    results <- screenSubset(data, results, data[, raw], k, t)
+    results <- screenSubset(data, results, data[[raw]], k, t, weights = w)
     highestConsistent <- results$highestConsistent
-  } else
-    highestConsistent <- NULL
+  }
 
-  # model selection strategy:
-  # 1. If no criterion is specified, take largest consistent model, if available
+  # --- model selection strategy ------------------------------------------------
+  # 1. If no criterion is specified, take the largest consistent model, if available
   # 2. else take the first model exceeding R2 > .99
-  # 3. else if nothing worked, take model with 5 terms
-  # 4. else if terms are specified, take terms
-  # 5. Selection based on R2
-  selectionStrategy <- 0
-
-  # take highest consistent model
-  # number of selected predictors in each (possibly filtered) row
+  # 3. else fall back to BIC-optimal model
+  # 4. if terms are specified, take terms
+  # 5. selection based on R2
   n_terms_per_row <- rowSums(results$outmat == "*")
-
   selectionStrategy <- 0
 
-  if (is.null(R2) && (terms == 0)) {
+  if (is.null(R2) && terms == 0) {
     if (!is.null(results$highestConsistent)) {
       i <- results$highestConsistent
       selectionStrategy <- 1
-      report <- paste0("Final solution: ",
-                       n_terms_per_row[i],
+      report <- paste0("Final solution: ", n_terms_per_row[i],
                        " terms (highest consistent model)")
     } else {
       i <- which(results$adjr2 > 0.99)[1]
       if (is.na(i)) {
-        # fall back to the smallest available model
-        i <- which.min(n_terms_per_row)
+        # fall back to the BIC-optimal model instead of the smallest one
+        i <- which.min(results$bic)
         selectionStrategy <- 3
         report <- paste0(
-          "Final solution: ",
-          n_terms_per_row[i],
-          " terms (smallest available; R2 > .99 not reached)"
-        )
-      } else {
+          "Final solution: ", n_terms_per_row[i],
+          " terms (BIC-optimal fallback; R2 > .99 not reached)")
+    } else {
         selectionStrategy <- 2
-        report <- paste0("Final solution: ",
-                         n_terms_per_row[i],
+        report <- paste0("Final solution: ", n_terms_per_row[i],
                          " terms (model exceeding R2 > .99)")
       }
     }
@@ -253,14 +240,9 @@ bestModel <- function(data,
     candidate <- which(n_terms_per_row == terms)[1]
     if (is.na(candidate)) {
       candidate <- which.min(abs(n_terms_per_row - terms))
-      warning(
-        "No model with exactly ",
-        terms,
-        " terms is available after consistency screening; ",
-        "using closest match (",
-        n_terms_per_row[candidate],
-        " terms)."
-      )
+      warning("No model with exactly ", terms,
+              " terms is available after consistency screening; ",
+              "using closest match (", n_terms_per_row[candidate], " terms).")
     }
     i <- candidate
     selectionStrategy <- 4
@@ -270,143 +252,122 @@ bestModel <- function(data,
     if (length(candidates) == 0L) {
       i <- which.max(results$adjr2)
       selectionStrategy <- 3
-      report <- paste0(
-        "User specified solution: R2 > ",
-        R2,
-        ", but value not reached. Using best available model (",
-        n_terms_per_row[i],
-        " terms)."
-      )
+      report <- paste0("User specified solution: R2 > ", R2,
+                       ", but value not reached. Using best available model (",
+                       n_terms_per_row[i], " terms).")
     } else {
-      # smallest model meeting the threshold
       i <- candidates[which.min(n_terms_per_row[candidates])]
       selectionStrategy <- 5
-      report <- paste0("User specified solution: R2 > ",
-                       R2,
-                       " resulting in ",
-                       n_terms_per_row[i],
-                       " terms")
+      report <- paste0("User specified solution: R2 > ", R2,
+                       " resulting in ", n_terms_per_row[i], " terms")
     }
   }
 
-
-  report[2] <-
-    paste0("R-Square Adj. = ", round(results$adjr2[i], digits = 6))
-
-
-  # build regression formula
-  text <- paste0(raw, " ~ ", paste(colnames(results$outmat)[results$outmat[i, ] == "*"], collapse = " + "))
-
-  report[3] <- paste0("Final regression model: ", text)
-
-  # determine final lm object; use resampling if specified
-  if (subsampling) {
-    if (is.null(attr(data, "weights")))
-      bestformula <- subsample_lm(text, data, NULL)
-    else
-      bestformula <- subsample_lm(text, data, weights = data$weights)
-  } else{
-    if (is.null(attr(data, "weights")))
-      bestformula <- lm(text, data)
-    else
-      bestformula <- lm(text, data, weights = data$weights)
+  # after selection, independent of strategy:
+  if (extensive && useAge && is.null(highestConsistent)) {
+    warning("No model passed the monotonicity screening. The selected model ",
+            "violates consistency somewhere in the norm score / age range. ",
+            "Inspect 'plotPercentileSeries(model)', restrict the norm score ",
+            "range (e.g. +/- 2.5 SD via minNorm/maxNorm), or reduce k/t.")
   }
 
+  report[2] <- paste0("R-Square Adj. = ", round(results$adjr2[i], digits = 6))
 
-  # compute rmse
-  tab <-
-    data.frame(raw = data[, raw], fitted = bestformula$fitted.values)
-  tab <- tab[complete.cases(tab), ]
-  rmse <- sqrt(sum((tab$raw - tab$fitted)^2) / length(tab$raw))
+  # --- final model fit -----------------------------------------------------------
+  selectedTerms <- colnames(results$outmat)[results$outmat[i, ] == "*"]
+  text <- paste0(raw, " ~ ", paste(selectedTerms, collapse = " + "))
+  report[3] <- paste0("Final regression model: ", text)
 
-  # Model information
+  if (averaging && !is.null(results$consistent) &&
+      any(results$consistent, na.rm = TRUE)) {
+    bestformula <- weightedAverageModel(results, data, raw, weights = w)
+    report[3] <- paste0(report[3],
+                        " (BIC-weighted averaging over consistent models applied)")
+  } else {
+    if (averaging)
+      warning("Model averaging requires consistency screening (extensive = TRUE) ",
+              "and age-based norming with at least one consistent model. ",
+              "Falling back to single model fit.")
+    if (is.null(w))
+      bestformula <- stats::lm(stats::as.formula(text), data = data)
+    else
+      bestformula <- stats::lm(stats::as.formula(text), data = data, weights = w)
+  }
+
+  # --- fit statistics ---------------------------------------------------------
+  tab <- data.frame(raw = data[[raw]], fitted = bestformula$fitted.values)
+  tab <- tab[stats::complete.cases(tab), ]
+  rmse <- sqrt(mean((tab$raw - tab$fitted)^2))
+
+  # --- model information --------------------------------------------------------
   bestformula$ideal.model <- i
   bestformula$cutoff <- R2
   bestformula$subsets <- results
+  bestformula$useAge <- useAge
 
-  # add information for horizontal and vertical extrapolation
-  if (attr(data, "useAge")) {
-    bestformula$useAge <- TRUE
-  } else{
-    bestformula$useAge <- FALSE
-  }
-
-  # conventional norming
-  if (is.null(data$A1)) {
+  if (is.null(data$A1)) {          # conventional norming
     bestformula$minA1 <- 0
     bestformula$maxA1 <- 0
-
-  }
-  # continuous norming
-  else{
+  } else {                         # continuous norming
     bestformula$minA1 <- min(data$A1)
     bestformula$maxA1 <- max(data$A1)
   }
 
   bestformula$minL1 <- min(data$L1)
   bestformula$maxL1 <- max(data$L1)
-  bestformula$minRaw <- min(data[, raw])
-  bestformula$maxRaw <- max(data[, raw])
+  bestformula$minRaw <- min(data[[raw]])
+  bestformula$maxRaw <- max(data[[raw]])
   bestformula$raw <- raw
   bestformula$rmse <- rmse
-  bestformula$scaleSD <- attributes(data)$scaleSD
-  bestformula$scaleM <- attributes(data)$scaleM
-  bestformula$descend <- attributes(data)$descend
-  bestformula$group <- attributes(data)$group
-  bestformula$age <- attributes(data)$age
-  bestformula$k <- attributes(data)$k
-  bestformula$A <- attributes(data)$A
+  bestformula$scaleSD <- attr(data, "scaleSD")
+  bestformula$scaleM <- attr(data, "scaleM")
+  bestformula$descend <- attr(data, "descend")
+  bestformula$group <- attr(data, "group")
+  bestformula$age <- attr(data, "age")
+  bestformula$k <- attr(data, "k")
+  bestformula$A <- attr(data, "A")
   bestformula$highestConsistent <- highestConsistent
   bestformula$selectionStrategy <- selectionStrategy
 
-  # Print output
-  report[4] <-
-    paste0("Regression function: ",
-           regressionFunction(bestformula, digits = 10))
+  # --- report ----------------------------------------------------------------
+  report[4] <- paste0("Regression function: ",
+                      regressionFunction(bestformula, digits = 10))
   report[5] <- paste0("Raw Score RMSE = ", round(rmse, digits = 5))
-  if (!is.null(weights)) {
-    report[6] <-
-      paste0(
-        "Post stratification was applied. The weights range from ",
-        round(min(weights), digits = 3),
-        " to ",
-        round(max(weights), digits = 3),
-        " (m = ",
-        round(mean(weights), digits = 3),
-        ", sd = ",
-        round(sd(weights), digits = 3),
-        ")."
-      )
+  if (!is.null(w)) {
+    report[6] <- paste0(
+      "Post stratification was applied. The weights range from ",
+      round(min(w), digits = 3), " to ", round(max(w), digits = 3),
+      " (m = ", round(mean(w), digits = 3),
+      ", sd = ", round(stats::sd(w), digits = 3), ").")
   }
 
   bestformula$report <- report
 
-  if (plot) {
-    cat(report, sep = "\n")
-  }
-
+  if (plot) cat(report, sep = "\n")
 
   if (anyNA(bestformula$coefficients)) {
-    warning(
-      "The regression contains missing coefficients. No fitting model could be found. Please try a different number of terms."
-    )
+    warning("The regression contains missing coefficients. No fitting model ",
+            "could be found. Please try a different number of terms.")
   }
 
-  if (terms > 15) {
-    message(
-      "\nThe model includes a high number of terms. Simpler models are usually more robust. Cross validation with 'cv(model$data)' or an inspection of information functions with 'plot.subset' might help to identify a balanced number of terms. Consider fixing this parameter to a smaller number."
-    )
+  nSelected <- length(bestformula$coefficients) - 1L
+  if (nSelected > 15) {
+    message("\nThe model includes a high number of terms. Simpler models are ",
+            "usually more robust. Cross validation with 'cnorm.cv' or an ",
+            "inspection of information functions with 'plotSubset' might help ",
+            "to identify a balanced number of terms. Consider fixing the ",
+            "'terms' parameter to a smaller number.")
   }
 
   if (plot) {
     if (!is.null(data$A1)) {
-      cat(
-        "\nUse 'printSubset(model)' to get detailed information on the different solutions, 'plotPercentiles(model) to display percentile plot, plotSubset(model)' to inspect model fit."
-      )
-    } else{
-      cat(
-        "\nConventional norming was applied. Use 'normTable(0, model)' or 'rawTable(0, model)' to retrieve norm scores. If you would like to achieve a closer fit, increase the terms parameter."
-      )
+      cat("\nUse 'printSubset(model)' to get detailed information on the ",
+          "different solutions, 'plotPercentiles(model)' to display the ",
+          "percentile plot and 'plotSubset(model)' to inspect model fit.", sep = "")
+    } else {
+      cat("\nConventional norming was applied. Use 'normTable(0, model)' or ",
+          "'rawTable(0, model)' to retrieve norm scores. If you would like to ",
+          "achieve a closer fit, increase the terms parameter.", sep = "")
     }
   }
 
@@ -418,15 +379,96 @@ bestModel <- function(data,
     plotPercentiles(tmp)
   }
 
-
   return(bestformula)
+}
+
+
+#' BIC-Weighted Model Averaging Across Consistent Candidate Models
+#'
+#' Computes a weighted average of the regression coefficients across the
+#' consistency-screened candidate models returned by \code{regsubsets} and
+#' \code{screenSubset}. Weights are information-theoretic model weights
+#' \eqn{w_j \propto exp(-\Delta BIC_j / 2)}, restricted to models within
+#' \code{deltaBIC} of the best model. Each candidate is refitted on the
+#' complete sample via (weighted) least squares; coefficients of terms not
+#' included in a candidate are treated as zero.
+#'
+#' Because all candidates passed the monotonicity screening (same direction),
+#' and the averaging weights are positive and sum to one, the averaged model is
+#' itself monotone and thus consistent. In contrast to averaging coefficients
+#' over subsamples (deprecated \code{subsample_lm}), this approach targets the
+#' actual source of variance - model selection - while each component estimate
+#' remains a full-sample least squares fit.
+#'
+#' @param results A (screened) \code{summary.regsubsets} object, including a
+#'   \code{consistent} flag per row.
+#' @param data The preprocessed norm data.
+#' @param raw Name of the raw score variable.
+#' @param weights Optional numeric vector of case weights.
+#' @param deltaBIC Only models within this BIC distance of the best candidate
+#'   are averaged (default 10; Burnham & Anderson, 2002).
+#' @return An \code{lm}-type object with averaged coefficients over the union of
+#'   the candidate terms; \code{fitted.values} and \code{residuals} are updated
+#'   accordingly.
+#' @references Burnham, K. P., & Anderson, D. R. (2002). Model Selection and
+#'   Multimodel Inference. Springer.
+#' @export
+#' @family model
+weightedAverageModel <- function(results, data, raw, weights = NULL,
+                                 deltaBIC = 10) {
+  candidates <- if (!is.null(results$consistent) &&
+                    any(results$consistent, na.rm = TRUE)) {
+    which(results$consistent)
+  } else {
+    seq_along(results$bic)
+  }
+
+  bic <- results$bic[candidates]
+  candidates <- candidates[bic - min(bic) <= deltaBIC]
+  bic <- results$bic[candidates]
+  wgt <- exp(-0.5 * (bic - min(bic)))
+  wgt <- wgt / sum(wgt)
+
+  unionTerms <- colnames(results$outmat)[
+    colSums(results$outmat[candidates, , drop = FALSE] == "*") > 0]
+
+  coefMat <- matrix(0, nrow = length(candidates), ncol = length(unionTerms) + 1L,
+                    dimnames = list(NULL, c("(Intercept)", unionTerms)))
+
+  for (j in seq_along(candidates)) {
+    trms <- colnames(results$outmat)[results$outmat[candidates[j], ] == "*"]
+    f <- stats::reformulate(trms, response = raw)
+    fitj <- if (is.null(weights)) stats::lm(f, data = data)
+    else stats::lm(f, data = data, weights = weights)
+    cf <- stats::coef(fitj)
+    cf[is.na(cf)] <- 0
+    coefMat[j, names(cf)] <- cf
+  }
+
+  avg <- as.vector(crossprod(coefMat, wgt))
+  names(avg) <- colnames(coefMat)
+
+  fUnion <- stats::reformulate(unionTerms, response = raw)
+  final <- if (is.null(weights)) stats::lm(fUnion, data = data)
+  else stats::lm(fUnion, data = data, weights = weights)
+
+  X <- stats::model.matrix(final)
+  final$coefficients <- avg[colnames(X)]
+  final$fitted.values <- as.vector(X %*% final$coefficients)
+  final$residuals <- stats::model.response(stats::model.frame(final)) -
+    final$fitted.values
+  final$averaged <- TRUE
+  final$averagingWeights <- wgt
+  final
 }
 
 
 #' Print Model Selection Information
 #'
-#' Displays R^2 and other metrics for models with varying predictors, aiding in choosing the best-fitting model
-#' after model fitting.
+#' Displays R^2 and other metrics for models with varying predictors, aiding in
+#' choosing the best-fitting model after model fitting. The F-test compares each
+#' model to the preceding (smaller) one, with degrees of freedom based on the
+#' actual difference in the number of parameters.
 #' @param x Model output from 'bestModel' or a cnorm object.
 #' @param ... Additional parameters.
 #' @return Table with model information criteria.
@@ -434,7 +476,6 @@ bestModel <- function(data,
 #'
 #' @examples
 #' \dontrun{
-#'   # Using cnorm object from sample data
 #'   result <- cnorm(raw = elfe$raw, group = elfe$group)
 #'   printSubset(result)
 #' }
@@ -444,25 +485,33 @@ printSubset <- function(x, ...) {
     x <- x$model
   }
 
-  # compute F and significance
-  RSS1 <- c(NA, x$subsets$rss)
-  RSS2 <- c(x$subsets$rss, NA)
-  k1 <- seq(from = 1, to = length(x$subsets$rss) + 1)
-  k2 <- seq(from = 2, to = length(x$subsets$rss) + 2)
-  df1 <- k2 - k1
-  df2 <- length(x$fitted.values) - k2
-  F <- ((RSS1 - RSS2) / df1) / (RSS2 / df2)
-  p <- 1 - pf(F, df1, df2)
+  rss <- x$subsets$rss
+  adjr2 <- x$subsets$adjr2
+  nModels <- length(rss)
+  nParams <- rowSums(x$subsets$outmat == "*") + 1L   # + intercept
+  n <- length(x$fitted.values)
+
+  Fvals <- rep(NA_real_, nModels)
+  pvals <- rep(NA_real_, nModels)
+  if (nModels > 1L) {
+    df1 <- diff(nParams)
+    df1[df1 < 1L] <- NA                              # non-nested comparison
+    df2 <- n - nParams[-1L]
+    Fs <- (-diff(rss) / df1) / (rss[-1L] / df2)
+    Fvals[-1L] <- Fs
+    pvals[-1L] <- stats::pf(Fs, df1, df2, lower.tail = FALSE)
+  }
+
   table <- data.frame(
-    R2adj = x$subsets$adjr2,
+    R2adj = adjr2,
     BIC = x$subsets$bic,
     CP = x$subsets$cp,
-    RSS = x$subsets$rss,
-    RMSE = sqrt(x$subsets$rss / length(x$fitted.values)),
-    DeltaR2adj = head(c(x$subsets$adjr2, NA) - c(NA, x$subsets$adjr2), -1),
-    F = head(F, -1),
-    p = head(p, -1),
-    nr = seq(1, length(x$subsets$adjr2), by = 1)
+    RSS = rss,
+    RMSE = sqrt(rss / n),
+    DeltaR2adj = c(NA, diff(adjr2)),
+    F = Fvals,
+    p = pvals,
+    nr = seq_len(nModels)
   )
 
   if (!is.null(x$subsets$consistent))
@@ -471,16 +520,17 @@ printSubset <- function(x, ...) {
   return(table)
 }
 
+
 #' Check the consistency of the norm data model
 #'
 #' While abilities increase and decline over age, within one age group, the
-#' norm scores always have to show a monotonic increase or decrease with increasing raw
-#' scores. Violations of this assumption are an indication for problems
-#' in modeling the relationship between raw and norm scores. There are
+#' norm scores always have to show a monotonic increase or decrease with
+#' increasing raw scores. Violations of this assumption are an indication for
+#' problems in modeling the relationship between raw and norm scores. There are
 #' several reasons, why this might occur:
 #' \enumerate{
 #'   \item Vertical extrapolation: Choosing extreme norm scores, e. g. values
-#'   -3 <= x and x >= 3 In order to model these extreme values, a large sample
+#'   -3 <= x and x >= 3. In order to model these extreme values, a large sample
 #'   dataset is necessary.
 #'   \item Horizontal extrapolation: Taylor polynomials converge in a certain
 #'   radius. Using the model values outside the original dataset may
@@ -496,20 +546,31 @@ printSubset <- function(x, ...) {
 #'  norm score range to the relevant range of abilities, e.g. +/- 2.5 SD via
 #'  the minNorm and maxNorm parameter.
 #'
+#'  With \code{method = "analytic"} (default), monotonicity within each age is
+#'  verified exactly: since the model is polynomial in the norm score L, the
+#'  real roots of its derivative are computed via \code{polyroot} and the sign
+#'  of the derivative is checked between consecutive roots. This detects even
+#'  narrow violations that a coarse norm score grid can miss. Age remains
+#'  discretized; violations that are entirely clipped by the raw score bounds
+#'  are ignored. \code{method = "grid"} reproduces the classical numerical
+#'  check and is used automatically as a fallback for models with non-Taylor
+#'  predictors.
+#'
 #' @param model The model from the bestModel function or a cnorm object
 #' @param minAge Age to start with checking
 #' @param maxAge Upper end of the age check
-#' @param stepAge Stepping parameter for the age check.
-#' values indicate higher precision / closer checks
+#' @param stepAge Stepping parameter for the age check. If NULL, 8 equidistant
+#'   age points are used. Lower values indicate higher precision.
 #' @param minNorm Lower end of the norm value range
 #' @param maxNorm Upper end of the norm value range
 #' @param minRaw clipping parameter for the lower bound of raw scores
 #' @param maxRaw clipping parameter for the upper bound of raw scores
-#' @param stepNorm Stepping parameter for the norm table check within age with lower
-#' scores indicating a higher precision. The choice depends of the norm scale
-#' used. With T scores a stepping parameter of 1 is suitable
-#' @param warn If set to TRUE, already minor violations of the model assumptions
-#' are displayed (default = FALSE)
+#' @param stepNorm Stepping parameter for the norm table check within age
+#'   (only used with \code{method = "grid"})
+#' @param method Either "analytic" (default; exact within age via polynomial
+#'   derivative roots) or "grid" (numerical check on a norm score grid)
+#' @param warn Retained for backwards compatibility (violations below numerical
+#'   tolerance are always suppressed)
 #' @param silent turn off messages
 #' @return Boolean, indicating model violations (TRUE) or no problems (FALSE)
 #' @examples
@@ -520,7 +581,6 @@ printSubset <- function(x, ...) {
 #' }
 #' @export
 #' @family model
-#' Check the consistency of the norm data model
 checkConsistency <- function(model,
                              minAge = NULL,
                              maxAge = NULL,
@@ -530,6 +590,7 @@ checkConsistency <- function(model,
                              maxRaw = NULL,
                              stepAge = NULL,
                              stepNorm = 1,
+                             method = c("analytic", "grid"),
                              warn = FALSE,
                              silent = FALSE) {
   if (isTaylor(model)) {
@@ -540,77 +601,81 @@ checkConsistency <- function(model,
     stop("Please provide a cnorm model.")
   }
 
-  # Fallbacks to model limits
+  method <- match.arg(method)
+
+  # fallbacks to model limits
   if (is.null(minAge)) minAge <- model$minA1
   if (is.null(maxAge)) maxAge <- model$maxA1
   if (is.null(minNorm)) minNorm <- model$minL1
   if (is.null(maxNorm)) maxNorm <- model$maxL1
   if (is.null(minRaw)) minRaw <- model$minRaw
   if (is.null(maxRaw)) maxRaw <- model$maxRaw
-  if (is.null(stepAge)) stepAge <- (maxAge - minAge) / 3
 
-  descend <- model$descend
+  descend <- isTRUE(model$descend)
 
-  # Create evaluation sequences
-  ages  <- seq(minAge, maxAge, by = stepAge)
-  norms <- seq(minNorm, maxNorm, by = stepNorm)
-
-  if (length(norms) < 2) stop("Range of norm scores too small to check consistency.")
-
-  # Vectorized grid setup
-  n_ages <- length(ages)
-  n_norms <- length(norms)
-
-  grid_norms <- rep(norms, times = n_ages)
-  grid_ages  <- rep(ages, each = n_norms)
-
-  # Single vectorized call (replaces the while loop entirely)
-  raw_preds <- predictRaw(norm = grid_norms,
-                          age = grid_ages,
-                          coefficients = model$coefficients,
-                          minRaw = minRaw,
-                          maxRaw = maxRaw)
-
-  # Reshape back to matrix format (rows = norms, columns = ages)
-  pred_mat <- matrix(raw_preds, nrow = n_norms, ncol = n_ages)
-
-  # Calculate column-wise differences
-  diffs <- pred_mat[-1, , drop = FALSE] - pred_mat[-nrow(pred_mat), , drop = FALSE]
-
-  # Evaluate monotonicity allowing for tiny floating point noise (1e-10)
-  tol <- 1e-10
-  if (descend) {
-    violations <- !apply(diffs <= tol, 2, all)
+  # age evaluation points (handles conventional norming with minAge == maxAge)
+  if (maxAge > minAge) {
+    ages <- if (is.null(stepAge)) seq(minAge, maxAge, length.out = 8)
+    else seq(minAge, maxAge, by = stepAge)
   } else {
-    violations <- !apply(diffs >= -tol, 2, all)
+    ages <- minAge
   }
 
-  # Extract the age points that failed the check
+  # analytic check requires pure Taylor coefficient names
+  B <- taylorCoefficientMatrix(model$coefficients)
+  if (is.null(B) || anyNA(model$coefficients)) method <- "grid"
+
+  if (method == "analytic") {
+    tPow <- ncol(B) - 1L
+    violations <- vapply(ages, function(a) {
+      pcoef <- as.vector(B %*% a^(0:tPow))
+      polyViolatesMonotonicity(pcoef, minNorm, maxNorm,
+                               descend = descend,
+                               minRaw = minRaw, maxRaw = maxRaw)
+    }, logical(1))
+  } else {
+    norms <- seq(minNorm, maxNorm, by = stepNorm)
+    if (length(norms) < 2)
+      stop("Range of norm scores too small to check consistency.")
+
+    n_ages <- length(ages)
+    n_norms <- length(norms)
+    grid_norms <- rep(norms, times = n_ages)
+    grid_ages <- rep(ages, each = n_norms)
+
+    raw_preds <- predictRaw(norm = grid_norms, age = grid_ages,
+                            coefficients = model$coefficients,
+                            minRaw = minRaw, maxRaw = maxRaw)
+
+    pred_mat <- matrix(raw_preds, nrow = n_norms, ncol = n_ages)
+    diffs <- pred_mat[-1, , drop = FALSE] - pred_mat[-n_norms, , drop = FALSE]
+
+    tol <- 1e-10
+    violations <- if (descend) !apply(diffs <= tol, 2, all)
+    else !apply(diffs >= -tol, 2, all)
+  }
+
   results <- round(ages[violations], digits = 1)
 
-  # Output handling
   if (length(results) == 0) {
-    if (!silent) {
-      cat("No relevant violations of model consistency found.\n")
-    }
+    if (!silent) cat("No relevant violations of model consistency found.\n")
     return(FALSE)
   } else {
     if (!silent) {
-      message(
-        paste0(
-          "Violations of monotonicity found within the specified range of age and norm score at age points: ",
-          paste(results, sep = " "),
-          "\n\nUse 'plotPercentiles' to visually inspect the norm curve or 'plotDerivative' to identify regions violating the consistency. Rerun the modeling with adjusted parameters or restrict the valid value range accordingly.\n"
-        )
-      )
-
+      message(paste0(
+        "Violations of monotonicity found within the specified range of age ",
+        "and norm score at age points: ",
+        paste(results, collapse = ", "),
+        "\n\nUse 'plotPercentiles' to visually inspect the norm curve or ",
+        "'plotDerivative' to identify regions violating the consistency. ",
+        "Rerun the modeling with adjusted parameters or restrict the valid ",
+        "value range accordingly.\n"))
       cat(rangeCheck(model, minAge, maxAge, minNorm, maxNorm))
       cat("\n")
     }
     return(TRUE)
   }
 }
-
 
 
 #' Regression function
@@ -641,24 +706,21 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 
   coefs <- model$coefficients
 
-  # Format coefficients to specified digits (or native string conversion)
   if (!is.null(digits)) {
-    formatted_coefs <- format(coefs, digits = digits, trim = TRUE, scientific = FALSE)
+    formatted_coefs <- format(coefs, digits = digits, trim = TRUE,
+                              scientific = FALSE)
   } else {
     formatted_coefs <- as.character(coefs)
   }
 
   intercept <- formatted_coefs[1]
 
-  # If the model is an intercept-only model
   if (length(coefs) == 1) {
     return(paste(raw, "~", intercept))
   }
 
-  # Vectorized concatenation of terms
   term_strings <- paste0("(", formatted_coefs[-1], "*", names(coefs)[-1], ")")
 
-  # Construct final formula
   formulA <- paste(raw, intercept, sep = " ~ ")
   formulA <- paste(formulA, paste(term_strings, collapse = " + "), sep = " + ")
 
@@ -668,17 +730,18 @@ regressionFunction <- function(model, raw = NULL, digits = NULL) {
 
 #' Derivative of regression model
 #'
-#' Calculates the derivative of the location / norm value from the regression model with the first
-#' derivative as the default. This is useful for finding violations of model assumptions and problematic
-#' distribution features as f. e. bottom and ceiling effects, non-progressive norm scores within an
-#' age group or in general #' intersecting percentile curves.
+#' Calculates the derivative of the location / norm value from the regression
+#' model with the first derivative as the default. This is useful for finding
+#' violations of model assumptions and problematic distribution features as
+#' f. e. bottom and ceiling effects, non-progressive norm scores within an age
+#' group or in general intersecting percentile curves.
 #' @param model The regression model or a cnorm object
-#' @param order The degree of the derivate, default: 1
+#' @param order The degree of the derivative, default: 1
 #' @return The derived coefficients
 #' @examples
 #' \dontrun{
 #'   m <- cnorm(raw = elfe$raw, group = elfe$group)
-#'   derivedCoefficients <- derive(m, order=1)
+#'   derivedCoefficients <- derive(m, order = 1)
 #' }
 #' @export
 #' @family model
@@ -688,43 +751,27 @@ derive <- function(model, order = 1) {
   coeff <- model$coefficients
 
   for (o in seq_len(order)) {
-    # Only keep terms containing "L" (constants disappear in derivation)
-    coeff <- coeff[grep("L", names(coeff))]
+    # only terms containing an L power survive derivation w.r.t. L
+    coeff <- coeff[grepl("L\\d+", names(coeff))]
     if (length(coeff) == 0) return(coeff)
 
-    new_coeff <- numeric(length(coeff))
-    new_names <- character(length(coeff))
+    nms <- names(coeff)
+    lpow <- as.integer(sub("^.*?L(\\d+).*$", "\\1", nms))
+    apart <- sub("^L\\d+", "", nms)          # "" or "A<j>"
 
-    for (i in seq_along(coeff)) {
-      c_name <- names(coeff)[i]
-      c_val  <- coeff[[i]]
+    newVal <- as.numeric(coeff) * lpow
+    newPow <- lpow - 1L
+    newNms <- ifelse(newPow == 0L,
+                     ifelse(apart == "", "(Intercept)", apart),
+                     paste0("L", newPow, apart))
 
-      # Regex extraction: Find the digits immediately following "L"
-      l_pow_str <- regmatches(c_name, regexpr("L\\d+", c_name))
-      l_pow     <- as.numeric(sub("L", "", l_pow_str))
-
-      # Derivation math: c * L^pow -> (c * pow) * L^(pow - 1)
-      new_val <- c_val * l_pow
-      new_pow <- l_pow - 1
-
-      # Construct new coefficient name
-      if (new_pow == 0) {
-        new_name <- sub("L\\d+", "", c_name) # L disappears
-        if (new_name == "") new_name <- "(Intercept)"
-      } else {
-        new_name <- sub(paste0("L", l_pow), paste0("L", new_pow), c_name)
-      }
-
-      new_coeff[i] <- new_val
-      new_names[i] <- new_name
-    }
-
-    coeff <- new_coeff
-    names(coeff) <- new_names
+    coeff <- newVal
+    names(coeff) <- newNms
   }
 
   return(coeff)
 }
+
 
 #' Prints the results and regression function of a cnorm model
 #'
@@ -740,76 +787,51 @@ modelSummary <- function(object, ...) {
   strat <- c(
     "largest consistent model",
     "first model exceeding R2 > .99",
-    "fall back to model with 5 terms",
+    "fallback: best / smallest available model",
     "terms specified manually",
     "selection based on R2"
   )
-  # Extract relevant information
-  terms <- length(object$coefficients) - 1  # Subtract 1 for intercept
+
+  terms <- length(object$coefficients) - 1
   adj_r_squared <- object$subsets$adjr2[object$ideal.model]
   rmse <- object$rmse
   selection_strategy <- object$selectionStrategy
   highest_consistent <- object$highestConsistent
 
-  # Create summary list
-  summary_list <- list(
-    terms = terms,
-    adj_r_squared = adj_r_squared,
-    rmse = rmse,
-    selection_strategy = selection_strategy,
-    highest_consistent = highest_consistent,
-    raw_variable = object$raw,
-    use_age = object$useAge,
-    min_raw = object$minRaw,
-    max_raw = object$maxRaw,
-    regression_function = regressionFunction(object)
-  )
-
-  # Add age-related information if applicable
-  if (object$useAge) {
-    summary_list$min_age <- object$minA1
-    summary_list$max_age <- object$maxA1
-  }
-
   cat("cNORM Model Summary\n")
   cat("-------------------\n")
-  cat("Number of terms:", summary_list$terms, "\n")
-  cat("Adjusted R-squared:",
-      round(summary_list$adj_r_squared, 4),
-      "\n")
-  cat("RMSE:", round(summary_list$rmse, 4), "\n")
-  cat("Selection strategy:", summary_list$selection_strategy)
-  if (summary_list$selection_strategy > 0 &&
-      summary_list$selection_strategy < 6) {
-    cat(", ", strat[summary_list$selection_strategy])
+  cat("Number of terms:", terms, "\n")
+  cat("Adjusted R-squared:", round(adj_r_squared, 4), "\n")
+  cat("RMSE:", round(rmse, 4), "\n")
+  cat("Selection strategy:", selection_strategy)
+  if (!is.null(selection_strategy) && selection_strategy > 0 &&
+      selection_strategy <= length(strat)) {
+    cat(",", strat[selection_strategy])
   }
   cat("\nHighest consistent model:",
-      summary_list$highest_consistent,
-      "\n")
-  cat("Raw score variable:", summary_list$raw_variable, "\n")
-  cat("Raw score range:",
-      summary_list$min_raw,
-      "to",
-      summary_list$max_raw,
-      "\n")
-  if (summary_list$use_age) {
-    cat("Age range:",
-        summary_list$min_age,
-        "to",
-        summary_list$max_age,
-        "\n")
+      if (is.null(highest_consistent)) "none" else highest_consistent, "\n")
+  if (isTRUE(object$averaged)) {
+    cat("BIC-weighted model averaging was applied across",
+        length(object$averagingWeights), "consistent models.\n")
+  }
+  cat("Raw score variable:", object$raw, "\n")
+  cat("Raw score range:", object$minRaw, "to", object$maxRaw, "\n")
+  if (isTRUE(object$useAge)) {
+    cat("Age range:", object$minA1, "to", object$maxA1, "\n")
   }
   cat("\nRegression function:\n")
-  cat(summary_list$regression_function, "\n")
+  cat(regressionFunction(object), "\n")
 
   cat(object$report, sep = "\n")
 }
 
+
 #' Check for horizontal and vertical extrapolation
 #'
-#' Regression model only work in a specific range and extrapolation horizontally (outside
-#' the original range) or vertically (extreme norm scores) might lead to inconsistent
-#' results. The function generates a message, indicating extrapolation and the range of the original data.
+#' Regression models only work in a specific range and extrapolation
+#' horizontally (outside the original range) or vertically (extreme norm
+#' scores) might lead to inconsistent results. The function generates a
+#' message, indicating extrapolation and the range of the original data.
 #' @param object The regression model or a cnorm object
 #' @param minAge The lower age bound
 #' @param maxAge The upper age bound
@@ -825,95 +847,81 @@ modelSummary <- function(object, ...) {
 #'   rangeCheck(m)
 #' }
 #' @family model
-rangeCheck <-
-  function(object,
-           minAge = NULL,
-           maxAge = NULL,
-           minNorm = NULL,
-           maxNorm = NULL,
-           digits = 3,
-           ...) {
-    if (isTaylor(object)) {
-      object <- object$model
-    }
-
-    summary <-
-      paste0(
-        "The original data for the regression model spanned from age ",
-        round(object$minA1, digits),
-        " to ",
-        round(object$maxA1, digits),
-        ", with a norm score range from ",
-        round(object$minL1, digits),
-        " to ",
-        round(object$maxL1, digits),
-        ". The raw scores range from ",
-        object$minRaw,
-        " to ",
-        object$maxRaw,
-        "."
-      )
-    if (object$descend) {
-      summary <-
-        paste0(summary, " The ranking was done in descending order.")
-    }
-    reportOnly <-
-      (is.null(minAge) ||
-         is.null(maxAge) || is.null(minNorm) || is.null(maxNorm))
-    if (!reportOnly &&
-        (minAge < object$minA1 ||
-         maxAge > object$maxA1) &&
-        (minNorm < object$minL1 || maxNorm > object$maxL1)) {
-      summary <-
-        paste(
-          "Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.",
-          summary,
-          sep = "\n"
-        )
-    } else if (!reportOnly &&
-               (minAge < object$minA1 || maxAge > object$maxA1)) {
-      summary <-
-        paste(
-          "Horizontal extrapolation detected. Be careful using age groups outside the original sample.",
-          summary,
-          sep = "\n"
-        )
-    } else if (!reportOnly &&
-               (minNorm < object$minL1 || maxNorm > object$maxL1)) {
-      summary <-
-        paste(
-          "Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.",
-          summary,
-          sep = "\n"
-        )
-    }
-
-    return(summary)
+rangeCheck <- function(object,
+                       minAge = NULL,
+                       maxAge = NULL,
+                       minNorm = NULL,
+                       maxNorm = NULL,
+                       digits = 3,
+                       ...) {
+  if (isTaylor(object)) {
+    object <- object$model
   }
+
+  summary <- paste0(
+    "The original data for the regression model spanned from age ",
+    round(object$minA1, digits), " to ", round(object$maxA1, digits),
+    ", with a norm score range from ",
+    round(object$minL1, digits), " to ", round(object$maxL1, digits),
+    ". The raw scores range from ", object$minRaw, " to ", object$maxRaw, ".")
+
+  if (isTRUE(object$descend)) {
+    summary <- paste0(summary, " The ranking was done in descending order.")
+  }
+
+  reportOnly <- (is.null(minAge) || is.null(maxAge) ||
+                   is.null(minNorm) || is.null(maxNorm))
+
+  if (!reportOnly &&
+      (minAge < object$minA1 || maxAge > object$maxA1) &&
+      (minNorm < object$minL1 || maxNorm > object$maxL1)) {
+    summary <- paste(
+      "Horizontal and vertical extrapolation detected. Be careful using age groups and extreme norm scores outside the original sample.",
+      summary, sep = "\n")
+  } else if (!reportOnly && (minAge < object$minA1 || maxAge > object$maxA1)) {
+    summary <- paste(
+      "Horizontal extrapolation detected. Be careful using age groups outside the original sample.",
+      summary, sep = "\n")
+  } else if (!reportOnly && (minNorm < object$minL1 || maxNorm > object$maxL1)) {
+    summary <- paste(
+      "Vertical extrapolation detected. Be careful using extreme norm scores exceeding the scores of the original sample.",
+      summary, sep = "\n")
+  }
+
+  return(summary)
+}
+
 
 #' Cross-validation for Term Selection in cNORM
 #'
-#' Assists in determining the optimal number of terms for the regression model using repeated Monte Carlo
-#' cross-validation. It leverages an 80-20 split between training and validation data, with stratification by norm group
-#' or random sample in case of using sliding window ranking.
+#' Assists in determining the optimal number of terms for the regression model
+#' using repeated Monte Carlo cross-validation. It leverages an 80-20 split
+#' between training and validation data, with stratification by norm group or
+#' random sample in case of using sliding window ranking.
 #'
-#' Successive models, with an increasing number of terms, are evaluated, and the RMSE for raw scores plotted. This
-#' encompasses the training, validation, and entire dataset. If `norms` is set to TRUE (default), the function will also
-#' calculate the mean norm score reliability and crossfit measures. Note that due to the computational requirements
-#' of norm score calculations, execution can be slow, especially with numerous repetitions or terms.
+#' Successive models, with an increasing number of terms, are evaluated, and the
+#' RMSE for raw scores plotted. This encompasses the training, validation, and
+#' entire dataset. If `norms` is set to TRUE (default), the function will also
+#' calculate the mean norm score reliability and crossfit measures. Note that
+#' due to the computational requirements of norm score calculations, execution
+#' can be slow, especially with numerous repetitions or terms.
 #'
-#' When `cv` is set to "full" (default), both test and validation datasets are ranked separately, providing comprehensive
-#' cross-validation. For a more streamlined validation process focused only on modeling, a pre-ranked dataset can be used.
-#' The output comprises RMSE for raw score models, norm score R^2, delta R^2, crossfit, and the norm score SE according
-#' to Oosterhuis, van der Ark, & Sijtsma (2016).
+#' When `cv` is set to "full" (default), both test and validation datasets are
+#' ranked separately, providing comprehensive cross-validation. For a more
+#' streamlined validation process focused only on modeling, a pre-ranked dataset
+#' can be used. The output comprises RMSE for raw score models, norm score R^2,
+#' delta R^2, crossfit, and the norm score SE according to Oosterhuis, van der
+#' Ark, & Sijtsma (2016).
 #'
-#' This function is not yet prepared for the 'extensive' search strategy, introduced in version 3.3, but instead
-#' relies on the first model per number of terms, without consistency check.
+#' This function is not yet prepared for the 'extensive' search strategy,
+#' introduced in version 3.3, but instead relies on the first model per number
+#' of terms, without consistency check.
 #'
 #' For assessing overfitting:
 #' \deqn{CROSSFIT = R(Training; Model)^2 / R(Validation; Model)^2}
-#' A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and values around 1 are optimal,
-#' given a low raw score RMSE and high norm score validation R^2.
+#' A CROSSFIT > 1 suggests overfitting, < 1 suggests potential underfitting, and
+#' values around 1 are optimal, given a low raw score RMSE and high norm score
+#' validation R^2.
 #'
 #' Suggestions for ideal model selection:
 #' \itemize{
@@ -922,21 +930,28 @@ rangeCheck <-
 #'   \item Aim for low raw score RMSE and high norm score R^2, avoiding terms with significant overfit (e.g., crossfit > 1.1).
 #' }
 #'
-#' @param data Data frame of norm sample or a cnorm object. Should have ranking, powers, and interaction of L and A.
-#' @param formula Formula from an existing regression model; min/max functions ignored. If using a cnorm object, this is automatically fetched.
+#' @param data Data frame of norm sample or a cnorm object. Should have ranking,
+#'   powers, and interaction of L and A.
+#' @param formula Formula from an existing regression model; min/max functions
+#'   ignored. If using a cnorm object, this is automatically fetched.
 #' @param repetitions Number of repetitions for cross-validation.
-#' @param norms If TRUE, computes norm score crossfit and R^2. Note: Computationally intensive.
-#' @param min Start with a minimum number of terms (default = 1).
-#' @param max Maximum terms in model, up to (k + 1) * (t + 1) - 1.
-#' @param cv "full" (default) splits data into training/validation, then ranks. Otherwise, expects a pre-ranked dataset.
-#' @param pCutoff Checks stratification for unbalanced data. Performs a t-test per group. Default set to 0.2 to minimize beta error.
-#' @param width If provided, ranking done via `rankBySlidingWindow`. Otherwise, by group.
+#' @param norms If TRUE, computes norm score crossfit and R^2. Note:
+#'   Computationally intensive.
+#' @param min Start with a minimum number of terms (default = 4).
+#' @param max Maximum terms in model, up to (k + 1) * (t + 1) - 1 (default = 20).
+#' @param cv "full" (default) splits data into training/validation, then ranks.
+#'   Otherwise, expects a pre-ranked dataset.
+#' @param pCutoff Checks stratification for unbalanced data. Performs a t-test
+#'   per group. Default set to 0.2 to minimize beta error.
+#' @param width If provided, ranking done via `rankBySlidingWindow`. Otherwise,
+#'   by group.
 #' @param raw Name of the raw score variable.
 #' @param age Name of the age variable.
 #' @param group Name of the grouping variable.
 #' @param weights Name of the weighting parameter.
 #'
-#' @return Table with results per term number: RMSE for raw scores, R^2 for norm scores, and crossfit measure.
+#' @return Table with results per term number: RMSE for raw scores, R^2 for
+#'   norm scores, and crossfit measure.
 #' @export
 #'
 #' @examples
@@ -949,15 +964,16 @@ rangeCheck <-
 #' cnorm.cv(result, repetitions = 1)
 #' }
 #'
-#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional
-#' and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016).
+#'   Sample Size Requirements for Traditional and Regression-Based Norms.
+#'   Assessment, 23(2), 191-202. https://doi.org/10.1177/1073191115580638
 #' @family model
 cnorm.cv <- function(data,
                      formula = NULL,
                      repetitions = 5,
                      norms = TRUE,
-                     min = 1,
-                     max = 12,
+                     min = 4,
+                     max = 20,
                      cv = "full",
                      pCutoff = NULL,
                      width = NA,
@@ -977,14 +993,11 @@ cnorm.cv <- function(data,
 
   d <- data
 
-  if (is.null(raw))
-    raw <- attr(d, "raw")
-
-  if (is.null(raw))
-    stop("Please provide a raw score variable name.")
-
-  if (!is.null(raw) && !(raw %in% colnames(data)))
-    stop(paste0("The specified raw score variable '", raw, "' is not present in the dataset."))
+  if (is.null(raw)) raw <- attr(d, "raw")
+  if (is.null(raw)) stop("Please provide a raw score variable name.")
+  if (!(raw %in% colnames(data)))
+    stop("The specified raw score variable '", raw,
+         "' is not present in the dataset.")
 
   if (is.null(group)) group <- attr(d, "group")
   if (is.null(age))   age   <- attr(d, "age")
@@ -995,8 +1008,7 @@ cnorm.cv <- function(data,
   if (is.null(group) || (is.null(age) && is.na(width)))
     stop("Please provide either a grouping variable or age and width.")
 
-  if (is.null(weights))
-    weights <- attr(d, "weights")
+  if (is.null(weights)) weights <- attr(d, "weights")
 
   if (!is.null(weights) && !(weights %in% colnames(data))) {
     warning("Weighting variable not found in dataset. Continuing without weighting.\n")
@@ -1010,20 +1022,17 @@ cnorm.cv <- function(data,
   if (is.null(scaleM)  || is.na(scaleM)  || cv == "full") scaleM  <- 50
   if (is.null(scaleSD) || is.na(scaleSD) || cv == "full") scaleSD <- 10
 
-  k <- attr(d, "k")
-  if (is.null(k)) k <- 5
-  t <- attr(d, "t")
-  if (is.null(t)) t <- 3
+  k <- attr(d, "k"); if (is.null(k)) k <- 5
+  t <- attr(d, "t"); if (is.null(t)) t <- 3
 
   n.models <- (k + 1) * (t + 1) - 1
-
   if (is.na(max) || max > n.models || max < 1) max <- n.models
 
   if (is.null(formula)) {
     lmX <- buildFunction(raw = raw, k = k, t = t, age = TRUE)
   } else {
     lmX <- formula
-    n_formula_terms <- length(attr(formula, "term.labels"))
+    n_formula_terms <- length(attr(stats::terms(formula), "term.labels"))
     min <- n_formula_terms
     max <- n_formula_terms
   }
@@ -1034,7 +1043,6 @@ cnorm.cv <- function(data,
   r2.train        <- rep(0, max)
   r2.test         <- rep(0, max)
   delta           <- rep(NA, max)
-  crossfit        <- rep(0, max)
   norm.rmse       <- rep(0, max)
   norm.se         <- rep(0, max)
   norm.rmse.min   <- rep(0, max)
@@ -1048,8 +1056,7 @@ cnorm.cv <- function(data,
     rankGroup <- FALSE
   }
 
-  # Build the full formula exactly once for use in subsetting later
-  full_formula <- formula(lmX)
+  full_formula <- stats::formula(lmX)
 
   for (a in seq_len(repetitions)) {
     p.value <- 0.01
@@ -1057,9 +1064,10 @@ cnorm.cv <- function(data,
     train   <- NA
     test    <- NA
 
-    # Balanced split evaluation
+    # establish a balanced 80/20 split
     while (p.value < pCutoff) {
-      if (n > 100L) stop("Could not establish balanced data sets. Try decreasing pCutoff.")
+      if (n > 100L)
+        stop("Could not establish balanced data sets. Try decreasing pCutoff.")
       n <- n + 1L
 
       if (rankGroup) {
@@ -1072,7 +1080,7 @@ cnorm.cv <- function(data,
         test  <- lapply(sp, function(x) x[c(TRUE, rep(FALSE, 4)), ])
 
         p <- vapply(seq_along(train), function(z)
-          t.test(train[[z]][, raw], test[[z]][, raw])$p.value, numeric(1))
+          stats::t.test(train[[z]][, raw], test[[z]][, raw])$p.value, numeric(1))
 
         p.value <- min(p)
         if (p.value < pCutoff) next
@@ -1081,8 +1089,10 @@ cnorm.cv <- function(data,
         test  <- do.call(rbind, test)
 
         if (cv == "full") {
-          train <- prepareData(train, raw = raw, group = group, age = age, width = width, weights = weights, silent = TRUE)
-          test  <- prepareData(test, raw = raw, group = group, age = age, width = width, weights = weights, silent = TRUE)
+          train <- prepareData(train, raw = raw, group = group, age = age,
+                               width = width, weights = weights, silent = TRUE)
+          test  <- prepareData(test, raw = raw, group = group, age = age,
+                               width = width, weights = weights, silent = TRUE)
         }
       } else {
         d      <- d[sample(nrow(d)), ]
@@ -1090,42 +1100,47 @@ cnorm.cv <- function(data,
         train  <- d[seq_len(number), ]
         test   <- d[(number + 1L):nrow(d), ]
 
-        p.value <- t.test(train[, age], test[, age])$p.value
+        p.value <- stats::t.test(train[, age], test[, age])$p.value
         if (p.value < pCutoff) next
 
-        train <- rankBySlidingWindow(train, age = age, raw = raw, weights = weights, width = width, silent = TRUE)
-        test  <- rankBySlidingWindow(test, age = age, raw = raw, weights = weights, width = width, silent = TRUE)
+        train <- rankBySlidingWindow(train, age = age, raw = raw,
+                                     weights = weights, width = width,
+                                     silent = TRUE)
+        test  <- rankBySlidingWindow(test, age = age, raw = raw,
+                                     weights = weights, width = width,
+                                     silent = TRUE)
         train <- computePowers(train, age = age, k = k, t = t, silent = TRUE)
         test  <- computePowers(test, age = age, k = k, t = t, silent = TRUE)
       }
     }
 
-    subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max, really.big = n.models > 25)
+    subsets <- regsubsets(lmX, data = train, nbest = 1, nvmax = max,
+                          really.big = n.models > 25)
 
     if (norms && is.null(formula)) cat(paste0("Cycle ", a, "\n"))
 
-    # Highly optimized design matrix extraction
-    X_train_full <- model.matrix(full_formula, train)
-    X_test_full  <- model.matrix(full_formula, test)
+    # design matrices, built once per repetition
+    X_train_full <- stats::model.matrix(full_formula, train)
+    X_test_full  <- stats::model.matrix(full_formula, test)
     y_train      <- train[, raw]
 
     for (i in min:max) {
       variables <- names(coef(subsets, id = i))
 
-      # Fast matrix subsetting
       X_train_sub <- X_train_full[, variables, drop = FALSE]
       X_test_sub  <- X_test_full[, variables, drop = FALSE]
 
-      # C-level linear fit
-      fit <- .lm.fit(X_train_sub, y_train)
-      names(fit$coefficients) <- variables  # Manually attach names for predictNorm
+      # lm.fit (NOT .lm.fit): returns named, unpivoted coefficients
+      # and fitted values
+      fit <- stats::lm.fit(X_train_sub, y_train)
+      cf <- fit$coefficients
+      cf[is.na(cf)] <- 0                      # guard against aliased columns
 
-      # Fast Matrix prediction
-      test.fitted <- as.vector(X_test_sub %*% fit$coefficients)
+      test.fitted <- as.vector(X_test_sub %*% cf)
 
-      # Lightweight mock object to bypass slow `lm` object creation footprint
+      # lightweight mock object for norm score prediction
       mock_model <- list(
-        coefficients = fit$coefficients,
+        coefficients = cf,
         k = k,
         minRaw = min(train[, raw], na.rm = TRUE),
         maxRaw = max(train[, raw], na.rm = TRUE),
@@ -1137,41 +1152,51 @@ cnorm.cv <- function(data,
       )
       class(mock_model) <- "cnormModel"
 
-      # Store terms (excluding the intercept)
       terms_list[[terms_idx]] <- variables[variables != "(Intercept)"]
       terms_idx <- terms_idx + 1L
 
-      # Accumulate errors
-      train.errors[i] <- train.errors[i] + sqrt(mean((fit$fitted.values - y_train)^2, na.rm = TRUE))
-      val.errors[i]   <- val.errors[i]   + sqrt(mean((test.fitted - test[, raw])^2, na.rm = TRUE))
+      train.errors[i] <- train.errors[i] +
+        sqrt(mean((fit$fitted.values - y_train)^2, na.rm = TRUE))
+      val.errors[i]   <- val.errors[i] +
+        sqrt(mean((test.fitted - test[, raw])^2, na.rm = TRUE))
 
       if (norms) {
-        train$T <- predictNorm(train[, raw], train[, age], mock_model, min(train$normValue), max(train$normValue), silent = TRUE)
-        test$T  <- predictNorm(test[, raw], test[, age], mock_model, min(train$normValue), max(train$normValue), silent = TRUE)
+        train$T <- predictNorm(train[, raw], train[, age], mock_model,
+                               min(train$normValue), max(train$normValue),
+                               silent = TRUE)
+        test$T  <- predictNorm(test[, raw], test[, age], mock_model,
+                               min(train$normValue), max(train$normValue),
+                               silent = TRUE)
 
-        r2.train[i]  <- r2.train[i]  + cor(train$normValue, train$T, use = "pairwise.complete.obs")^2
-        r2.test[i]   <- r2.test[i]   + cor(test$normValue, test$T, use = "pairwise.complete.obs")^2
-        norm.rmse[i] <- norm.rmse[i] + sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
+        r2.train[i]  <- r2.train[i] +
+          stats::cor(train$normValue, train$T, use = "pairwise.complete.obs")^2
+        r2.test[i]   <- r2.test[i] +
+          stats::cor(test$normValue, test$T, use = "pairwise.complete.obs")^2
+        norm.rmse[i] <- norm.rmse[i] +
+          sqrt(mean((test$T - test$normValue)^2, na.rm = TRUE))
 
         n_valid    <- sum(!is.na(test$T))
-        norm.se[i] <- norm.se[i] + sqrt(sum((test$T - test$normValue)^2, na.rm = TRUE) / max(n_valid - 2L, 1L))
+        norm.se[i] <- norm.se[i] +
+          sqrt(sum((test$T - test$normValue)^2, na.rm = TRUE) /
+                 max(n_valid - 2L, 1L))
       }
     }
   }
 
   norm.rmse.min[1] <- NA
-  complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models, really.big = n.models > 25)
+  complete <- regsubsets(lmX, data = d, nbest = 1, nvmax = n.models,
+                         really.big = n.models > 25)
 
-  # Process the complete dataset optimally
-  X_full_dataset <- model.matrix(full_formula, d)
+  X_full_dataset <- stats::model.matrix(full_formula, d)
   y_full_dataset <- d[, raw]
 
   for (i in seq_len(max)) {
     variables <- names(coef(complete, id = i))
 
-    # Fast subset and fit
-    fit_complete <- .lm.fit(X_full_dataset[, variables, drop = FALSE], y_full_dataset)
-    complete.errors[i] <- sqrt(mean((fit_complete$fitted.values - y_full_dataset)^2, na.rm = TRUE))
+    fit_complete <- stats::lm.fit(
+      X_full_dataset[, variables, drop = FALSE], y_full_dataset)
+    complete.errors[i] <- sqrt(mean(
+      (fit_complete$fitted.values - y_full_dataset)^2, na.rm = TRUE))
 
     train.errors[i] <- train.errors[i] / repetitions
     val.errors[i]   <- val.errors[i]   / repetitions
@@ -1184,7 +1209,8 @@ cnorm.cv <- function(data,
 
       if (i > min) {
         delta[i]         <- r2.test[i] - r2.test[i - 1L]
-        norm.rmse.min[i] <- if (norm.rmse[i] > 0) norm.rmse[i] - norm.rmse[i - 1L] else NA
+        norm.rmse.min[i] <- if (norm.rmse[i] > 0)
+          norm.rmse[i] - norm.rmse[i - 1L] else NA
       }
     }
 
@@ -1249,7 +1275,7 @@ cnorm.cv <- function(data,
         geom_point(aes(x = .data$terms, y = .data$R2.norm.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
         geom_line(aes(x = .data$terms, y = .data$R2.norm.train, color = "Training"), linewidth = .75, na.rm = TRUE) +
         geom_point(aes(x = .data$terms, y = .data$R2.norm.train), size = 2.5, color = "#d62728", na.rm = TRUE) +
-        labs(title = expression(paste("Norm Score ", R^2 , " (2)")), x = "Number of terms", y = expression(R^2)) +
+        labs(title = expression(paste("Norm Score ", R^2, " (2)")), x = "Number of terms", y = expression(R^2)) +
         scale_color_manual(values = c("Training" = "#d62728", "Validation" = "#1f77b4", "Complete" = "#33aa55")) +
         scale_x_continuous(breaks = breaks_step_1)
       print(p2)
@@ -1268,7 +1294,7 @@ cnorm.cv <- function(data,
         geom_line(aes(x = .data$terms, y = .data$Delta.R2.test, color = "Delta R2"), linewidth = .75, na.rm = TRUE) +
         geom_point(aes(x = .data$terms, y = .data$Delta.R2.test), size = 2.5, color = "#1f77b4", na.rm = TRUE) +
         geom_hline(aes(yintercept = 0.00, color = "Equal R2"), linetype = "dashed", linewidth = 1, na.rm = TRUE) +
-        labs(title = expression(paste("Norm Score ", Delta, R^2 , " in Validation (4)")), x = "Number of terms", y = "Delta R2") +
+        labs(title = expression(paste("Norm Score ", Delta, R^2, " in Validation (4)")), x = "Number of terms", y = "Delta R2") +
         scale_color_manual(values = c("Equal R2" = "#33aa55", "Delta R2" = "#1f77b4")) +
         scale_x_continuous(breaks = breaks_step_1)
       print(p4)
@@ -1285,19 +1311,23 @@ cnorm.cv <- function(data,
 
     cat("\nThe simulation yielded the following optimal settings:\n")
     if (norms) {
-      cat(paste0("\nNumber of terms with best crossfit: ", which.min((1 - tab$Crossfit)^2)))
+      cat(paste0("\nNumber of terms with best crossfit: ",
+                 which.min((1 - tab$Crossfit)^2)))
       best.norm <- which.max(r2.test)
       FirstNegative <- which(tab$Delta.R2.test <= 0)[1]
 
-      cat(paste0("\nNumber of terms with best norm validation R2: ", best.norm, "\n"))
-      cat(paste0("First negative norm score R2 delta in validation: ", FirstNegative))
-      cat(paste0("\nNumber of terms with best norm validation RMSE: ", which.min(tab$RMSE.norm.test)))
+      cat(paste0("\nNumber of terms with best norm validation R2: ",
+                 best.norm, "\n"))
+      cat(paste0("First negative norm score R2 delta in validation: ",
+                 FirstNegative))
+      cat(paste0("\nNumber of terms with best norm validation RMSE: ",
+                 which.min(tab$RMSE.norm.test)))
 
       cat(paste0("\nChoosing a model with ", (FirstNegative - 1),
-                 " terms might be a good choice. For this, use the parameter 'terms = ",
-                 (FirstNegative - 1), "' in the cnorm-function.\n"))
+                 " terms might be a good choice. For this, use the parameter ",
+                 "'terms = ", (FirstNegative - 1), "' in the cnorm-function.\n"))
       cat("\nPlease investigate the plots and the summary table, as the results might vary within a narrow range.")
-      cat("\nEspecially pay attention to RMSE.norm.test delta R2 stops to progress.")
+      cat("\nEspecially pay attention to where RMSE.norm.test and delta R2 stop to progress.")
     }
 
     cat("\n\n")
@@ -1308,42 +1338,43 @@ cnorm.cv <- function(data,
     cat(paste0("Repeated cross validation with prespecified formula and ",
                repetitions, " repetitions yielded the following results:\n\n"))
     tab$Delta.R2.test <- NULL
-    return(tab[complete.cases(tab), ])
+    return(tab[stats::complete.cases(tab), ])
   }
 }
 
-#' Calculates the standard error (SE) or root mean square error (RMSE) of the norm scores
-#' In case of large datasets, both results should be almost identical
+
+#' Calculates the standard error (SE) or root mean square error (RMSE) of the
+#' norm scores. In case of large datasets, both results should be almost
+#' identical.
 #'
 #' @param model a cnorm object
-#' @param type either '1' for the standard error senso Oosterhuis et al. (2016) or '2' for
-#'             the RMSE (default)
+#' @param type either '1' for the standard error sensu Oosterhuis et al. (2016)
+#'   or '2' for the RMSE (default)
 #'
-#' @return The standard error (SE) of the norm scores sensu Oosterhuis et al. (2016) or the RMSE
+#' @return The standard error (SE) of the norm scores sensu Oosterhuis et al.
+#'   (2016) or the RMSE
 #' @export
 #'
-#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016). Sample Size Requirements for Traditional and Regression-Based Norms. Assessment, 23(2), 191–202. https://doi.org/10.1177/1073191115580638
+#' @references Oosterhuis, H. E. M., van der Ark, L. A., & Sijtsma, K. (2016).
+#'   Sample Size Requirements for Traditional and Regression-Based Norms.
+#'   Assessment, 23(2), 191-202. https://doi.org/10.1177/1073191115580638
 getNormScoreSE <- function(model, type = 2) {
   if (!isTaylor(model)) {
     stop("Please provide cnorm object as the model parameter")
   }
 
-  if (type != 1 && type != 2) {
-    type <- 2
-  }
+  if (type != 1 && type != 2) type <- 2
 
   data <- model$data
   model <- model$model
   minNorm <- model$minL1
   maxNorm <- model$maxL1
-  d <- data
   raw <- data[[model$raw]]
   age <- data[[model$age]]
 
-  d$fitted <-
-    predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
+  fitted <- predictNorm(raw, age, model, minNorm = minNorm, maxNorm = maxNorm)
 
-  diff <- d$fitted - data$normValue
+  diff <- fitted - data$normValue
   diff <- diff[!is.na(diff)]
 
   if (type == 1)
@@ -1351,7 +1382,6 @@ getNormScoreSE <- function(model, type = 2) {
   else
     return(sqrt(mean(diff^2)))
 }
-
 
 
 #' Build regression function for bestModel
@@ -1362,6 +1392,7 @@ getNormScoreSE <- function(model, type = 2) {
 #' @param age use age
 #'
 #' @return regression function
+#' @keywords internal
 buildFunction <- function(raw, k, t, age) {
   terms <- paste0("L", 1:k)
   if (age) {
@@ -1369,248 +1400,256 @@ buildFunction <- function(raw, k, t, age) {
     terms <- c(terms, as.vector(outer(1:k, 1:t, function(i, j)
       paste0("L", i, "A", j))))
   }
-  formula(paste(raw, paste(terms, collapse = " + "), sep = " ~ "))
+  stats::formula(paste(raw, paste(terms, collapse = " + "), sep = " ~ "))
 }
 
 
-#' Fast Vectorized Prediction Matrix Generator
+# ---------------------------------------------------------------------------
+# Internal helpers for analytic monotonicity checks
+# ---------------------------------------------------------------------------
+
+#' Parse Taylor coefficients into an (L power x A power) matrix
+#'
+#' Returns NULL if the coefficient names do not exclusively follow the Taylor
+#' naming scheme (Intercept, L#, A#, L#A#), e.g. with custom predictors.
 #' @keywords internal
 #' @noRd
-predictionMatrix_fast <- function(minL, maxL, minA, maxA, k, t, n_L = 50) {
-  L_vals <- seq(from = minL, to = maxL, length.out = n_L)
-  A_vals <- c(minA, maxA)
+taylorCoefficientMatrix <- function(coefficients) {
+  nm <- names(coefficients)
+  if (is.null(nm) ||
+      !all(grepl("^(\\(Intercept\\)|L\\d+|A\\d+|L\\d+A\\d+)$", nm)))
+    return(NULL)
 
-  n_ages <- length(A_vals)
-  n_norms <- length(L_vals)
+  lp <- integer(length(nm))
+  ap <- integer(length(nm))
 
-  # Vectorized grid generation
-  L_vec <- rep(L_vals, times = n_ages)
-  A_vec <- rep(A_vals, each = n_norms)
+  hasL <- grepl("L\\d+", nm)
+  hasA <- grepl("A\\d+", nm)
 
-  cols <- 1 + k + t + (k * t)
-  out_mat <- matrix(1, nrow = length(L_vec), ncol = cols)
-  cnames <- character(cols)
-  cnames[1] <- "(Intercept)"
+  # conversion restricted to matching names -> no NA coercion warnings
+  lp[hasL] <- as.integer(sub("^.*?L(\\d+).*$", "\\1", nm[hasL]))
+  ap[hasA] <- as.integer(sub("^.*?A(\\d+).*$", "\\1", nm[hasA]))
 
-  col_idx <- 2
-  L_pows <- matrix(1, nrow = length(L_vec), ncol = k)
-  A_pows <- matrix(1, nrow = length(L_vec), ncol = t)
-
-  for (i in seq_len(k)) {
-    L_pows[, i] <- L_vec^i
-    out_mat[, col_idx] <- L_pows[, i]
-    cnames[col_idx] <- paste0("L", i)
-    col_idx <- col_idx + 1
-  }
-  for (j in seq_len(t)) {
-    A_pows[, j] <- A_vec^j
-    out_mat[, col_idx] <- A_pows[, j]
-    cnames[col_idx] <- paste0("A", j)
-    col_idx <- col_idx + 1
-  }
-
-  for (i in seq_len(k)) {
-    for (j in seq_len(t)) {
-      out_mat[, col_idx] <- L_pows[, i] * A_pows[, j]
-      cnames[col_idx] <- paste0("L", i, "A", j)
-      col_idx <- col_idx + 1
-    }
-  }
-
-  colnames(out_mat) <- cnames
-  return(out_mat)
+  B <- matrix(0, nrow = max(lp) + 1L, ncol = max(ap) + 1L)
+  B[cbind(lp + 1L, ap + 1L)] <- as.numeric(coefficients)
+  B
 }
 
-#' Fast Matrix Monotonicity Check
+#' Evaluate polynomial (ascending coefficients) via Horner scheme
 #' @keywords internal
 #' @noRd
-check_monotonicity_matrix <- function(coefs, X_pred, n_ages, n_norms,
-                                      minRaw = -Inf, maxRaw = Inf,
-                                      tol = 1e-8) {
-  pred <- as.vector(X_pred %*% coefs)
-
-  # optional clipping (set bounds to keep old behaviour; leave Inf to disable)
-  if (is.finite(minRaw) || is.finite(maxRaw))
-    pred <- pmax(pmin(pred, maxRaw), minRaw)
-
-  pred_mat <- matrix(pred, nrow = n_norms, ncol = n_ages)
-
-  d1 <- diff(pred_mat[, 1L])
-  direction <- if (all(d1 >= -tol)) 1L
-  else if (all(d1 <= tol)) -1L
-  else return(FALSE)
-
-  if (n_ages > 1L) {
-    for (i in 2:n_ages) {
-      d <- diff(pred_mat[, i])
-      if (direction == 1L && !all(d >= -tol)) return(FALSE)
-      if (direction == -1L && !all(d <= tol)) return(FALSE)
-    }
-  }
-  TRUE
+evalPolynomial <- function(cf, x) {
+  r <- rep(0, length(x))
+  for (c in rev(cf)) r <- r * x + c
+  r
 }
 
+#' Exact direction of a polynomial on an interval
+#'
+#' Determines whether p(L) is non-decreasing (1), non-increasing (-1),
+#' constant (0) or non-monotone (NA) on [minL, maxL], based on the real roots
+#' of its derivative (via polyroot).
+#' @keywords internal
+#' @noRd
+polyDirection <- function(pcoef, minL, maxL, tol = 1e-12) {
+  deg <- length(pcoef) - 1L
+  if (deg < 1L) return(0L)
+
+  dcoef <- pcoef[-1L] * seq_len(deg)
+  while (length(dcoef) > 0L && abs(dcoef[length(dcoef)]) < 1e-14)
+    dcoef <- dcoef[-length(dcoef)]
+  if (length(dcoef) == 0L) return(0L)
+  if (length(dcoef) == 1L) return(if (dcoef > 0) 1L else -1L)
+
+  rts <- polyroot(dcoef)
+  re <- Re(rts)[abs(Im(rts)) < 1e-8 * (1 + abs(Re(rts)))]
+  breaks <- sort(unique(c(minL, re[re > minL & re < maxL], maxL)))
+  mids <- (breaks[-1L] + breaks[-length(breaks)]) / 2
+
+  v <- evalPolynomial(dcoef, mids)
+  scale <- max(abs(v), 1)
+  pos <- any(v > tol * scale)
+  neg <- any(v < -tol * scale)
+
+  if (pos && neg) return(NA_integer_)
+  if (pos) 1L else if (neg) -1L else 0L
+}
+
+#' Exact, clipping-aware monotonicity violation check
+#'
+#' Checks whether p(L) violates monotonicity on [minL, maxL] in the direction
+#' implied by 'descend'. Violations whose raw score span lies entirely outside
+#' [minRaw, maxRaw] (and would thus be removed by clipping) are ignored.
+#' @keywords internal
+#' @noRd
+polyViolatesMonotonicity <- function(pcoef, minL, maxL, descend = FALSE,
+                                     minRaw = -Inf, maxRaw = Inf) {
+  deg <- length(pcoef) - 1L
+  if (deg < 1L) return(FALSE)
+
+  dcoef <- pcoef[-1L] * seq_len(deg)
+  while (length(dcoef) > 0L && abs(dcoef[length(dcoef)]) < 1e-14)
+    dcoef <- dcoef[-length(dcoef)]
+  if (length(dcoef) == 0L) return(FALSE)
+
+  breaks <- c(minL, maxL)
+  if (length(dcoef) > 1L) {
+    rts <- polyroot(dcoef)
+    re <- Re(rts)[abs(Im(rts)) < 1e-8 * (1 + abs(Re(rts)))]
+    breaks <- sort(unique(c(minL, re[re > minL & re < maxL], maxL)))
+  }
+
+  for (s in seq_len(length(breaks) - 1L)) {
+    a <- breaks[s]
+    b <- breaks[s + 1L]
+    dv <- evalPolynomial(dcoef, (a + b) / 2)
+    pa <- evalPolynomial(pcoef, a)
+    pb <- evalPolynomial(pcoef, b)
+    tol <- 1e-10 * max(1, abs(pa), abs(pb))
+
+    wrong <- if (descend) dv > tol else dv < -tol
+    if (wrong) {
+      lo <- min(pa, pb)
+      hi <- max(pa, pb)
+      # p is monotone on this segment; the violation is visible unless its
+      # entire raw score span is clipped away
+      if (!(lo >= maxRaw || hi <= minRaw)) return(TRUE)
+    }
+  }
+  FALSE
+}
+
+#' Filter rows of a summary.regsubsets object
+#' @keywords internal
+#' @noRd
+filterSubsetRows <- function(results, keep) {
+  results$which  <- results$which[keep, , drop = FALSE]
+  results$outmat <- results$outmat[keep, , drop = FALSE]
+  results$adjr2  <- results$adjr2[keep]
+  results$cp     <- results$cp[keep]
+  results$bic    <- results$bic[keep]
+  results$rss    <- results$rss[keep]
+  results$rsq    <- results$rsq[keep]
+  results
+}
 
 #' Screen `regsubsets` output for monotonic consistency
+#'
+#' For each model size, candidate models are checked in order of decreasing
+#' R^2. A model is consistent if its prediction is monotone in L in the same
+#' direction across all evaluated ages, verified analytically via the real
+#' roots of the derivative polynomial. Models that do not depend on L at all
+#' are treated as inconsistent (degenerate for norming). If no consistent
+#' model exists for a size, the best model of that size is retained as
+#' fallback (flagged inconsistent).
 #' @keywords internal
 #' @noRd
-screenSubset <- function(data1, results, raw, k, t) {
-  y_train <- as.numeric(raw)
-
-  # Prediction grid utilizing the highly optimized fast matrix generator
-  n_norms <- 50L
-  n_ages  <- 2L
-  X_pred_full_raw <- predictionMatrix_fast(min(data1$L1), max(data1$L1),
-                                           min(data1$A1), max(data1$A1),
-                                           k, t, n_L = n_norms)
-
-  # Full design matrices, built once.
+screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8, weights = NULL) {
   all_vars <- colnames(results$outmat)
-  X_train_full <- cbind(`(Intercept)` = 1, as.matrix(data1[, all_vars, drop = FALSE]))
-
-  # Ensure X_pred_full strictly matches the exact variable order from regsubsets
-  X_pred_full  <- X_pred_full_raw[, c("(Intercept)", all_vars), drop = FALSE]
-
-  # Number of selected terms in each row
-  nTerms <- as.integer(apply(results$outmat, 1L, function(row) sum(row == "*", na.rm = TRUE)))
+  y <- as.numeric(raw)
+  nTerms <- as.integer(rowSums(results$outmat == "*"))
   n_models <- length(nTerms)
+
+  # screening requires pure Taylor terms and the L1/A1 columns
+  taylorOnly <- all(grepl("^(L\\d+|A\\d+|L\\d+A\\d+)$", all_vars)) &&
+    all(all_vars %in% colnames(data1)) &&
+    !is.null(data1$L1) && !is.null(data1$A1)
+
+  if (!taylorOnly) {
+    # cannot screen custom predictors: keep the best model per size
+    keepFirst <- !duplicated(nTerms)
+    results1 <- filterSubsetRows(results, keepFirst)
+    results1$consistent <- rep(NA, sum(keepFirst))
+    results1$highestConsistent <- NULL
+    return(results1)
+  }
+
+  X_full <- cbind(`(Intercept)` = 1,
+                  as.matrix(data1[, all_vars, drop = FALSE]))
+  minL <- min(data1$L1)
+  maxL <- max(data1$L1)
+  ages <- seq(min(data1$A1), max(data1$A1), length.out = nAgePoints)
 
   consistent      <- rep(FALSE, n_models)
   currentNumber   <- 0L
   consistentFound <- FALSE
 
-  # Walk through models in regsubsets order
   for (i in seq_len(n_models)) {
     if (nTerms[i] > currentNumber) {
       currentNumber   <- nTerms[i]
       consistentFound <- FALSE
     }
+    if (consistentFound) next
 
-    if (!consistentFound) {
-      selected   <- c(TRUE, results$outmat[i, ] == "*")
-      X_sub      <- X_train_full[, selected, drop = FALSE]
-      X_pred_sub <- X_pred_full[, selected, drop = FALSE]
 
-      fit <- .lm.fit(X_sub, y_train)
+    sel <- c(TRUE, results$outmat[i, ] == "*")
+    fit <- if (is.null(weights)) stats::lm.fit(X_full[, sel, drop = FALSE], y)
+           else stats::lm.wfit(X_full[, sel, drop = FALSE], y, w = weights)
+    cf <- fit$coefficients
 
-      if (anyNA(fit$coefficients)) {
-        # Rank-deficient subset
-        consistent[i] <- FALSE
-      } else {
-        consistentFound <- check_monotonicity_matrix(fit$coefficients, X_pred_sub, n_ages, n_norms)
-        consistent[i]   <- consistentFound
-      }
-    }
+    if (anyNA(cf)) next                      # rank deficient -> inconsistent
+
+    B <- taylorCoefficientMatrix(cf)
+    if (is.null(B)) next
+
+    tPow <- ncol(B) - 1L
+    dirs <- vapply(ages, function(a)
+      polyDirection(as.vector(B %*% a^(0:tPow)), minL, maxL), integer(1))
+
+    ok <- !anyNA(dirs) &&
+      !(any(dirs == 1L) && any(dirs == -1L)) &&
+      any(dirs != 0L)                        # constant-in-L models are degenerate
+
+    consistent[i]   <- ok
+    consistentFound <- ok
   }
 
-  # Bookkeeping: fallback mechanism
-  df <- data.frame(terms      = nTerms,
-                   consistent = consistent,
-                   R2         = results$adjr2)
-  df_modified <- df
-
+  # fallback: if no consistent model exists for a size, keep the best one
+  keepFlag <- consistent
   for (term in unique(nTerms)) {
-    term_indices <- which(df$terms == term)
-    if (!any(df$consistent[term_indices])) {
-      df_modified$consistent[term_indices[1]] <- TRUE
-    }
+    idx <- which(nTerms == term)
+    if (!any(consistent[idx])) keepFlag[idx[1]] <- TRUE
   }
 
-  keep <- df_modified$consistent
-
-  results1 <- results
-  results1$consistent <- df$consistent[keep]
-  results1$which      <- results1$which[keep, , drop = FALSE]
-  results1$outmat     <- results1$outmat[keep, , drop = FALSE]
-  results1$adjr2      <- results1$adjr2[keep]
-  results1$cp         <- results1$cp[keep]
-  results1$bic        <- results1$bic[keep]
-  results1$rss        <- results1$rss[keep]
-  results1$rsq        <- results1$rsq[keep]
+  results1 <- filterSubsetRows(results, keepFlag)
+  results1$consistent <- consistent[keepFlag]
 
   consistent_positions <- which(results1$consistent)
-  results1$highestConsistent <- if (length(consistent_positions) > 0L) {
-    max(consistent_positions)
-  } else {
-    NULL
-  }
+  results1$highestConsistent <- if (length(consistent_positions) > 0L)
+    max(consistent_positions) else NULL
 
   results1
 }
 
 
-#' K-fold Resampled Coefficient Estimation for Linear Regression
+#' Deprecated: K-fold Resampled Coefficient Estimation
 #'
 #' @description
-#' Performs k-fold resampling to estimate averaged coefficients for linear regression.
-#' The coefficients are averaged across k different subsets of the data to provide
-#' more stable estimates. For small samples (n < 100), returns a standard linear model instead.
+#' Deprecated. Averaging OLS coefficients over subsamples or folds cannot
+#' improve upon the full-sample (weighted) least squares fit, which is already
+#' the minimum-variance unbiased estimator for a fixed set of terms
+#' (Gauss-Markov); it merely adds Monte-Carlo noise and small-sample bias. The
+#' relevant source of variance is model *selection*, which is addressed by
+#' consistency screening and by BIC-weighted model averaging
+#' (\code{bestModel(..., averaging = TRUE)} or \code{weightedAverageModel}).
+#' This function now simply returns the full-sample least squares fit.
 #'
 #' @param text A character string or formula specifying the model to be fitted
 #' @param data A data frame containing the variables in the model
-#' @param weights Optional numeric vector of weights. If NULL, unweighted regression is performed
-#' @param k Integer specifying the number of resampling folds (default = 10)
+#' @param weights Optional numeric vector of weights
+#' @param k Ignored (kept for backwards compatibility)
 #'
-#' @return An object of class 'lm' with averaged coefficients from k-fold resampling.
-#' For small samples, returns a standard lm object.
-#'
-#' @details
-#' The function splits the data into k subsets, fits a linear model on k-1 subsets,
-#' and stores the coefficients. This process is repeated k times, and the final
-#' coefficients are averaged across all iterations to provide more stable estimates.
+#' @return An object of class 'lm' fitted on the complete sample.
+#' @seealso weightedAverageModel
 #' @keywords deprecated
 subsample_lm <- function(text, data, weights, k = 10) {
-  warning("Function deprecated")
-  # Save current random seed state to get reproducible results
-  if (exists(".Random.seed", envir = .GlobalEnv)) {
-    old_seed <- .Random.seed
-    on.exit(assign(".Random.seed", old_seed, envir = .GlobalEnv))
-  } else{
-    on.exit(rm(".Random.seed", envir = .GlobalEnv))
-  }
-
-  set.seed(123)
-
-  # in case of very small samples, just return linear model
-  if (nrow(data) < 100) {
-    if (is.null(weights)) {
-      return(lm(text, data))
-    } else{
-      return(lm(text, data, weights = weights))
-    }
-  }
-
-  formula <- formula(text)
-
-  # Set up k-fold CV
-  folds <- sample(rep(1:k, length.out = nrow(data)))
-
-  # Store coefficients from each fold
-  coef_matrix <- matrix(NA, nrow = k, ncol = length(attr(terms(formula), "term.labels")) + 1)
-  colnames(coef_matrix) <- c("(Intercept)", attr(terms(formula), "term.labels"))
-
-  # Perform k-fold CV
-  for (i in 1:k) {
-    fold_idx   <- which(folds == i)
-    train_data <- data[-fold_idx, ]
-
-    if (is.null(weights)) {
-      fit <- lm(formula, data = train_data)
-    } else {
-      train_weights <- weights[-fold_idx]      # <-- FIX
-      fit <- lm(formula, data = train_data, weights = train_weights)
-    }
-    coef_matrix[i, ] <- coef(fit)
-  }
-
-  # Calculate final coefficients (mean across folds)
-  final_coef <- colMeans(coef_matrix)
-
-  # Create final model with averaged coefficients
-  final_model <- lm(formula, data = data)
-  final_model$coefficients <- final_coef
-  final_model$fitted.values <- model.matrix(final_model) %*% final_coef
-  final_model$residuals <- final_model$model[[1]] - final_model$fitted.values
-
-  return(final_model)
+  .Deprecated("weightedAverageModel",
+              msg = paste0("subsample_lm() is deprecated: coefficient averaging ",
+                           "over subsamples cannot improve on the full-sample ",
+                           "least squares fit. Returning a standard (weighted) ",
+                           "lm fit. Consider bestModel(..., averaging = TRUE) ",
+                           "for BIC-weighted model averaging."))
+  f <- stats::formula(text)
+  if (is.null(weights)) stats::lm(f, data = data)
+  else stats::lm(f, data = data, weights = weights)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plotPercentileSeries}
 \alias{plotPercentileSeries}
-\title{Generates a series of plots with number curves by percentile for different models}
+\title{Generates a series of plots with percentile curves for different models}
 \usage{
 plotPercentileSeries(
   model,
@@ -14,35 +14,49 @@ plotPercentileSeries(
 )
 }
 \arguments{
-\item{model}{The Taylor polynomial regression model object from the cNORM}
+\item{model}{The Taylor polynomial regression model object or a cnorm object}
 
-\item{start}{Number of predictors to start with}
+\item{start}{Number of terms to start with (default 1)}
 
-\item{end}{Number of predictors to end with}
+\item{end}{Number of terms to end with; defaults to the largest available
+model}
 
-\item{group}{The name of the grouping variable; the distinct groups are automatically
-determined}
+\item{group}{The name of the grouping variable; the distinct groups are
+automatically determined}
 
-\item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
+\item{percentiles}{Vector with percentile scores, ranging from 0 to 1
+(exclusive)}
 
-\item{filename}{Prefix of the filename. If specified, the plots are saves as
-png files in the directory of the workspace, instead of displaying them}
+\item{filename}{Prefix of the filename. If specified, the plots are saved as
+png files in the directory of the workspace, instead of only displaying
+them. The number of terms is appended to the prefix.}
 }
 \value{
-the complete list of plots
+A named list of plots (names indicate the number of terms),
+  returned invisibly
 }
 \description{
-This functions makes use of 'plotPercentiles' to generate a series of plots
-with different number of predictors. It draws on the information provided by the model object
-to determine the bounds of the modeling (age and standard score range). It can be used as an
-additional model check to determine the best fitting model. Please have a look at the
-' plotPercentiles' function for further information.
+This function makes use of 'plotPercentiles' to generate a series of plots
+for models with an increasing number of terms. It draws on the information
+provided by the model object to determine the bounds of the modeling (age
+and standard score range). It can be used as an additional model check to
+determine the best fitting model. Please have a look at the
+'plotPercentiles' function for further information.
+}
+\details{
+Each model of the series is refitted on the complete norm sample (applying
+case weights, if the norm data were post stratified). Models are identified
+by their actual number of terms, which - after consistency screening in
+\code{bestModel} - is not necessarily identical to the row number of the
+model selection table. The subtitle of each plot reports the number of
+terms, the adjusted R2 and, if available, the result of the consistency
+check.
 }
 \examples{
 \dontrun{
   # Load example data set, compute model and plot results
   result <- cnorm(raw = elfe$raw, group = elfe$group)
-  plotPercentileSeries(result, start=4, end=6)
+  plotPercentileSeries(result, start = 4, end = 6)
 }
 
 }

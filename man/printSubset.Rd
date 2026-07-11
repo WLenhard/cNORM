@@ -15,12 +15,13 @@ printSubset(x, ...)
 Table with model information criteria.
 }
 \description{
-Displays R^2 and other metrics for models with varying predictors, aiding in choosing the best-fitting model
-after model fitting.
+Displays R^2 and other metrics for models with varying predictors, aiding in
+choosing the best-fitting model after model fitting. The F-test compares each
+model to the preceding (smaller) one, with degrees of freedom based on the
+actual difference in the number of parameters.
 }
 \examples{
 \dontrun{
-  # Using cnorm object from sample data
   result <- cnorm(raw = elfe$raw, group = elfe$group)
   printSubset(result)
 }
@@ -35,6 +36,7 @@ Other model:
 \code{\link[=print.cnorm]{print.cnorm()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

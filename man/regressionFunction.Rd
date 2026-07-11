@@ -38,6 +38,7 @@ Other model:
 \code{\link[=print.cnorm]{print.cnorm()}},
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

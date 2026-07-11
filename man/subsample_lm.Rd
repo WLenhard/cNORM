@@ -2,7 +2,7 @@
 % Please edit documentation in R/modelling.R
 \name{subsample_lm}
 \alias{subsample_lm}
-\title{K-fold Resampled Coefficient Estimation for Linear Regression}
+\title{Deprecated: K-fold Resampled Coefficient Estimation}
 \usage{
 subsample_lm(text, data, weights, k = 10)
 }
@@ -11,22 +11,24 @@ subsample_lm(text, data, weights, k = 10)
 
 \item{data}{A data frame containing the variables in the model}
 
-\item{weights}{Optional numeric vector of weights. If NULL, unweighted regression is performed}
+\item{weights}{Optional numeric vector of weights}
 
-\item{k}{Integer specifying the number of resampling folds (default = 10)}
+\item{k}{Ignored (kept for backwards compatibility)}
 }
 \value{
-An object of class 'lm' with averaged coefficients from k-fold resampling.
-For small samples, returns a standard lm object.
+An object of class 'lm' fitted on the complete sample.
 }
 \description{
-Performs k-fold resampling to estimate averaged coefficients for linear regression.
-The coefficients are averaged across k different subsets of the data to provide
-more stable estimates. For small samples (n < 100), returns a standard linear model instead.
+Deprecated. Averaging OLS coefficients over subsamples or folds cannot
+improve upon the full-sample (weighted) least squares fit, which is already
+the minimum-variance unbiased estimator for a fixed set of terms
+(Gauss-Markov); it merely adds Monte-Carlo noise and small-sample bias. The
+relevant source of variance is model *selection*, which is addressed by
+consistency screening and by BIC-weighted model averaging
+(\code{bestModel(..., averaging = TRUE)} or \code{weightedAverageModel}).
+This function now simply returns the full-sample least squares fit.
 }
-\details{
-The function splits the data into k subsets, fits a linear model on k-1 subsets,
-and stores the coefficients. This process is repeated k times, and the final
-coefficients are averaged across all iterations to provide more stable estimates.
+\seealso{
+weightedAverageModel
 }
 \keyword{deprecated}

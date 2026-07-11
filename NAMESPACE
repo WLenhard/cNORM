@@ -28,7 +28,7 @@ importFrom(ggplot2,
            guide_legend, guides, labs, margin, scale_color_brewer,
            scale_color_manual, scale_color_viridis_d, scale_fill_gradientn,
            scale_shape_manual, scale_x_continuous, scale_y_continuous,
-           scale_y_log10, theme, theme_minimal, unit, ylim)
+           scale_y_log10, theme, theme_minimal, unit, ylim, coord_cartesian)
 
 # Exported functions
 export(
@@ -83,6 +83,7 @@ export(
     simulateRasch,
     standardize,
     taylorSwift,
+    weightedAverageModel,
     weighted.quantile,
     weighted.quantile.harrell.davis,
     weighted.quantile.inflation,

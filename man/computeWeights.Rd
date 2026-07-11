@@ -11,12 +11,12 @@ computeWeights(data, population.margins, standardized = TRUE)
 
 \item{population.margins}{A data.frame including three columns, specifying the
 variable name in the original dataset used for data stratification, the factor
-level of the variable and the according population share. Please ensure, the
-original data does not include factor levels, not present in the
+level of the variable and the according population share. Please ensure the
+original data does not include factor levels not present in the
 population.margins. Additionally, summing up the shares of the different
 levels of a variable should result in a value near 1.0. The first column must
 specify the name of the stratification variable, the second the level and
-the third the proportion}
+the third the proportion.}
 
 \item{standardized}{If TRUE (default), the raking weights are scaled to
 weights/min(weights)}
@@ -27,13 +27,13 @@ a vector with the standardized weights
 \description{
 Computes and standardizes weights via raking to compensate for non-stratified
 samples. It is based on the implementation in the survey R package. It reduces
-data collection #' biases in the norm data by the means of post stratification,
+data collection biases in the norm data by the means of post stratification,
 thus reducing the effect of unbalanced data in percentile estimation and norm
 data modeling.
 }
 \details{
 This function computes standardized raking weights to overcome biases in norm
-samples. It generates weights, by drawing on the information of population
+samples. It generates weights by drawing on the information of population
 shares (e. g. for sex, ethnic group, region ...) and subsequently reduces the
 influence of over-represented groups or increases underrepresented cases. The
 returned weights are either raw or standardized and scaled to be larger than 0.
@@ -52,8 +52,8 @@ variable and (c) the according population proportion.
 # to weight the data, we have to specify the population shares.
 # According to census, the population includes 52\% boys
 # (factor level 1 in the ppvt dataset) and 70\% / 30\% of persons
-# without / with a a history of migration (= 0 / 1 in the dataset).
-# First we set up the popolation margins with all shares of the
+# without / with a history of migration (= 0 / 1 in the dataset).
+# First we set up the population margins with all shares of the
 # different levels:
 
 margins <- data.frame(variables = c("sex", "sex",
@@ -76,10 +76,10 @@ unique(weights)
 
 # To include the weights in the cNORM modelling, we have
 # to pass them as weights. They are then used to set up
-# weighted quantiles and as weights in the regession.
+# weighted quantiles and as weights in the regression.
 
 model <- cnorm(raw = ppvt$raw,
-               group=ppvt$group,
+               group = ppvt$group,
                weights = weights)
 }
 }

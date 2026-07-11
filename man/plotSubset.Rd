@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plotSubset}
 \alias{plotSubset}
-\title{Evaluate information criteria for regression model}
+\title{#' Evaluate information criteria for regression model}
 \usage{
 plotSubset(model, type = 0)
 }
@@ -11,40 +11,51 @@ plotSubset(model, type = 0)
 
 \item{type}{Integer specifying the type of plot to generate:
 \itemize{
-  \item 0: Adjusted R2 by number of predictors (default)
-  \item 1: Log-transformed Mallow's Cp by adjusted R2
+  \item 0: Adjusted R2 by number of terms (default)
+  \item 1: Log-transformed Mallows's Cp by adjusted R2
   \item 2: Bayesian Information Criterion (BIC) by adjusted R2
-  \item 3: Root Mean Square Error (RMSE) by number of predictors
-  \item 4: Residual Sum of Squares (RSS) by number of predictors
-  \item 5: F-test statistic for consecutive models by number of predictors
-  \item 6: p-value for model tests by number of predictors
+  \item 3: Root Mean Square Error (RMSE) by number of terms
+  \item 4: Residual Sum of Squares (RSS) by number of terms
+  \item 5: F-test statistic for consecutive models by number of terms
+  \item 6: p-value for model tests by number of terms
 }}
 }
 \value{
 A ggplot object representing the selected information criterion plot.
 }
 \description{
-This function plots various information criteria and model fit statistics against
-the number of predictors or adjusted R-squared, depending on the type of plot selected.
-It helps in model selection by visualizing different aspects of model performance. Models,
-which did not pass the initial consistency check are depicted with an empty circle.
+This function plots various information criteria and model fit statistics
+against the number of terms or the adjusted R-squared, depending on the type
+of plot selected. It helps in model selection by visualizing different
+aspects of model performance. Models which did not pass the consistency
+check are depicted with an empty circle; the automatically selected model is
+highlighted in red. If BIC-weighted model averaging was applied
+(\code{averaging = TRUE}), a caption indicates that the final coefficients
+are a weighted combination of the consistent candidate models shown.
 }
 \details{
 The function generates different plots to help in model selection:
 
-- For types 1 and 2 (Mallow's Cp and BIC), look for the "elbow" in the curve where
-  the information criterion begins to drop. This often indicates a good balance
-  between model fit and complexity.
+- For types 1 and 2 (Mallows's Cp and BIC), look for the "elbow" in the curve
+  where the information criterion begins to drop. This often indicates a good
+  balance between model fit and complexity.
 - For type 0 (Adjusted R2), higher values indicate better fit, but be cautious
   of overfitting with values approaching 1.
 - For types 3 and 4 (RMSE and RSS), lower values indicate better fit.
-- For type 5 (F-test), higher values suggest significant improvement with added predictors.
+- For type 5 (F-test), higher values suggest significant improvement with
+  added terms.
 - For type 6 (p-values), values below the significance level (typically 0.05)
-  suggest significant improvement with added predictors.
+  suggest significant improvement with added terms.
+
+The F-tests and p-values compare each model with the preceding (smaller) one,
+with degrees of freedom based on the actual difference in the number of
+parameters. After consistency screening, consecutive models may differ by
+more than one term.
 }
 \note{
-It's important to balance statistical measures with practical considerations and
-to visually inspect the model fit using functions like \code{plotPercentiles}.
+It's important to balance statistical measures with practical considerations
+and to visually inspect the model fit using functions like
+\code{plotPercentiles}.
 }
 \examples{
 \dontrun{
@@ -55,7 +66,7 @@ plotSubset(cnorm.model)
 # Plot BIC against adjusted R-squared
 plotSubset(cnorm.model, type = 2)
 
-# Plot RMSE against number of predictors
+# Plot RMSE against number of terms
 plotSubset(cnorm.model, type = 3)
 }
 

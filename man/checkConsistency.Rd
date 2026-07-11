@@ -14,6 +14,7 @@ checkConsistency(
   maxRaw = NULL,
   stepAge = NULL,
   stepNorm = 1,
+  method = c("analytic", "grid"),
   warn = FALSE,
   silent = FALSE
 )
@@ -33,15 +34,17 @@ checkConsistency(
 
 \item{maxRaw}{clipping parameter for the upper bound of raw scores}
 
-\item{stepAge}{Stepping parameter for the age check.
-values indicate higher precision / closer checks}
+\item{stepAge}{Stepping parameter for the age check. If NULL, 8 equidistant
+age points are used. Lower values indicate higher precision.}
 
-\item{stepNorm}{Stepping parameter for the norm table check within age with lower
-scores indicating a higher precision. The choice depends of the norm scale
-used. With T scores a stepping parameter of 1 is suitable}
+\item{stepNorm}{Stepping parameter for the norm table check within age
+(only used with \code{method = "grid"})}
 
-\item{warn}{If set to TRUE, already minor violations of the model assumptions
-are displayed (default = FALSE)}
+\item{method}{Either "analytic" (default; exact within age via polynomial
+derivative roots) or "grid" (numerical check on a norm score grid)}
+
+\item{warn}{Retained for backwards compatibility (violations below numerical
+tolerance are always suppressed)}
 
 \item{silent}{turn off messages}
 }
@@ -50,13 +53,13 @@ Boolean, indicating model violations (TRUE) or no problems (FALSE)
 }
 \description{
 While abilities increase and decline over age, within one age group, the
-norm scores always have to show a monotonic increase or decrease with increasing raw
-scores. Violations of this assumption are an indication for problems
-in modeling the relationship between raw and norm scores. There are
+norm scores always have to show a monotonic increase or decrease with
+increasing raw scores. Violations of this assumption are an indication for
+problems in modeling the relationship between raw and norm scores. There are
 several reasons, why this might occur:
 \enumerate{
   \item Vertical extrapolation: Choosing extreme norm scores, e. g. values
-  -3 <= x and x >= 3 In order to model these extreme values, a large sample
+  -3 <= x and x >= 3. In order to model these extreme values, a large sample
   dataset is necessary.
   \item Horizontal extrapolation: Taylor polynomials converge in a certain
   radius. Using the model values outside the original dataset may
@@ -72,6 +75,16 @@ In general, extrapolation (point 1 and 2) can carefully be done to a
  most likely become independent and it is thus recommended to restrict the
  norm score range to the relevant range of abilities, e.g. +/- 2.5 SD via
  the minNorm and maxNorm parameter.
+
+ With \code{method = "analytic"} (default), monotonicity within each age is
+ verified exactly: since the model is polynomial in the norm score L, the
+ real roots of its derivative are computed via \code{polyroot} and the sign
+ of the derivative is checked between consecutive roots. This detects even
+ narrow violations that a coarse norm score grid can miss. Age remains
+ discretized; violations that are entirely clipped by the raw score bounds
+ are ignored. \code{method = "grid"} reproduces the classical numerical
+ check and is used automatically as a fallback for models with non-Taylor
+ predictors.
 }
 \examples{
 \dontrun{
@@ -90,6 +103,7 @@ Other model:
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=rangeCheck]{rangeCheck()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}}
+\code{\link[=summary.cnorm]{summary.cnorm()}},
+\code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}

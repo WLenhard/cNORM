@@ -240,6 +240,9 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
 #' @param t Power degree for the age dimension (max 6).
 #' @param plot If TRUE (default), display percentile plot and report.
 #' @param extensive If TRUE (default), screen models for monotonic consistency.
+#' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
+#'   across the consistency-screened candidate models instead of selecting a
+#'   single model. Requires \code{extensive = TRUE} and age-based norming.
 #' @param subsampling (deprecated) If TRUE (default is FALSE), use 10-fold
 #'  subsampled coefficient averaging in `bestModel`.
 #'
@@ -286,6 +289,7 @@ cnorm <- function(raw = NULL,
                   R2 = NULL,
                   plot = TRUE,
                   extensive = TRUE,
+                  averaging = TRUE,
                   subsampling = FALSE) {
 
   # ---- input validation -----------------------------------------------------
@@ -406,7 +410,7 @@ cnorm <- function(raw = NULL,
   # ---- model, assemble, report ----------------------------------------------
   model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2,
                      weights = data$weights, plot = FALSE,
-                     extensive = extensive, subsampling = subsampling)
+                     extensive = extensive, averaging = averaging, subsampling = subsampling)
 
   result <- structure(list(data = data, model = model), class = "cnorm")
   if (plot) {
@@ -457,7 +461,10 @@ cnorm <- function(raw = NULL,
 #' captured by cubic polynomials.
 #' @param plot Default TRUE; plots the regression model and prints report
 #' @param extensive If TRUE, screen models for consistency and - if possible, exclude inconsistent ones
-#' @param subsampling If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
+#' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
+#'   across the consistency-screened candidate models instead of selecting a
+#'   single model. Requires \code{extensive = TRUE} and age-based norming.
+#' @param subsampling (deprecated) If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.
 #'
 #' @return cnorm object including the ranked raw data and the regression model
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel

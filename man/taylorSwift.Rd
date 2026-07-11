@@ -19,6 +19,7 @@ taylorSwift(
   R2 = NULL,
   plot = TRUE,
   extensive = TRUE,
+  averaging = TRUE,
   subsampling = FALSE
 )
 }
@@ -69,7 +70,11 @@ this number of terms is used}
 
 \item{extensive}{If TRUE, screen models for consistency and - if possible, exclude inconsistent ones}
 
-\item{subsampling}{If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.}
+\item{averaging}{If TRUE (default FALSE), apply BIC-weighted model averaging
+across the consistency-screened candidate models instead of selecting a
+single model. Requires \code{extensive = TRUE} and age-based norming.}
+
+\item{subsampling}{(deprecated) If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.}
 }
 \value{
 cnorm object including the ranked raw data and the regression model

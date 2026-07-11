@@ -3,6 +3,65 @@ This file documents the development of the package as well as open issues or poi
 
 
 
+### Version in 3.6.1
+Date: 11.07.2026 - in progress
+
+## New features
+
+* `bestModel()` gains an `averaging` argument: instead of selecting a single
+  model, the final coefficients can now be computed as a BIC-weighted average
+  across all consistency-screened candidate models (`weightedAverageModel()`,
+  new exported function). Since only monotone models of identical direction
+  enter the average and the weights form a convex combination, the averaged
+  model is guaranteed to remain consistent. This addresses model *selection*
+  variance and replaces the deprecated subsampling approach.
+* Analytical monotonicity check: model consistency is now verified exactly
+  within each age. As the model is polynomial in the norm score L (degree <= k),
+  the real roots of its derivative are computed via `polyroot()` and the sign
+  of the derivative is evaluated between consecutive roots. This detects
+  narrow violations that a discrete norm score grid can miss, and is faster
+  than the previous 50-point grid.
+* `checkConsistency()` gains a `method` argument (`"analytic"`, the new
+  default, or `"grid"` for the previous numerical behaviour). The analytic
+  method is clipping-aware: violations lying entirely outside
+  `[minRaw, maxRaw]` are ignored, matching the former clipped grid check.
+  Models with non-Taylor predictors automatically fall back to the grid method.
+* Consistency screening in `bestModel()` now evaluates 8 age points instead of
+  only the age minimum and maximum, so intersecting percentile curves at
+  interior ages are now detected.
+
+## Deprecations
+
+* `subsample_lm()` is deprecated and returns a plain (weighted) least squares
+  fit. Averaging OLS coefficients over subsamples cannot improve on the
+  full-sample fit (Gauss-Markov) and only added Monte-Carlo noise; use
+  `bestModel(..., averaging = TRUE)` instead. The `subsampling` argument of
+  `bestModel()` is deprecated and ignored.
+
+## Bug fixes
+
+* `cnorm.cv()` and the internal consistency screening used `.lm.fit()`, which
+  neither returns fitted values nor unpivoted, named coefficients. This could
+  yield `NaN` RMSE values and mislabeled coefficients in rank-deficient cases.
+  Replaced by `lm.fit()`.
+* `bestModel()` with `extensive = TRUE` and user-defined predictors crashed
+  during screening ("subscript out of bounds"); screening is now skipped
+  gracefully for non-Taylor predictor sets (best model per size retained).
+* `checkConsistency()` failed for conventional norming (`minA1 == maxA1`)
+  due to a zero age stepping parameter.
+* `nvmax` was computed incorrectly when `predictors` was supplied as a formula
+  (`length(formula)` returns 3) or as a character vector.
+* Violating age points in `checkConsistency()` were concatenated with `sep`
+  instead of `collapse` and hence not fully displayed.
+
+
+## Behavioural changes
+
+* Candidate models that do not depend on L at all (flat percentile lines) are
+  now flagged as *inconsistent* during screening; previously they passed the
+  monotonicity check. Such models are degenerate for norming purposes.
+
+
 
 ### Version in 3.6.0
 Date: 17.06.2026 - release
