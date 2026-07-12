@@ -7,7 +7,7 @@
 predictCoefficients(model, ages, n = NULL)
 }
 \arguments{
-\item{model}{An object of class "cnormBetaBinomial", typically the result of a call to \code{\link{cnorm.betabinomial}}.}
+\item{model}{An object of class "cnormBetaBinomial".}
 
 \item{ages}{A numeric vector of age points at which to make predictions.}
 
@@ -18,15 +18,19 @@ A data frame with columns:
   \item{age}{The input age points}
   \item{mu}{Predicted mean values}
   \item{sigma}{Predicted standard deviation values}
+  \item{a}{Alpha parameters}
+  \item{b}{Beta parameters}
 }
 \description{
-This function generates predictions from a fitted beta binomial regression model
-for new age points.
+This function generates predictions from a fitted beta binomial regression
+model (mode 1) for new age points and converts them into alpha and beta
+parameters of the beta-binomial distribution via method of moments.
 }
 \details{
-This function takes a fitted beta binomial regression model and generates predictions
-for new age points. It applies the same standardization used in model fitting,
-generates predictions on the standardized scale, and then transforms these back
-to the original scale.
+The function applies the same standardization used in model fitting,
+generates predictions on the standardized scale, and transforms these back
+to the original scale. If the method of moments yields invalid (i.e.
+non-positive or non-finite) parameters, a mean-preserving low-precision
+fallback is used instead of arbitrarily clamping both parameters.
 }
 \keyword{internal}

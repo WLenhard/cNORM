@@ -7,25 +7,30 @@
 betaCoefficients(x, n = NULL)
 }
 \arguments{
-\item{x}{A numeric vector of non-negative integers representing observed counts.}
+\item{x}{A numeric vector of non-negative integers representing observed
+counts.}
 
-\item{n}{The maximum number or the maximum possible value of `x`. If not specified, uses max(x) instead.}
+\item{n}{The maximum number or the maximum possible value of \code{x}.
+If not specified, uses max(x) instead.}
 }
 \value{
-A numeric vector containing the calculated parameters in the following order:
-alpha (a), beta (b), mean (m), standard deviation (sd), and the maximum number (n).
+A numeric vector containing the calculated parameters in the
+  following order: alpha (a), beta (b), mean (m), standard deviation (sd),
+  and the maximum number (n).
 }
 \description{
-This function calculates the \eqn{\alpha} (a) and \eqn{\beta} (b) parameters of a beta binomial
-distribution, along with the mean (m), variance (var) based on the input vector `x`
-and the maximum number `n`.
+This function calculates the \eqn{\alpha} (a) and \eqn{\beta} (b)
+parameters of a beta binomial distribution, along with the mean (m) and
+standard deviation (sd) based on the input vector \code{x} and the maximum
+number \code{n}.
 }
 \details{
-The beta-binomial distribution is a discrete probability distribution that models the
-number of successes in a fixed number of trials, where the probability of success varies
-from trial to trial. This variability in success probability is modeled by a beta
-distribution. Such a calculation is particularly relevant in scenarios where there is
-heterogeneity in success probabilities across trials, which is common in real-world
-situations, as for example the number of correct solutions in a psychometric test, where
-the test has a fixed number of items.
+The beta-binomial distribution is a discrete probability distribution that
+models the number of successes in a fixed number of trials, where the
+probability of success varies from trial to trial. This variability in
+success probability is modeled by a beta distribution. Such a calculation
+is particularly relevant in scenarios where there is heterogeneity in
+success probabilities across trials, which is common in real-world
+situations, as for example the number of correct solutions in a
+psychometric test, where the test has a fixed number of items.
 }

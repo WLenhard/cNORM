@@ -4,12 +4,12 @@
 \alias{log_likelihood2}
 \title{Calculate the negative log-likelihood for a beta-binomial regression model}
 \usage{
-log_likelihood2(params, X, Z, y, n, weights = NULL)
+log_likelihood2(params, X, Z, y, n, weights = NULL, lch = NULL)
 }
 \arguments{
-\item{params}{A numeric vector containing all model parameters. The first n_alpha elements
-are coefficients for the alpha model, and the remaining elements are
-coefficients for the beta model.}
+\item{params}{A numeric vector containing all model parameters. The first
+n_alpha elements are coefficients for the alpha model, and the remaining
+elements are coefficients for the beta model.}
 
 \item{X}{A matrix of predictors for the alpha model.}
 
@@ -17,19 +17,27 @@ coefficients for the beta model.}
 
 \item{y}{A numeric vector of response values.}
 
-\item{n}{The maximum score (number of trials in the beta-binomial distribution).}
+\item{n}{The maximum score (number of trials).}
 
-\item{weights}{A numeric vector of weights for each observation. If NULL, equal weights are used.}
+\item{weights}{A numeric vector of weights for each observation
+(NULL = equal weights).}
+
+\item{lch}{Optional precomputed \code{lchoose(n, y)}. Since this term does
+not depend on the parameters, passing it once avoids recomputation in
+every optimizer iteration.}
 }
 \value{
-The negative log-likelihood of the model.
+The negative log-likelihood of the model (large finite penalty
+  if non-finite).
 }
 \description{
-This function computes the negative log-likelihood for a beta-binomial regression model
-where both the alpha and beta parameters are modeled as functions of predictors.
+This function computes the negative log-likelihood for a beta-binomial
+regression model where both the alpha and beta parameters are modeled as
+functions of predictors (mode 2).
 }
 \details{
-This function uses a numerically stable implementation of the beta-binomial log-probability.
-It allows for weighted observations, which can be useful for various modeling scenarios.
+Uses a numerically stable implementation of the beta-binomial
+log-probability via \code{lbeta}. The linear predictors of
+log(alpha) and log(beta) are clamped to [-20, 20].
 }
 \keyword{internal}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/betaBinomial.R
 \name{cnorm.betabinomial1}
 \alias{cnorm.betabinomial1}
-\title{Fit a beta binomial regression model}
+\title{Fit a beta binomial regression model (mode 1, mu/sigma parameterization)}
 \usage{
 cnorm.betabinomial1(
   age,
@@ -13,7 +13,7 @@ cnorm.betabinomial1(
   sigma = 3,
   control = NULL,
   scale = "T",
-  plot = T
+  plot = TRUE
 )
 }
 \arguments{
@@ -21,20 +21,24 @@ cnorm.betabinomial1(
 
 \item{score}{A numeric vector of response values.}
 
-\item{n}{Number of items in the test, resp. maximum score to be achieved}
+\item{n}{Number of items in the test, resp. maximum score to be achieved.}
 
-\item{weights}{A numeric vector of weights for each observation. Default is NULL (equal weights).}
+\item{weights}{A numeric vector of weights for each observation.
+Default is NULL (equal weights).}
 
-\item{mu}{Integer specifying the degree of the polynomial for the mean model. Default is 2.}
+\item{mu}{Integer specifying the degree of the polynomial for the mean
+model. Default is 3.}
 
-\item{sigma}{Integer specifying the degree of the polynomial for the standard deviation model. Default is 1.}
+\item{sigma}{Integer specifying the degree of the polynomial for the
+standard deviation model. Default is 3.}
 
-\item{control}{A list of control parameters to be passed to the `optim` function.
-If NULL, default values are used.}
+\item{control}{A list of control parameters to be passed to the
+\code{optim} function. If NULL, default values are used.}
 
-\item{scale}{type of norm scale, either T (default), IQ, z or percentile (= no
-transformation); a double vector with the mean and standard deviation can as
-well, be provided f. e. c(10, 3) for Wechsler scale index points}
+\item{scale}{Type of norm scale, either T (default), IQ, z or percentile
+(= no transformation); a double vector with the mean and standard
+deviation can be provided as well, e.g. c(10, 3) for Wechsler scale
+index points.}
 
 \item{plot}{Logical indicating whether to plot the model. Default is TRUE.}
 }
@@ -49,15 +53,17 @@ A list of class "cnormBetaBinomial" containing:
 }
 \description{
 This function fits a beta binomial regression model where both the mean and
-standard deviation of the response variable are modeled as polynomial functions
-of the predictor variable. While 'cnorm-betabinomial2' fits a beta-binomial model
-on the basis of \eqn{\gamma} and \eqn{\beta} of a beta binomial function, this function
-fits \eqn{\mu} and \eqn{\sigma}, which are then used to estimate the beta binomial distribution
-parameters.
+standard deviation of the response variable are modeled as polynomial
+functions of the predictor variable. While 'cnorm.betabinomial2' fits a
+beta-binomial model directly on the basis of \eqn{\alpha} and \eqn{\beta},
+this function fits \eqn{\mu} and \eqn{\sigma}, which are then used to
+estimate the beta binomial distribution parameters. Kept for backwards
+compatibility; 'cnorm.betabinomial2' is the recommended default.
 }
 \details{
-The function standardizes the input variables, fits polynomial models for both
-the mean and standard deviation, and uses maximum likelihood estimation to
-find the optimal parameters. The optimization is performed using the BFGS method.
+The function standardizes the input variables, fits polynomial models for
+both the mean and standard deviation, and uses maximum likelihood
+estimation to find the optimal parameters. The optimization is performed
+using the BFGS method.
 }
 \keyword{internal}

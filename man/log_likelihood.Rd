@@ -4,12 +4,12 @@
 \alias{log_likelihood}
 \title{Calculate the negative log-likelihood for a beta binomial regression model}
 \usage{
-log_likelihood(params, X, Z, y, weights)
+log_likelihood(params, X, Z, y, weights = NULL)
 }
 \arguments{
-\item{params}{A numeric vector containing all model parameters. The first n_beta elements
-are coefficients for the mean model, and the remaining elements are
-coefficients for the log-standard deviation model.}
+\item{params}{A numeric vector containing all model parameters. The first
+n_beta elements are coefficients for the mean model, and the remaining
+elements are coefficients for the log-standard deviation model.}
 
 \item{X}{A matrix of predictors for the mean model.}
 
@@ -17,13 +17,17 @@ coefficients for the log-standard deviation model.}
 
 \item{y}{A numeric vector of response values.}
 
-\item{weights}{A numeric vector of weights for each observation.}
+\item{weights}{A numeric vector of weights for each observation
+(NULL = equal weights).}
 }
 \value{
-The negative log-likelihood of the model.
+The negative log-likelihood of the model (large finite penalty
+  if non-finite).
 }
 \description{
-This function computes the negative log-likelihood for a beta binomial regression model
-where both the mean and standard deviation are modeled as functions of predictors.
+This function computes the negative log-likelihood for a beta binomial
+regression model where both the mean and standard deviation are modeled
+as functions of predictors (mode 1, normal approximation on standardized
+scores).
 }
 \keyword{internal}

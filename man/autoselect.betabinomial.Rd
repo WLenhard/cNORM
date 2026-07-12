@@ -29,7 +29,8 @@ autoselect.betabinomial(
 
 \item{weights}{Optional numeric vector of weights.}
 
-\item{mode}{1 for \eqn{\mu}/\eqn{\sigma}, 2 for direct \eqn{\alpha}/\eqn{\beta} (default).}
+\item{mode}{1 for \eqn{\mu}/\eqn{\sigma}, 2 for direct
+\eqn{\alpha}/\eqn{\beta} (default).}
 
 \item{max_alpha, max_beta}{Maximum polynomial degrees. Default 4.}
 
@@ -48,15 +49,17 @@ autoselect.betabinomial(
 \item{verbose}{Logical; print progress. Default \code{TRUE}.}
 }
 \value{
-The selected fitted model
+The selected fitted model, with an additional element
+  \code{selection} containing the evaluation table and selection details.
 }
 \description{
 Selects polynomial degrees for the two components of a beta-binomial model
-(\eqn{\alpha}/\eqn{\beta} when \code{mode = 2} or \eqn{\mu}/\eqn{\sigma} when
-\code{mode = 1}) by minimizing BIC.
+(\eqn{\alpha}/\eqn{\beta} when \code{mode = 2} or \eqn{\mu}/\eqn{\sigma}
+when \code{mode = 1}) by minimizing BIC over the full grid of degree
+combinations.
 }
 \details{
-Parallel execution is attempted by default. If the workers cannot access the
-\pkg{cNORM} namespace, the function transparently falls
-back to sequential execution.
+Parallel execution is attempted by default. If the workers cannot access
+the \pkg{cNORM} namespace (e.g. during \code{devtools::load_all()}), the
+function transparently falls back to sequential execution.
 }

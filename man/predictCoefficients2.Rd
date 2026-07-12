@@ -7,7 +7,7 @@
 predictCoefficients2(model, ages, n = NULL)
 }
 \arguments{
-\item{model}{An object of class "cnormBetaBinomial2", typically the result of a call to cnorm.betabinomial2().}
+\item{model}{An object of class "cnormBetaBinomial2".}
 
 \item{ages}{A numeric vector of age points at which to make predictions.}
 
@@ -22,13 +22,13 @@ A data frame with columns:
   \item{sigma}{Predicted standard deviation values}
 }
 \description{
-This function generates predictions from a fitted beta-binomial regression model
-for new age points.
+This function generates predictions from a fitted beta-binomial regression
+model (mode 2) for new age points.
 }
 \details{
-This function takes a fitted beta-binomial regression model and generates predictions
-for new age points. It applies the same standardization used in model fitting,
-generates predictions on the standardized scale, and then transforms these back
-to the original scale.
+The function applies the same standardization used in model fitting and
+the same clamping of the linear predictors (\eqn{\pm 20} on the log scale)
+as the likelihood function, ensuring consistent behavior also under
+(mild) extrapolation.
 }
 \keyword{internal}

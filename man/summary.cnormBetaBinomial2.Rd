@@ -7,43 +7,24 @@
 \method{summary}{cnormBetaBinomial2}(object, ...)
 }
 \arguments{
-\item{object}{An object of class "cnormBetaBinomial" or "cnormBetaBinomial2", typically
-the result of a call to \code{\link{cnorm.betabinomial}}.}
+\item{object}{An object of class "cnormBetaBinomial" or
+"cnormBetaBinomial2", typically the result of a call to
+\code{\link{cnorm.betabinomial}}.}
 
 \item{...}{Additional arguments passed to the summary method:
 \itemize{
-   \item age An optional numeric vector of age values corresponding to the raw scores. If provided along with \code{raw}, additional fit statistics (R-squared, RMSE, bias) will be calculated.
-   \item score An optional numeric vector of raw scores. Must be provided if \code{age} is given.
-   \item weights An optional numeric vector of weights for each observation.
+   \item age An optional numeric vector of age values.
+   \item score An optional numeric vector of raw scores.
+   \item weights An optional numeric vector of weights.
  }}
 }
 \value{
-Invisibly returns a list containing detailed diagnostic information about the model.
-  The function primarily produces printed output summarizing the model.
+Invisibly returns a list containing detailed diagnostic
+  information about the model.
 }
 \description{
-This function provides a summary of a fitted beta-binomial continuous norming model,
-including model fit statistics, convergence information, and parameter estimates.
-}
-\details{
-The summary includes:
-\itemize{
-  \item Basic model information (type, number of observations, number of parameters)
-  \item Model fit statistics (log-likelihood, AIC, BIC)
-  \item R-squared, RMSE, and bias (if age and raw scores are provided)
-        in comparison to manifest norm scores
-  \item Convergence information
-  \item Parameter estimates with standard errors, z-values, and p-values
-}
-}
-\examples{
-\dontrun{
-model <- cnorm.betabinomial(ppvt$age, ppvt$raw, n = 228)
-summary(model)
-
-# Including R-squared, RMSE, and bias in the summary:
-summary(model, age = ppvt$age, raw = ppvt$raw)
-}
+Summary method for objects of class "cnormBetaBinomial2". See
+\code{\link{summary.cnormBetaBinomial}} for details.
 }
 \seealso{
 \code{\link{cnorm.betabinomial}}, \code{\link{diagnostics.betabinomial}}

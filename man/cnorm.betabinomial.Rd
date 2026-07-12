@@ -14,7 +14,7 @@ cnorm.betabinomial(
   beta = 3,
   control = NULL,
   scale = "T",
-  plot = T
+  plot = TRUE
 )
 }
 \arguments{
@@ -22,33 +22,39 @@ cnorm.betabinomial(
 
 \item{score}{A numeric vector of response values.}
 
-\item{n}{The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.}
+\item{n}{The maximum score (number of trials in the beta-binomial
+distribution). If NULL, max(score) is used.}
 
-\item{weights}{A numeric vector of weights for each observation. Default is NULL (equal weights).}
+\item{weights}{A numeric vector of weights for each observation.
+Default is NULL (equal weights).}
 
-\item{mode}{Integer specifying the mode of the model. Default is 2 (direct modelling of \eqn{\gamma} and \eqn{\beta}).
-If set to 1, the model is fitted on the basis of \eqn{\mu} and \eqn{\sigma}, the predicted
-mean and standard deviation over age.}
+\item{mode}{Integer specifying the mode of the model. Default is 2 (direct
+modelling of \eqn{\alpha} and \eqn{\beta}). If set to 1, the model is
+fitted on the basis of \eqn{\mu} and \eqn{\sigma}, the predicted mean
+and standard deviation over age.}
 
-\item{alpha}{Integer specifying the degree of the polynomial for the alpha model.
-Default is 3. If mode is set to 1, this parameter is used to specify the degree
-of the polynomial for the \eqn{\mu} model.}
+\item{alpha}{Integer specifying the degree of the polynomial for the alpha
+model. Default is 3. If mode is set to 1, this parameter is used to
+specify the degree of the polynomial for the \eqn{\mu} model.}
 
-\item{beta}{Integer specifying the degree of the polynomial for the beta model. Default is 3.
-If mode is set to 1, this parameter is used to specify the degree of the polynomial
-for the \eqn{\sigma} model.}
+\item{beta}{Integer specifying the degree of the polynomial for the beta
+model. Default is 3. If mode is set to 1, this parameter is used to
+specify the degree of the polynomial for the \eqn{\sigma} model.}
 
-\item{control}{A list of control parameters to be passed to the `optim` function.
-If NULL, default values are used, namely control = list(reltol = 1e-8, maxit = 1000)
-for mode 1 and control = list(factr = 1e-8, maxit = 1000) for mode 2.}
+\item{control}{A list of control parameters to be passed to the
+\code{optim} function. If NULL, default values are used, namely
+\code{list(reltol = 1e-8, maxit = 1000)} for mode 1 and adaptive
+L-BFGS-B settings (factr between 1e4 and 1e6, maxit proportional to the
+number of parameters) for mode 2.}
 
-\item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.}
+\item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a
+double vector with the mean and standard deviation.}
 
 \item{plot}{Logical indicating whether to plot the model. Default is TRUE.}
 }
 \value{
-A list of class "cnormBetaBinomial" or "cnormBetaBinomial2". In case of mode 2
-        containing:
+A list of class "cnormBetaBinomial" or "cnormBetaBinomial2".
+  In case of mode 2 containing:
   \item{alpha_est}{Estimated coefficients for the alpha model}
   \item{beta_est}{Estimated coefficients for the beta model}
   \item{se}{Standard errors of the estimated coefficients}
@@ -57,16 +63,18 @@ A list of class "cnormBetaBinomial" or "cnormBetaBinomial2". In case of mode 2
   \item{result}{Full result from the optimization procedure}
 }
 \description{
-This function fits a beta-binomial regression model where both the \eqn{\alpha} and \eqn{\beta}
-parameters of the beta-binomial distribution are modeled as polynomial functions
-of the predictor variable (typically age). Setting mode to 1 fits a beta-binomial
-model on the basis of \eqn{\mu} and \eqn{\sigma}, setting it to 2 (default) fits a beta-binomial
+This function fits a beta-binomial regression model where both the
+\eqn{\alpha} and \eqn{\beta} parameters of the beta-binomial distribution
+are modeled as polynomial functions of the predictor variable (typically
+age). Setting mode to 1 fits a beta-binomial model on the basis of
+\eqn{\mu} and \eqn{\sigma}, setting it to 2 (default) fits a beta-binomial
 model directly on the basis of \eqn{\alpha} and \eqn{\beta}.
 }
 \details{
-The function standardizes the input variables, fits polynomial models for both
-the alpha and beta parameters, and uses maximum likelihood estimation to
-find the optimal parameters. The optimization is performed using the L-BFGS-B method.
+The function standardizes the input variables, fits polynomial models for
+both distribution parameters, and uses maximum likelihood estimation to
+find the optimal parameters. In mode 2, the optimization is performed
+using the L-BFGS-B method.
 }
 \examples{
 \dontrun{

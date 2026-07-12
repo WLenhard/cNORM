@@ -7,23 +7,30 @@
 \method{summary}{cnormBetaBinomial}(object, ...)
 }
 \arguments{
-\item{object}{An object of class "cnormBetaBinomial" or "cnormBetaBinomial2", typically
-the result of a call to \code{\link{cnorm.betabinomial}}.}
+\item{object}{An object of class "cnormBetaBinomial" or
+"cnormBetaBinomial2", typically the result of a call to
+\code{\link{cnorm.betabinomial}}.}
 
 \item{...}{Additional arguments passed to the summary method:
 \itemize{
-   \item age An optional numeric vector of age values corresponding to the raw scores. If provided along with \code{raw}, additional fit statistics (R-squared, RMSE, bias) will be calculated.
-   \item score An optional numeric vector of raw scores. Must be provided if \code{age} is given.
-   \item weights An optional numeric vector of weights for each observation.
+   \item age An optional numeric vector of age values corresponding to
+     the raw scores. If provided along with \code{score}, additional fit
+     statistics (R-squared, RMSE, bias) will be calculated.
+   \item score An optional numeric vector of raw scores. Must be
+     provided if \code{age} is given.
+   \item weights An optional numeric vector of weights for each
+     observation.
  }}
 }
 \value{
-Invisibly returns a list containing detailed diagnostic information about the model.
-  The function primarily produces printed output summarizing the model.
+Invisibly returns a list containing detailed diagnostic
+  information about the model. The function primarily produces printed
+  output summarizing the model.
 }
 \description{
-This function provides a summary of a fitted beta-binomial continuous norming model,
-including model fit statistics, convergence information, and parameter estimates.
+This function provides a summary of a fitted beta-binomial continuous
+norming model, including model fit statistics, convergence information,
+and parameter estimates.
 }
 \details{
 The summary includes:

@@ -7,62 +7,49 @@
 diagnostics.betabinomial(model, age = NULL, score = NULL, weights = NULL)
 }
 \arguments{
-\item{model}{An object of class "cnormBetaBinomial", typically the result of a call to cnorm.betabinomial().}
+\item{model}{An object of class "cnormBetaBinomial" or
+"cnormBetaBinomial2", typically the result of a call to
+cnorm.betabinomial().}
 
-\item{age}{An optional vector with age values}
+\item{age}{An optional vector with age values.}
 
-\item{score}{An optional vector with raw values}
+\item{score}{An optional vector with raw values.}
 
-\item{weights}{An optional vector with weights}
+\item{weights}{An optional vector with weights.}
 }
 \value{
-A list containing the following diagnostic information:
-\itemize{
-  \item converged: Logical indicating whether the optimization algorithm converged.
-  \item n_evaluations: Number of function evaluations performed during optimization.
-  \item n_gradient: Number of gradient evaluations performed during optimization.
-  \item final_value: Final value of the objective function (negative log-likelihood).
-  \item message: Any message returned by the optimization algorithm.
-  \item AIC: Akaike Information Criterion.
-  \item BIC: Bayesian Information Criterion.
-  \item max_gradient: Maximum absolute gradient at the solution (if available).
-}
+A list containing diagnostic information, including convergence,
+  number of evaluations, log-likelihood, AIC, BIC, parameter estimates
+  with standard errors, z and p values, and - if age and score are
+  provided - R2, RMSE and bias of the norm scores.
 }
 \description{
-This function provides diagnostic information for a fitted beta-binomial model
-from the cnorm.betabinomial function. It returns various metrics related to
-model convergence, fit, and complexity. In case, age and raw scores are provided,
-the function as well computes R2, rmse and bias for the norm scores based on
-the manifest and predicted norm scores.
+This function provides diagnostic information for a fitted beta-binomial
+model from the cnorm.betabinomial function. It returns various metrics
+related to model convergence, fit, and complexity. In case age and raw
+scores are provided, the function as well computes R2, RMSE and bias for
+the norm scores based on the manifest and predicted norm scores.
 }
 \details{
 The AIC and BIC are calculated as:
 AIC = 2k - 2ln(L)
 BIC = ln(n)k - 2ln(L)
-where k is the number of parameters, L is the maximum likelihood, and n is the number of observations.
+where k is the number of parameters, L is the maximum likelihood, and n
+is the number of observations.
 }
 \examples{
 \dontrun{
-# Fit a beta-binomial model
 model <- cnorm.betabinomial(ppvt$age, ppvt$raw)
-
-# Get diagnostic information
 diag_info <- diagnostics.betabinomial(model)
-
-# Print the diagnostic information
 print(diag_info)
-
-# Summary the diagnostic information
 summary(diag_info)
 
-# Check if the model converged
 if(diag_info$converged) {
   cat("Model converged successfully.\n")
 } else {
   cat("Warning: Model did not converge.\n")
 }
 
-# Compare AIC and BIC
 cat("AIC:", diag_info$AIC, "\n")
 cat("BIC:", diag_info$BIC, "\n")
 }

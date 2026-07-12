@@ -2,7 +2,7 @@
 % Please edit documentation in R/betaBinomial.R
 \name{cnorm.betabinomial2}
 \alias{cnorm.betabinomial2}
-\title{Fit a beta-binomial regression model for continuous norming}
+\title{Fit a beta-binomial regression model for continuous norming (mode 2)}
 \usage{
 cnorm.betabinomial2(
   age,
@@ -21,18 +21,24 @@ cnorm.betabinomial2(
 
 \item{score}{A numeric vector of response values.}
 
-\item{n}{The maximum score (number of trials in the beta-binomial distribution). If NULL, max(score) is used.}
+\item{n}{The maximum score (number of trials in the beta-binomial
+distribution). If NULL, max(score) is used.}
 
-\item{weights}{A numeric vector of weights for each observation. Default is NULL (equal weights).}
+\item{weights}{A numeric vector of weights for each observation.
+Default is NULL (equal weights).}
 
-\item{alpha_degree}{Integer specifying the degree of the polynomial for the alpha model. Default is 3.}
+\item{alpha_degree}{Integer specifying the degree of the polynomial for
+the alpha model. Default is 3.}
 
-\item{beta_degree}{Integer specifying the degree of the polynomial for the beta model. Default is 3.}
+\item{beta_degree}{Integer specifying the degree of the polynomial for
+the beta model. Default is 3.}
 
-\item{control}{A list of control parameters to be passed to the `optim` function.
-If NULL, default values are used.}
+\item{control}{A list of control parameters to be passed to the
+\code{optim} function (method "L-BFGS-B"). If NULL, adaptive defaults
+are used.}
 
-\item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a double vector with the mean and standard deviation.}
+\item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a
+double vector with the mean and standard deviation.}
 
 \item{plot}{Logical indicating whether to plot the model. Default is TRUE.}
 }
@@ -46,14 +52,18 @@ A list of class "cnormBetaBinomial2" containing:
   \item{result}{Full result from the optimization procedure}
 }
 \description{
-This function fits a beta-binomial regression model where both the alpha and beta
-parameters of the beta-binomial distribution are modeled as polynomial functions
-of the predictor variable (typically age). While 'cnorm-betabinomial' fits a beta-binomial model
-on the basis of \eqn{\mu} and \eqn{\sigma}, this function fits a beta-binomial model directly on the basis
-of \eqn{\gamma} and \eqn{\beta}.
+This function fits a beta-binomial regression model where both the alpha
+and beta parameters of the beta-binomial distribution are modeled as
+polynomial functions of the predictor variable (typically age). While
+'cnorm.betabinomial1' fits a beta-binomial model on the basis of \eqn{\mu}
+and \eqn{\sigma}, this function fits the model directly on the basis of
+\eqn{\alpha} and \eqn{\beta}. This is the recommended default approach
+(see \code{\link{cnorm.betabinomial}}).
 }
 \details{
-The function standardizes the input variables, fits polynomial models for both
-the alpha and beta parameters, and uses maximum likelihood estimation to
-find the optimal parameters. The optimization is performed using the L-BFGS-B method.
+The function standardizes the input variables, fits polynomial models for
+both the alpha and beta parameters, and uses maximum likelihood estimation
+to find the optimal parameters. The optimization is performed using the
+L-BFGS-B method with parameter bounds to prevent numerical issues.
 }
+\keyword{internal}

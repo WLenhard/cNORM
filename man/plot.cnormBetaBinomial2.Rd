@@ -2,28 +2,33 @@
 % Please edit documentation in R/betaBinomial.R
 \name{plot.cnormBetaBinomial2}
 \alias{plot.cnormBetaBinomial2}
-\title{Plot cnormBetaBinomial Model with Data and Percentile Lines}
+\title{Plot cnormBetaBinomial2 Model with Data and Percentile Lines}
 \usage{
 \method{plot}{cnormBetaBinomial2}(x, ...)
 }
 \arguments{
-\item{x}{A fitted model object of class "cnormBetaBinomial" or "cnormBetaBinomial2".}
+\item{x}{A fitted model object of class "cnormBetaBinomial" or
+"cnormBetaBinomial2".}
 
 \item{...}{Additional arguments passed to the plot method.
 \itemize{
-   \item age A vector the age data.
-   \item A vector of the score data.
+   \item age A vector of the age data.
+   \item score A vector of the score data.
    \item weights An optional numeric vector of weights for each observation.
    \item percentiles An optional vector with the percentiles to plot.
-   \item points Logical indicating whether to plot the data points. Default is TRUE.
+   \item points Logical indicating whether to plot the data points.
+     Default is TRUE.
+   \item discrete Logical indicating whether to plot the discrete raw
+     scores. Default is FALSE.
  }}
 }
 \value{
 A ggplot object.
 }
 \description{
-This function creates a visualization of a fitted cnormBetaBinomial model,
-including the original data points manifest percentiles and specified percentile lines.
+This function creates a visualization of a fitted cnormBetaBinomial2
+model, including the original data points, manifest percentiles and
+specified percentile lines. See \code{\link{plot.cnormBetaBinomial}}.
 }
 \seealso{
 Other plot:

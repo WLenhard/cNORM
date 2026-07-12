@@ -16,28 +16,32 @@ normTable.betabinomial(
 )
 }
 \arguments{
-\item{model}{The model, which was fitted using the `optimized.model` function.}
+\item{model}{The model, fitted with \code{\link{cnorm.betabinomial}}.}
 
-\item{ages}{A numeric vector of age points at which to make predictions.}
+\item{ages}{A numeric vector of age points at which to compute the tables.}
 
 \item{n}{The number of items resp. the maximum score.}
 
-\item{m}{An optional stop criterion in table generation. Positive integer lower than n.}
+\item{m}{An optional stop criterion in table generation. Positive integer
+lower than n. Please note: The probabilities are always computed on the
+full support 0 to n; m only truncates the output table.}
 
-\item{range}{The range of the norm scores in standard deviations. Default is 3. Thus, scores in the
-range of +/- 3 standard deviations are considered.}
+\item{range}{The range of the norm scores in standard deviations.
+Default is 3. Thus, scores in the range of +/- 3 standard deviations
+are considered.}
 
-\item{CI}{confidence coefficient, ranging from 0 to 1, default .9}
+\item{CI}{Confidence coefficient, ranging from 0 to 1, default .9.}
 
-\item{reliability}{coefficient, ranging between  0 to 1}
+\item{reliability}{Reliability coefficient, ranging between 0 to 1.}
 }
 \value{
-A list of data frames with columns: x, Px, Pcum, Percentile, z, norm score
-and possibly confidence interval
+A list of data frames with columns: x, Px, Pcum, Percentile, z,
+  norm score and possibly confidence intervals.
 }
 \description{
-This function generates a norm table for a specific ages based on the beta binomial
-regression model. In case a confidence coefficient (CI, default .9) and the
-reliability is specified, confidence intervals are computed for the true score
-estimates, including a correction for regression to the mean (Eid & Schmidt, 2012, p. 272).
+This function generates a norm table for specific ages based on the beta
+binomial regression model. In case a confidence coefficient (CI, default
+.9) and the reliability is specified, confidence intervals are computed
+for the true score estimates, including a correction for regression to
+the mean (Eid & Schmidt, 2012, p. 272).
 }
