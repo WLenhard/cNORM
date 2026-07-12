@@ -1,10 +1,16 @@
 # cNORM:news and change-log
-This file documents the development of the package as well as open issues or points for further improvements.
+This file documents the development of the package as well as open issues or 
+points for further improvements.
 
 
 
 ### Version in 3.6.1
 Date: 11.07.2026 - in progress
+
+This release mainly targets optimization and code hardening. The central new
+feature is the `averaging` argument in the `bestModel()` and `bestModel()`,
+which conducts a model averaging for the consistent models in order to reduce
+variance in model estimation.
 
 ## New features
 
@@ -53,13 +59,37 @@ Date: 11.07.2026 - in progress
   (`length(formula)` returns 3) or as a character vector.
 * Violating age points in `checkConsistency()` were concatenated with `sep`
   instead of `collapse` and hence not fully displayed.
+* `normTable.betabinomial()`: tables truncated via `m < n` were erroneously  
+  renormalized over the truncated support, distorting percentiles and norm  
+  scores. Probabilities are now always computed on the full support 0:n.
+* `cnorm.betabinomial()` (mode 2): corrected infeasible `factr` settings for  
+  L-BFGS-B that caused spurious convergence failures; retry path no longer  
+  fails with user-supplied control lists.
+* Mode 1 predictions in beta binomial modelling: mean-preserving fallback when 
+  the method of moments yields invalid beta-binomial parameters (previously 
+  both parameters were clamped, biasing the predicted mean).
+* `diagnostics.betabinomial()`: robust against singular Hessians; removed dead 
+  code.
+* Consistent clamping of linear predictors between likelihood and prediction 
+  (mode 2); more robust scale specification (`is.numeric` instead of `typeof`).
+
+
+## Performance Optimizations in beta binomial modelling
+
+* `lchoose(n, y)` is precomputed once per fit instead of in every optimizer
+  iteration.
+* `predict()` for beta-binomial models computes the distribution once per  
+  unique age (major speed-up for grouped data).
+* Shared internal helpers for input validation, design matrices and the  
+  beta-binomial pmf/cdf; percentile plots now use a single long-format layer.
 
 
 ## Behavioural changes
 
-* Candidate models that do not depend on L at all (flat percentile lines) are
-  now flagged as *inconsistent* during screening; previously they passed the
-  monotonicity check. Such models are degenerate for norming purposes.
+* Candidate models in Taylor modelling that do not depend on L at all (flat 
+  percentile lines) are now flagged as *inconsistent* during screening; 
+  previously they passed the monotonicity check. Such models are degenerate
+  for norming purposes.
 
 
 
