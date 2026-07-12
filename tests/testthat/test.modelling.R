@@ -163,12 +163,135 @@ test_that("normTable returns data.frame", {
 
 # =============================================================================
 # 5. PARAMETRIC MODELS (Beta-Binomial & ShaSh)
+#    Thoroughly tests beta binomial modelling
 # =============================================================================
 
-test_that("cnorm.betabinomial returns correct class", {
-  skip_on_cran()
-  expect_s3_class(get_bb(), "cnormBetaBinomial2")
+# ---- Helper: simulate beta-binomial data with age trend -------------------
+simulate_bb <- function(N = 800, n_items = 40, seed = 42) {
+  set.seed(seed)
+  age <- runif(N, 6, 12)
+  # increasing ability with age, moderate overdispersion
+  a <- exp(0.2 + 0.25 * (age - 9))
+  b <- exp(1.0 - 0.15 * (age - 9))
+  p <- rbeta(N, a, b)
+  score <- rbinom(N, size = n_items, prob = p)
+  list(age = age, score = score, n = n_items)
+}
+
+sim <- simulate_bb()
+
+# Fit once, reuse across tests (mode 2 = default path)
+model <- suppressMessages(
+  cnorm.betabinomial(sim$age, sim$score, n = sim$n, plot = FALSE)
+)
+
+
+test_that("cnorm.betabinomial (mode 2) fits and converges on simulated data", {
+  expect_s3_class(model, "cnormBetaBinomial2")
+  expect_equal(model$result$convergence, 0)
+  expect_equal(attr(model$result, "max"), sim$n)
+  expect_equal(attr(model$result, "N"), length(sim$score))
+
+  d <- diagnostics.betabinomial(model)
+  expect_true(d$converged)
+  expect_true(is.finite(d$BIC))
 })
+
+
+test_that("log_likelihood2 with precomputed lchoose is identical", {
+  X <- bb_design_matrix(standardize(sim$age), 3)
+  Z <- bb_design_matrix(standardize(sim$age), 3)
+  params <- c(model$alpha_est, model$beta_est)
+  lch <- lchoose(sim$n, sim$score)
+
+  expect_equal(
+    log_likelihood2(params, X, Z, sim$score, sim$n),
+    log_likelihood2(params, X, Z, sim$score, sim$n, lch = lch)
+  )
+})
+
+
+test_that("bb_distribution is a proper mid-p distribution", {
+  dist <- bb_distribution(a = 2.5, b = 4.0, n = 30)
+  expect_equal(sum(dist$Px), 1, tolerance = 1e-12)
+  expect_equal(dist$cum[31], 1)
+  expect_true(all(diff(dist$perc) > 0))          # strictly increasing
+  expect_true(all(dist$perc > 0 & dist$perc < 1))
+
+  # invalid parameters yield NA, not errors
+  bad <- bb_distribution(a = -1, b = 2, n = 30)
+  expect_true(all(is.na(bad$Px)))
+})
+
+
+test_that("normTable.betabinomial: truncation via m does not renormalize", {
+  ages <- c(7, 10)
+  full  <- normTable.betabinomial(model, ages, CI = NULL)
+  trunc <- normTable.betabinomial(model, ages, m = 20, CI = NULL)
+
+  # truncated table must be an exact head of the full table (bugfix check)
+  expect_equal(nrow(trunc[[1]]), 21)
+  expect_equal(trunc[[1]]$Px,         full[[1]]$Px[1:21])
+  expect_equal(trunc[[1]]$Pcum,       full[[1]]$Pcum[1:21])
+  expect_equal(trunc[[1]]$Percentile, full[[1]]$Percentile[1:21])
+})
+
+
+test_that("predict is consistent with normTable and unique-age grouping", {
+  ages  <- rep(c(7, 10), each = 3)
+  raws  <- c(10, 20, 30, 10, 20, 30)
+  preds <- predict(model, ages, raws)
+
+  # cross-check against normTable norm scores
+  tab <- normTable.betabinomial(model, c(7, 10), CI = NULL)
+  expect_equal(preds[1:3], tab[["7"]]$norm[raws[1:3] + 1],  tolerance = 1e-10)
+  expect_equal(preds[4:6], tab[["10"]]$norm[raws[4:6] + 1], tolerance = 1e-10)
+
+  # monotonicity in raw score within age
+  expect_true(all(diff(preds[1:3]) > 0))
+
+  # out-of-range and non-integer scores yield NA with warning
+  expect_warning(p2 <- predict(model, c(8, 8), c(sim$n + 5, 12.5)))
+  expect_true(all(is.na(p2)))
+})
+
+
+test_that("mode 1 (cnorm.betabinomial1) remains functional (compatibility)", {
+  m1 <- suppressMessages(
+    cnorm.betabinomial(sim$age, sim$score, n = sim$n, mode = 1, plot = FALSE)
+  )
+  expect_s3_class(m1, "cnormBetaBinomial")
+
+  p <- predict(m1, c(7, 9, 11), c(15, 20, 25))
+  expect_true(all(is.finite(p)))
+
+  # mean-preserving fallback in predictCoefficients: mu/(a+b) relation holds
+  pc <- predictCoefficients(m1, c(7, 9, 11))
+  expect_true(all(pc$a > 0 & pc$b > 0))
+  expect_equal(sim$n * pc$a / (pc$a + pc$b), pc$mu, tolerance = 0.05)
+})
+
+
+test_that("betaCoefficients recovers parameters approximately", {
+  set.seed(1)
+  x <- rbinom(50000, 25, rbeta(50000, 3, 5))
+  cf <- betaCoefficients(x, 25)
+  expect_equal(cf[1], 3, tolerance = 0.25)
+  expect_equal(cf[2], 5, tolerance = 0.35)
+})
+
+
+test_that("plot and summary run without error", {
+  expect_s3_class(
+    plot(model, age = sim$age, score = sim$score),
+    "ggplot"
+  )
+  out <- capture.output(
+    d <- summary(model, age = sim$age, score = sim$score)
+  )
+  expect_true(d$R2 > 0.9)   # norm score recovery on well-behaved data
+})
+
 
 test_that("cnorm.shash returns correct class", {
   skip_on_cran()
