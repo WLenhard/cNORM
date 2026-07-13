@@ -12,7 +12,8 @@ compare(
   score = NULL,
   weights = NULL,
   title = NULL,
-  subtitle = NULL
+  subtitle = NULL,
+  discrete = TRUE
 )
 }
 \arguments{
@@ -31,6 +32,11 @@ compare(
 \item{title}{Custom title for plot (optional)}
 
 \item{subtitle}{Custom subtitle for plot (optional)}
+
+\item{discrete}{Logical indicating whether beta-binomial models are displayed
+with their exact discrete quantiles as step functions (TRUE, default) or
+with a smooth continuous approximation via the underlying beta
+distribution (FALSE). Ignored for other model types.}
 }
 \value{
 A ggplot object showing the comparison of both models
@@ -41,6 +47,15 @@ their percentile curves. The first model is shown with solid lines, the second
 with dashed lines. If age and score vectors are provided, manifest percentiles
 are displayed as dots. The function works with regular cnorm models, beta-binomial
 models, and shash models, allowing comparison between different model types.
+}
+\details{
+For beta-binomial models, the exact quantiles of the discrete beta-binomial
+distribution are displayed by default as step functions (\code{discrete = TRUE}).
+Setting \code{discrete = FALSE} draws smooth lines based on the quantiles of
+the underlying beta (mixing) distribution instead. Note that this continuous
+approximation omits the binomial stage of the variance and therefore displays
+less spread than the fitted model actually implies, particularly in the outer
+percentiles. The parameter has no effect on Taylor polynomial or shash models.
 }
 \examples{
 \dontrun{

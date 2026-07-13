@@ -18,8 +18,9 @@
    \item percentiles An optional vector with the percentiles to plot.
    \item points Logical indicating whether to plot the data points.
      Default is TRUE.
-   \item discrete Logical indicating whether to plot the discrete raw
-     scores. Default is FALSE.
+   \item discrete Logical indicating whether to plot the exact discrete
+     beta-binomial quantiles (TRUE, default) or a smooth continuous
+     approximation via the underlying beta distribution (FALSE).
  }}
 }
 \value{
@@ -27,11 +28,21 @@ A ggplot object.
 }
 \description{
 This function creates a visualization of a fitted cnormBetaBinomial model,
-including the original data points, manifest percentiles and specified
-percentile lines. Note that the beta-binomial model aims at discrete raw
-scores. We decided to display continuous percentile lines nonetheless in
-order to maintain visual comparability with other modelling techniques.
-If you prefer discretization, set the "discrete" parameter to TRUE.
+including the original data points, the manifest percentiles (diamond-shaped
+dots per age group) and the model-implied percentile lines.
+}
+\details{
+By default (\code{discrete = TRUE}), the percentile lines represent the
+exact quantiles of the fitted discrete beta-binomial distribution and are
+therefore step functions. Setting \code{discrete = FALSE} draws smooth
+lines based on the quantiles of the underlying beta (mixing) distribution.
+Note that this continuous approximation omits the binomial stage of the
+variance and therefore displays less spread than the fitted model actually
+implies, particularly in the outer percentiles. Use it only for visual
+comparability with continuous modelling approaches.
+
+Cases with non-finite values (NA, NaN, Inf) in age, score or weights are
+removed prior to plotting, mirroring the behavior of the fitting functions.
 }
 \seealso{
 Other plot:
