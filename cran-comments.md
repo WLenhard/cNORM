@@ -1,33 +1,49 @@
-## Resubmission
-This is a medium release of an existing package. This release includes new 
-functions for automatically selecting parametric models based on BIC. The raking 
-and weighting was revised and ranking methods optimized. The monotonicity 
-checks are now much more strict. In this version I have:
+## cNORM version 3.6.1
 
-Changes:
+This release focuses on optimization, code hardening, and improved handling of 
+beta-binomial models.
 
-*    new methods: autoselect.betabinomial, autoselect.shash
-*    Information on modelling Logits from IRT models added to vignette
-*    function getGroups hardened for rare exceptions
-*    Stricter check on monotonicity in Taylor polynomials
-*    Cleaned up derive function
-*    Vectorization in regressionFunction()
-*    Code review of the raking code and the weighted.rank
-*    Code review for rankByGroups and rankBySlidingWindow; performance improvements
-*    prepareData and cnorm functions hardened
-*    added example code for new functions to vignette and README.md
+**Major Features & Behavioral Changes**
+* **Model Averaging:** Introduced an `averaging` argument in `bestModel()` to 
+  compute final coefficients as a BIC-weighted average across consistency-
+  screened models. This reduces model selection variance and guarantees 
+  consistent models.
+* **Analytic Consistency Checks:** Replaced the discrete grid check with an 
+  exact analytical monotonicity check using `polyroot()` (now the default in 
+  `checkConsistency()`). This detects narrow violations that a discrete grid 
+  can miss and is faster.
+* **Consistency Screening:** Flat candidate models (independent of L) are now 
+  correctly flagged as inconsistent, and screening evaluates 8 age points (up 
+  from 2) to catch intersecting percentile curves.
+* **Plotting:** Discrete beta-binomial quantiles are now correctly rendered as 
+  step functions in `plot()` and `compare()`.
+
+**Deprecations**
+* Deprecated `subsample_lm()` and the `subsampling` argument in `bestModel()`. 
+  Subsampling OLS coefficients adds Monte-Carlo noise without improving the fit 
+  and is entirely replaced by the new `averaging` method.
+
+**Bug Fixes & Performance Optimizations**
+* Fixed issues causing `NaN` RMSE values (switched from `.lm.fit()` to 
+  `lm.fit()`) and crashes during consistency screening with non-Taylor 
+  predictors.
+* Fixed beta-binomial probability normalization over truncated supports and 
+  resolved L-BFGS-B optimization convergence failures.
+* Fixed an edge case failure in `checkConsistency()` for conventional norming 
+  (`minA1 == maxA1`).
+* Significant performance improvements in beta-binomial modeling via 
+  precomputation of `lchoose()` and grouped-data optimizations in `predict()`.
 
 
 ## Test environments
 * local WIN11, 64Bit install, R 4.6.0
 * winbuilder win release, win old release, win development
-* Automatic checks on GitHub: Ubuntu (old-rel1, devel, release), MacOS latest,
+* Automatic checks on GitHub: Ubuntu (old-rel1, devel, release), MacOS latest, 
   Windows latest
 
 
-
 ## R CMD check results
-There were no ERRORs, WARNINGs or NOTES
+There were no ERRORs, WARNINGs or NOTEs.
 
 
 ## Downstream dependencies

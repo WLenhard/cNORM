@@ -5,7 +5,7 @@ points for further improvements.
 
 
 ### Version in 3.6.1
-Date: 13.07.2026 - in progress
+Date: 13.07.2026 - release
 
 This release mainly targets optimization and code hardening. The central new
 feature is the `averaging` argument in the `bestModel()` and `bestModel()`,
