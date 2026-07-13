@@ -5,12 +5,13 @@ points for further improvements.
 
 
 ### Version in 3.6.1
-Date: 11.07.2026 - in progress
+Date: 13.07.2026 - in progress
 
 This release mainly targets optimization and code hardening. The central new
 feature is the `averaging` argument in the `bestModel()` and `bestModel()`,
 which conducts a model averaging for the consistent models in order to reduce
-variance in model estimation.
+variance in model estimation. Beta binomial models are now drawn as stepping
+and this as well is applied for the compare function.
 
 ## New features
 
@@ -90,6 +91,13 @@ variance in model estimation.
   percentile lines) are now flagged as *inconsistent* during screening; 
   previously they passed the monotonicity check. Such models are degenerate
   for norming purposes.
+* In beta binomial modelling, the plotting now show discrete beta-binomial 
+  quantiles are now rendered as proper step functions (geom_step, midpoint 
+  risers) in plot() and compare(); compare() gained a discrete argument 
+  default TRUE) controlling whether beta-binomial models are displayed with 
+  exact discrete quantiles or the continuous beta approximation.  This as well
+  resolves an artefact of compressed percentile lines in areas +/- 1 SD that 
+  falsly indicated an inferiority of beta binomial models.
 
 
 

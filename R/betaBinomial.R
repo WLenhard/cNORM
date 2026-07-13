@@ -1142,11 +1142,20 @@ predict.cnormBetaBinomial2 <- predict.cnormBetaBinomial
 #' Plot cnormBetaBinomial Model with Data and Percentile Lines
 #'
 #' This function creates a visualization of a fitted cnormBetaBinomial model,
-#' including the original data points, manifest percentiles and specified
-#' percentile lines. Note that the beta-binomial model aims at discrete raw
-#' scores. We decided to display continuous percentile lines nonetheless in
-#' order to maintain visual comparability with other modelling techniques.
-#' If you prefer discretization, set the "discrete" parameter to TRUE.
+#' including the original data points, the manifest percentiles (diamond-shaped
+#' dots per age group) and the model-implied percentile lines.
+#'
+#' By default (\code{discrete = TRUE}), the percentile lines represent the
+#' exact quantiles of the fitted discrete beta-binomial distribution and are
+#' therefore step functions. Setting \code{discrete = FALSE} draws smooth
+#' lines based on the quantiles of the underlying beta (mixing) distribution.
+#' Note that this continuous approximation omits the binomial stage of the
+#' variance and therefore displays less spread than the fitted model actually
+#' implies, particularly in the outer percentiles. Use it only for visual
+#' comparability with continuous modelling approaches.
+#'
+#' Cases with non-finite values (NA, NaN, Inf) in age, score or weights are
+#' removed prior to plotting, mirroring the behavior of the fitting functions.
 #'
 #' @param x A fitted model object of class "cnormBetaBinomial" or
 #'   "cnormBetaBinomial2".
@@ -1158,8 +1167,9 @@ predict.cnormBetaBinomial2 <- predict.cnormBetaBinomial
 #'      \item percentiles An optional vector with the percentiles to plot.
 #'      \item points Logical indicating whether to plot the data points.
 #'        Default is TRUE.
-#'      \item discrete Logical indicating whether to plot the discrete raw
-#'        scores. Default is FALSE.
+#'      \item discrete Logical indicating whether to plot the exact discrete
+#'        beta-binomial quantiles (TRUE, default) or a smooth continuous
+#'        approximation via the underlying beta distribution (FALSE).
 #'    }
 #'
 #' @return A ggplot object.
@@ -1188,7 +1198,7 @@ plot.cnormBetaBinomial <- function(x, ...) {
   percentiles <- if ("percentiles" %in% names(args)) args$percentiles
   else c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975)
   points <- if ("points" %in% names(args)) args$points else TRUE
-  discrete <- if ("discrete" %in% names(args)) args$discrete else FALSE
+  discrete <- if ("discrete" %in% names(args)) args$discrete else TRUE
 
   if (is.null(age) || is.null(score)) {
     stop("Please provide 'age' and 'score' vectors.")
@@ -1204,6 +1214,23 @@ plot.cnormBetaBinomial <- function(x, ...) {
 
   if (!is.null(weights) && length(weights) != length(age)) {
     stop("Length of 'weights' must match length of 'age' and 'score'.")
+  }
+
+  # Remove non-finite cases (NA, NaN, Inf), mirroring the fitting functions.
+  # Without this, weighted.quantile() propagates NA into the manifest
+  # percentiles and the dots silently disappear from the plot.
+  ok <- is.finite(age) & is.finite(score)
+  if (!is.null(weights)) {
+    ok <- ok & is.finite(weights)
+  }
+  if (!all(ok)) {
+    message("Vector(s) contained non-finite values (NA, NaN, Inf). ",
+            "These cases will be removed for plotting.")
+    age <- age[ok]
+    score <- score[ok]
+    if (!is.null(weights)) {
+      weights <- weights[ok]
+    }
   }
 
   # Generate prediction points
@@ -1222,32 +1249,36 @@ plot.cnormBetaBinomial <- function(x, ...) {
     preds <- predictCoefficients2(model, pred_ages, n_max)
   }
 
-  NAMES <- paste0("PR", percentiles * 100)
-
   if (discrete) {
-    # Discrete quantiles from the beta-binomial distribution
+    # Exact quantiles of the fitted discrete beta-binomial distribution
     percentile_matrix <- vapply(seq_along(pred_ages), function(j) {
       dist <- bb_distribution(preds$a[j], preds$b[j], n_max)
       if (anyNA(dist$cum)) {
         return(rep(NA_real_, length(percentiles)))
       }
       vapply(percentiles,
-             function(p) dist$x[which.max(dist$cum >= p)],
+             function(p) as.numeric(dist$x[which.max(dist$cum >= p)]),
              numeric(1))
     }, numeric(length(percentiles)))
     percentile_values <- t(percentile_matrix)   # rows: ages, cols: percentiles
   } else {
-    # Continuous approximation via the underlying beta distribution
+    # Continuous approximation via the underlying beta (mixing) distribution;
+    # omits the binomial-stage variance and compresses outer percentiles
     percentile_values <- sapply(percentiles, function(p) {
       qbeta(p, shape1 = preds$a, shape2 = preds$b) * n_max
     })
   }
 
-  # Long format for a single line layer
-  line_long <- data.frame(
-    age = rep(pred_ages, times = length(percentiles)),
-    value = as.vector(percentile_values),
-    Percentile = factor(rep(NAMES, each = n_points), levels = NAMES)
+  # Wide-format prediction data, consistent with plot.cnormShash
+  percentile_data <- as.data.frame(percentile_values)
+  colnames(percentile_data) <- paste0("P", percentiles * 100)
+
+  plot_data <- data.frame(
+    age = pred_ages,
+    mu = preds$mu,
+    sigma = preds$sigma,
+    percentile_data,
+    check.names = FALSE
   )
 
   # Create the plot
@@ -1274,34 +1305,53 @@ plot.cnormBetaBinomial <- function(x, ...) {
     data$group <- getGroups(age, n = 30)
   }
 
-  # Manifest percentiles
-  percentile.actual <- as.data.frame(do.call("rbind",
-                                             lapply(split(data, data$group), function(df) {
-                                               c(age = mean(df$age),
-                                                 weighted.quantile(df$score, probs = percentiles, weights = df$w))
-                                             })))
+  # Get actual percentiles
+  NAMES <- paste("PR", percentiles * 100, sep = "")
+  percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data$group), function(df) {
+    c(age = mean(df$age),
+      weighted.quantile(df$score, probs = percentiles, weights = df$w))
+  })))
   colnames(percentile.actual) <- c("age", NAMES)
+  manifest_data <- percentile.actual
 
-  manifest_long <- data.frame(
-    age = rep(percentile.actual$age, times = length(NAMES)),
-    value = unlist(percentile.actual[NAMES], use.names = FALSE),
-    Percentile = factor(rep(NAMES, each = nrow(percentile.actual)),
-                        levels = NAMES)
-  )
-
-  p <- p +
-    geom_line(
-      data = line_long,
-      aes(x = .data$age, y = .data$value, color = .data$Percentile),
-      linewidth = 0.6
-    ) +
-    geom_point(
-      data = manifest_long,
-      aes(x = .data$age, y = .data$value, color = .data$Percentile),
+  # Add percentile lines and points
+  # Discrete quantiles are piecewise constant in age: render them with
+  # geom_step (vertical risers) instead of geom_line, which would draw
+  # sheared ramps between adjacent prediction ages.
+  for (i in seq_along(percentiles)) {
+    if (discrete) {
+      p <- p + geom_step(
+        data = plot_data,
+        aes(
+          x = .data$age,
+          y = .data[[paste0("P", percentiles[i] * 100)]],
+          color = !!NAMES[i]
+        ),
+        direction = "mid",
+        linewidth = 0.6
+      )
+    } else {
+      p <- p + geom_line(
+        data = plot_data,
+        aes(
+          x = .data$age,
+          y = .data[[paste0("P", percentiles[i] * 100)]],
+          color = !!NAMES[i]
+        ),
+        linewidth = 0.6
+      )
+    }
+    p <- p + geom_point(
+      data = manifest_data,
+      aes(
+        x = .data$age,
+        y = .data[[NAMES[i]]],
+        color = !!NAMES[i]
+      ),
       size = 2,
       shape = 18
     )
-
+  }
   # Customize the plot
   p <- p +
     theme_minimal() +

@@ -1770,6 +1770,14 @@ plotCnorm <- function(x, y, ...) {
 #' are displayed as dots. The function works with regular cnorm models, beta-binomial
 #' models, and shash models, allowing comparison between different model types.
 #'
+#' For beta-binomial models, the exact quantiles of the discrete beta-binomial
+#' distribution are displayed by default as step functions (\code{discrete = TRUE}).
+#' Setting \code{discrete = FALSE} draws smooth lines based on the quantiles of
+#' the underlying beta (mixing) distribution instead. Note that this continuous
+#' approximation omits the binomial stage of the variance and therefore displays
+#' less spread than the fitted model actually implies, particularly in the outer
+#' percentiles. The parameter has no effect on Taylor polynomial or shash models.
+#'
 #' @param model1 First model object (distribution free, beta-binomial, or shash)
 #' @param model2 Second model object (distribution free, beta-binomial, or shash)
 #' @param age Optional vector with manifest age or group values
@@ -1778,6 +1786,10 @@ plotCnorm <- function(x, y, ...) {
 #' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
 #' @param title Custom title for plot (optional)
 #' @param subtitle Custom subtitle for plot (optional)
+#' @param discrete Logical indicating whether beta-binomial models are displayed
+#'   with their exact discrete quantiles as step functions (TRUE, default) or
+#'   with a smooth continuous approximation via the underlying beta
+#'   distribution (FALSE). Ignored for other model types.
 #'
 #' @return A ggplot object showing the comparison of both models
 #'
@@ -1804,7 +1816,8 @@ compare <- function(model1,
                     score = NULL,
                     weights = NULL,
                     title = NULL,
-                    subtitle = NULL) {
+                    subtitle = NULL,
+                    discrete = TRUE) {
   # retrieve score from model if score is null and one of the
   # models is a cnorm object
   if (is.null(score) && isTaylor(model1)) {
@@ -1825,11 +1838,30 @@ compare <- function(model1,
       preds <- predictCoefficients2(model, pred_ages)
     }
 
-    pred_matrix <- matrix(NA,
+    n_max <- attr(model$result, "max")
+    pred_matrix <- matrix(NA_real_,
                           nrow = length(pred_ages),
                           ncol = length(percentiles))
-    for (i in seq_along(percentiles)) {
-      pred_matrix[, i] <- qbeta(percentiles[i], shape1 = preds$a, shape2 = preds$b) * attr(model$result, "max")
+
+    if (discrete) {
+      # Exact quantiles of the discrete beta-binomial distribution;
+      # one pmf evaluation per age, all percentiles read from it
+      for (j in seq_along(pred_ages)) {
+        dist <- bb_distribution(preds$a[j], preds$b[j], n_max)
+        if (!anyNA(dist$cum)) {
+          pred_matrix[j, ] <- vapply(percentiles, function(p) {
+            as.numeric(dist$x[which.max(dist$cum >= p)])
+          }, numeric(1))
+        }
+      }
+    } else {
+      # Continuous approximation via the underlying beta (mixing)
+      # distribution; omits the binomial-stage variance
+      for (i in seq_along(percentiles)) {
+        pred_matrix[, i] <- qbeta(percentiles[i],
+                                  shape1 = preds$a,
+                                  shape2 = preds$b) * n_max
+      }
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1896,7 +1928,11 @@ compare <- function(model1,
   # Create common age sequence
   pred_ages <- seq(min(range1[1], range2[1]), max(range1[2], range2[2]), length.out = 100)
 
-  # Get predictions for both models
+  # Get predictions for both models; remember which models are displayed
+  # as step functions (discrete beta-binomial quantiles)
+  step1 <- isBeta(model1) && discrete
+  step2 <- isBeta(model2) && discrete
+
   plot_data1 <- if (isBeta(model1)) {
     get_bb_predictions(model1, pred_ages)
   } else if (isSHASH(model1)) {
@@ -1964,28 +2000,34 @@ compare <- function(model1,
     subtitle <- "Model 1: solid lines, Model 2: dashed lines"
   }
 
+  # Layer helper: piecewise-constant discrete quantiles are rendered with
+  # geom_step (vertical risers, direction "mid"), continuous curves with
+  # geom_line
+  model_layer <- function(dat, lty, use_step) {
+    if (use_step) {
+      geom_step(
+        data = dat,
+        aes(x = .data$age, y = .data$value, color = .data$percentile),
+        direction = "mid",
+        linetype = lty,
+        linewidth = 0.6
+      )
+    } else {
+      geom_line(
+        data = dat,
+        aes(x = .data$age, y = .data$value, color = .data$percentile),
+        linetype = lty,
+        linewidth = 0.6
+      )
+    }
+  }
+
   # Create plot
   p <- ggplot() +
-    geom_line(
-      data = plot_data_long[plot_data_long$model == "Model 1", ],
-      aes(
-        x = .data$age,
-        y = .data$value,
-        color = .data$percentile
-      ),
-      linetype = "solid",
-      linewidth = 0.6
-    ) +
-    geom_line(
-      data = plot_data_long[plot_data_long$model == "Model 2", ],
-      aes(
-        x = .data$age,
-        y = .data$value,
-        color = .data$percentile
-      ),
-      linetype = "dashed",
-      linewidth = 0.6
-    ) +
+    model_layer(plot_data_long[plot_data_long$model == "Model 1", ],
+                "solid", step1) +
+    model_layer(plot_data_long[plot_data_long$model == "Model 2", ],
+                "dashed", step2) +
     scale_color_manual(values = rainbow(length(percentiles)),
                        labels = paste0(percentiles * 100, "%")) +
     labs(
