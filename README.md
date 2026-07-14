@@ -1,7 +1,6 @@
 <!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/cNORM)](https://cran.r-project.org/package=cNORM)
 [![R-CMD-check](https://github.com/WLenhard/cNORM/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/WLenhard/cNORM/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/WLenhard/cNORM/branch/main/graph/badge.svg)](https://app.codecov.io/gh/WLenhard/cNORM?branch=main)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/cNORM)](https://cran.r-project.org/package=cNORM)
 [![CRAN RStudio mirror downloads](https://cranlogs.r-pkg.org/badges/grand-total/cNORM?color=blue)](https://r-pkg.org/pkg/cNORM)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
