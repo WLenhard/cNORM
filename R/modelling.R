@@ -52,7 +52,9 @@
 #' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
 #'   across the consistency-screened candidate models instead of selecting a
 #'   single model. Requires \code{extensive = TRUE} and age-based norming.
-#' @param subsampling Deprecated and ignored. Use \code{averaging} instead.
+#' @param minDip Tolerance for monotonicity check. Allow small violations
+#'   (default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+#'   for strict checking.
 #' @return The model. Further exploration can be done using
 #'   \code{plotSubset(model)} and \code{plotPercentiles(data, model)}.
 #' @examples
@@ -82,13 +84,7 @@ bestModel <- function(data,
                       plot = TRUE,
                       extensive = TRUE,
                       averaging = FALSE,
-                      subsampling = FALSE) {
-
-  if (isTRUE(subsampling)) {
-    warning("'subsampling' is deprecated and ignored. Coefficient averaging over ",
-            "subsamples cannot improve on the full-sample least squares fit. ",
-            "Use 'averaging = TRUE' for BIC-weighted model averaging instead.")
-  }
+                      minDip = .01) {
 
   # --- retrieve attributes and consolidate defaults -------------------------
   if (is.null(raw)) raw <- attr(data, "raw")
@@ -202,7 +198,8 @@ bestModel <- function(data,
   results <- summary(subsets)
   highestConsistent <- NULL
   if (extensive && useAge) {
-    results <- screenSubset(data, results, data[[raw]], k, t, weights = w)
+    results <- screenSubset(data, results, data[[raw]], k, t, weights = w,
+                            minDip =  (max(data[[raw]])-min(data[[raw]])) * minDip)
     highestConsistent <- results$highestConsistent
   }
 
@@ -1471,11 +1468,11 @@ polyViolatesMonotonicity <- function(pcoef, minL, maxL, descend = FALSE,
     dcoef <- dcoef[-length(dcoef)]
   if (length(dcoef) == 0L) return(FALSE)
 
-  # default: allow reversals smaller than 0.1% of the raw score range
+  # default: allow reversals smaller than 1% of the raw score range
   # (falls back to an absolute epsilon if the raw range is unknown/degenerate)
   if (is.null(minDip)) {
     rawRange <- maxRaw - minRaw
-    minDip <- if (is.finite(rawRange) && rawRange > 0) 1e-3 * rawRange else 1e-6
+    minDip <- if (is.finite(rawRange) && rawRange > 0) 1e-2 * rawRange else 1e-6
   }
 
   breaks <- c(minL, maxL)
@@ -1562,7 +1559,7 @@ filterSubsetRows <- function(results, keep) {
 #'   that function pick a self-scaling default based on the raw score range.
 #' @keywords internal
 #' @noRd
-screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8,
+screenSubset <- function(data1, results, raw, k, t, nAgePoints = 4,
                          weights = NULL, minRaw = NULL, maxRaw = NULL,
                          descend = NULL, minDip = NULL) {
   all_vars <- colnames(results$outmat)
@@ -1646,35 +1643,3 @@ screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8,
   results1
 }
 
-
-#' Deprecated: K-fold Resampled Coefficient Estimation
-#'
-#' @description
-#' Deprecated. Averaging OLS coefficients over subsamples or folds cannot
-#' improve upon the full-sample (weighted) least squares fit, which is already
-#' the minimum-variance unbiased estimator for a fixed set of terms
-#' (Gauss-Markov); it merely adds Monte-Carlo noise and small-sample bias. The
-#' relevant source of variance is model *selection*, which is addressed by
-#' consistency screening and by BIC-weighted model averaging
-#' (\code{bestModel(..., averaging = TRUE)} or \code{weightedAverageModel}).
-#' This function now simply returns the full-sample least squares fit.
-#'
-#' @param text A character string or formula specifying the model to be fitted
-#' @param data A data frame containing the variables in the model
-#' @param weights Optional numeric vector of weights
-#' @param k Ignored (kept for backwards compatibility)
-#'
-#' @return An object of class 'lm' fitted on the complete sample.
-#' @seealso weightedAverageModel
-#' @keywords deprecated
-subsample_lm <- function(text, data, weights, k = 10) {
-  .Deprecated("weightedAverageModel",
-              msg = paste0("subsample_lm() is deprecated: coefficient averaging ",
-                           "over subsamples cannot improve on the full-sample ",
-                           "least squares fit. Returning a standard (weighted) ",
-                           "lm fit. Consider bestModel(..., averaging = TRUE) ",
-                           "for BIC-weighted model averaging."))
-  f <- stats::formula(text)
-  if (is.null(weights)) stats::lm(f, data = data)
-  else stats::lm(f, data = data, weights = weights)
-}

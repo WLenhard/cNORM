@@ -20,7 +20,7 @@ cnorm(
   plot = TRUE,
   extensive = TRUE,
   averaging = FALSE,
-  subsampling = FALSE
+  minDip = 0.01
 )
 }
 \arguments{
@@ -62,8 +62,9 @@ receive lower norm scores (e.g. for error scores).}
 across the consistency-screened candidate models instead of selecting a
 single model. Requires \code{extensive = TRUE} and age-based norming.}
 
-\item{subsampling}{(deprecated) If TRUE (default is FALSE), use 10-fold
-subsampled coefficient averaging in `bestModel`.}
+\item{minDip}{Tolerance for monotonicity check. Allow small violations
+(default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+for strict checking.}
 }
 \value{
 cnorm object including the ranked raw data and the regression model.

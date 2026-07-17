@@ -17,7 +17,7 @@ bestModel(
   plot = TRUE,
   extensive = TRUE,
   averaging = FALSE,
-  subsampling = FALSE
+  minDip = 0.01
 )
 }
 \arguments{
@@ -54,7 +54,9 @@ possible - exclude inconsistent ones.}
 across the consistency-screened candidate models instead of selecting a
 single model. Requires \code{extensive = TRUE} and age-based norming.}
 
-\item{subsampling}{Deprecated and ignored. Use \code{averaging} instead.}
+\item{minDip}{Tolerance for monotonicity check. Allow small violations
+(default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+for strict checking.}
 }
 \value{
 The model. Further exploration can be done using

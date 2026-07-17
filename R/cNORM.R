@@ -243,9 +243,9 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
 #' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
 #'   across the consistency-screened candidate models instead of selecting a
 #'   single model. Requires \code{extensive = TRUE} and age-based norming.
-#' @param subsampling (deprecated) If TRUE (default is FALSE), use 10-fold
-#'  subsampled coefficient averaging in `bestModel`.
-#'
+#' @param minDip Tolerance for monotonicity check. Allow small violations
+#'   (default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+#'   for strict checking.
 #' @return cnorm object including the ranked raw data and the regression model.
 #' @seealso rankByGroup, rankBySlidingWindow, computePowers, bestModel
 #' @examples
@@ -290,7 +290,7 @@ cnorm <- function(raw = NULL,
                   plot = TRUE,
                   extensive = TRUE,
                   averaging = FALSE,
-                  subsampling = FALSE) {
+                  minDip = .01) {
 
   # ---- input validation -----------------------------------------------------
   if (is.null(raw) || !is.numeric(raw))
@@ -349,7 +349,7 @@ cnorm <- function(raw = NULL,
 
     model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2,
                        weights = data$weights, plot = FALSE,
-                       extensive = extensive, subsampling = subsampling)
+                       extensive = extensive, averaging=averaging, minDip = minDip)
 
     result <- structure(list(data = data, model = model), class = "cnorm")
     if (plot) {
@@ -410,7 +410,7 @@ cnorm <- function(raw = NULL,
   # ---- model, assemble, report ----------------------------------------------
   model <- bestModel(data, k = k, t = t, terms = terms, R2 = R2,
                      weights = data$weights, plot = FALSE,
-                     extensive = extensive, averaging = averaging, subsampling = subsampling)
+                     extensive = extensive, averaging=averaging, minDip = minDip)
 
   result <- structure(list(data = data, model = model), class = "cnorm")
   if (plot) {

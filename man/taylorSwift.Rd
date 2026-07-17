@@ -20,7 +20,7 @@ taylorSwift(
   plot = TRUE,
   extensive = TRUE,
   averaging = FALSE,
-  subsampling = FALSE
+  minDip = 0.01
 )
 }
 \arguments{
