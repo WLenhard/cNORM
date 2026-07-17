@@ -30,7 +30,8 @@ In certain cases, however, the beta-binomial distribution is excellently suited 
 
 As the name suggests, the beta-binomial distribution combines the binomial distribution with the beta distribution. The binomial distribution can be used to determine the probability of achieving x successes in n trials. The binomial distribution assumes a constant probability of success. However, this is usually not the case in psychometric test scales, especially in performance tests. This is where the beta distribution comes into play. In the beta-binomial distribution, it is assumed that the probability of success is not constant, but that the item difficulties follow a beta distribution. The latter does not represent a specific distribution, but a family of distributions determined by two shape parameters $\alpha$ and $\beta$. Although the item difficulties in most test scales are probably not exactly beta-distributed, test results can usually be modeled very well with the beta-binomial distribution, at least for unspeeded tests.
 
-Since version 3.2, cNORM is not only able to model psychometric data across age using Taylor polynomials, but also using the beta-binomial distribution (additionally, since 3.5, modelling with the four parametric ShaSh distribution is possible). In the following we will show the mathematical derivation, explain the requirements, demonstrate a practical modeling example and present the results of a simulation study.
+Since version 3.2, cNORM is not only able to model psychometric data across age using Taylor polynomials, but also using the beta-binomial distribution (additionally, since 3.5, modelling with the four parametric ShaSh distribution is possible). In the following we will show the mathematical derivation, explain the requirements, demonstrate a practical modeling example and present the results of a simulation study. If you prefer a graphical
+user interface, you can start the included shiny app via cNORM.GUI2().
 
 
 # Mathematical Derivation
@@ -105,7 +106,8 @@ To fit the beta-binomial distribution to the data, we employ the 'cnorm.betabino
 ```{r fig1, fig.height = 4, fig.width = 7}
 # Models the data across a continuos explanatroy variable such as age,
 # thereby assuming that the raw scores follow a beta-binomial distribution
-# at a given age level:
+# at a given age level. Use autoselect.betabinomial (same syntax) to find
+# the model with the lowest BIC automatically.
 
 model.betabinomial <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 ```
@@ -199,9 +201,8 @@ In the results, we compare conventional norming with 6-month intervals, distribu
 ```markdown
 ![](beta.png){height=500px}
 
-Our results demonstrate that parametric continuous norming with beta-binomial distribution performs exceptionally well for the simulated scales. Even with relatively small samples, it closely approximates the 'ideal' norm scores simulated for the large and representative cross-validation sample. Parametric norming with the beta-binomial distribution is markedly superior to conventional norming with 6-month intervals. In fact, for the simple 1-PL scales simulated here, it performs even slightly better than distribution-free continuous norming with Taylor polynomials. However, the differences between the two continuous methods are so minimal that they are unlikely to have practical significance in most cases.
-
-Moreover, based on the results presented here, it cannot be assumed that parametric norming using the beta-binomial distribution generally yields better results than distribution-free continuous norming. At least in unsystematic simulations for individual age groups, we found a better fit with Taylor polynomials for speeded test scales. We are currently preparing additional systematic simulations, the results of which we will report as soon as possible.
+Our results demonstrate that parametric continuous norming with beta-binomial distribution performs exceptionally well for the simulated scales. Even with relatively small samples, it closely approximates the 'ideal' norm scores simulated for the large and representative cross-validation sample. Parametric norming with the beta-binomial distribution is markedly superior to conventional norming with 6-month intervals. In fact, for the simple 1-PL scales simulated here, it performs even slightly better than distribution-free continuous norming with Taylor polynomials. However, the differences between the two continuous methods are minimal that they are unlikely to have practical significance in most cases. At the moment (2026), we are systeamtically evaluation, which approach is best suited in what use case. So far, our results point towards using beta binomial modelling in the case of
+1PL IRT based tests, while Taylor polynomials are better suited for speeded tests.
 
 
 ## Conclusion: When to Use What?
