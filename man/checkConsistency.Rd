@@ -40,8 +40,9 @@ age points are used. Lower values indicate higher precision.}
 \item{stepNorm}{Stepping parameter for the norm table check within age
 (only used with \code{method = "grid"})}
 
-\item{method}{Either "analytic" (default; exact within age via polynomial
-derivative roots) or "grid" (numerical check on a norm score grid)}
+\item{method}{Monotonicity cgeck. Either "analytic" (default; exact within
+age via polynomial derivative roots) or "grid" (numerical check on a norm
+score grid)}
 
 \item{warn}{Retained for backwards compatibility (violations below numerical
 tolerance are always suppressed)}

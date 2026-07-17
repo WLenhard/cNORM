@@ -19,7 +19,7 @@ taylorSwift(
   R2 = NULL,
   plot = TRUE,
   extensive = TRUE,
-  averaging = TRUE,
+  averaging = FALSE,
   subsampling = FALSE
 )
 }

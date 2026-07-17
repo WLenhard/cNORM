@@ -351,12 +351,13 @@ bestModel <- function(data,
   }
 
   nSelected <- length(bestformula$coefficients) - 1L
-  if (nSelected > 15) {
-    message("\nThe model includes a high number of terms. Simpler models are ",
-            "usually more robust. Cross validation with 'cnorm.cv' or an ",
-            "inspection of information functions with 'plotSubset' might help ",
-            "to identify a balanced number of terms. Consider fixing the ",
-            "'terms' parameter to a smaller number.")
+  if (nSelected < 4) {
+    message("\nThe model includes a low number of terms. Models with four or ",
+            "more predictors are usually more robust. The low number is probably ",
+            "the consequence of the rather strict monotonicity checks in cNORM. ",
+            "Information functions with 'plotSubset' and 'plotPercentileSeries' ",
+            "might help to identify a balanced number of terms. Consider fixing ",
+            "the 'terms' parameter to a higher number.")
   }
 
   if (plot) {
@@ -567,8 +568,9 @@ printSubset <- function(x, ...) {
 #' @param maxRaw clipping parameter for the upper bound of raw scores
 #' @param stepNorm Stepping parameter for the norm table check within age
 #'   (only used with \code{method = "grid"})
-#' @param method Either "analytic" (default; exact within age via polynomial
-#'   derivative roots) or "grid" (numerical check on a norm score grid)
+#' @param method Monotonicity cgeck. Either "analytic" (default; exact within
+#'   age via polynomial derivative roots) or "grid" (numerical check on a norm
+#'   score grid)
 #' @param warn Retained for backwards compatibility (violations below numerical
 #'   tolerance are always suppressed)
 #' @param silent turn off messages
@@ -615,7 +617,7 @@ checkConsistency <- function(model,
 
   # age evaluation points (handles conventional norming with minAge == maxAge)
   if (maxAge > minAge) {
-    ages <- if (is.null(stepAge)) seq(minAge, maxAge, length.out = 8)
+    ages <- if (is.null(stepAge)) seq(minAge, maxAge, length.out = 4)
     else seq(minAge, maxAge, by = stepAge)
   } else {
     ages <- minAge
@@ -650,7 +652,7 @@ checkConsistency <- function(model,
     pred_mat <- matrix(raw_preds, nrow = n_norms, ncol = n_ages)
     diffs <- pred_mat[-1, , drop = FALSE] - pred_mat[-n_norms, , drop = FALSE]
 
-    tol <- 1e-10
+    tol <- 1e-6
     violations <- if (descend) !apply(diffs <= tol, 2, all)
     else !apply(diffs >= -tol, 2, all)
   }
@@ -1444,46 +1446,23 @@ evalPolynomial <- function(cf, x) {
   r
 }
 
-#' Exact direction of a polynomial on an interval
-#'
-#' Determines whether p(L) is non-decreasing (1), non-increasing (-1),
-#' constant (0) or non-monotone (NA) on [minL, maxL], based on the real roots
-#' of its derivative (via polyroot).
-#' @keywords internal
-#' @noRd
-polyDirection <- function(pcoef, minL, maxL, tol = 1e-12) {
-  deg <- length(pcoef) - 1L
-  if (deg < 1L) return(0L)
-
-  dcoef <- pcoef[-1L] * seq_len(deg)
-  while (length(dcoef) > 0L && abs(dcoef[length(dcoef)]) < 1e-14)
-    dcoef <- dcoef[-length(dcoef)]
-  if (length(dcoef) == 0L) return(0L)
-  if (length(dcoef) == 1L) return(if (dcoef > 0) 1L else -1L)
-
-  rts <- polyroot(dcoef)
-  re <- Re(rts)[abs(Im(rts)) < 1e-8 * (1 + abs(Re(rts)))]
-  breaks <- sort(unique(c(minL, re[re > minL & re < maxL], maxL)))
-  mids <- (breaks[-1L] + breaks[-length(breaks)]) / 2
-
-  v <- evalPolynomial(dcoef, mids)
-  scale <- max(abs(v), 1)
-  pos <- any(v > tol * scale)
-  neg <- any(v < -tol * scale)
-
-  if (pos && neg) return(NA_integer_)
-  if (pos) 1L else if (neg) -1L else 0L
-}
 
 #' Exact, clipping-aware monotonicity violation check
 #'
 #' Checks whether p(L) violates monotonicity on [minL, maxL] in the direction
 #' implied by 'descend'. Violations whose raw score span lies entirely outside
-#' [minRaw, maxRaw] (and would thus be removed by clipping) are ignored.
+#' [minRaw, maxRaw] (and would thus be removed by clipping), or whose raw-score
+#' reversal depth is smaller than 'minDip', are ignored as practically
+#' irrelevant.
+#' @param minDip Minimum raw-score reversal depth (in raw score units) for a
+#'   sign violation to be considered a genuine, reportable inconsistency.
+#'   Defaults to a small fraction of the raw score range.
 #' @keywords internal
 #' @noRd
 polyViolatesMonotonicity <- function(pcoef, minL, maxL, descend = FALSE,
-                                     minRaw = -Inf, maxRaw = Inf) {
+                                     minRaw = -Inf, maxRaw = Inf,
+                                     minDip = NULL, dTol = 1e-8) {
+
   deg <- length(pcoef) - 1L
   if (deg < 1L) return(FALSE)
 
@@ -1492,11 +1471,27 @@ polyViolatesMonotonicity <- function(pcoef, minL, maxL, descend = FALSE,
     dcoef <- dcoef[-length(dcoef)]
   if (length(dcoef) == 0L) return(FALSE)
 
+  # default: allow reversals smaller than 0.1% of the raw score range
+  # (falls back to an absolute epsilon if the raw range is unknown/degenerate)
+  if (is.null(minDip)) {
+    rawRange <- maxRaw - minRaw
+    minDip <- if (is.finite(rawRange) && rawRange > 0) 1e-3 * rawRange else 1e-6
+  }
+
   breaks <- c(minL, maxL)
   if (length(dcoef) > 1L) {
     rts <- polyroot(dcoef)
     re <- Re(rts)[abs(Im(rts)) < 1e-8 * (1 + abs(Re(rts)))]
-    breaks <- sort(unique(c(minL, re[re > minL & re < maxL], maxL)))
+    re <- re[re > minL & re < maxL]
+
+    # merge roots that are numerically indistinguishable (root-finding jitter)
+    if (length(re) > 1L) {
+      re <- sort(re)
+      minSep <- 1e-6 * (maxL - minL)
+      keep <- c(TRUE, diff(re) > minSep)
+      re <- re[keep]
+    }
+    breaks <- sort(unique(c(minL, re, maxL)))
   }
 
   for (s in seq_len(length(breaks) - 1L)) {
@@ -1505,15 +1500,18 @@ polyViolatesMonotonicity <- function(pcoef, minL, maxL, descend = FALSE,
     dv <- evalPolynomial(dcoef, (a + b) / 2)
     pa <- evalPolynomial(pcoef, a)
     pb <- evalPolynomial(pcoef, b)
-    tol <- 1e-10 * max(1, abs(pa), abs(pb))
+
+    # numeric tolerance on the derivative sign test, loosened from 1e-10
+    # and no longer purely a function of local p-values only
+    tol <- dTol * max(1, abs(pa), abs(pb))
 
     wrong <- if (descend) dv > tol else dv < -tol
     if (wrong) {
       lo <- min(pa, pb)
       hi <- max(pa, pb)
-      # p is monotone on this segment; the violation is visible unless its
-      # entire raw score span is clipped away
-      if (!(lo >= maxRaw || hi <= minRaw)) return(TRUE)
+      dip <- hi - lo
+      # ignore if clipped away entirely, or too small to be practically relevant
+      if (dip > minDip && !(lo >= maxRaw || hi <= minRaw)) return(TRUE)
     }
   }
   FALSE
@@ -1533,18 +1531,40 @@ filterSubsetRows <- function(results, keep) {
   results
 }
 
+
 #' Screen `regsubsets` output for monotonic consistency
 #'
 #' For each model size, candidate models are checked in order of decreasing
-#' R^2. A model is consistent if its prediction is monotone in L in the same
-#' direction across all evaluated ages, verified analytically via the real
-#' roots of the derivative polynomial. Models that do not depend on L at all
-#' are treated as inconsistent (degenerate for norming). If no consistent
-#' model exists for a size, the best model of that size is retained as
-#' fallback (flagged inconsistent).
+#' R^2. A model is consistent if its prediction is monotone in L, in the
+#' direction implied by \code{descend}, across all evaluated ages -- verified
+#' analytically via \code{polyViolatesMonotonicity()} (same routine used by
+#' \code{checkConsistency(method = "analytic")}), which is clipping-aware
+#' (violations entirely outside \code{[minRaw, maxRaw]} are ignored) and
+#' tolerant of practically negligible reversals via \code{minDip}. Models
+#' that do not depend on L at all are treated as degenerate/inconsistent
+#' (they cannot serve for norming). If no consistent model exists for a size,
+#' the best model of that size is retained as fallback (flagged
+#' inconsistent).
+#'
+#' This #' version enforces the actual expected direction (\code{descend}) rather
+#' than merely requiring internal agreement across ages, and shares its
+#' clipping/tolerance behaviour with the final \code{checkConsistency()}
+#' check -- so a model that survives screening is held to the same standard
+#' that will later be applied when reporting on it.
+#'
+#' @param minRaw,maxRaw Raw score clipping bounds used for the
+#'   clipping-awareness of the monotonicity check. Default to the observed
+#'   raw score range in \code{data1}.
+#' @param descend Expected direction of the raw~L relationship. Defaults to
+#'   \code{attr(data1, "descend")}.
+#' @param minDip Minimum practically relevant raw-score reversal depth passed
+#'   through to \code{polyViolatesMonotonicity()}. \code{NULL} (default) lets
+#'   that function pick a self-scaling default based on the raw score range.
 #' @keywords internal
 #' @noRd
-screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8, weights = NULL) {
+screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8,
+                         weights = NULL, minRaw = NULL, maxRaw = NULL,
+                         descend = NULL, minDip = NULL) {
   all_vars <- colnames(results$outmat)
   y <- as.numeric(raw)
   nTerms <- as.integer(rowSums(results$outmat == "*"))
@@ -1570,6 +1590,10 @@ screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8, weights = NU
   maxL <- max(data1$L1)
   ages <- seq(min(data1$A1), max(data1$A1), length.out = nAgePoints)
 
+  if (is.null(minRaw)) minRaw <- min(y, na.rm = TRUE)
+  if (is.null(maxRaw)) maxRaw <- max(y, na.rm = TRUE)
+  if (is.null(descend)) descend <- isTRUE(attr(data1, "descend"))
+
   consistent      <- rep(FALSE, n_models)
   currentNumber   <- 0L
   consistentFound <- FALSE
@@ -1581,24 +1605,25 @@ screenSubset <- function(data1, results, raw, k, t, nAgePoints = 8, weights = NU
     }
     if (consistentFound) next
 
-
     sel <- c(TRUE, results$outmat[i, ] == "*")
     fit <- if (is.null(weights)) stats::lm.fit(X_full[, sel, drop = FALSE], y)
-           else stats::lm.wfit(X_full[, sel, drop = FALSE], y, w = weights)
+    else stats::lm.wfit(X_full[, sel, drop = FALSE], y, w = weights)
     cf <- fit$coefficients
 
     if (anyNA(cf)) next                      # rank deficient -> inconsistent
 
     B <- taylorCoefficientMatrix(cf)
-    if (is.null(B)) next
+    if (is.null(B) || nrow(B) < 2L) next      # no L-dependency -> degenerate
 
     tPow <- ncol(B) - 1L
-    dirs <- vapply(ages, function(a)
-      polyDirection(as.vector(B %*% a^(0:tPow)), minL, maxL), integer(1))
+    violated <- vapply(ages, function(a) {
+      pcoef <- as.vector(B %*% a^(0:tPow))
+      polyViolatesMonotonicity(pcoef, minL, maxL, descend = descend,
+                               minRaw = minRaw, maxRaw = maxRaw,
+                               minDip = minDip)
+    }, logical(1))
 
-    ok <- !anyNA(dirs) &&
-      !(any(dirs == 1L) && any(dirs == -1L)) &&
-      any(dirs != 0L)                        # constant-in-L models are degenerate
+    ok <- !any(violated)
 
     consistent[i]   <- ok
     consistentFound <- ok

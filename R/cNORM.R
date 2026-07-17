@@ -289,7 +289,7 @@ cnorm <- function(raw = NULL,
                   R2 = NULL,
                   plot = TRUE,
                   extensive = TRUE,
-                  averaging = TRUE,
+                  averaging = FALSE,
                   subsampling = FALSE) {
 
   # ---- input validation -----------------------------------------------------

@@ -4,6 +4,21 @@ points for further improvements.
 
 
 
+### Version in 3.6.2
+Date: 13.07.2026 - release
+
+Minor update for fine-tuning internal functions. No new features.
+
+## Changes
+
+* monotonicity check in Taylor polynomilas now accept minimal inconsistencies
+  (violations of less than .1% of the raw score range)
+* The averaging feature has been turned of by default. We have to conduct 
+  more research first.
+
+
+
+
 ### Version in 3.6.1
 Date: 13.07.2026 - release
 
