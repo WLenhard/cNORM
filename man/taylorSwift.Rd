@@ -74,7 +74,9 @@ this number of terms is used}
 across the consistency-screened candidate models instead of selecting a
 single model. Requires \code{extensive = TRUE} and age-based norming.}
 
-\item{subsampling}{(deprecated) If TRUE (default), model coefficients are calculated using 10-folds and averaged across the folds.}
+\item{minDip}{Tolerance for monotonicity check. Allow small violations
+(default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+for strict checking.}
 }
 \value{
 cnorm object including the ranked raw data and the regression model
