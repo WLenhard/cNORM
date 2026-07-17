@@ -198,8 +198,9 @@ In the results, we compare conventional norming with 6-month intervals, distribu
 
 ## Results and discussion
 
-```markdown
-![](beta.png){height=500px}
+```{r, echo=FALSE, out.height="450px", out.width="555px", fig.align='center'}
+knitr::include_graphics("beta.png")
+```
 
 Our results demonstrate that parametric continuous norming with beta-binomial distribution performs exceptionally well for the simulated scales. Even with relatively small samples, it closely approximates the 'ideal' norm scores simulated for the large and representative cross-validation sample. Parametric norming with the beta-binomial distribution is markedly superior to conventional norming with 6-month intervals. In fact, for the simple 1-PL scales simulated here, it performs even slightly better than distribution-free continuous norming with Taylor polynomials. However, the differences between the two continuous methods are minimal that they are unlikely to have practical significance in most cases. At the moment (2026), we are systeamtically evaluation, which approach is best suited in what use case. So far, our results point towards using beta binomial modelling in the case of
 1PL IRT based tests, while Taylor polynomials are better suited for speeded tests.

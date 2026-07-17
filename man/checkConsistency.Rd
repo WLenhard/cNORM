@@ -16,7 +16,8 @@ checkConsistency(
   stepNorm = 1,
   method = c("analytic", "grid"),
   warn = FALSE,
-  silent = FALSE
+  silent = FALSE,
+  minDip = 0.01
 )
 }
 \arguments{
@@ -48,6 +49,10 @@ score grid)}
 tolerance are always suppressed)}
 
 \item{silent}{turn off messages}
+
+\item{minDip}{Tolerance for monotonicity check. Allow small violations
+(default: .01 or 1% of the raw score range). Decrease e. g. to 1e-6
+for strict checking.}
 }
 \value{
 Boolean, indicating model violations (TRUE) or no problems (FALSE)
