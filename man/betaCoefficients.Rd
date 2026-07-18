@@ -16,13 +16,17 @@ If not specified, uses max(x) instead.}
 \value{
 A numeric vector containing the calculated parameters in the
   following order: alpha (a), beta (b), mean (m), standard deviation (sd),
-  and the maximum number (n).
+  and the maximum number (n). If the method of moments is degenerate
+  (mean at the boundary of the support or a non-positive moment
+  denominator), alpha and beta are returned as \code{NA} with a warning.
+  Non-positive estimates (indicating dispersion incompatible with a
+  beta-binomial distribution) are returned as-is with a warning.
 }
 \description{
 This function calculates the \eqn{\alpha} (a) and \eqn{\beta} (b)
 parameters of a beta binomial distribution, along with the mean (m) and
 standard deviation (sd) based on the input vector \code{x} and the maximum
-number \code{n}.
+number \code{n}, using the method of moments.
 }
 \details{
 The beta-binomial distribution is a discrete probability distribution that

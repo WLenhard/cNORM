@@ -280,6 +280,20 @@ test_that("betaCoefficients recovers parameters approximately", {
   expect_equal(cf[2], 5, tolerance = 0.35)
 })
 
+test_that("analytic beta-binomial gradient matches numerical gradient", {
+  set.seed(1)
+  n <- 60
+  age <- runif(400, 6, 12); a_std <- (age - mean(age))/sd(age)
+  y <- rbinom(400, n, rbeta(400, 4, 3))
+  X <- cNORM:::bb_design_matrix(a_std, 3)
+  Z <- cNORM:::bb_design_matrix(a_std, 3)
+  p0 <- c(log(4), 0.2, -0.1, 0.05, log(3), -0.15, 0.1, 0)
+  g_ana <- cNORM:::gradient_log_likelihood2(p0, X, Z, y, n)
+  g_num <- numDeriv::grad(cNORM:::log_likelihood2, p0, X = X, Z = Z, y = y, n = n)
+  expect_equal(g_ana, g_num, tolerance = 1e-6)
+})
+
+
 
 test_that("plot and summary run without error", {
   expect_s3_class(

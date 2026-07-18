@@ -34,8 +34,8 @@ the alpha model. Default is 3.}
 the beta model. Default is 3.}
 
 \item{control}{A list of control parameters to be passed to the
-\code{optim} function (method "L-BFGS-B"). If NULL, adaptive defaults
-are used.}
+\code{optim} function (method "L-BFGS-B"). Any parameters not specified
+are filled with adaptive defaults based on problem size.}
 
 \item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a
 double vector with the mean and standard deviation.}
@@ -63,7 +63,8 @@ and \eqn{\sigma}, this function fits the model directly on the basis of
 \details{
 The function standardizes the input variables, fits polynomial models for
 both the alpha and beta parameters, and uses maximum likelihood estimation
-to find the optimal parameters. The optimization is performed using the
-L-BFGS-B method with parameter bounds to prevent numerical issues.
+with analytic (digamma-based) gradients to find the optimal parameters.
+The optimization is performed using the L-BFGS-B method with parameter
+bounds to prevent numerical issues.
 }
 \keyword{internal}

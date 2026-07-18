@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{plot.cnormShash}
 \alias{plot.cnormShash}
-\title{Plot SinH-ArcSinH Model with Data and Percentile Lines}
+\title{Plot Sinh-Arcsinh Model with Data and Percentile Lines}
 \usage{
 \method{plot}{cnormShash}(x, ...)
 }
@@ -15,5 +15,5 @@
 A ggplot object
 }
 \description{
-Plot SinH-ArcSinH Model with Data and Percentile Lines
+Plot Sinh-Arcsinh Model with Data and Percentile Lines
 }

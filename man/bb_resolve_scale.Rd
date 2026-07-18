@@ -11,7 +11,7 @@ bb_resolve_scale(scale)
 or a numeric vector of length 2 with mean and sd.}
 }
 \value{
-A numeric vector c(mean, sd); c(NA, NA) indicates a custom scale
+A numeric vector c(mean, sd); c(NA, NA) indicates percentile output.
 }
 \description{
 Resolve a norm scale specification

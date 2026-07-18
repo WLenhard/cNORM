@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{diagnostics.shash}
 \alias{diagnostics.shash}
-\title{Diagnostic Statistics for SiHh-ArcSinH Continuous Norming Model}
+\title{Diagnostic Statistics for Sinh-Arcsinh Continuous Norming Model}
 \usage{
 diagnostics.shash(object, age = NULL, score = NULL, weights = NULL)
 }

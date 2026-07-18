@@ -17,6 +17,7 @@ Minor update for fine-tuning internal functions. No new features.
 * The averaging feature has been turned of by default. We have to conduct 
   more research first.
 * deprectated subsampling parameter and according function removed  
+* added analytic grading in fitting shash models
 
 
 

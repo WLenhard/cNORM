@@ -39,7 +39,8 @@ The summary includes:
   \item Model fit statistics (log-likelihood, AIC, BIC)
   \item R-squared, RMSE, and bias (if age and raw scores are provided)
         in comparison to manifest norm scores
-  \item Convergence information
+  \item Convergence information, including the maximum absolute gradient
+        at the solution (first-order optimality)
   \item Parameter estimates with standard errors, z-values, and p-values
 }
 }

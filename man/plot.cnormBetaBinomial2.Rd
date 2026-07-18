@@ -18,8 +18,9 @@
    \item percentiles An optional vector with the percentiles to plot.
    \item points Logical indicating whether to plot the data points.
      Default is TRUE.
-   \item discrete Logical indicating whether to plot the discrete raw
-     scores. Default is FALSE.
+   \item discrete Logical indicating whether to plot the exact discrete
+     beta-binomial quantiles (TRUE, default) or a smooth continuous
+     approximation via the underlying beta distribution (FALSE).
  }}
 }
 \value{

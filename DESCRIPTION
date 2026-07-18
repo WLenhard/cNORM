@@ -54,6 +54,7 @@ Suggests:
     foreign,
     knitr,
     markdown,
+    numDeriv,
     readxl,
     rmarkdown,
     shiny,

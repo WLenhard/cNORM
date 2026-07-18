@@ -24,7 +24,7 @@ log_likelihood_shash(
 
 \item{X_epsilon}{Design matrix for skewness parameter}
 
-\item{X_delta}{Design matrix for tails}
+\item{X_delta}{Design matrix for tail weight parameter (or NULL for fixed delta)}
 
 \item{y}{Response vector}
 
@@ -37,6 +37,7 @@ The negative log-likelihood of the model
 }
 \description{
 This function computes the negative log-likelihood for a Sinh-Arcsinh regression model
-where the location, scale, and skewness parameters are modeled as functions of predictors.
+where the location, scale, skewness, and (optionally) tail weight parameters
+are modeled as functions of predictors.
 }
 \keyword{internal}

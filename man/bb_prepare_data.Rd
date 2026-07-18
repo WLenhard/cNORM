@@ -18,7 +18,8 @@ A list with the (possibly filtered) elements age, score, weights.
 }
 \description{
 Performs the shared input validation for the beta-binomial fitting
-functions: length checks, removal of non-finite cases, and checks for
-negative or non-integer scores.
+functions: length checks, removal of non-finite cases, weight validation,
+and checks for negative or non-integer scores as well as degenerate
+predictor variance.
 }
 \keyword{internal}

@@ -28,10 +28,11 @@ distribution). If NULL, max(score) is used.}
 \item{weights}{A numeric vector of weights for each observation.
 Default is NULL (equal weights).}
 
-\item{mode}{Integer specifying the mode of the model. Default is 2 (direct
-modelling of \eqn{\alpha} and \eqn{\beta}). If set to 1, the model is
-fitted on the basis of \eqn{\mu} and \eqn{\sigma}, the predicted mean
-and standard deviation over age.}
+\item{mode}{Integer specifying the mode of the model, either 1 or 2.
+Default is 2 (direct modelling of \eqn{\alpha} and \eqn{\beta};
+recommended). If set to 1, the model is fitted on the basis of
+\eqn{\mu} and \eqn{\sigma}, the predicted mean and standard deviation
+over age (kept for backwards compatibility).}
 
 \item{alpha}{Integer specifying the degree of the polynomial for the alpha
 model. Default is 3. If mode is set to 1, this parameter is used to
@@ -42,10 +43,10 @@ model. Default is 3. If mode is set to 1, this parameter is used to
 specify the degree of the polynomial for the \eqn{\sigma} model.}
 
 \item{control}{A list of control parameters to be passed to the
-\code{optim} function. If NULL, default values are used, namely
-\code{list(reltol = 1e-8, maxit = 1000)} for mode 1 and adaptive
-L-BFGS-B settings (factr between 1e4 and 1e6, maxit proportional to the
-number of parameters) for mode 2.}
+\code{optim} function. Parameters not specified are filled with
+defaults, namely \code{list(reltol = 1e-8, maxit = 1000)} for mode 1
+and adaptive L-BFGS-B settings (factr between 1e4 and 1e6, maxit
+proportional to the number of parameters) for mode 2.}
 
 \item{scale}{Type of norm scale, either "T" (default), "IQ", "z" or a
 double vector with the mean and standard deviation.}
@@ -67,14 +68,20 @@ This function fits a beta-binomial regression model where both the
 \eqn{\alpha} and \eqn{\beta} parameters of the beta-binomial distribution
 are modeled as polynomial functions of the predictor variable (typically
 age). Setting mode to 1 fits a beta-binomial model on the basis of
-\eqn{\mu} and \eqn{\sigma}, setting it to 2 (default) fits a beta-binomial
-model directly on the basis of \eqn{\alpha} and \eqn{\beta}.
+\eqn{\mu} and \eqn{\sigma}, setting it to 2 (default and recommended)
+fits a beta-binomial model directly on the basis of \eqn{\alpha} and
+\eqn{\beta}.
 }
 \details{
 The function standardizes the input variables, fits polynomial models for
-both distribution parameters, and uses maximum likelihood estimation to
-find the optimal parameters. In mode 2, the optimization is performed
-using the L-BFGS-B method.
+both distribution parameters, and uses maximum likelihood estimation with
+analytic gradients to find the optimal parameters. In mode 2, the
+optimization is performed using the L-BFGS-B method.
+
+Please note that the model fit indices (log-likelihood, AIC, BIC) of
+mode 1 and mode 2 models are not directly comparable, since mode 1
+maximizes a normal likelihood on standardized scores, whereas mode 2
+maximizes the discrete beta-binomial likelihood on the raw scores.
 }
 \examples{
 \dontrun{

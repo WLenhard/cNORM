@@ -22,7 +22,7 @@ cnorm.shash(
 \item{age}{A numeric vector of predictor values (typically age, but can be any continuous predictor).}
 
 \item{score}{A numeric vector of response values (raw test scores). Must be the same length as age.
-The value range is unresticted and it can include zeros and negative values.}
+The value range is unrestricted and it can include zeros and negative values.}
 
 \item{weights}{An optional numeric vector of weights for each observation.
 Useful for incorporating sampling weights. If NULL (default), all observations are weighted equally.}
@@ -44,22 +44,23 @@ Lower degrees are often sufficient as variability typically changes more smoothl
 \item{epsilon_degree}{Integer specifying the degree of the polynomial for modeling the skewness parameter epsilon(age).
 Default is 2. This controls how the asymmetry of the distribution changes with age.}
 
-\item{delta_degree}{Integer specifying the plynomial for modelling the tail weight parameter delte(age). Default is 1.
-The tail weight can be fixed as well in case of numerical instability. In that case, set 'delta_degree' to NULL and
-specify a value for delta instead. Recommendation: Keep delta_degree low to avoid overfitting.}
+\item{delta_degree}{Integer specifying the degree of the polynomial for modeling the tail weight parameter delta(age).
+Default is 1. The tail weight can be fixed as well in case of numerical instability. In that case, set
+\code{delta_degree} to NULL and specify a value for \code{delta} instead. Recommendation: Keep
+\code{delta_degree} low to avoid overfitting.}
 
 \item{delta}{Fixed tail weight parameter (must be > 0). Default is 1. This parameter controls the
-heaviness of the distribution tails and is kept constant across all ages in this implementation.
-It is only used, if 'delta_degree' is set to NULL. Common values:
+heaviness of the distribution tails and is kept constant across all ages when \code{delta_degree}
+is set to NULL. Common values:
 \itemize{
   \item delta = 1: Normal-like tail behavior (baseline)
-  \item delta > 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
-  \item delta < 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
+  \item delta < 1: Heavier tails, higher kurtosis (more extreme scores than normal distribution)
+  \item delta > 1: Lighter tails, lower kurtosis (fewer extreme scores than normal distribution)
 }}
 
 \item{control}{An optional list of control parameters passed to the \code{optim} function for
-maximum likelihood estimation. If NULL, sensible defaults are chosen automatically based on
-the model complexity. Common parameters to adjust:
+maximum likelihood estimation. Any parameters not specified are filled with sensible defaults
+based on the model complexity. Common parameters to adjust:
 \itemize{
   \item \code{factr}: Controls precision of optimization (default: 1e-8)
   \item \code{maxit}: Maximum number of iterations (default: n_parameters * 200)
@@ -86,11 +87,12 @@ An object of class "cnormShash" containing the fitted model results. This is a l
   \item{sigma_est}{Numeric vector of estimated coefficients for the scale parameter log(sigma(age)).
     Note: These are coefficients for log(sigma) to ensure sigma > 0.}
   \item{epsilon_est}{Numeric vector of estimated coefficients for the skewness parameter epsilon(age).}
-  \item{delta}{The fixed tail weight parameter value used in fitting.}
-  \item{delta_est}{Numeric vector of estimated coefficients for the tail weight parameter delta(age) -
-     in case, a degree has been set.}
+  \item{delta}{The fixed tail weight parameter value used in fitting (relevant if \code{delta_degree} is NULL).}
+  \item{delta_est}{Numeric vector of estimated coefficients for log(delta(age)) -
+     in case a degree has been set, otherwise NULL.}
   \item{se}{Numeric vector of standard errors for all estimated coefficients (if Hessian computation succeeds).}
   \item{mu_degree, sigma_degree, epsilon_degree}{The polynomial degrees used for each parameter.}
+  \item{delta_degree}{The polynomial degree used for delta, or NULL if delta was fixed.}
   \item{result}{Complete output from the \code{optim} function, including convergence information,
     log-likelihood value, and other optimization details.}
 }
@@ -102,12 +104,13 @@ skewness and tail weight independently, making it ideal for handling floor effec
 and varying degrees of individual differences across age groups. In a simulation study (Lenhard et
 al, 2019), the shash model demonstrated superior performance compared to other parametric approaches
 from the Box Cox family of functions. In contrast to Box Cox, Sinh-Arcsinh can model distributions
-including zero and negativ values.
+including zero and negative values.
 }
 \details{
 This implementation uses the Jones & Pewsey (2009) parameterization of the Sinh-Arcsinh distribution.
-Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm. In case, optimization
-fails, try reducing model complexity by reducing polynomial degrees or fixing the delta parameter.
+Parameters are estimated using maximum likelihood via the L-BFGS-B algorithm with analytic
+gradients. In case optimization fails, try reducing model complexity by reducing polynomial
+degrees or fixing the delta parameter.
 
 \subsection{The Sinh-Arcsinh Distribution}{
 The shash distribution is defined by the transformation:
@@ -144,8 +147,8 @@ a good balance of flexibility and parsimony.
     Predictions outside the observed age range should be made cautiously.
   \item If convergence fails, try: (1) reducing polynomial degrees, (2) adjusting the delta parameter,
     (3) providing custom control parameters, or (4) checking for data quality issues.
-  \item The tail weight parameter delta is fixed across ages by default. For applications
-    where tail behavior changes substantially with age, consider setting the delta_degree paramerer to 1 or 2.
+  \item If parameters end up at their box constraints, the reported standard errors and
+    Wald tests for these parameters are not valid; a warning is issued in this case.
 }
 }
 \examples{
@@ -160,8 +163,8 @@ model_complex <- cnorm.shash(
   mu_degree = 4,         # Complex mean trajectory
   sigma_degree = 3,      # Changing variability pattern
   epsilon_degree = 2,    # Skewness shifts
-  delta_degree = NULL, # set to NULL to activate fixed delta
-  delta = 1.3            # Slightly heavy tails
+  delta_degree = NULL,   # set to NULL to activate fixed delta
+  delta = 0.8            # Slightly heavy tails
 )
 
 # With sampling weights

@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{summary.cnormShash}
 \alias{summary.cnormShash}
-\title{Summarize a SinH-ArcSinH Continuous Norming Model}
+\title{Summarize a Sinh-Arcsinh Continuous Norming Model}
 \usage{
 \method{summary}{cnormShash}(object, ...)
 }
@@ -24,7 +24,7 @@ Invisibly returns a list containing detailed diagnostic information about the mo
   The function primarily produces printed output summarizing the model.
 }
 \description{
-This function provides a summary of a fitted SinH-ArcSinH (shash) continuous norming model,
+This function provides a summary of a fitted Sinh-Arcsinh (shash) continuous norming model,
 including model fit statistics, convergence information, and parameter estimates.
 }
 \details{

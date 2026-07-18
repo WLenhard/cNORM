@@ -19,9 +19,10 @@ cnorm.betabinomial().}
 }
 \value{
 A list containing diagnostic information, including convergence,
-  number of evaluations, log-likelihood, AIC, BIC, parameter estimates
-  with standard errors, z and p values, and - if age and score are
-  provided - R2, RMSE and bias of the norm scores.
+  number of evaluations, log-likelihood, AIC, BIC, the maximum absolute
+  analytic gradient at the solution (first-order optimality), parameter
+  estimates with standard errors, z and p values, and - if age and score
+  are provided - R2, RMSE and bias of the norm scores.
 }
 \description{
 This function provides diagnostic information for a fitted beta-binomial
@@ -36,6 +37,10 @@ AIC = 2k - 2ln(L)
 BIC = ln(n)k - 2ln(L)
 where k is the number of parameters, L is the maximum likelihood, and n
 is the number of observations.
+
+Please note that fit indices of mode 1 and mode 2 models are not directly
+comparable, since the two modes maximize different likelihoods (normal
+on standardized scores vs. discrete beta-binomial).
 }
 \examples{
 \dontrun{

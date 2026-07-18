@@ -32,7 +32,9 @@ normTable.shash(
 \value{
 List of data frames (one per age) containing:
   \item{x}{Raw scores}
-  \item{Px}{Probability density values}
+  \item{Px}{Approximate interval probabilities (density times step width).
+    These are consistent with \code{Pcum} but do not necessarily sum to 1
+    over the tabulated score range.}
   \item{Pcum}{Cumulative probabilities}
   \item{Percentile}{Percentile ranks (0-100)}
   \item{z}{Standardized z-scores}
@@ -41,14 +43,14 @@ List of data frames (one per age) containing:
   \item{lowerCI_PR, upperCI_PR}{CI as percentile ranks (if reliability provided)}
 }
 \description{
-Generates norm tables for specific ages based on a fitted SinH-ArcSinH (shash) regression model.
-Computes probabilities, percentiles, z-scores, and norm scores for a specified range of raw scores.
+Generates norm tables for specific ages based on a fitted Sinh-Arcsinh (shash) regression model.
+Computes interval probabilities, percentiles, z-scores, and norm scores for a specified range of raw scores.
 Optionally includes confidence intervals when reliability is provided.
 }
 \details{
-For continuous shash distributions, probability densities are computed and converted to
-cumulative probabilities and percentiles. When reliability is specified, confidence
-intervals include correction for regression to the mean.
+For continuous shash distributions, densities are converted to interval probabilities
+(density times step width) and cumulative probabilities. When reliability is specified,
+confidence intervals include correction for regression to the mean.
 }
 \examples{
 \dontrun{

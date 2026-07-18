@@ -2,7 +2,7 @@
 % Please edit documentation in R/shash.R
 \name{print.cnormShash}
 \alias{print.cnormShash}
-\title{Print method for SinH-ArcSinH objects}
+\title{Print method for Sinh-Arcsinh objects}
 \usage{
 \method{print}{cnormShash}(x, ...)
 }
@@ -12,5 +12,5 @@
 \item{...}{Additional arguments}
 }
 \description{
-Print method for SinH-ArcSinH objects
+Print method for Sinh-Arcsinh objects
 }

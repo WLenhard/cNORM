@@ -41,7 +41,9 @@ rshash(n, mu = 0, sigma = 1, epsilon = 0, delta = 1)
 
 \item{epsilon}{skewness parameter (default: 0, symmetric distribution)}
 
-\item{delta}{tail weight parameter (must be > 0, default: 1 for normal-like tails)}
+\item{delta}{tail weight parameter (must be > 0, default: 1 for normal-like
+tails; \code{delta < 1} gives heavier tails, \code{delta > 1} gives
+lighter tails)}
 
 \item{log, log.p}{logical; if TRUE, probabilities p are given as log(p)}
 
@@ -78,11 +80,11 @@ The four parameters control:
   \item \code{sigma}: Scale (similar to standard deviation)
   \item \code{epsilon}: Skewness (\code{epsilon = 0} gives symmetry)
   \item \code{delta}: Tail weight (\code{delta = 1} gives normal-like tails,
-        \code{delta > 1} gives heavier tails, \code{delta < 1} gives lighter tails)
+        \code{delta < 1} gives heavier tails, \code{delta > 1} gives
+        lighter tails)
 }
 }
 \examples{
-\dontrun{
 # Generate random samples
 x <- rshash(1000, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
 
@@ -98,13 +100,13 @@ pshash(0, mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
 qshash(c(0.025, 0.5, 0.975), mu = 0, sigma = 1, epsilon = 0.5, delta = 1.2)
 
 # Compare with normal distribution (epsilon = 0, delta = 1)
-par(mfrow = c(2, 2))
+oldpar <- par(mfrow = c(2, 2))
 x_vals <- seq(-4, 4, length.out = 200)
 plot(x_vals, dshash(x_vals), type = "l", main = "Symmetric (like normal)")
 plot(x_vals, dshash(x_vals, epsilon = 1), type = "l", main = "Right skewed")
-plot(x_vals, dshash(x_vals, delta = 2), type = "l", main = "Heavy tails")
-plot(x_vals, dshash(x_vals, delta = 0.5), type = "l", main = "Light tails")
-}
+plot(x_vals, dshash(x_vals, delta = 0.5), type = "l", main = "Heavy tails")
+plot(x_vals, dshash(x_vals, delta = 2), type = "l", main = "Light tails")
+par(oldpar)
 
 }
 \references{

@@ -21,7 +21,8 @@
 }
 \value{
 A numeric vector of norm scores (or percentiles, if no norm scale
-  was specified in the model).
+  was specified in the model). Missing, non-integer or out-of-range raw
+  scores yield \code{NA}.
 }
 \description{
 This function calculates norm scores based on raw scores, age, and a

@@ -24,10 +24,12 @@ A numeric vector of norm scores.
 This function calculates norm scores based on raw scores, age, and a fitted cnormShash model.
 }
 \details{
-The function predicts the SinH-ArcSinH (shash) distribution parameters (mu, sigma, epsilon, delta) for each age
-using the provided model. It then calculates the cumulative probability for each
+The function predicts the Sinh-Arcsinh (shash) distribution parameters (mu, sigma, epsilon, delta)
+for each age using the provided model. It then calculates the cumulative probability for each
 raw score given these parameters using the continuous shash distribution. Finally,
-it converts these probabilities to the norm scale specified in the model.
+it converts these probabilities to the norm scale specified in the model. Raw scores
+at the extreme floor or ceiling of the distribution are mapped to the boundary of the
+norm score range (mean +/- \code{range} standard deviations), not to the mean.
 }
 \examples{
 \dontrun{

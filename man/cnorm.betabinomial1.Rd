@@ -33,7 +33,8 @@ model. Default is 3.}
 standard deviation model. Default is 3.}
 
 \item{control}{A list of control parameters to be passed to the
-\code{optim} function. If NULL, default values are used.}
+\code{optim} function. Any parameters not specified are filled with
+the defaults \code{list(reltol = 1e-8, maxit = 1000)}.}
 
 \item{scale}{Type of norm scale, either T (default), IQ, z or percentile
 (= no transformation); a double vector with the mean and standard
@@ -63,7 +64,7 @@ compatibility; 'cnorm.betabinomial2' is the recommended default.
 \details{
 The function standardizes the input variables, fits polynomial models for
 both the mean and standard deviation, and uses maximum likelihood
-estimation to find the optimal parameters. The optimization is performed
-using the BFGS method.
+estimation with analytic gradients to find the optimal parameters. The
+optimization is performed using the BFGS method.
 }
 \keyword{internal}
