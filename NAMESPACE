@@ -69,6 +69,7 @@ export(
     plotPercentileSeries,
     plotRaw,
     plotSubset,
+    predictMoments,
     predictNorm,
     predictRaw,
     prepareData,
@@ -111,3 +112,10 @@ S3method(summary, cnormBetaBinomial2)
 S3method(plot, cnormShash)
 S3method(predict, cnormShash)
 S3method(summary, cnormShash)
+
+# S3 methods to predict moments
+S3method(predictMoments, cnorm)
+S3method(predictMoments, cnormBetaBinomial)
+S3method(predictMoments, cnormBetaBinomial2)
+S3method(predictMoments, cnormShash)
+S3method(predictMoments, default)

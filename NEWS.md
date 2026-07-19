@@ -5,19 +5,47 @@ points for further improvements.
 
 
 ### Version in 3.6.2
-Date: 13.07.2026 - release
+Date: 19.07.2026 - in progress
 
-Minor update for fine-tuning internal functions. No new features.
+Fine-tuning of internal functions (relaxed monotonicity check) and a new S3 
+method for predicting distributional moments of fitted Taylor, beta binomial
+and shash models.
+
+## New features
+
+* New function `predictMoments()`: Computes model-implied distributional 
+  moments (mean, standard deviation, variance, skewness and excess kurtosis) 
+  of the raw score distribution at one or more ages (or, more generally, 
+  values of the explanatory variable). The function works with all model 
+  families and returns a `data.frame` with one row per age. 
+  The moments are model-implied population moments of the conditional raw 
+  score distribution, censored at the bounds of the raw score range 
+  `[minRaw, maxRaw]` for consistency across model families. The computation 
+  strategy depends on the model family:
+  * **Taylor polynomial (`cnorm`):** The bivariate regression function is 
+    collapsed at the specified age into a univariate polynomial in the norm 
+    score (location) variable. Moments are then obtained by Gauss-Hermite 
+    quadrature, which is mathematically exact for polynomial quantile 
+    functions (up to the censoring at `minRaw`/`maxRaw`).
+  * **Beta-binomial (`cnormBetaBinomial`, `cnormBetaBinomial2`):** Moments 
+    are computed exactly by summation over the discrete probability mass 
+    function on the support `0:n`, using the age-specific predicted alpha 
+    and beta parameters. This respects the discreteness of the distribution; 
+    no continuity approximation is involved.
+  * **SHASH (`cnormShash`):** Moments are obtained by Gauss-Hermite 
+    quadrature of the quantile function `qshash` evaluated at the 
+    age-specific distribution parameters, censored at `minRaw`/`maxRaw`.
+
 
 ## Changes
 
-* monotonicity check in Taylor polynomials now accept minimal inconsistencies
+* Monotonicity check in Taylor polynomials now accept minimal inconsistencies
   (violations of less than 1% of the raw score range; parameter added to cnorm 
   and bestModel).
 * The averaging feature has been turned of by default. We have to conduct 
   more research first.
-* deprectated subsampling parameter and according function removed  
-* added analytic grading in fitting shash models
+* Deprectated subsampling parameter and according function removed  
+* Added analytic grading in fitting shash models
 
 
 
