@@ -1,38 +1,22 @@
-## cNORM version 3.6.1
+## cNORM version 3.6.2
 
-This release focuses on optimization, code hardening, and improved handling of 
-beta-binomial models.
+Fine-tuning of internal functions (relaxed monotonicity check) and a new S3 
+method for predicting distributional moments of fitted Taylor, beta binomial
+and shash models. Model averaging was falsly already set to TRUE by default
+(now FALSE).
 
-**Major Features & Behavioral Changes**
-* **Model Averaging:** Introduced an `averaging` argument in `bestModel()` to 
-  compute final coefficients as a BIC-weighted average across consistency-
-  screened models. This reduces model selection variance and guarantees 
-  consistent models.
-* **Analytic Consistency Checks:** Replaced the discrete grid check with an 
-  exact analytical monotonicity check using `polyroot()` (now the default in 
-  `checkConsistency()`). This detects narrow violations that a discrete grid 
-  can miss and is faster.
-* **Consistency Screening:** Flat candidate models (independent of L) are now 
-  correctly flagged as inconsistent, and screening evaluates 8 age points (up 
-  from 2) to catch intersecting percentile curves.
-* **Plotting:** Discrete beta-binomial quantiles are now correctly rendered as 
-  step functions in `plot()` and `compare()`.
+## Changes
 
-**Deprecations**
-* Deprecated `subsample_lm()` and the `subsampling` argument in `bestModel()`. 
-  Subsampling OLS coefficients adds Monte-Carlo noise without improving the fit 
-  and is entirely replaced by the new `averaging` method.
-
-**Bug Fixes & Performance Optimizations**
-* Fixed issues causing `NaN` RMSE values (switched from `.lm.fit()` to 
-  `lm.fit()`) and crashes during consistency screening with non-Taylor 
-  predictors.
-* Fixed beta-binomial probability normalization over truncated supports and 
-  resolved L-BFGS-B optimization convergence failures.
-* Fixed an edge case failure in `checkConsistency()` for conventional norming 
-  (`minA1 == maxA1`).
-* Significant performance improvements in beta-binomial modeling via 
-  precomputation of `lchoose()` and grouped-data optimizations in `predict()`.
+* New function `predictMoments()`: Computes model-implied distributional 
+  moments (mean, standard deviation, variance, skewness and excess kurtosis) 
+  of the raw score distribution at one or more ages.
+* Monotonicity check in Taylor polynomials now accept minimal inconsistencies
+  (violations of less than 1% of the raw score range; parameter added to cnorm 
+  and bestModel).
+* The averaging feature has been turned of by default. We have to conduct 
+  more research first.
+* Deprectated subsampling parameter and according function removed  
+* Added analytic grading in fitting shash models
 
 
 ## Test environments

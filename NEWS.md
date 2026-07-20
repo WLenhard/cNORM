@@ -5,7 +5,7 @@ points for further improvements.
 
 
 ### Version in 3.6.2
-Date: 19.07.2026 - in progress
+Date: 20.07.2026 - release
 
 Fine-tuning of internal functions (relaxed monotonicity check) and a new S3 
 method for predicting distributional moments of fitted Taylor, beta binomial
