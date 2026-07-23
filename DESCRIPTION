@@ -1,6 +1,6 @@
 Package: cNORM
 Title: Continuous Norming
-Version: 3.6.2
+Version: 3.6.3
 Authors@R: c(
     person("Alexandra", "Lenhard", 
            email = "lenhard@psychometrica.de",

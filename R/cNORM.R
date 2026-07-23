@@ -340,6 +340,46 @@ cnorm <- function(raw = NULL,
   conventional <- is.null(group) && is.null(age)
   use_window   <- is.null(group) && !is.null(age) && !is.na(width)
 
+  # ---- plausibility on group number ---------------------------------------
+  if (!is.null(group)) {
+    k.groups <- length(unique(df_in$group))
+    t.max <- k.groups - 1
+
+    if (k.groups == 1) {
+      message("Only one distinct age group present. Deactivating continuous norming over age.")
+      conventional <- TRUE
+    } else if (t > t.max) {
+      msg <- sprintf(paste0(
+        "Age power t = %d exceeds what is identifiable with %d distinct groups. ",
+        "Powers of age >= %d potentially lead to arbitrary behavior between ",
+        "groups , unidentifiable models and a breakdown of percentile curves."),
+        t, k.groups, k.groups)
+
+      if (interactive()) {
+        message(msg)
+        choice <- utils::menu(
+          choices = c(sprintf("Reduce t to %d (recommended)", t.max),
+                      sprintf("Keep t = %d (model will likely be malformed)", t)),
+          title = "How do you want to proceed?"
+        )
+
+        if (choice == 2) {
+          warning(sprintf(
+            "Proceeding with t = %d despite non-identifiability. Carefully check model consistency, e.g. via plot(model, \"norm\") and checkConsistency().",
+            t), call. = FALSE)
+        } else {
+          # choice == 1, or 0 (user pressed 0/ESC): default to the safe option
+          t <- t.max
+          message(sprintf("t was reduced to %d.", t.max))
+        }
+      } else {
+        # non-interactive context: we cannot ask; warn but respect the user's setting
+        warning(paste0(msg, sprintf(
+          " Please reduce the t parameter to %d.", t.max)), call. = FALSE)
+      }
+    }
+  }
+
   # ============================ CONVENTIONAL =================================
   if (conventional) {
     data <- rankByGroup(data = df_in, group = FALSE, raw = "raw",

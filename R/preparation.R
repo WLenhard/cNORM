@@ -179,6 +179,8 @@ prepareData <- function(data = NULL,
     }
   }
 
+
+
   # ---- Dispatch decision ----------------------------------------------------
   use_group_ranking <- is.null(width) || (length(width) == 1L && is.na(width))
 
@@ -421,7 +423,6 @@ rankByGroup <- function(data = NULL,
 
   # ---- ranking --------------------------------------------------------------
   if (is.logical(group) && !group) {
-    if (!silent) message("No grouping variable specified. Ranking without grouping.")
     n_cases <- nrow(d)
 
     x <- sign_mult * d[["raw"]]

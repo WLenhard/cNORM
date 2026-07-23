@@ -348,7 +348,7 @@ bestModel <- function(data,
   }
 
   nSelected <- length(bestformula$coefficients) - 1L
-  if (nSelected < 4) {
+  if (nSelected < 4 && useAge) {
     message("\nThe model includes a low number of terms. Models with four or ",
             "more predictors are usually more robust. The low number is probably ",
             "the consequence of the rather strict monotonicity checks in cNORM. ",
