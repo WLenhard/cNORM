@@ -343,7 +343,6 @@ cnorm <- function(raw = NULL,
   use_window   <- is.null(group) && !is.null(age) && !is.na(width)
 
   # ---- plausibility on identifiable time variables ------------------------
-  # Identify the effective 'time/age' dimension the model will use
   time_var <- if (!is.null(group)) df_in$group else df_in$age
 
   if (!is.null(time_var)) {
@@ -353,37 +352,28 @@ cnorm <- function(raw = NULL,
     if (k.groups <= 1) {
       if (!silent) message("Only one distinct age/group present. Deactivating continuous norming over time.")
       conventional <- TRUE
+
     } else if (t > t.max) {
-      msg <- sprintf(
-        "Age power t = %d exceeds mathematical identifiability for %d distinct age groups. ",
-        t, k.groups)
-      msg_risk <- sprintf("Using t >= %d will can lead to unidentifiable models.", k.groups)
 
       if (!t_user_provided) {
-        # Silent correction if user didn't explicitly request a high t
+        # Silent correction if user relied on package defaults
         t <- t.max
-        if (!silent) message(paste0(msg, sprintf("Automatically reducing t to %d.", t.max)))
-      } else {
-        # If user explicitly requested dangerous parameters
-        if (interactive() && !silent) {
-          message(paste0(msg, msg_risk))
-          choice <- utils::menu(
-            choices = c(sprintf("Reduce t to %d (Recommended)", t.max),
-                        sprintf("Keep t = %d (Danger of model breakdown)", t)),
-            title = "Model Overparameterization Detected. Proceed?"
-          )
-
-          if (choice == 2) {
-            warning(sprintf("Proceeding with t = %d. Verify model validity with checkConsistency().", t), call. = FALSE)
-          } else {
-            t <- t.max
-            message(sprintf("t reduced to %d.", t.max))
-          }
-        } else {
-          # Safe fallback for non-interactive / automated builds
-          warning(paste0(msg, msg_risk, sprintf(" Forcing reduction of t parameter to %d to ensure estimability.", t.max)), call. = FALSE)
-          t <- t.max
+        if (!silent) {
+          message(sprintf("Default time power t exceeds max identifiable degree for %d groups. Automatically setting t = %d.",
+                          k.groups, t.max))
         }
+      } else {
+        t <- t.max
+        msg <- sprintf(
+          "Requested age power (t) exceeds mathematical identifiability for %d distinct age groups. ",
+          k.groups
+        )
+        msg_risk <- sprintf(
+          "To prevent severe percentile breakdown, t has been automatically reduced to %d.",
+          t.max
+        )
+
+        warning(paste0(msg, msg_risk), call. = FALSE)
       }
     }
   }
