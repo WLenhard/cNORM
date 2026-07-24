@@ -238,7 +238,8 @@ cNORM.GUI2 <- function(launch.browser = TRUE) {
 #' @param R2 Stopping criterion (adjusted R-squared) for model selection.
 #' @param k Power degree for the location dimension (max 6).
 #' @param t Power degree for the age dimension (max 6).
-#' @param plot If TRUE (default), display percentile plot and report.
+#' @param plot If TRUE (default), display percentile plot and report. Setting
+#'        it to FALSE as well deactivates potential user interactions.
 #' @param extensive If TRUE (default), screen models for monotonic consistency.
 #' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
 #'   across the consistency-screened candidate models instead of selecting a
@@ -318,12 +319,13 @@ cnorm <- function(raw = NULL,
   }
 
   # ---- default smoothing parameters -----------------------------------------
+  t_user_provided <- !is.null(t)
   if (is.null(k) && is.null(t)) {
     k <- 5; t <- 3
   } else if (is.null(t)) {
     t <- k
   } else if (is.null(k)) {
-    k <- t
+    k <- 5
   }
 
   # ---- assemble & clean (single source of NA removal, weights kept aligned) --
@@ -340,42 +342,48 @@ cnorm <- function(raw = NULL,
   conventional <- is.null(group) && is.null(age)
   use_window   <- is.null(group) && !is.null(age) && !is.na(width)
 
-  # ---- plausibility on group number ---------------------------------------
-  if (!is.null(group)) {
-    k.groups <- length(unique(df_in$group))
+  # ---- plausibility on identifiable time variables ------------------------
+  # Identify the effective 'time/age' dimension the model will use
+  time_var <- if (!is.null(group)) df_in$group else df_in$age
+
+  if (!is.null(time_var)) {
+    k.groups <- length(unique(time_var))
     t.max <- k.groups - 1
 
-    if (k.groups == 1) {
-      message("Only one distinct age group present. Deactivating continuous norming over age.")
+    if (k.groups <= 1) {
+      if (!silent) message("Only one distinct age/group present. Deactivating continuous norming over time.")
       conventional <- TRUE
     } else if (t > t.max) {
-      msg <- sprintf(paste0(
-        "Age power t = %d exceeds what is identifiable with %d distinct groups. ",
-        "Powers of age >= %d potentially lead to arbitrary behavior between ",
-        "groups , unidentifiable models and a breakdown of percentile curves."),
-        t, k.groups, k.groups)
+      msg <- sprintf(
+        "Age power t = %d exceeds mathematical identifiability for %d distinct age groups. ",
+        t, k.groups)
+      msg_risk <- sprintf("Using t >= %d will can lead to unidentifiable models.", k.groups)
 
-      if (interactive()) {
-        message(msg)
-        choice <- utils::menu(
-          choices = c(sprintf("Reduce t to %d (recommended)", t.max),
-                      sprintf("Keep t = %d (model will likely be malformed)", t)),
-          title = "How do you want to proceed?"
-        )
-
-        if (choice == 2) {
-          warning(sprintf(
-            "Proceeding with t = %d despite non-identifiability. Carefully check model consistency, e.g. via plot(model, \"norm\") and checkConsistency().",
-            t), call. = FALSE)
-        } else {
-          # choice == 1, or 0 (user pressed 0/ESC): default to the safe option
-          t <- t.max
-          message(sprintf("t was reduced to %d.", t.max))
-        }
+      if (!t_user_provided) {
+        # Silent correction if user didn't explicitly request a high t
+        t <- t.max
+        if (!silent) message(paste0(msg, sprintf("Automatically reducing t to %d.", t.max)))
       } else {
-        # non-interactive context: we cannot ask; warn but respect the user's setting
-        warning(paste0(msg, sprintf(
-          " Please reduce the t parameter to %d.", t.max)), call. = FALSE)
+        # If user explicitly requested dangerous parameters
+        if (interactive() && !silent) {
+          message(paste0(msg, msg_risk))
+          choice <- utils::menu(
+            choices = c(sprintf("Reduce t to %d (Recommended)", t.max),
+                        sprintf("Keep t = %d (Danger of model breakdown)", t)),
+            title = "Model Overparameterization Detected. Proceed?"
+          )
+
+          if (choice == 2) {
+            warning(sprintf("Proceeding with t = %d. Verify model validity with checkConsistency().", t), call. = FALSE)
+          } else {
+            t <- t.max
+            message(sprintf("t reduced to %d.", t.max))
+          }
+        } else {
+          # Safe fallback for non-interactive / automated builds
+          warning(paste0(msg, msg_risk, sprintf(" Forcing reduction of t parameter to %d to ensure estimability.", t.max)), call. = FALSE)
+          t <- t.max
+        }
       }
     }
   }
@@ -499,7 +507,8 @@ cnorm <- function(raw = NULL,
 #' @param t The age power parameter (max = 6). If not set, it uses k and if both
 #' parameters are NULL, k is set to 3, since age trajectories are most often well
 #' captured by cubic polynomials.
-#' @param plot Default TRUE; plots the regression model and prints report
+#' @param plot Default TRUE; plots the regression model and prints reportSetting
+#'        it to FALSE as well deactivates potential user interactions.
 #' @param extensive If TRUE, screen models for consistency and - if possible, exclude inconsistent ones
 #' @param averaging If TRUE (default FALSE), apply BIC-weighted model averaging
 #'   across the consistency-screened candidate models instead of selecting a
