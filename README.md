@@ -63,7 +63,7 @@ rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 
 
 ### 2. Parametric modeling for accuracy tests: Beta-binomial distribution
-```{r example}
+```r
 library(cNORM)
 # cNORM can as well model norm data using the beta-binomial
 # distribution, which usually performs well on tests with
@@ -97,7 +97,7 @@ tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
 ```
 
 ### 3. Parametric modeling for speeded tests and counts: Conway-Maxwell-Poisson (CMP)
-```{r example}
+```r
 library(cNORM)
 
 # The Conway-Maxwell-Poisson (CMP) model is designed for count data and speeded tests
@@ -129,7 +129,7 @@ predictMoments(model.cmp, age = seq(7, 10, by = 0.5))
 ```
 
 ### 4. Parametric modeling for continuous scores: Sinh-Arcsinh (SHASH)
-```{r example}
+```r
 library(cNORM)
 # The Sinh-Arcsinh (ShaSh) distribution is a flexible approach.
 # It can handle raw score value ranges including zeros and negative
@@ -155,7 +155,7 @@ tables <- normTable.shash(model.shash, c(10, 15),
 ```
 
 ### 5. Visual Model Comparison
-```{r example}
+```r
 # Compare distribution-free Taylor polynomial with CMP count model:
 model.taylor <- cnorm(raw = elfe$raw, group = elfe$group)
 model.cmp    <- cnorm.cmp(age = elfe$group, score = elfe$raw)
@@ -164,7 +164,7 @@ compare(model.taylor, model.cmp, age = elfe$group, score = elfe$raw)
 ```
 
 ### 6. Conventional norming:
-```{r example}
+```r
 library(cNORM)
 
 # cNORM can as well be used for conventional norming:
@@ -173,13 +173,14 @@ cnorm(raw=elfe$raw)
 
 
 Start vignettes in cNORM:
-```{r example}
+```r
 library(cNORM)
 
 vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
 vignette("BetaBinomial", package = "cNORM")
 vignette("sinh", package = "cNORM")
+vignette("cmp", package = "cNORM")
 ```
 
 
