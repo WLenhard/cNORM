@@ -28,6 +28,37 @@
 #' @format A data frame with 1400 rows and 3 columns
 "elfe"
 
+#' Word reading fluency test from ELFE-II
+#'
+#' A synthetic dataset containing 1438 records simulating children's performance
+#' in the word reading fluency subtest from the ELFE-II reading assessment
+#' (Lenhard, Lenhard, & Schneider, 2017). In this subtest, students are presented
+#' with individual words paired with pictures and must rapidly identify the matching
+#' item under a strict time limit (speeded decoding). The synthetic data preserves
+#' the marginal distributions, age trajectory, and variance structure of empirical
+#' test results.
+#'
+#' @format A data frame with 1438 rows and 2 variables:
+#' \describe{
+#'   \item{age}{chronological age of the student in years (decimal)}
+#'   \item{fluency}{the raw score achieved by the student, indicating the number of correctly processed items within the time limit}
+#' }
+#' @source \url{https://www.psychometrica.de/elfe2.html}
+#' @references Lenhard, W., Lenhard, A. & Schneider, W. (2017). ELFE II: Ein Leseverstaendnistest fuer Erst- bis Siebtklaessler. Goettingen: Hogrefe.
+#' @docType data
+#' @keywords datasets
+#' @concept reading speed
+#' @concept fluency
+#' @name speed
+#' @examples
+#' \dontrun{
+#'   # Model continuous norms using cnorm
+#'   model <- cnorm(age = speed$age, raw = speed$fluency)
+#'   summary(model)
+#'   plotPercentiles(model)
+#' }
+"speed"
+
 #' Vocabulary development from 2.5 to 17
 #'
 #' A dataset based on an unstratified sample of PPVT4 data (German adaption). The PPVT4 consists of blocks of items with

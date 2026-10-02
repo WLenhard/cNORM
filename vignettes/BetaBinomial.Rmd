@@ -206,16 +206,65 @@ Our results demonstrate that parametric continuous norming with beta-binomial di
 1PL IRT based tests, while Taylor polynomials are better suited for speeded tests.
 
 
-## Conclusion: When to Use What?
+## Decision Framework for Model Selection
 
-A diverse methodological toolkit is invaluable in psychometrics. Taylor polynomials, as implemented in cNORM, have proven effective in a wide range of norming scenarios. Their distribution-free nature makes them applicable to various tests, including those with continuous or negative raw scores. Parametric modeling with beta-binomial distribution, on the other hand, is particularly well-suited for unspeeded tests with dichotomous items and fixed maximum scores. Both methods yield significantly better results than conventional norming for typical sample sizes and should therefore be preferentially applied in test construction.
+`cNORM` provides four distinct modeling paradigms: one semi-parametric, distribution-free approach and three parametric families. Each model possesses distinct mathematical properties tailored to specific types of test data and measurement designs.
 
-The choice between these approaches should be guided by the following factors:
+---
 
-1. Characteristics of raw scores (e.g., discrete vs. continuous raw scores, negative values)
-2. Test scale features (e.g., speeded vs. unspeeded)
+### Quick Selection Matrix
 
-Regardless of the method used, it is always necessary to thoroughly evaluate the model fit and transparently report its quality in the test manuals. Particular attention should be paid to the shape of the percentile curves, which should align with theoretical expectations. For instance, wavy percentile curves are generally not expected. Such a pattern indicates overfitting and should be avoided. In such cases, review the model parameters or employ an alternative modeling approach.
+| Criterion | Distribution-Free (Taylor) | Beta-Binomial | Conway-Maxwell-Poisson (CMP) | Sinh-Arcsinh (SHASH) |
+| :--- | :--- | :--- | :--- | :--- |
+| **Score Scale** | Continuous or discrete | Discrete integer counts ($0 \le y \le n$) | Discrete integer counts ($y \ge 0$) | Continuous real numbers ($y \in \mathbb{R}$) |
+| **Test Paradigm** | General ability / achievement | Power / accuracy tests | Speeded tests / rate tasks | Continuous scales, physical / RT |
+| **Ceiling Bound** | Post-hoc clipping $[minRaw, maxRaw]$ | Natural upper bound ($n$ items) | Open-ended ($[0, \infty)$) | Natural infinite support ($(-\infty, \infty)$) |
+| **Distributional Shape** | Any (empirical rank projection) | Binomial with Beta-mixing | Over-, equi-, or **under-dispersed** | Skewed with heavy or light tails |
+| **Key Advantage** | Maximum shape flexibility | Respects fixed item bounds | Captures under-dispersion ($\text{Var} < \text{Mean}$) | Handles negative and uncentered scores |
+| **Primary Function** | `cnorm()` | `cnorm.betabinomial()` | `cnorm.cmp()` | `cnorm.shash()` |
+
+---
+
+### Detailed Selection Guidelines
+
+#### 1. Use Distribution-Free Models (Taylor Polynomials) when:
+* **Maximum flexibility is paramount:** The data exhibit non-standard features (e.g., multimodality, local irregularities, or empirical anomalies) that cannot be captured by standard parametric families.
+* **No distributional assumptions can be justified:** You prefer empirical ranking over specifying a functional density.
+* **Complex interaction surfaces:** The relationship between person location and age changes irregularly across development.
+* **Caution:** Because bivariate polynomials can occasionally invert in extreme regions, always inspect consistency (`checkConsistency()`) and percentile curves (`plotPercentiles()`).
+
+#### 2. Use Beta-Binomial Models (`cnorm.betabinomial`) when:
+* **The test is an unspeeded power/accuracy test:** Raw scores represent the sum of $n$ dichotomously scored items (1PL IRT / Rasch-scaled instruments).
+* **There is a strict, known ceiling:** Scores cannot exceed the maximum number of items $n$.
+* **Floor or ceiling effects are present:** The distribution naturally compresses near $0$ or $n$ without requiring artificial clipping.
+* **Item count is small to moderate:** The discrete nature of individual item increments is psychometrically meaningful.
+
+#### 3. Use Conway-Maxwell-Poisson Models (`cnorm.cmp`) when:
+* **The test is a speeded test:** The raw score is the number of correctly processed items within a fixed time limit (e.g., cancellation tasks, coding, symbol search, reading fluency).
+* **The scale is open-ended:** There is no hard item ceiling, or the ceiling is practically unattainable within the time limit.
+* **The data exhibit under-dispersion ($\text{Var} < \text{Mean}$):** Speeded tasks with easy items routinely produce performance pacing with variance substantially smaller than the mean—a feature that neither Poisson nor Negative Binomial models can accommodate.
+* **Counts can also be over-dispersed ($\text{Var} > \text{Mean}$):** The CMP dispersion parameter $\nu(a)$ smoothly models over- ($\nu < 1$), equi- ($\nu = 1$), and under-dispersion ($\nu > 1$) across age.
+
+#### 4. Use Sinh-Arcsinh Models (`cnorm.shash`) when:
+* **Raw scores are continuous:** Scores have decimal precision, or stem from latent scale transformations, response times, or physical measurements (e.g., height, weight, force).
+* **Zero or negative values occur:** Scores are difference scores, change scores, or unstandardized index points spanning zero and negative numbers.
+* **Asymmetry and tail heaviness vary smoothly across age:** The distribution shifts from Gaussian to skewed or heavy/light-tailed across developmental stages.
+* **Parametric parsimony is desired:** Four smooth polynomial trajectories ($\mu, \sigma, \epsilon, \delta$) describe the complete conditional distribution surface.
+
+---
+
+### Empirical Model Evaluation
+
+When choosing between candidate models or tuning polynomial degrees, evaluate models across multiple complementary criteria:
+
+1. **Theoretical Appropriateness:** Does the model's support and dispersion mechanism match the test design (e.g., Beta-Binomial for accuracy tests, CMP for speeded tests)?
+2. **Information Criteria (AIC & BIC):** Lower values indicate better trade-offs between goodness-of-fit and parsimony. (Use `autoselect.cmp()`, `autoselect.betabinomial()`, or `autoselect.shash()` for automated grid selection).
+3. **Cross-Validation (`cnorm.cv`):** Evaluate out-of-sample prediction accuracy and check crossfit indices ($\approx 1.0$) to guard against overfitting.
+4. **Direct Model Comparison (`compare()`):** Overlay percentile curves from competing models (e.g., Taylor vs. CMP) and inspect differences in $R^2$, RMSE, and bias against manifest group percentiles.
+5. **Visual Plausibility:** Percentile curves must progress smoothly across age without crossings, implausible compressions, or edge-extrapolation artifacts.
+
+
+## Conclusion
 
 In summary, both distribution-free and parametric continuous norming with cNORM offer significant advantages over conventional norming. The specific choice between the two continuous norming methods should be made through careful consideration of the test type and available data.
 
