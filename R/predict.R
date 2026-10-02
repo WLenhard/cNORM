@@ -188,11 +188,14 @@ predictRaw <-
 #' @param maxNorm The upper bound of the norm score range (Taylor models)
 #' @param minRaw clipping parameter for the lower bound of raw scores (or start score for CMP/shash)
 #' @param maxRaw clipping parameter for the upper bound of raw scores (or end score for CMP/shash)
+#' @param start Minimum raw score value for the norm table (default: observed minimum)
+#' @param end Maximum raw score value for the norm table (default: observed maximum)
 #' @param step Stepping parameter with lower values indicating higher precision (for CMP: integer step size)
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
 #' @param reliability coefficient, ranging between 0 to 1
 #' @param pretty Format table by collapsing intervals and rounding to meaningful precision
+#' @param ... Additional arguments passed to model-specific norm table methods (e.g., \code{mid_p} for CMP)
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list of norm tables if vector of A values was provided
 #' @seealso rawTable
@@ -205,32 +208,44 @@ normTable <- function(A,
                       maxNorm = NULL,
                       minRaw = NULL,
                       maxRaw = NULL,
+                      start = NULL,
+                      end = NULL,
                       step = NULL,
                       monotonuous = TRUE,
                       CI = .9,
                       reliability = NULL,
-                      pretty = TRUE) {
+                      pretty = TRUE,
+                      ...) {
+
+  # Harmonize start/end and minRaw/maxRaw across all model families
+  if (!is.null(start) && is.null(minRaw)) minRaw <- start
+  if (!is.null(end) && is.null(maxRaw))   maxRaw <- end
+  if (!is.null(minRaw) && is.null(start)) start <- minRaw
+  if (!is.null(maxRaw) && is.null(end))   end <- maxRaw
+
   if (isBeta(model)) {
     return(normTable.betabinomial(model, A, CI = CI, reliability = reliability))
   } else if (isSHASH(model)) {
     return(normTable.shash(
       model,
       A,
-      minRaw,
-      maxRaw,
-      step,
+      start = start,
+      end = end,
+      step = if (is.null(step)) 1 else step,
       CI = CI,
       reliability = reliability
     ))
   } else if (isCMP(model)) {
+    # For count data, step is strictly an integer (default 1)
     res <- normTable.cmp(
       model,
       ages = A,
-      start = minRaw,
-      end = maxRaw,
-      step = if (is.null(step)) 1 else step,
+      start = start,
+      end = end,
+      step = if (is.null(step) || step < 1) 1L else as.integer(round(step)),
       CI = CI,
-      reliability = reliability
+      reliability = reliability,
+      ...
     )
     if (length(A) == 1L && is.list(res) && !is.data.frame(res)) {
       return(res[[1L]])

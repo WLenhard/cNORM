@@ -12,6 +12,9 @@ on 't' parameter reduction.
 
 ## New features
 * Modelling speeded tests with the Conway-Maxwell Poisson Counts Model (CMPCM)
+* Vignette for CMP modelling
+* new dataset 'speed' with word reading fluency per age (synthetic data based
+  on ELFE2)
 
 
 

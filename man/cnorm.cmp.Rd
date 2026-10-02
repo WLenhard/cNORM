@@ -9,7 +9,7 @@ cnorm.cmp(
   score,
   weights = NULL,
   mu_degree = 3,
-  nu_degree = 1,
+  nu_degree = 2,
   nu = 1,
   control = NULL,
   scale = "T",
@@ -32,7 +32,7 @@ Default is 3. Note that the polynomial acts on the log scale, so lower degrees
 than in the Taylor or shash approaches are often sufficient.}
 
 \item{nu_degree}{Integer specifying the degree of the polynomial for log(nu(age)).
-Default is 1. Use \code{0} for a constant but estimated dispersion, and \code{NULL}
+Default is 2. Use \code{0} for a constant but estimated dispersion, and \code{NULL}
 to fix the dispersion at the value given in \code{nu} (\code{nu = 1} yields a
 Poisson regression). Recommendation: keep \code{nu_degree} low to avoid overfitting.}
 

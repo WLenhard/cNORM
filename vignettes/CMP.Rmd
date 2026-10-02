@@ -244,6 +244,7 @@ compare(
 
 * Conway, R. W., & Maxwell, W. L. (1962). A queuing model with state dependent service rates. *Journal of Industrial Engineering*, 12, 132–136.
 * Huang, A. (2017). Mean-parametrized Conway-Maxwell-Poisson regression models for dispersed counts. *Statistical Modelling*, 17(6), 359–380.
+* Forthmann, B., Lenhard, W., Lenhard, A., & Förster, N. (2024). Flexible Item Response Modeling for Timed Reading Comprehension Assessment. The Journal of Experimental Education, 1–17. https://doi.org/10.1080/00220973.2024.2367162
 * Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. *Assessment*, 25(1), 112–125. https://doi.org/10.1177/1073191116656437
 * Sellers, K. F., & Shmueli, G. (2010). A flexible regression model for count data. *The Annals of Applied Statistics*, 4(2), 943–961.
 * Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S., & Boatwright, P. (2005). A useful distribution for fitting discrete data: revival of the Conway-Maxwell-Poisson distribution. *Journal of the Royal Statistical Society C*, 54(1), 127–142.

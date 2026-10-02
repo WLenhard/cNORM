@@ -11,11 +11,14 @@ normTable(
   maxNorm = NULL,
   minRaw = NULL,
   maxRaw = NULL,
+  start = NULL,
+  end = NULL,
   step = NULL,
   monotonuous = TRUE,
   CI = 0.9,
   reliability = NULL,
-  pretty = TRUE
+  pretty = TRUE,
+  ...
 )
 }
 \arguments{
@@ -31,6 +34,10 @@ normTable(
 
 \item{maxRaw}{clipping parameter for the upper bound of raw scores (or end score for CMP/shash)}
 
+\item{start}{Minimum raw score value for the norm table (default: observed minimum)}
+
+\item{end}{Maximum raw score value for the norm table (default: observed maximum)}
+
 \item{step}{Stepping parameter with lower values indicating higher precision (for CMP: integer step size)}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
@@ -40,6 +47,8 @@ normTable(
 \item{reliability}{coefficient, ranging between 0 to 1}
 
 \item{pretty}{Format table by collapsing intervals and rounding to meaningful precision}
+
+\item{...}{Additional arguments passed to model-specific norm table methods (e.g., \code{mid_p} for CMP)}
 }
 \value{
 either data.frame with norm scores, predicted raw scores and percentiles in case of simple A

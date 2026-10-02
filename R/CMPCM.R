@@ -1420,45 +1420,18 @@ autoselect.cmp <- function(age,
 #'
 #' Generates norm tables for specific ages based on a fitted CMP regression model.
 #' Computes point probabilities, cumulative probabilities, percentile ranks, z-scores,
-#' and norm scores for a range of raw scores. Optionally includes confidence intervals
-#' when reliability is provided.
+#' and norm scores for integer raw scores.
 #'
 #' @param model Fitted CMP model object of class "cnormCMP"
 #' @param ages Numeric vector of age points for norm table generation
-#' @param start Minimum raw score value for the norm table (default: minimum in the sample)
-#' @param end Maximum raw score value for the norm table (default: maximum in the sample)
-#' @param step Step size between consecutive raw scores. Must be a positive integer (default: 1).
+#' @param start Minimum raw score value for the norm table (default: observed minimum)
+#' @param end Maximum raw score value for the norm table (default: observed maximum)
+#' @param step Step size between consecutive raw scores (integer, default: 1)
 #' @param CI Confidence coefficient (0-1, default: 0.9) for confidence intervals
 #' @param reliability Reliability coefficient (0-1) for true score confidence intervals
-#' @param mid_p Logical; if TRUE (default), percentile ranks and norm scores refer to the
-#'   mid-point of the probability mass of each raw score, i.e. P(Y < x) + 0.5 * P(Y = x),
-#'   which corresponds to the mid-rank convention for ties used for manifest norm scores.
-#'   If FALSE, the cumulative probability P(Y <= x) is used.
-#'
-#' @return List of data frames (one per age) containing:
-#'   \item{x}{Raw scores}
-#'   \item{Px}{Probability P(Y = x)}
-#'   \item{Pcum}{Cumulative probabilities P(Y <= x)}
-#'   \item{Percentile}{Percentile ranks (0-100), mid-p corrected if \code{mid_p = TRUE}}
-#'   \item{z}{Standardized z-scores}
-#'   \item{norm}{Norm scores in specified scale}
-#'   \item{lowerCI, upperCI}{Confidence intervals (if reliability provided)}
-#'   \item{lowerCI_PR, upperCI_PR}{CI as percentile ranks (if reliability provided)}
-#'
-#' @details
-#' Because the CMP distribution is discrete, each raw score is assigned the normal deviate
-#' of its (mid-)percentile rank. When reliability is specified, confidence intervals include
-#' a correction for regression to the mean. The CMP support is unbounded; restrict
-#' \code{start} and \code{end} to the possible score range of the test.
-#'
-#' @examples
-#' \dontrun{
-#' model <- cnorm.cmp(age, score)
-#' tables <- normTable.cmp(model, ages = c(7, 8, 9), start = 0, end = 60)
-#'
-#' tables_ci <- normTable.cmp(model, ages = c(8, 9), start = 10, end = 40,
-#'                            CI = 0.95, reliability = 0.85)
-#' }
+#' @param mid_p Logical; if TRUE (default), uses mid-p adjusted percentiles for discrete scores
+#' @param minRaw,maxRaw Optional aliases for \code{start} and \code{end}
+#' @param ... Additional arguments
 #'
 #' @export
 normTable.cmp <- function(model,
@@ -1468,66 +1441,78 @@ normTable.cmp <- function(model,
                           step = 1,
                           CI = .9,
                           reliability = NULL,
-                          mid_p = TRUE) {
+                          mid_p = TRUE,
+                          minRaw = NULL,
+                          maxRaw = NULL,
+                          ...) {
   # Input validation
   if (!isCMP(model)) {
-    stop("Wrong object. Please provide object from class 'cnormCMP'.")
+    stop("Wrong object. Please provide an object of class 'cnormCMP'.")
   }
+
+  # Support minRaw and maxRaw as aliases
+  if (is.null(start) && !is.null(minRaw)) start <- minRaw
+  if (is.null(end) && !is.null(maxRaw))   end <- maxRaw
 
   if (is.null(start)) {
     start <- attr(model$result, "min")
   }
-
   if (is.null(end)) {
     end <- attr(model$result, "max")
   }
 
-  if (is.null(step)) {
-    step <- 1
-  }
+  # Ensure integer bounds for count data
+  start <- max(0L, as.integer(ceiling(start)))
+  end   <- as.integer(floor(end))
 
   if (start >= end) {
     stop("Start value must be less than end value.")
   }
 
-  if (step < 1 || step != round(step)) {
-    stop("Step size must be a positive integer for count data.")
+  # For discrete counts, step must be an integer >= 1
+  if (is.null(step) || step < 1) {
+    step <- 1L
+  } else {
+    step <- as.integer(round(step))
   }
 
   if (is.null(CI) || is.na(CI)) {
     reliability <- NULL
   } else if (CI > .99999 || CI < .00001) {
-    stop("Confidence coefficient (CI) out of range. Please specify value between 0 and 1.")
+    stop("Confidence coefficient (CI) out of range. Please specify a value between 0 and 1.")
   }
 
   # Setup reliability and confidence intervals
   rel <- FALSE
   if (!is.null(reliability)) {
     if (reliability > .9999 || reliability < .0001) {
-      stop("Reliability coefficient out of range. Please specify value between 0 and 1.")
+      stop("Reliability coefficient out of range. Please specify a value between 0 and 1.")
     } else {
       se <- qnorm(1 - ((1 - CI) / 2)) * sqrt(reliability * (1 - reliability))
       rel <- TRUE
     }
   }
 
-  # Get predictions for all ages
+  # Get predicted CMP parameters for all requested ages
   predictions <- predictCoefficients_cmp(model, ages)
 
-  # Create score sequence (integer counts)
-  x <- seq(from = max(0, ceiling(start)), to = floor(end), by = step)
+  # Discrete raw count sequence
+  x <- seq(from = start, to = end, by = step)
 
-  # Get scale information
+  # Scale metrics
   mScale <- attr(model$result, "scaleMean")
   sdScale <- attr(model$result, "scaleSD")
 
-  result <- list()
+  result <- vector("list", length(ages))
 
   # Generate norm table for each age
   for (k in seq_along(ages)) {
-    cp <- cmp_cum_pmf(x,
-                      mu = rep(predictions$mu[k], length(x)),
-                      nu = rep(predictions$nu[k], length(x)))
+    cp <- cmp_cum_pmf(
+      x,
+      mu = rep(predictions$mu[k], length(x)),
+      nu = rep(predictions$nu[k], length(x))
+    )
+
     if (any(!cp$ok)) {
       warning("CMP series did not converge for age ", ages[k],
               "; results may be unreliable. Consider increasing 'max_terms'.")
@@ -1536,19 +1521,18 @@ normTable.cmp <- function(model,
     Px <- cp$pmf
     cum <- cp$cdf
 
-    # Percentile ranks (mid-p by default for discrete scores)
+    # Mid-p percentile ranks: P(Y < x) + 0.5 * P(Y = x)
     perc <- if (mid_p) cp$cdf_prev + 0.5 * cp$pmf else cum
 
-    # Clamp extreme probabilities instead of mapping non-finite z-scores to 0
+    # Clamp extreme probabilities to avoid non-finite z-scores
     z <- qnorm(pmin(pmax(perc, 1e-12), 1 - 1e-12))
 
     # Calculate norm scores
-    norm <- rep(NA, length(z))
+    norm <- rep(NA_real_, length(z))
     if (!is.na(mScale) && !is.na(sdScale)) {
       norm <- mScale + sdScale * z
     }
 
-    # Create data frame
     df <- data.frame(
       x = x,
       Px = Px,
@@ -1558,28 +1542,19 @@ normTable.cmp <- function(model,
       norm = norm
     )
 
-    # Add confidence intervals if reliability is specified
+    # Add Kelley's true score confidence intervals if reliability is provided
     if (rel) {
-      # True score estimates (regression to the mean correction)
       zPredicted <- reliability * z
-
-      # Confidence intervals
       df$lowerCI <- (zPredicted - se) * sdScale + mScale
       df$upperCI <- (zPredicted + se) * sdScale + mScale
-      df$lowerCI_PR <- pnorm(zPredicted - se) * 100
-      df$upperCI_PR <- pnorm(zPredicted + se) * 100
-
-      # Ensure percentile ranks are within bounds
-      df$lowerCI_PR <- pmax(0, pmin(100, df$lowerCI_PR))
-      df$upperCI_PR <- pmax(0, pmin(100, df$upperCI_PR))
+      df$lowerCI_PR <- pmax(0, pmin(100, pnorm(zPredicted - se) * 100))
+      df$upperCI_PR <- pmax(0, pmin(100, pnorm(zPredicted + se) * 100))
     }
 
     result[[k]] <- df
   }
 
-  # Name the list elements with ages
   names(result) <- as.character(ages)
-
   return(result)
 }
 

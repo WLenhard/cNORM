@@ -12,7 +12,10 @@ normTable.cmp(
   step = 1,
   CI = 0.9,
   reliability = NULL,
-  mid_p = TRUE
+  mid_p = TRUE,
+  minRaw = NULL,
+  maxRaw = NULL,
+  ...
 )
 }
 \arguments{
@@ -20,51 +23,24 @@ normTable.cmp(
 
 \item{ages}{Numeric vector of age points for norm table generation}
 
-\item{start}{Minimum raw score value for the norm table (default: minimum in the sample)}
+\item{start}{Minimum raw score value for the norm table (default: observed minimum)}
 
-\item{end}{Maximum raw score value for the norm table (default: maximum in the sample)}
+\item{end}{Maximum raw score value for the norm table (default: observed maximum)}
 
-\item{step}{Step size between consecutive raw scores. Must be a positive integer (default: 1).}
+\item{step}{Step size between consecutive raw scores (integer, default: 1)}
 
 \item{CI}{Confidence coefficient (0-1, default: 0.9) for confidence intervals}
 
 \item{reliability}{Reliability coefficient (0-1) for true score confidence intervals}
 
-\item{mid_p}{Logical; if TRUE (default), percentile ranks and norm scores refer to the
-mid-point of the probability mass of each raw score, i.e. P(Y < x) + 0.5 * P(Y = x),
-which corresponds to the mid-rank convention for ties used for manifest norm scores.
-If FALSE, the cumulative probability P(Y <= x) is used.}
-}
-\value{
-List of data frames (one per age) containing:
-  \item{x}{Raw scores}
-  \item{Px}{Probability P(Y = x)}
-  \item{Pcum}{Cumulative probabilities P(Y <= x)}
-  \item{Percentile}{Percentile ranks (0-100), mid-p corrected if \code{mid_p = TRUE}}
-  \item{z}{Standardized z-scores}
-  \item{norm}{Norm scores in specified scale}
-  \item{lowerCI, upperCI}{Confidence intervals (if reliability provided)}
-  \item{lowerCI_PR, upperCI_PR}{CI as percentile ranks (if reliability provided)}
+\item{mid_p}{Logical; if TRUE (default), uses mid-p adjusted percentiles for discrete scores}
+
+\item{minRaw, maxRaw}{Optional aliases for \code{start} and \code{end}}
+
+\item{...}{Additional arguments}
 }
 \description{
 Generates norm tables for specific ages based on a fitted CMP regression model.
 Computes point probabilities, cumulative probabilities, percentile ranks, z-scores,
-and norm scores for a range of raw scores. Optionally includes confidence intervals
-when reliability is provided.
-}
-\details{
-Because the CMP distribution is discrete, each raw score is assigned the normal deviate
-of its (mid-)percentile rank. When reliability is specified, confidence intervals include
-a correction for regression to the mean. The CMP support is unbounded; restrict
-\code{start} and \code{end} to the possible score range of the test.
-}
-\examples{
-\dontrun{
-model <- cnorm.cmp(age, score)
-tables <- normTable.cmp(model, ages = c(7, 8, 9), start = 0, end = 60)
-
-tables_ci <- normTable.cmp(model, ages = c(8, 9), start = 10, end = 40,
-                           CI = 0.95, reliability = 0.85)
-}
-
+and norm scores for integer raw scores.
 }

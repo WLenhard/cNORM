@@ -106,17 +106,17 @@ library(cNORM)
 # under-dispersion (nu > 1; Var < Mean) common in speeded tasks.
 
 # Basic fit:
-model.cmp <- cnorm.cmp(speeded$age, speeded$raw)
+model.cmp <- cnorm.cmp(speed$age, speed$fluency)
 
 # Automatic model selection over polynomial degrees via BIC:
-model.cmp <- autoselect.cmp(speeded$age, speeded$raw)
+model.cmp <- autoselect.cmp(speed$age, speed$fluency)
 
 # Fit statistics and parameter estimates:
-summary(model.cmp, age = speeded$age, score = speeded$raw)
+summary(model.cmp, age = speed$age, score = speed$fluency)
 
 # Visual inspection: discrete step-function percentiles against manifest data
-plot(model.cmp, speeded$age, speeded$raw)
-plotNorm(model.cmp, age = speeded$age, score = speeded$raw, width = 1)
+plot(model.cmp, speed$age, speed$fluency)
+plotNorm(model.cmp, age = speed$age, score = speed$fluency, width = 1)
 
 # Predict norm scores (using mid-p rank adjustment for discrete ties):
 predict(model.cmp, age = c(7.5, 8.2, 9.0), score = c(18, 24, 30))
