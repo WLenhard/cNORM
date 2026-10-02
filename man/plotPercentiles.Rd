@@ -38,9 +38,7 @@ determined}
 \item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
 
 \item{scale}{The norm scale, either 'T', 'IQ', 'z', 'percentile' or
-self defined with a double vector with the mean and standard deviation,
-f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
-data preparation is used (default)}
+self defined with a double vector with the mean and standard deviation}
 
 \item{title}{custom title for plot}
 
@@ -50,26 +48,8 @@ data preparation is used (default)}
 }
 \description{
 The function plots the norm curves based on the regression model against
-the actual percentiles from the raw data. As in 'plotNormCurves',
-please check for inconsistent curves, especially intersections.
-Violations of this assumption are a strong indication for problems
-in modeling the relationship between raw and norm scores.
-In general, extrapolation (point 1 and 2) can carefully be done to a
-certain degree outside the original sample, but it should in general
-be handled with caution.
-The original percentiles are displayed as distinct points in the according
-color, the model based projection of percentiles are drawn as lines.
-Please note, that the estimation of the percentiles of the raw data is done with
-the quantile function with the default settings.
-In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
-and/or 't' parameter in modeling.
-}
-\examples{
-\dontrun{
-  # Load example data set, compute model and plot results
-  result <- cnorm(raw = elfe$raw, group = elfe$group)
-  plotPercentiles(result)
-}
+the actual percentiles from the raw data. Applicable only for Taylor polynomial models.
+For parametric models (Beta-Binomial, CMP, or SHASH), please use \code{plot(model, age, score)} instead.
 }
 \seealso{
 plotNormCurves, plotPercentileSeries

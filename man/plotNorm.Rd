@@ -17,7 +17,7 @@ plotNorm(
 )
 }
 \arguments{
-\item{model}{The regression model, usually from the 'cnorm', 'cnorm.betabinomial', or 'cnorm.shash' function}
+\item{model}{The regression model, usually from the 'cnorm', 'cnorm.betabinomial', 'cnorm.cmp', or 'cnorm.shash' function}
 
 \item{age}{In case of parametric models, please provide the age vector}
 
@@ -29,7 +29,7 @@ If null, the function tries to determine a sensible setting.}
 \item{weights}{Vector or variable name in the dataset with weights for each
 individual case. If NULL, no weights are used.}
 
-\item{group}{On optional grouping variable, use empty string for no group, the variable name
+\item{group}{An optional grouping variable, use empty string for no group, the variable name
 for Taylor polynomial models or a vector with the groups for parametric models}
 
 \item{minNorm}{lower bound of fitted norm scores}
@@ -46,19 +46,21 @@ A ggplot object representing the norm scores plot.
 This function plots the manifest norm score against the fitted norm score from
 the inverse regression model per group. This helps to inspect the precision
 of the modeling process. The scores should not deviate too far from
-the regression line. Applicable for Taylor polynomial, beta-binomial, and shash models.
+the regression line. Applicable for Taylor polynomial, beta-binomial, CMP, and shash models.
 }
 \examples{
 \dontrun{
-# Load example data set, compute model and plot results
-
 # Taylor polynomial model
 model <- cnorm(raw = elfe$raw, group = elfe$group)
 plot(model, "norm")
 
-# Beta binomial models; maximum number of items in elfe is n = 28
+# Beta-binomial model
 model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 plotNorm(model.bb, age = elfe$group, score = elfe$raw)
+
+# Conway-Maxwell-Poisson model
+model.cmp <- cnorm.cmp(speeded$age, speeded$raw)
+plotNorm(model.cmp, age = speeded$age, score = speeded$raw)
 }
 
 }

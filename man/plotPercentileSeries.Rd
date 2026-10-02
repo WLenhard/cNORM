@@ -18,47 +18,17 @@ plotPercentileSeries(
 
 \item{start}{Number of terms to start with (default 1)}
 
-\item{end}{Number of terms to end with; defaults to the largest available
-model}
+\item{end}{Number of terms to end with}
 
-\item{group}{The name of the grouping variable; the distinct groups are
-automatically determined}
+\item{group}{The name of the grouping variable}
 
-\item{percentiles}{Vector with percentile scores, ranging from 0 to 1
-(exclusive)}
+\item{percentiles}{Vector with percentile scores}
 
-\item{filename}{Prefix of the filename. If specified, the plots are saved as
-png files in the directory of the workspace, instead of only displaying
-them. The number of terms is appended to the prefix.}
-}
-\value{
-A named list of plots (names indicate the number of terms),
-  returned invisibly
+\item{filename}{Prefix of the filename if saving to png}
 }
 \description{
 This function makes use of 'plotPercentiles' to generate a series of plots
-for models with an increasing number of terms. It draws on the information
-provided by the model object to determine the bounds of the modeling (age
-and standard score range). It can be used as an additional model check to
-determine the best fitting model. Please have a look at the
-'plotPercentiles' function for further information.
-}
-\details{
-Each model of the series is refitted on the complete norm sample (applying
-case weights, if the norm data were post stratified). Models are identified
-by their actual number of terms, which - after consistency screening in
-\code{bestModel} - is not necessarily identical to the row number of the
-model selection table. The subtitle of each plot reports the number of
-terms, the adjusted R2 and, if available, the result of the consistency
-check.
-}
-\examples{
-\dontrun{
-  # Load example data set, compute model and plot results
-  result <- cnorm(raw = elfe$raw, group = elfe$group)
-  plotPercentileSeries(result, start = 4, end = 6)
-}
-
+for models with an increasing number of terms.
 }
 \seealso{
 plotPercentiles

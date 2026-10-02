@@ -1,3 +1,7 @@
+# ===========================================================================
+# moments.R - Model-Implied Distributional Moments for cNORM Models
+# ===========================================================================
+
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
@@ -115,6 +119,12 @@
 #'     \code{0:n}, using the age-specific predicted \eqn{\alpha} and
 #'     \eqn{\beta} parameters. This respects the discreteness of the
 #'     distribution; no continuity approximation is involved.}
+#'   \item{Conway-Maxwell-Poisson (\code{cnormCMP})}{Moments are computed
+#'     exactly by discrete summation over the probability mass function using
+#'     the age-specific predicted \eqn{\mu} and \eqn{\nu} parameters. By default,
+#'     the distribution is censored at \code{[minRaw, maxRaw]} to match the
+#'     empirical test score range, consistent with the other methods.
+#'     Uncensored theoretical moments can be computed with \code{censor = FALSE}.}
 #'   \item{SHASH (\code{cnormShash})}{Moments are obtained by Gauss-Hermite
 #'     quadrature of the quantile function \code{qshash} evaluated at the
 #'     age-specific distribution parameters, censored at
@@ -125,18 +135,18 @@
 #' distribution).
 #'
 #' Note that the skewness and kurtosis of the \emph{censored} distribution
-#' are reported. For well-fitting models whose raw score range covers the
+#' are reported by default. For well-fitting models whose raw score range covers the
 #' probability mass of the conditional distribution, censoring effects are
 #' negligible; for distributions with substantial floor or ceiling effects,
 #' the censored moments are the substantively meaningful ones.
 #'
 #' @param model A model object of class \code{cnorm},
-#'   \code{cnormBetaBinomial}, \code{cnormBetaBinomial2} or
-#'   \code{cnormShash}.
+#'   \code{cnormBetaBinomial}, \code{cnormBetaBinomial2}, \code{cnormCMP},
+#'   or \code{cnormShash}.
 #' @param age A numeric vector of ages (values of the explanatory variable)
 #'   at which to compute the moments.
 #' @param ... Additional parameters passed to the methods, e.g.
-#'   \code{nNodes}.
+#'   \code{nNodes} or \code{censor}.
 #'
 #' @return A \code{data.frame} with one row per age and the columns
 #'   \code{age}, \code{mean}, \code{sd}, \code{variance}, \code{skewness}
@@ -152,9 +162,16 @@
 #' # Beta-binomial model
 #' bb <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 #' predictMoments(bb, age = seq(4, 16, by = 2))
+#'
+#' # Conway-Maxwell-Poisson model (speeded tests)
+#' cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+#' predictMoments(cmp, age = c(7, 8, 9, 10))
 #' }
 #'
 #' @references
+#' Conway, R. W., & Maxwell, W. L. (1962). A queuing model with state dependent
+#' service rates. Journal of Industrial Engineering, 12, 132-136.
+#'
 #' Isserlis, L. (1918). On a formula for the product-moment coefficient of
 #' any order of a normal frequency distribution in any number of variables.
 #' Biometrika, 12(1/2), 134-139.
@@ -180,7 +197,7 @@ predictMoments.default <- function(model, age, ...) {
   stop("predictMoments is not defined for objects of class '",
        paste(class(model), collapse = "', '"),
        "'. Supported classes: cnorm, cnormBetaBinomial, cnormBetaBinomial2, ",
-       "cnormShash.", call. = FALSE)
+       "cnormCMP, cnormShash.", call. = FALSE)
 }
 
 
@@ -191,7 +208,7 @@ predictMoments.default <- function(model, age, ...) {
 #' @rdname predictMoments
 #' @param nNodes Number of Gauss-Hermite quadrature nodes (default 100).
 #'   Only relevant for the Taylor and SHASH methods; ignored for
-#'   beta-binomial models, which are computed exactly by summation.
+#'   discrete models (Beta-Binomial, CMP), which are computed exactly by summation.
 #' @export
 predictMoments.cnorm <- function(model, age, nNodes = 100, ...) {
   .checkAge(age)
@@ -218,11 +235,6 @@ predictMoments.cnorm <- function(model, age, nNodes = 100, ...) {
 # ---------------------------------------------------------------------------
 
 #' Retrieve age-specific alpha/beta parameters of a beta-binomial model
-#'
-#' NOTE: Adapt the accessor calls below to the actual internal predictor
-#' functions of the development version (e.g. predictCoefficients /
-#' predictCoefficients2). The contract of this helper: return a data.frame
-#' with columns 'a' and 'b', one row per age.
 #'
 #' @keywords internal
 #' @noRd
@@ -259,7 +271,6 @@ predictMoments.cnorm <- function(model, age, nNodes = 100, ...) {
 predictMoments.cnormBetaBinomial <- function(model, age, ...) {
   .checkAge(age)
 
-  # Number of items; adapt accessor if stored differently
   n <- attr(model$result, "max")
   if (is.null(n))
     stop("Could not retrieve the number of items 'n' from the model object.",
@@ -278,6 +289,109 @@ predictMoments.cnormBetaBinomial <- function(model, age, ...) {
 #' @rdname predictMoments
 #' @export
 predictMoments.cnormBetaBinomial2 <- predictMoments.cnormBetaBinomial
+
+
+# ---------------------------------------------------------------------------
+# Conway-Maxwell-Poisson models (exact, via pmf summation)
+# ---------------------------------------------------------------------------
+
+#' Exact moments of the Conway-Maxwell-Poisson distribution via pmf summation
+#'
+#' Computes moments by discrete summation over the support.
+#' If censor = TRUE, mass below minRaw and above maxRaw is collapsed onto
+#' the respective boundary point.
+#'
+#' @keywords internal
+#' @noRd
+.cmpMoments <- function(mu, nu, censor = TRUE, minRaw = 0, maxRaw = NULL) {
+  if (!is.finite(mu) || !is.finite(nu) || mu <= 0 || nu <= 0) {
+    return(list(mean = NA_real_, variance = NA_real_, sd = NA_real_,
+                skewness = NA_real_, kurtosis = NA_real_))
+  }
+
+  if (isTRUE(censor)) {
+    minRaw <- max(0L, as.integer(round(minRaw)))
+    maxRaw <- as.integer(round(maxRaw))
+
+    if (minRaw >= maxRaw) {
+      return(list(mean = as.numeric(minRaw), variance = 0, sd = 0,
+                  skewness = NA_real_, kurtosis = NA_real_))
+    }
+
+    x <- minRaw:maxRaw
+    # Floor: P(Y <= minRaw)
+    p_floor <- pcmp(minRaw, mu = mu, nu = nu, lower.tail = TRUE)
+    # Ceiling: P(Y >= maxRaw) = P(Y > maxRaw - 1)
+    p_tail  <- pcmp(maxRaw - 1L, mu = mu, nu = nu, lower.tail = FALSE)
+
+    if (maxRaw > minRaw + 1L) {
+      p_mid <- dcmp((minRaw + 1L):(maxRaw - 1L), mu = mu, nu = nu)
+      w <- c(p_floor, p_mid, p_tail)
+    } else {
+      w <- c(p_floor, p_tail)
+    }
+  } else {
+    # Uncensored: determine upper summation bound J capturing >= 1 - 1e-12 of mass
+    J <- tryCatch({
+      as.integer(ceiling(qcmp(1 - 1e-12, mu = mu, nu = nu)))
+    }, error = function(e) NA_integer_)
+
+    if (is.na(J) || !is.finite(J) || J < 1L) {
+      # Analytical spread fallback based on CMP variance approximation mu / nu
+      J <- as.integer(ceiling(mu + 12 * sqrt(mu / nu) + 50))
+    }
+    J <- max(J + 10L, 50L)
+
+    x <- 0:J
+    w <- dcmp(x, mu = mu, nu = nu)
+  }
+
+  w_sum <- sum(w)
+  if (!is.finite(w_sum) || w_sum <= 0) {
+    return(list(mean = NA_real_, variance = NA_real_, sd = NA_real_,
+                skewness = NA_real_, kurtosis = NA_real_))
+  }
+  w <- w / w_sum   # guard against numerical drift
+
+  .weightedMoments(x, w)
+}
+
+#' @rdname predictMoments
+#' @param censor Logical; if \code{TRUE} (default), the distribution is censored
+#'   at \code{[minRaw, maxRaw]} to reflect the empirical score limits. If \code{FALSE},
+#'   uncensored theoretical population moments are calculated.
+#' @param minRaw,maxRaw Optional custom score bounds for censoring. If \code{NULL} (default),
+#'   they are retrieved from the fitted model attributes.
+#' @export
+predictMoments.cnormCMP <- function(model, age, censor = TRUE,
+                                    minRaw = NULL, maxRaw = NULL, ...) {
+  .checkAge(age)
+
+  if (is.null(minRaw))
+    minRaw <- attr(model$result, "min")
+  if (is.null(maxRaw))
+    maxRaw <- attr(model$result, "max")
+
+  if (is.null(minRaw) || is.null(maxRaw)) {
+    stop("Could not retrieve score bounds (min/max) from the model object.",
+         call. = FALSE)
+  }
+
+  pars <- predictCoefficients_cmp(model, age)
+
+  momentsList <- lapply(seq_along(age), function(i) {
+    .cmpMoments(mu = pars$mu[i], nu = pars$nu[i],
+                censor = censor, minRaw = minRaw, maxRaw = maxRaw)
+  })
+
+  method_label <- if (censor) {
+    "Conway-Maxwell-Poisson / censored discrete pmf summation"
+  } else {
+    "Conway-Maxwell-Poisson / exact discrete pmf summation"
+  }
+
+  .momentsDataFrame(age, momentsList, method = method_label)
+}
 
 
 # ---------------------------------------------------------------------------

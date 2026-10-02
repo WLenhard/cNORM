@@ -5,7 +5,7 @@ account: cnorm
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17377085
-bundleId: 12006688
+bundleId: 12607873
 url: https://cnorm.shinyapps.io/app1/
 version: 1
 asMultiple: FALSE

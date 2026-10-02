@@ -18,51 +18,25 @@ plotDerivative(
 \arguments{
 \item{model}{The model from the bestModel function, a cnorm object.}
 
-\item{minAge}{Minimum age to start checking. If NULL, it's automatically determined from the model.}
+\item{minAge}{Minimum age to start checking.}
 
-\item{maxAge}{Maximum age for checking. If NULL, it's automatically determined from the model.}
+\item{maxAge}{Maximum age for checking.}
 
-\item{minNorm}{Lower end of the norm score range. If NULL, it's automatically determined from the model.}
+\item{minNorm}{Lower end of the norm score range.}
 
-\item{maxNorm}{Upper end of the norm score range. If NULL, it's automatically determined from the model.}
+\item{maxNorm}{Upper end of the norm score range.}
 
-\item{stepAge}{Stepping parameter for the age check, usually 1 or 0.1; lower values indicate higher precision.}
+\item{stepAge}{Stepping parameter for age.}
 
 \item{stepNorm}{Stepping parameter for norm scores.}
 
 \item{order}{Degree of the derivative (default = 1).}
 }
-\value{
-A ggplot object representing the derivative of the regression function.
-}
 \description{
-This function plots the scores obtained via the first order derivative of the regression model
-in dependence of the norm score.
-}
-\details{
-The results indicate the progression of the norm scores within each age group. The regression-based
-modeling approach relies on the assumption of a linear progression of the norm scores. Negative scores
-in the first order derivative indicate a violation of this assumption. Scores near zero are typical
-for bottom and ceiling effects in the raw data.
-
-The regression models usually converge within the range of the original values. In case of vertical
-and horizontal extrapolation, with increasing distance to the original data, the risk of assumption
-violation increases as well.
-}
-\note{
-This function is currently incompatible with reversed raw score scales ('descent' option).
-}
-\examples{
-\dontrun{
-# For traditional continuous norming model
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, stepNorm=1)
-}
-
+This function plots the scores obtained via the first order derivative of the regression model.
+Applicable only for Taylor polynomial models.
 }
 \seealso{
-\code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
-
 Other plot:
 \code{\link[=compare]{compare()}},
 \code{\link[=plot.cnorm]{plot.cnorm()}},

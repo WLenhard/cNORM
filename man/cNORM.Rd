@@ -54,7 +54,8 @@ receive lower norm scores (e.g. for error scores).}
 
 \item{R2}{Stopping criterion (adjusted R-squared) for model selection.}
 
-\item{plot}{If TRUE (default), display percentile plot and report.}
+\item{plot}{If TRUE (default), display percentile plot and report. Setting
+it to FALSE as well deactivates potential user interactions.}
 
 \item{extensive}{If TRUE (default), screen models for monotonic consistency.}
 

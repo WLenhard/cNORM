@@ -4,11 +4,14 @@ points for further improvements.
 
 
 
-### Version in 3.6.3
-Date: 23.07.2026 - progress
+### Version in 3.7.0
+Date: 02.10.2026 - progress
 
 Checks on number of groups in Taylor modelling added. Now actively advises
 on 't' parameter reduction.
+
+## New features
+* Modelling speeded tests with the Conway-Maxwell Poisson Counts Model (CMPCM)
 
 
 

@@ -21,23 +21,23 @@ normTable(
 \arguments{
 \item{A}{the age as single value or a vector of age values}
 
-\item{model}{The regression model from the cnorm function}
+\item{model}{The regression model from cnorm, cnorm.betabinomial, cnorm.cmp, or cnorm.shash}
 
-\item{minNorm}{The lower bound of the norm score range}
+\item{minNorm}{The lower bound of the norm score range (Taylor models)}
 
-\item{maxNorm}{The upper bound of the norm score range}
+\item{maxNorm}{The upper bound of the norm score range (Taylor models)}
 
-\item{minRaw}{clipping parameter for the lower bound of raw scores}
+\item{minRaw}{clipping parameter for the lower bound of raw scores (or start score for CMP/shash)}
 
-\item{maxRaw}{clipping parameter for the upper bound of raw scores}
+\item{maxRaw}{clipping parameter for the upper bound of raw scores (or end score for CMP/shash)}
 
-\item{step}{Stepping parameter with lower values indicating higher precision}
+\item{step}{Stepping parameter with lower values indicating higher precision (for CMP: integer step size)}
 
 \item{monotonuous}{corrects for decreasing norm scores in case of model inconsistencies (default)}
 
 \item{CI}{confidence coefficient, ranging from 0 to 1, default .9}
 
-\item{reliability}{coefficient, ranging between  0 to 1}
+\item{reliability}{coefficient, ranging between 0 to 1}
 
 \item{pretty}{Format table by collapsing intervals and rounding to meaningful precision}
 }
@@ -48,34 +48,13 @@ value or a list of norm tables if vector of A values was provided
 \description{
 This function generates a norm table for a specific age based on the regression
 model by assigning raw scores to norm scores. Please specify the
-range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
-of .6. As a consequence, specifying a range of T = 25 to T = 75 would cover 98.4 % of
-the population. Please be careful when extrapolating vertically (at the lower and
-upper end of the age specific distribution). Depending on the size of your standardization
-sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
-In case a confidence coefficient (CI, default .9) and the reliability is specified,
+range of norm scores you want to cover. For Taylor polynomial models, specifying a
+range of T = 25 to T = 75 covers 98.4% of the population.
+For parametric models (beta-binomial, CMP, shash), norm tables are computed directly
+from the distribution functions.
+In case a confidence coefficient (CI, default .9) and reliability is specified,
 confidence intervals are computed for the true score estimates, including a correction for
 regression to the mean (Eid & Schmidt, 2012, p. 272).
-}
-\examples{
-\dontrun{
-# Generate cnorm object from example data
-cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-
-# create single norm table
-norms <- normTable(3.5, cnorm.elfe, minNorm = 25, maxNorm = 75, step = 0.5)
-
-# create list of norm tables
-norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
-  minNorm = 25, maxNorm = 75,
-  step = 1, minRaw = 0, maxRaw = 26
-)
-
-# conventional norming, set age to arbitrary value
-model <- cnorm(raw = elfe$raw)
-normTable(0, model)
-}
-
 }
 \references{
 Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
@@ -88,6 +67,7 @@ Other predict:
 \code{\link[=getNormCurve]{getNormCurve()}},
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
+\code{\link[=predict.cnormCMP]{predict.cnormCMP()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},
 \code{\link[=predictNorm]{predictNorm()}},
 \code{\link[=predictRaw]{predictRaw()}},

@@ -62,6 +62,35 @@ get_shash <- function() {
   .shash_model
 }
 
+# ---- CMP Fixture: simulate speeded count test data (under-dispersed) ----
+simulate_cmp_data <- function(N = 500, seed = 42) {
+  set.seed(seed)
+  age <- runif(N, 7, 12)
+  # Typical speeded test: score increases with age, underdispersed (nu = 2.0)
+  log_mu <- 2.2 + 0.15 * (age - 9.5)
+  mu <- exp(log_mu)
+  nu <- 2.0
+  score <- rcmp(N, mu = mu, nu = nu)
+  list(age = age, score = score)
+}
+
+.cmp_data  <- simulate_cmp_data()
+.cmp_model <- NULL
+
+get_cmp <- function() {
+  if (is.null(.cmp_model)) {
+    suppressMessages({
+      .cmp_model <<- cnorm.cmp(
+        age = .cmp_data$age,
+        score = .cmp_data$score,
+        mu_degree = 2,
+        nu_degree = 0,
+        plot = FALSE
+      )
+    })
+  }
+  .cmp_model
+}
 # =============================================================================
 # 1. DATA PREPARATION
 # =============================================================================
@@ -365,4 +394,98 @@ test_that("bestModel works with case weights", {
   # weights = FALSE must ignore existing weights without error
   m2 <- bestModel(data, weights = FALSE, plot = FALSE)
   expect_s3_class(m2, "cnormModel")
+})
+
+# =============================================================================
+# 9. CMP MODELLING
+# =============================================================================
+# 1. Strip names when comparing gradients
+test_that("analytic CMP gradient matches numerical gradient", {
+  skip_if_not_installed("numDeriv")
+  set.seed(1)
+  age <- runif(150, 6, 12)
+  a_std <- (age - mean(age)) / sd(age)
+  y <- rpois(150, lambda = 12)
+
+  X_mu <- cNORM:::cmp_design(a_std, 2)
+  X_nu <- cNORM:::cmp_design(a_std, 1)
+
+  params <- c(log(12), 0.1, -0.05, 0.2, -0.1)
+
+  g_ana <- cNORM:::gradient_cmp(params, X_mu = X_mu, X_nu = X_nu, y = y)
+  g_num <- numDeriv::grad(cNORM:::log_likelihood_cmp, params,
+                          X_mu = X_mu, X_nu = X_nu, y = y)
+
+  expect_equal(unname(g_ana), unname(g_num), tolerance = 1e-5)
+})
+
+
+# 2. Use representative raw scores (within +/- 3 SD) so clipping does not trigger equality
+test_that("predict.cnormCMP returns monotonic norm scores across raw scores", {
+  m <- get_cmp()
+  ages <- c(8, 8, 8, 10, 10, 10)
+  # Scores within +/- 2 SD of conditional means (mean ~7 at age 8; mean ~9.5 at age 10)
+  raws <- c(5, 7, 9, 7, 9, 11)
+
+  preds <- predict(m, age = ages, score = raws)
+
+  expect_length(preds, 6)
+  expect_true(all(is.finite(preds)))
+
+  # Monotonicity: higher raw scores yield higher norm scores at the same age
+  expect_true(preds[1] < preds[2] && preds[2] < preds[3])
+  expect_true(preds[4] < preds[5] && preds[5] < preds[6])
+
+  # Age differentiation: same raw score (7) at age 10 yields a lower norm score than at age 8
+  expect_true(preds[2] > preds[4])
+})
+
+
+# 3. Test norm table on active score range where mass > 0 for all increments
+test_that("normTable.cmp generates valid discrete norm tables with CIs", {
+  m <- get_cmp()
+  tables <- normTable.cmp(
+    m,
+    ages = c(8, 10),
+    start = 3,
+    end = 14,
+    step = 1,
+    reliability = 0.85,
+    CI = 0.90,
+    mid_p = TRUE
+  )
+
+  expect_type(tables, "list")
+  expect_named(tables, c("8", "10"))
+
+  tab8 <- tables[["8"]]
+  expect_s3_class(tab8, "data.frame")
+  expect_true(all(c("x", "Px", "Pcum", "Percentile", "z", "norm",
+                    "lowerCI", "upperCI", "lowerCI_PR", "upperCI_PR") %in% colnames(tab8)))
+
+  # Proper bounds and monotonicity
+  expect_true(all(tab8$Px >= 0))
+  expect_true(all(diff(tab8$Pcum) >= 0))
+  expect_true(all(diff(tab8$norm) > 0))
+
+  # Confidence intervals properly bracket the estimates
+  expect_true(all(tab8$lowerCI < tab8$upperCI))
+  expect_true(all(tab8$lowerCI_PR <= tab8$upperCI_PR))
+})
+
+
+# 4. Match the actual cnorm.cmp error message
+test_that("cnorm.cmp rejects invalid inputs properly", {
+  # Negative scores
+  expect_error(cnorm.cmp(c(7, 8, 9), c(-1, 5, 10)), "negative values")
+
+  # Non-integer counts
+  expect_error(cnorm.cmp(c(7, 8, 9), c(2.5, 5, 10)), "non-integer values")
+
+  # Mismatched lengths
+  expect_error(cnorm.cmp(c(7, 8), c(5, 10, 15)), "must be the same")
+
+  # Invalid polynomial degrees
+  expect_error(cnorm.cmp(c(7, 8, 9), c(5, 10, 15), mu_degree = 0), "positive integer")
+  expect_error(cnorm.cmp(c(7, 8, 9), c(5, 10, 15), nu_degree = -2), "non-negative integer")
 })

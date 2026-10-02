@@ -9,85 +9,60 @@
 
 # cNORM
 
- cNORM (A. Lenhard, W. Lenhard & S. Gary) is a package for the R environment for statistical computing that aims at generating continuous test norms in psychometrics and biometrics and to analyze the model fit. Originally, cNorm exclusively used an approach that makes no assumptions about the specific distribution of the raw data (A. Lenhard, Lenhard, Suggate & Segerer, 2016). Since version 3.2 (2024), however, the package also offers the option of parametric modeling using the beta-binomial distribution and since version 3.5 modeling with the Sinh-Arcsinh (ShaSh) distribution.
+**cNORM** (A. Lenhard, W. Lenhard & S. Gary) is an R package for statistical computing that generates continuous test norms in psychometrics and biometrics and evaluates model fit. Originally, cNORM exclusively used a distribution-free approach based on Taylor polynomials that makes no parametric assumptions about the raw score distribution (A. Lenhard, Lenhard, Suggate & Segerer, 2016). 
 
-cNORM was developed specifically for achievement tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, the package can be used wherever mental (e.g. reaction time), physical (e.g. body weight) or other test scores depend on continuous (e.g. age, duration of schooling) or discrete explanatory variables (e.g. sex, test form). In addition, the package can also be used for "conventional" norming based on individual groups, i.e. without including explanatory variables.
+The package currently features **both distribution-free and parametric continuous norming**:
+1. **Distribution-free modeling** using bivariate Taylor polynomials (A. Lenhard et al., 2016).
+2. **Beta-binomial modeling** (since v3.2): For bounded accuracy tests with a fixed number of dichotomous items without a time limit (e.g., 1PL IRT / Rasch-scaled scales).
+3. **Sinh-Arcsinh (SHASH) modeling** (since v3.5): For flexible continuous distributions accommodating skewness and varying tail heaviness, including scores spanning zero and negative numbers.
+4. **Conway-Maxwell-Poisson (CMP) modeling** (since v3.7): For open-ended count data and **speeded tests** (e.g., number of correctly processed items within a time limit). Unlike standard Poisson models, CMP allows modeling equi-dispersion ($\nu = 1$), over-dispersion ($\nu < 1$), and notably **under-dispersion** ($\nu > 1$, $\text{Var} < \text{Mean}$), which is typical for speeded cognitive performance tasks.
 
-The package estimates percentiles as a function of the explanatory variable. This is done either parametrically on the basis of the beta-binomial or the Sinh-Arcsinh (ShaSh) distribution or distribution-free using Taylor polynomials. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and have a look at the vignettes.
+cNORM was developed specifically for psychometric and educational tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, it applies wherever mental (e.g., processing speed, reaction time), physical (e.g., body weight, height), or behavioral scores depend on continuous (e.g., age, duration of schooling) or discrete explanatory variables (e.g., grade, sex). Conventional norming based on separate subsamples is supported as well.
+
+The package estimates conditional percentiles as a function of the explanatory variable. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and explore the package vignettes.
 
 
 ## In a nutshell
 
-A quick guide to distribution-free modeling with the essential cNORM functions:
-```{r example}
-## Basic example code for modeling the sample dataset
+### 1. Distribution-free modeling with Taylor polynomials
+
+```r
 library(cNORM)
 
-# Start the graphical user interface (needs shiny installed)
-# The GUI includes the most important functions. For specific cases,
-# please use cNORM on the console.
-cNORM.GUI()  // distribution-free modelling with Taylor polynomials
-cNORM.GUI2() // parametric modelling with beta-binomial or the Sinh-Arcsinh (ShaSh) distribution
+# Launch graphical user interface (requires shiny)
+cNORM.GUI()   # distribution-free modeling with Taylor polynomials
+cNORM.GUI2()  # parametric modeling
 
-# Using the syntax on the console: The function 'cnorm' performs
-# all steps automatically. Please specify the raw score and the
-# grouping variable. The resulting object contains the ranked data
-# via object$data and the model via object$model.
+# Automatic model fitting via 'cnorm'
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
 
-# ... and since we love pop music as much as Taylor polynomials, you
-# can also use the taylorSwift function to swiftly compute a distribution-
-# free Taylor polynomial model (which is however identical to cnorm). Here
-# with the sample dataset 'ppvt':
+# Swift modeling (pop-culture alias for cnorm):
 model <- taylorSwift(ppvt$raw, ppvt$group)
 
-# Plot different indicators of model fit depending on the number of
-# predictors
-plot(cnorm.elfe, "subset", type=0) # plot R2
-plot(cnorm.elfe, "subset", type=3) # plot MSE
+# Model selection diagnostics
+plot(cnorm.elfe, "subset", type = 0) # Adjusted R2 by terms
+plot(cnorm.elfe, "subset", type = 3) # Raw score RMSE by terms
 
-# NOTE! At this point, you usually select a good fitting model and rerun
-# the process with a fixed number of terms, e. g. 4:
+# Fix the model to a chosen number of terms (e.g., 4):
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, terms = 4)
 
-# Powers of age can be specified via the parameter 't'.
-# Cubic modeling is usually sufficient, i.e., t = 3.
-# In contrast, 'k' specifies the power of the person location.
-# This parameter should be somewhat higher, e.g., k = 5.
-cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group, k = 5, t = 3)
-
-# Visual inspection of the percentile curves of the fitted model
+# Visual inspection of model percentiles and fit
 plot(cnorm.elfe, "percentiles")
-
-# Visual inspection of the observed and fitted raw and norm scores
 plot(cnorm.elfe, "norm")
 plot(cnorm.elfe, "raw")
 
-# In order to compare different models, generate a series of percentile
-# plots with an ascending number of predictors, in this example between
-# 5 and 14 predictors.
-plot(cnorm.elfe, "series", start=5, end=14)
+# Cross-validation across term numbers (Monte Carlo 80/20 split):
+cnorm.cv(cnorm.elfe$data, max = 10, repetitions = 3)
 
-# Cross validation of number of terms with 80% of the data for training
-# and 20% for validation. Due to the time intensity, the maximum
-# number of terms is restricted to 10 in this example
-# with 3 repetitions.
-cnorm.cv(cnorm.elfe$data, max=10, repetitions=3)
-
-# Cross validation with prespecified terms of an already
-# existing model
-cnorm.cv(cnorm.elfe, repetitions=3)
-
-# Print norm table (in this case: 0, 3 or 6 months at grade level 3)
+# Generate norm table (at grade 3; 0, 3, or 6 months into the school year)
 normTable(c(3, 3.25, 3.5), cnorm.elfe)
 
-# The other way round: Print raw table (grade level 3; 0 months) together
-# with 90% confidence intervalls for a test with a reliability of .94
+# Inverted raw score table with 90% true-score confidence intervals:
 rawTable(3, cnorm.elfe, CI = .9, reliability = .94)
 ```
 
 
-Modelling norm data using beta-binomial distributions:
+Parametric modeling for accuracy tests: Beta-binomial distribution
 ```{r example}
 library(cNORM)
 # cNORM can as well model norm data using the beta-binomial
@@ -121,7 +96,39 @@ tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
                                  reliability=0.9)
 ```
 
-Modelling norm data using Sinh-Arcsinh (ShaSh) distributions:
+Parametric modeling for speeded tests and counts: Conway-Maxwell-Poisson (CMP)
+```{r example}
+library(cNORM)
+
+# The Conway-Maxwell-Poisson (CMP) model is designed for count data and speeded tests
+# where the raw score is the number of processed items within a time limit.
+# It smoothly models location mu(age) and dispersion nu(age), naturally capturing
+# under-dispersion (nu > 1; Var < Mean) common in speeded tasks.
+
+# Basic fit:
+model.cmp <- cnorm.cmp(speeded$age, speeded$raw)
+
+# Automatic model selection over polynomial degrees via BIC:
+model.cmp <- autoselect.cmp(speeded$age, speeded$raw)
+
+# Fit statistics and parameter estimates:
+summary(model.cmp, age = speeded$age, score = speeded$raw)
+
+# Visual inspection: discrete step-function percentiles against manifest data
+plot(model.cmp, speeded$age, speeded$raw)
+plotNorm(model.cmp, age = speeded$age, score = speeded$raw, width = 1)
+
+# Predict norm scores (using mid-p rank adjustment for discrete ties):
+predict(model.cmp, age = c(7.5, 8.2, 9.0), score = c(18, 24, 30))
+
+# Generate discrete norm tables:
+tables <- normTable(c(7.5, 8.5), model.cmp, start = 0, end = 60, reliability = 0.88)
+
+# Model-implied population moments (mean, variance, skewness, excess kurtosis):
+predictMoments(model.cmp, age = seq(7, 10, by = 0.5))
+```
+
+Parametric modeling for continuous scores: Sinh-Arcsinh (SHASH)
 ```{r example}
 library(cNORM)
 # The Sinh-Arcsinh (ShaSh) distribution is a flexible approach.
@@ -145,6 +152,15 @@ summary(model.shash, ppvt$age, ppvt$raw)
 predict(model.shash, c(8.9, 10.1), c(153, 121))
 tables <- normTable.shash(model.shash, c(10, 15),
                                  reliability=0.9)
+```
+
+Visual Model Comparison
+```{r example}
+# Compare distribution-free Taylor polynomial with CMP count model:
+model.taylor <- cnorm(raw = elfe$raw, group = elfe$group)
+model.cmp    <- cnorm.cmp(age = elfe$group, score = elfe$raw)
+
+compare(model.taylor, model.cmp, age = elfe$group, score = elfe$raw)
 ```
 
 Conventional norming:

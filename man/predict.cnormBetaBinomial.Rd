@@ -52,6 +52,7 @@ Other predict:
 \code{\link[=getNormCurve]{getNormCurve()}},
 \code{\link[=normTable]{normTable()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
+\code{\link[=predict.cnormCMP]{predict.cnormCMP()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},
 \code{\link[=predictNorm]{predictNorm()}},
 \code{\link[=predictRaw]{predictRaw()}},

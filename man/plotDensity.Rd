@@ -14,8 +14,8 @@ plotDensity(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2 or
-cnormShash object.}
+\item{model}{The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2,
+a cnormCMP, or a cnormShash object.}
 
 \item{minRaw}{Lower bound of the raw score. If NULL, it's automatically determined based on the model type.}
 
@@ -32,35 +32,17 @@ A ggplot object representing the density functions.
 }
 \description{
 This function plots density curves based on the regression model against the raw scores.
-It supports both traditional continuous norming models and beta-binomial models.
-The function allows for customization of the plot range and groups to be displayed.
+It supports traditional continuous norming models, beta-binomial models, Conway-Maxwell-Poisson (CMP)
+models, and SHASH models.
 }
 \details{
-The function generates density curves for specified age groups, allowing for easy comparison of score distributions
-across different ages.
+The function generates density curves (or PMFs for discrete models) for specified age groups,
+allowing for easy comparison of score distributions across different ages.
 
-For beta-binomial models, the density is based on the probability mass function, while for
-traditional models, it uses a normal distribution based on the norm scores.
-}
-\note{
-Please check for inconsistent curves, especially those showing implausible shapes
-such as violations of biuniqueness in the cnorm models.
-}
-\examples{
-\dontrun{
-# For traditional continuous norming model
-result <- cnorm(raw = elfe$raw, group = elfe$group)
-plotDensity(result, group = c(2, 4, 6))
-
-# For beta-binomial model
-bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
-plotDensity(bb_model)
-}
-
+For beta-binomial and CMP models, the display reflects the probability mass function, while for
+continuous models (Taylor and SHASH), it displays the probability density function.
 }
 \seealso{
-\code{\link{plotNormCurves}}, \code{\link{plotPercentiles}}
-
 Other plot:
 \code{\link[=compare]{compare()}},
 \code{\link[=plot.cnorm]{plot.cnorm()}},

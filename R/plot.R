@@ -110,16 +110,16 @@ plotRaw <- function(model, group = FALSE, type = 0) {
 #' This function plots the manifest norm score against the fitted norm score from
 #' the inverse regression model per group. This helps to inspect the precision
 #' of the modeling process. The scores should not deviate too far from
-#' the regression line. Applicable for Taylor polynomial, beta-binomial, and shash models.
+#' the regression line. Applicable for Taylor polynomial, beta-binomial, CMP, and shash models.
 #'
-#' @param model The regression model, usually from the 'cnorm', 'cnorm.betabinomial', or 'cnorm.shash' function
+#' @param model The regression model, usually from the 'cnorm', 'cnorm.betabinomial', 'cnorm.cmp', or 'cnorm.shash' function
 #' @param age In case of parametric models, please provide the age vector
 #' @param score In case of parametric models, please provide the score vector
 #' @param width In case of parametric models, please provide the width for the sliding window.
 #'              If null, the function tries to determine a sensible setting.
 #' @param weights Vector or variable name in the dataset with weights for each
 #' individual case. If NULL, no weights are used.
-#' @param group On optional grouping variable, use empty string for no group, the variable name
+#' @param group An optional grouping variable, use empty string for no group, the variable name
 #'              for Taylor polynomial models or a vector with the groups for parametric models
 #' @param minNorm lower bound of fitted norm scores
 #' @param maxNorm upper bound of fitted norm scores
@@ -130,15 +130,17 @@ plotRaw <- function(model, group = FALSE, type = 0) {
 #'
 #' @examples
 #' \dontrun{
-#' # Load example data set, compute model and plot results
-#'
 #' # Taylor polynomial model
 #' model <- cnorm(raw = elfe$raw, group = elfe$group)
 #' plot(model, "norm")
 #'
-#' # Beta binomial models; maximum number of items in elfe is n = 28
+#' # Beta-binomial model
 #' model.bb <- cnorm.betabinomial(elfe$group, elfe$raw, n = 28)
 #' plotNorm(model.bb, age = elfe$group, score = elfe$raw)
+#'
+#' # Conway-Maxwell-Poisson model
+#' model.cmp <- cnorm.cmp(speeded$age, speeded$raw)
+#' plotNorm(model.cmp, age = speeded$age, score = speeded$raw)
 #' }
 #'
 #' @import ggplot2
@@ -186,7 +188,7 @@ plotNorm <- function(model,
   } else if (isParametric(model)) {
     if (is.null(age) || is.null(score)) {
       stop(
-        "Please provide age and score vectors for beta-binomial or shash models and the width for the sliding window."
+        "Please provide age and score vectors for parametric models and the width for the sliding window."
       )
     }
 
@@ -214,7 +216,7 @@ plotNorm <- function(model,
           weights = weights,
           scale = model_scale
         )
-    } else{
+    } else {
       if (is.null(weights))
         d <- rankBySlidingWindow(
           data = d,
@@ -234,11 +236,11 @@ plotNorm <- function(model,
         )
     }
 
-    # Generic S3 dispatch so predict.cnormShash OR predict.cnormBetaBinomial is correctly used
+    # S3 dispatch to predict.cnormBetaBinomial, predict.cnormCMP, or predict.cnormShash
     d$fitted <- predict(model, d$age, d$score)
 
   } else {
-    stop("Please provide an object of type cnorm, cnormBetaBinomial, cnormBetaBinomial2, or cnormShash.")
+    stop("Please provide an object of type cnorm, cnormBetaBinomial, cnormBetaBinomial2, cnormCMP, or cnormShash.")
   }
 
   if (!"normValue" %in% colnames(d)) {
@@ -262,7 +264,7 @@ plotNorm <- function(model,
         paste("Observed vs. Fitted Norm Scores by", group)
       else
         "Observed vs. Fitted Norm Scores"
-    } else{
+    } else {
       title <- if (is.numeric(group))
         paste("Observed vs. Fitted Norm Scores by group")
       else
@@ -290,7 +292,7 @@ plotNorm <- function(model,
         paste("Observed Norm Scores vs. Difference Scores by", group)
       else
         "Observed Norm Scores vs. Difference Scores"
-    } else{
+    } else {
       title <- if (is.numeric(group))
         paste("Observed Norm Scores vs. Difference Scores by group")
       else
@@ -341,10 +343,11 @@ plotNorm <- function(model,
 #' @title Plot norm curves
 #'
 #' @description
-#' This function plots the norm curves based on the regression model. It supports both
-#' Taylor polynomial models, beta-binomial models, and shash models.
+#' This function plots the norm curves based on the regression model. It supports
+#' Taylor polynomial models, beta-binomial models, Conway-Maxwell-Poisson (CMP) models,
+#' and shash models.
 #'
-#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormShash object.
+#' @param model The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormCMP / cnormShash object.
 #' @param normList Vector with norm scores to display. If NULL, default values are used.
 #' @param minAge Age to start with checking. If NULL, it's automatically determined from the model.
 #' @param maxAge Upper end of the age check. If NULL, it's automatically determined from the model.
@@ -375,6 +378,10 @@ plotNorm <- function(model,
 #' # For beta-binomial model
 #' bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 #' plotNormCurves(bb_model)
+#'
+#' # For CMP model
+#' cmp_model <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+#' plotNormCurves(cmp_model)
 #' }
 plotNormCurves <- function(model,
                            normList = NULL,
@@ -390,6 +397,7 @@ plotNormCurves <- function(model,
   parametric <- isParametric(model)
   is_beta_binomial <- isBeta(model)
   is_shash <- isSHASH(model)
+  is_cmp <- isCMP(model)
 
   if (!parametric && !model$useAge) {
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
@@ -423,7 +431,7 @@ plotNormCurves <- function(model,
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if (is_beta_binomial)
+    minRaw <- if (is_beta_binomial || is_cmp)
       0
     else if (is_shash)
       attr(model$result, "min")
@@ -444,7 +452,6 @@ plotNormCurves <- function(model,
       p_val <- pnorm((norm - scaleMean) / scaleSD)
 
       if (is_beta_binomial) {
-        # Loop for backwards compat with un-vectorized underlying coefficient variants
         raws <- sapply(ages, function(a) {
           if (inherits(model, "cnormBetaBinomial")) {
             pred <- predictCoefficients(model, a)
@@ -454,9 +461,11 @@ plotNormCurves <- function(model,
           qbeta(p_val, pred$a, pred$b) * attr(model$result, "max")
         })
       } else if (is_shash) {
-        # Predict parameters vectorized and calculate exact inverse quantiles
         preds <- predictCoefficients_shash(model, ages)
         raws <- qshash(p_val, mu = preds$mu, sigma = preds$sigma, epsilon = preds$epsilon, delta = preds$delta)
+      } else if (is_cmp) {
+        preds <- predictCoefficients_cmp(model, ages)
+        raws <- qcmp(p_val, mu = preds$mu, nu = preds$nu)
       }
 
       data.frame(n = norm, raw = raws, age = ages)
@@ -538,15 +547,13 @@ plotCumulative <- function(x,
   data    <- x$data
   m       <- x$model
   raw_var <- m$raw
-  scaleM  <- m$scaleM
-  scaleSD <- m$scaleSD
 
   if (is.null(minRaw))
     minRaw <- m$minRaw
   if (is.null(maxRaw))
     maxRaw <- m$maxRaw
 
-  curve_df <- rawTable(0, x, minRaw, maxRaw, pretty = F)
+  curve_df <- rawTable(0, x, minRaw, maxRaw, pretty = FALSE)
   raw_obs <- data[[raw_var]]
   raw_obs <- raw_obs[!is.na(raw_obs)]
   n_obs   <- length(raw_obs)
@@ -601,7 +608,6 @@ plotCumulative <- function(x,
       panel.grid.minor = element_line(color = "gray95")
     )
 
-
   print(p)
   invisible(p)
 }
@@ -609,19 +615,8 @@ plotCumulative <- function(x,
 #' Plot norm curves against actual percentiles
 #'
 #' The function plots the norm curves based on the regression model against
-#' the actual percentiles from the raw data. As in 'plotNormCurves',
-#' please check for inconsistent curves, especially intersections.
-#' Violations of this assumption are a strong indication for problems
-#' in modeling the relationship between raw and norm scores.
-#' In general, extrapolation (point 1 and 2) can carefully be done to a
-#' certain degree outside the original sample, but it should in general
-#' be handled with caution.
-#' The original percentiles are displayed as distinct points in the according
-#' color, the model based projection of percentiles are drawn as lines.
-#' Please note, that the estimation of the percentiles of the raw data is done with
-#' the quantile function with the default settings.
-#' In case, you get 'jagged' or disorganized percentile curve, try to reduce the 'k'
-#' and/or 't' parameter in modeling.
+#' the actual percentiles from the raw data. Applicable only for Taylor polynomial models.
+#' For parametric models (Beta-Binomial, CMP, or SHASH), please use \code{plot(model, age, score)} instead.
 #'
 #' @param model The Taylor polynomial regression model object from the cNORM
 #' @param minRaw Lower bound of the raw score (default = 0)
@@ -633,19 +628,11 @@ plotCumulative <- function(x,
 #' determined
 #' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
 #' @param scale The norm scale, either 'T', 'IQ', 'z', 'percentile' or
-#' self defined with a double vector with the mean and standard deviation,
-#' f. e. c(10, 3) for Wechsler scale index points; if NULL, scale information from the
-#' data preparation is used (default)
+#' self defined with a double vector with the mean and standard deviation
 #' @param title custom title for plot
 #' @param subtitle custom title for plot
 #' @param points Logical indicating whether to plot the data points. Default is TRUE.
 #' @seealso plotNormCurves, plotPercentileSeries
-#' @examples
-#' \dontrun{
-#'   # Load example data set, compute model and plot results
-#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
-#'   plotPercentiles(result)
-#' }
 #' @export
 #' @family plot
 plotPercentiles <- function(model,
@@ -662,7 +649,7 @@ plotPercentiles <- function(model,
                             points = FALSE) {
   if (isParametric(model)) {
     stop(
-      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). ",
+      "This function is not applicable for parametric models (Beta-Binomial, CMP, or SHASH). ",
       "Please use 'plot(model, age, raw)' instead."
     )
   }
@@ -686,7 +673,6 @@ plotPercentiles <- function(model,
     )
   }
 
-
   if (is.null(group)) {
     group <- attr(data, "group")
   }
@@ -699,56 +685,25 @@ plotPercentiles <- function(model,
     group <- "group"
   }
 
-  if (is.null(minAge)) {
-    minAge <- m$minA1
-  }
-
-  if (is.null(maxAge)) {
-    maxAge <- m$maxA1
-  }
-
-  if (is.null(minRaw)) {
-    minRaw <- m$minRaw
-  }
-
-  if (is.null(maxRaw)) {
-    maxRaw <- m$maxRaw
-  }
-
-  if (is.null(raw)) {
-    raw <- m$raw
-  }
+  if (is.null(minAge)) minAge <- m$minA1
+  if (is.null(maxAge)) maxAge <- m$maxA1
+  if (is.null(minRaw)) minRaw <- m$minRaw
+  if (is.null(maxRaw)) maxRaw <- m$maxRaw
+  if (is.null(raw))    raw <- m$raw
 
   if (!(raw %in% colnames(data))) {
-    stop(paste(
-      c(
-        "ERROR: Raw score variable '",
-        raw,
-        "' does not exist in data object."
-      ),
-      collapse = ""
-    ))
+    stop(paste0("ERROR: Raw score variable '", raw, "' does not exist in data object."))
   }
 
   if (!(group %in% colnames(data))) {
-    stop(paste(
-      c(
-        "ERROR: Grouping variable '",
-        group,
-        "' does not exist in data object."
-      ),
-      collapse = ""
-    ))
+    stop(paste0("ERROR: Grouping variable '", group, "' does not exist in data object."))
   }
 
   if (typeof(group) == "logical" && !group) {
     stop("The plotPercentiles-function does not work without a grouping variable.")
   }
 
-
-  # compute norm scores from percentile vector
   if (is.null(scale)) {
-    # fetch scale information from model
     T <- qnorm(percentiles, m$scaleM, m$scaleSD)
   } else if ((typeof(scale) == "double" && length(scale) == 2)) {
     T <- qnorm(percentiles, scale[1], scale[2])
@@ -759,35 +714,20 @@ plotPercentiles <- function(model,
   } else if (scale == "T") {
     T <- qnorm(percentiles, 50, 10)
   } else {
-    # no transformation
     T <- percentiles
   }
 
-  # generate variable names
   NAMES <- paste("PR", percentiles * 100, sep = "")
   NAMESP <- paste("PredPR", percentiles * 100, sep = "")
 
-  # build function for xyplot and aggregate actual percentiles per group
-  xyFunction <- paste(
-    paste(NAMES, collapse = " + "),
-    paste(NAMESP, collapse = " + "),
-    sep = " + ",
-    collapse = " + "
-  )
-  xyFunction <- paste(xyFunction, group, sep = " ~ ")
-
-  w <- attributes(data)$weights
   data[, group] <- round(data[, group], digits = 3)
   AGEP <- unique(data[, group])
 
-  # get actual percentiles
   if (!is.null(attr(data, "descend")) && attr(data, "descend")) {
     percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df) {
-      weighted.quantile(df[, raw],
-                        probs = 1 - percentiles,
-                        weights = df$w)
+      weighted.quantile(df[, raw], probs = 1 - percentiles, weights = df$w)
     })))
-  } else{
+  } else {
     percentile.actual <- as.data.frame(do.call("rbind", lapply(split(data, data[, group]), function(df) {
       weighted.quantile(df[, raw], probs = percentiles, weights = df$w)
     })))
@@ -796,44 +736,24 @@ plotPercentiles <- function(model,
   colnames(percentile.actual) <- c(NAMES, c(group))
   rownames(percentile.actual) <- AGEP
 
-  # build finer grained grouping variable for prediction and fit predicted percentiles
-  share <- seq(from = minAge,
-               to = maxAge,
-               length.out = 100)
+  share <- seq(from = minAge, to = maxAge, length.out = 100)
   AGEP <- c(AGEP, share)
-  percentile.fitted <- data.frame(matrix(NA, nrow = length(AGEP), ncol = length(T)))
 
-  norm_rep <- rep(T, times = length(AGEP))   # T1,T2,...,Tk, T1,T2,...,Tk, ...
-  age_rep  <- rep(AGEP, each  = length(T))       # A1,A1,...,A1, A2,A2,...,A2, ...
+  norm_rep <- rep(T, times = length(AGEP))
+  age_rep  <- rep(AGEP, each  = length(T))
 
-  preds <- predictRaw(norm_rep,
-                      age_rep,
-                      m$coefficients,
-                      minRaw = minRaw,
-                      maxRaw = maxRaw)
+  preds <- predictRaw(norm_rep, age_rep, m$coefficients, minRaw = minRaw, maxRaw = maxRaw)
 
-  percentile.fitted <- as.data.frame(matrix(
-    preds,
-    nrow = length(AGEP),
-    ncol = length(T),
-    byrow = TRUE
-  ))
+  percentile.fitted <- as.data.frame(matrix(preds, nrow = length(AGEP), ncol = length(T), byrow = TRUE))
   percentile.fitted$group <- AGEP
   percentile.fitted <- percentile.fitted[!duplicated(percentile.fitted$group), ]
   colnames(percentile.fitted)  <- c(NAMESP, group)
   rownames(percentile.fitted)  <- percentile.fitted$group
 
-  # Merge actual and predicted scores and plot them show lines
-  # for predicted scores and dots for actual scores
-  percentile <- merge(percentile.actual,
-                      percentile.fitted,
-                      by = group,
-                      all = TRUE)
+  percentile <- merge(percentile.actual, percentile.fitted, by = group, all = TRUE)
 
   END <- .8
   COL1 <- rainbow(length(percentiles), end = END)
-  COL2 <- c(rainbow(length(percentiles), end = END), rainbow(length(percentiles), end = END))
-
 
   if (is.null(title)) {
     title <- "Observed and Predicted Percentile Curves"
@@ -842,67 +762,44 @@ plotPercentiles <- function(model,
     ))))
   }
 
-  # Prepare data for ggplot
   plot_data <- data.frame(
     group = rep(percentile$group, 2 * length(percentiles)),
     value = c(as.matrix(percentile[, NAMES]), as.matrix(percentile[, NAMESP])),
-    type = rep(
-      c("Observed", "Predicted"),
-      each = nrow(percentile) * length(percentiles)
-    ),
-    percentile = factor(rep(rep(
-      NAMES, each = nrow(percentile)
-    ), 2), levels = NAMES)
+    type = rep(c("Observed", "Predicted"), each = nrow(percentile) * length(percentiles)),
+    percentile = factor(rep(rep(NAMES, each = nrow(percentile)), 2), levels = NAMES)
   )
 
   plot_data_predicted <- plot_data[plot_data$type == "Predicted", ]
-  plot_data_observed <- plot_data[plot_data$type == "Observed", ]
+  plot_data_observed  <- plot_data[plot_data$type == "Observed", ]
 
-  # Create the ggplot - ALIGNED ORDER: Points first, then lines
   p <- ggplot()
 
-  # Add raw scores FIRST if points is TRUE (matches plot.cnormShash)
   if (points) {
     if (is.null(age)) {
       p <- p + geom_point(
         data = data,
         aes(x = .data[[group]], y = .data[[raw]]),
-        color = "black",
-        alpha = 0.2,
-        size = 0.6
-      )  # Matched size
-    } else{
+        color = "black", alpha = 0.2, size = 0.6
+      )
+    } else {
       p <- p + geom_point(
         data = data,
         aes(x = .data$age, y = .data[[raw]]),
-        color = "black",
-        alpha = 0.2,
-        size = 0.6
-      )  # Matched size
+        color = "black", alpha = 0.2, size = 0.6
+      )
     }
   }
 
-  # Then add percentile lines and observed points
   p <- p +
     geom_line(
       data = plot_data_predicted,
-      aes(
-        x = .data$group,
-        y = .data$value,
-        color = .data$percentile
-      ),
+      aes(x = .data$group, y = .data$value, color = .data$percentile),
       linewidth = 0.6
-    ) +  # Matched linewidth
+    ) +
     geom_point(
       data = plot_data_observed,
-      aes(
-        x = .data$group,
-        y = .data$value,
-        color = .data$percentile
-      ),
-      na.rm = TRUE,
-      size = 2,
-      shape = 18
+      aes(x = .data$group, y = .data$value, color = .data$percentile),
+      na.rm = TRUE, size = 2, shape = 18
     ) +
     labs(
       title = title,
@@ -910,24 +807,19 @@ plotPercentiles <- function(model,
       x = paste0("Explanatory Variable (", group, ")"),
       y = paste0("Raw Score (", raw, ")"),
       color = "Percentile"
-    ) +  # Added legend title
+    ) +
     scale_color_manual(
       values = setNames(COL1, NAMES),
-      labels = paste0(percentiles * 100, "%")  # Matched label format
+      labels = paste0(percentiles * 100, "%")
     ) +
     guides(color = guide_legend(override.aes = list(
       linetype = rep("solid", length(NAMES)),
       shape = rep(18, length(NAMES))
-    )))  # Matched legend override
+    )))
 
-  # Apply consistent theme
   p <- p + theme_minimal() +
     theme(
-      plot.title = element_text(
-        hjust = 0.5,
-        size = 16,
-        face = "bold"
-      ),
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -939,20 +831,20 @@ plotPercentiles <- function(model,
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
+
   print(p)
   invisible(p)
 }
 
 
-
 #' Plot the density function per group by raw score
 #'
 #' This function plots density curves based on the regression model against the raw scores.
-#' It supports both traditional continuous norming models and beta-binomial models.
-#' The function allows for customization of the plot range and groups to be displayed.
+#' It supports traditional continuous norming models, beta-binomial models, Conway-Maxwell-Poisson (CMP)
+#' models, and SHASH models.
 #'
-#' @param model The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2 or
-#'    cnormShash object.
+#' @param model The model from the bestModel function, a cnorm object, a cnormBetaBinomial, a cnormBetaBinomial2,
+#'    a cnormCMP, or a cnormShash object.
 #' @param minRaw Lower bound of the raw score. If NULL, it's automatically determined based on the model type.
 #' @param maxRaw Upper bound of the raw score. If NULL, it's automatically determined based on the model type.
 #' @param minNorm Lower bound of the norm score. If NULL, it's automatically determined based on the model type.
@@ -962,28 +854,11 @@ plotPercentiles <- function(model,
 #' @return A ggplot object representing the density functions.
 #'
 #' @details
-#' The function generates density curves for specified age groups, allowing for easy comparison of score distributions
-#' across different ages.
+#' The function generates density curves (or PMFs for discrete models) for specified age groups,
+#' allowing for easy comparison of score distributions across different ages.
 #'
-#' For beta-binomial models, the density is based on the probability mass function, while for
-#' traditional models, it uses a normal distribution based on the norm scores.
-#'
-#' @note
-#' Please check for inconsistent curves, especially those showing implausible shapes
-#' such as violations of biuniqueness in the cnorm models.
-#'
-#' @seealso \code{\link{plotNormCurves}}, \code{\link{plotPercentiles}}
-#'
-#' @examples
-#' \dontrun{
-#' # For traditional continuous norming model
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotDensity(result, group = c(2, 4, 6))
-#'
-#' # For beta-binomial model
-#' bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
-#' plotDensity(bb_model)
-#' }
+#' For beta-binomial and CMP models, the display reflects the probability mass function, while for
+#' continuous models (Taylor and SHASH), it displays the probability density function.
 #'
 #' @import ggplot2
 #' @export
@@ -1000,23 +875,24 @@ plotDensity <- function(model,
 
   is_beta_binomial <- isBeta(model)
   is_shash <- isSHASH(model)
+  is_cmp <- isCMP(model)
 
   if (is.null(minNorm)) {
-    minNorm <- if (is_beta_binomial || is_shash)
+    minNorm <- if (is_beta_binomial || is_shash || is_cmp)
       -3
     else
       model$minL1
   }
 
   if (is.null(maxNorm)) {
-    maxNorm <- if (is_beta_binomial || is_shash)
+    maxNorm <- if (is_beta_binomial || is_shash || is_cmp)
       3
     else
       model$maxL1
   }
 
   if (is.null(minRaw)) {
-    minRaw <- if (is_beta_binomial)
+    minRaw <- if (is_beta_binomial || is_cmp)
       0
     else if (is_shash)
       attr(model$result, "min")
@@ -1024,14 +900,14 @@ plotDensity <- function(model,
       model$minRaw
   }
   if (is.null(maxRaw)) {
-    maxRaw <- if (is_beta_binomial || is_shash)
+    maxRaw <- if (is_beta_binomial || is_shash || is_cmp)
       attr(model$result, "max")
     else
       model$maxRaw
   }
 
   if (is.null(group)) {
-    if (is_beta_binomial || is_shash) {
+    if (is_beta_binomial || is_shash || is_cmp) {
       age_min <- attr(model$result, "ageMin")
       age_max <- attr(model$result, "ageMax")
       group <- round(seq(
@@ -1053,7 +929,6 @@ plotDensity <- function(model,
 
   step <- (maxNorm - minNorm) / 100
 
-  # Calculate step size uniquely required for continuous density approximation for shash
   step_shash <- NULL
   if (is_shash) {
     step_shash <- (maxRaw - minRaw) / 100
@@ -1063,6 +938,12 @@ plotDensity <- function(model,
   matrix_list <- lapply(group, function(g) {
     if (is_beta_binomial) {
       norm <- normTable.betabinomial(model, ages = g, n = attr(model$result, "max"))[[1]]
+      norm$group <- rep(g, length.out = nrow(norm))
+      colnames(norm)[colnames(norm) == "x"] <- "raw"
+      colnames(norm)[colnames(norm) == "norm"] <- "norm1"
+      colnames(norm)[colnames(norm) == "z"] <- "norm"
+    } else if (is_cmp) {
+      norm <- normTable.cmp(model, ages = g, start = minRaw, end = maxRaw)[[1]]
       norm$group <- rep(g, length.out = nrow(norm))
       colnames(norm)[colnames(norm) == "x"] <- "raw"
       colnames(norm)[colnames(norm) == "norm"] <- "norm1"
@@ -1091,27 +972,24 @@ plotDensity <- function(model,
 
   matrix <- do.call(rbind, matrix_list)
   matrix <- matrix[matrix$norm > minNorm & matrix$norm < maxNorm, ]
-  matrix <- matrix[matrix$raw > minRaw & matrix$raw < maxRaw, ]
+  matrix <- matrix[matrix$raw >= minRaw & matrix$raw <= maxRaw, ]
 
-  if (is_beta_binomial) {
+  if (is_beta_binomial || is_cmp) {
     matrix$density <- matrix$Px
   } else if (is_shash) {
-    # Re-scale back to pure density utilizing defined step_shash
     matrix$density <- matrix$Px / step_shash
   } else {
-    matrix$density <- dnorm(matrix$norm,
-                            mean = model$scaleM,
-                            sd = model$scaleSD)
+    matrix$density <- dnorm(matrix$norm, mean = model$scaleM, sd = model$scaleSD)
   }
 
-  # Create ggplot
-  title <- ""
-  if (is_beta_binomial) {
-    title <- "Density Functions (Beta-Binomial)"
+  title <- if (is_beta_binomial) {
+    "Probability Mass Functions (Beta-Binomial)"
+  } else if (is_cmp) {
+    "Probability Mass Functions (Conway-Maxwell-Poisson)"
   } else if (is_shash) {
-    title <- "Density Functions (SHASH)"
+    "Density Functions (SHASH)"
   } else {
-    title <- "Density Functions (Taylor Polynomial)"
+    "Density Functions (Taylor Polynomial)"
   }
 
   matrix <- matrix[complete.cases(matrix), ]
@@ -1124,14 +1002,10 @@ plotDensity <- function(model,
     scale_color_viridis_d(name = "Group",
                           labels = paste("Group", group),
                           option = "plasma") +
-    labs(title = title, x = "Raw Score", y = "Density") +
+    labs(title = title, x = "Raw Score", y = if (is_beta_binomial || is_cmp) "Probability" else "Density") +
     theme_minimal() +
     theme(
-      plot.title = element_text(
-        hjust = 0.5,
-        size = 16,
-        face = "bold"
-      ),
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       axis.title = element_text(size = 12, face = "bold"),
       axis.text = element_text(size = 10),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -1150,43 +1024,16 @@ plotDensity <- function(model,
 #' Generates a series of plots with percentile curves for different models
 #'
 #' This function makes use of 'plotPercentiles' to generate a series of plots
-#' for models with an increasing number of terms. It draws on the information
-#' provided by the model object to determine the bounds of the modeling (age
-#' and standard score range). It can be used as an additional model check to
-#' determine the best fitting model. Please have a look at the
-#' 'plotPercentiles' function for further information.
-#'
-#' Each model of the series is refitted on the complete norm sample (applying
-#' case weights, if the norm data were post stratified). Models are identified
-#' by their actual number of terms, which - after consistency screening in
-#' \code{bestModel} - is not necessarily identical to the row number of the
-#' model selection table. The subtitle of each plot reports the number of
-#' terms, the adjusted R2 and, if available, the result of the consistency
-#' check.
+#' for models with an increasing number of terms.
 #'
 #' @param model The Taylor polynomial regression model object or a cnorm object
 #' @param start Number of terms to start with (default 1)
-#' @param end Number of terms to end with; defaults to the largest available
-#'   model
-#' @param group The name of the grouping variable; the distinct groups are
-#'   automatically determined
-#' @param percentiles Vector with percentile scores, ranging from 0 to 1
-#'   (exclusive)
-#' @param filename Prefix of the filename. If specified, the plots are saved as
-#'   png files in the directory of the workspace, instead of only displaying
-#'   them. The number of terms is appended to the prefix.
+#' @param end Number of terms to end with
+#' @param group The name of the grouping variable
+#' @param percentiles Vector with percentile scores
+#' @param filename Prefix of the filename if saving to png
 #' @seealso plotPercentiles
-#' @return A named list of plots (names indicate the number of terms),
-#'   returned invisibly
 #' @export
-#'
-#' @examples
-#' \dontrun{
-#'   # Load example data set, compute model and plot results
-#'   result <- cnorm(raw = elfe$raw, group = elfe$group)
-#'   plotPercentileSeries(result, start = 4, end = 6)
-#' }
-#'
 #' @family plot
 plotPercentileSeries <- function(model,
                                  start = 1,
@@ -1195,8 +1042,8 @@ plotPercentileSeries <- function(model,
                                  percentiles = c(0.025, 0.1, 0.25, 0.5, 0.75, 0.9, 0.975),
                                  filename = NULL) {
   if (isParametric(model)) {
-    stop("This function is not applicable for parametric models (Beta Binomial ",
-         "or Sinh-Arcsinh). Please use the plotDensity function instead.")
+    stop("This function is not applicable for parametric models (Beta-Binomial, CMP, or SHASH). ",
+         "Please use the plotDensity function instead.")
   }
 
   if (isTaylor(model)) {
@@ -1207,34 +1054,26 @@ plotPercentileSeries <- function(model,
   }
 
   if (!isTRUE(attr(d, "useAge"))) {
-    stop("Age or group variable explicitly set to FALSE in dataset. ",
-         "No plotting available.")
+    stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
   subsets <- model$subsets
   outmat  <- subsets$outmat
-  nTerms  <- rowSums(outmat == "*")   # actual model sizes (row index is
-  # NOT reliable after screening)
+  nTerms  <- rowSums(outmat == "*")
   maxTerms <- max(nTerms)
 
-  # sanitize requested range
   if (is.null(end) || end > maxTerms) end <- maxTerms
   if (start < 1) start <- 1
   if (start > end) start <- end
 
-  # select the rows whose term count falls into the requested range;
-  # after screening there is one model per size, otherwise take the first
   rows <- which(nTerms >= start & nTerms <= end)
   rows <- rows[!duplicated(nTerms[rows])]
   if (length(rows) == 0L) {
     stop("No models with ", start, " to ", end, " terms available.")
   }
 
-  # case weights (post stratification), analogous to bestModel
-  w <- if (!is.null(attr(d, "weights")) && !is.null(d$weights))
-    d$weights else NULL
+  w <- if (!is.null(attr(d, "weights")) && !is.null(d$weights)) d$weights else NULL
 
-  # static model information, assembled once
   minR <- min(d[[model$raw]])
   maxR <- max(d[[model$raw]])
 
@@ -1267,19 +1106,15 @@ plotPercentileSeries <- function(model,
     size <- nTerms[row]
     message("Plotting model with ", size, " terms ...")
 
-    # refit the candidate model on the complete sample
     selected <- termNames[outmat[row, ] == "*"]
     f <- stats::reformulate(selected, response = model$raw)
-    bestformula <- if (is.null(w)) stats::lm(f, data = d)
-    else stats::lm(f, data = d, weights = w)
+    bestformula <- if (is.null(w)) stats::lm(f, data = d) else stats::lm(f, data = d, weights = w)
 
-    # attach the static model information
     bestformula[names(fields)] <- fields
 
     result <- list(data = d, model = bestformula)
     class(result) <- "cnormTemp"
 
-    # subtitle: actual size, fit and consistency information
     r2 <- round(subsets$adjr2[row], digits = 4)
     consInfo <- if (!is.null(subsets$consistent) && !is.na(subsets$consistent[row])) {
       if (subsets$consistent[row]) ", consistent" else ", inconsistent"
@@ -1317,77 +1152,19 @@ plotPercentileSeries <- function(model,
 }
 
 
-#' #' Evaluate information criteria for regression model
+#' Evaluate information criteria for regression model
 #'
-#' This function plots various information criteria and model fit statistics
-#' against the number of terms or the adjusted R-squared, depending on the type
-#' of plot selected. It helps in model selection by visualizing different
-#' aspects of model performance. Models which did not pass the consistency
-#' check are depicted with an empty circle; the automatically selected model is
-#' highlighted in red. If BIC-weighted model averaging was applied
-#' (\code{averaging = TRUE}), a caption indicates that the final coefficients
-#' are a weighted combination of the consistent candidate models shown.
+#' This function plots various information criteria and model fit statistics for Taylor polynomial models.
 #'
 #' @param model The regression model from the bestModel function or a cnorm object.
-#' @param type Integer specifying the type of plot to generate:
-#'   \itemize{
-#'     \item 0: Adjusted R2 by number of terms (default)
-#'     \item 1: Log-transformed Mallows's Cp by adjusted R2
-#'     \item 2: Bayesian Information Criterion (BIC) by adjusted R2
-#'     \item 3: Root Mean Square Error (RMSE) by number of terms
-#'     \item 4: Residual Sum of Squares (RSS) by number of terms
-#'     \item 5: F-test statistic for consecutive models by number of terms
-#'     \item 6: p-value for model tests by number of terms
-#'   }
+#' @param type Integer specifying the type of plot to generate (0 to 6).
 #'
 #' @return A ggplot object representing the selected information criterion plot.
-#'
-#' @details
-#' The function generates different plots to help in model selection:
-#'
-#' - For types 1 and 2 (Mallows's Cp and BIC), look for the "elbow" in the curve
-#'   where the information criterion begins to drop. This often indicates a good
-#'   balance between model fit and complexity.
-#' - For type 0 (Adjusted R2), higher values indicate better fit, but be cautious
-#'   of overfitting with values approaching 1.
-#' - For types 3 and 4 (RMSE and RSS), lower values indicate better fit.
-#' - For type 5 (F-test), higher values suggest significant improvement with
-#'   added terms.
-#' - For type 6 (p-values), values below the significance level (typically 0.05)
-#'   suggest significant improvement with added terms.
-#'
-#' The F-tests and p-values compare each model with the preceding (smaller) one,
-#' with degrees of freedom based on the actual difference in the number of
-#' parameters. After consistency screening, consecutive models may differ by
-#' more than one term.
-#'
-#' @note
-#' It's important to balance statistical measures with practical considerations
-#' and to visually inspect the model fit using functions like
-#' \code{plotPercentiles}.
-#'
-#' @seealso \code{\link{bestModel}}, \code{\link{plotPercentiles}}, \code{\link{printSubset}}
-#'
-#' @examples
-#' \dontrun{
-#' # Compute model with example data and plot information function
-#' cnorm.model <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotSubset(cnorm.model)
-#'
-#' # Plot BIC against adjusted R-squared
-#' plotSubset(cnorm.model, type = 2)
-#'
-#' # Plot RMSE against number of terms
-#' plotSubset(cnorm.model, type = 3)
-#' }
-#'
-#' @import ggplot2
 #' @export
 #' @family plot
 plotSubset <- function(model, type = 0) {
   if (isParametric(model)) {
-    stop("This function is not applicable for parametric models ",
-         "(Beta Binomial or Sinh-Arcsinh).")
+    stop("This function is not applicable for parametric models (Beta-Binomial, CMP, or SHASH).")
   }
 
   if (isTaylor(model)) {
@@ -1407,24 +1184,20 @@ plotSubset <- function(model, type = 0) {
   nModels <- length(subsets$rss)
   n       <- length(model$fitted.values)
 
-  # actual model complexity per row (row index != number of terms
-  # after consistency screening!)
   nTerms  <- rowSums(subsets$outmat == "*")
   nParams <- nTerms + 1L
 
-  # F-tests between consecutive models, df from actual parameter counts
   Fvals <- rep(NA_real_, nModels)
   pvals <- rep(NA_real_, nModels)
   if (nModels > 1L) {
     df1 <- diff(nParams)
-    df1[df1 < 1L] <- NA                      # guard non-nested comparisons
+    df1[df1 < 1L] <- NA
     df2 <- n - nParams[-1L]
     Fs  <- (-diff(subsets$rss) / df1) / (subsets$rss[-1L] / df2)
     Fvals[-1L] <- Fs
     pvals[-1L] <- stats::pf(Fs, df1, df2, lower.tail = FALSE)
   }
 
-  # consistency flags: NA (unscreened, e.g. custom predictors) shown as filled
   consistent <- subsets$consistent
   if (is.null(consistent)) consistent <- rep(TRUE, nModels)
   consistent[is.na(consistent)] <- TRUE
@@ -1445,36 +1218,35 @@ plotSubset <- function(model, type = 0) {
                          levels = c("consistent", "inconsistent"))
   )
 
-  # ---- plot configuration per type -----------------------------------------
   xlab_terms <- "Number of terms"
   xlab_r2    <- expression(paste("Adjusted ", R^2))
 
   cfg <- switch(type + 1L,
-                list(x = "nr",    y = "adjr2",                                     # 0
+                list(x = "nr",    y = "adjr2",
                      title = expression(paste("Information Function: Adjusted ", R^2)),
                      xlab = xlab_terms,
                      ylab = expression(paste("Adjusted ", R^2))),
-                list(x = "adjr2", y = "cp",                                        # 1
+                list(x = "adjr2", y = "cp",
                      title = "Information Function: Mallows's Cp",
                      xlab = xlab_r2,
                      ylab = "Mallows's Cp"),
-                list(x = "adjr2", y = "bic",                                       # 2
+                list(x = "adjr2", y = "bic",
                      title = "Information Function: BIC",
                      xlab = xlab_r2,
                      ylab = "Bayesian Information Criterion (BIC)"),
-                list(x = "nr",    y = "RMSE",                                      # 3
+                list(x = "nr",    y = "RMSE",
                      title = "Information Function: RMSE",
                      xlab = xlab_terms,
                      ylab = "Root Mean Square Error (Raw Score)"),
-                list(x = "nr",    y = "RSS",                                       # 4
+                list(x = "nr",    y = "RSS",
                      title = "Information Function: RSS",
                      xlab = xlab_terms,
                      ylab = "Residual Sum of Squares (RSS)"),
-                list(x = "nr",    y = "Fstat",                                     # 5
+                list(x = "nr",    y = "Fstat",
                      title = "Information Function: F-test Statistics",
                      xlab = xlab_terms,
                      ylab = "F-test Statistics for Consecutive Models"),
-                list(x = "nr",    y = "pval",                                      # 6
+                list(x = "nr",    y = "pval",
                      title = "Information Function: p-values",
                      xlab = xlab_terms,
                      ylab = expression(paste("p-values for Tests on ", R^2,
@@ -1490,25 +1262,19 @@ plotSubset <- function(model, type = 0) {
       axis.text    = element_text(size = 10),
       legend.title = element_blank(),
       legend.text  = element_text(size = 10),
-      # show the shape legend only if inconsistent models are present
-      legend.position = if (any(dat$consistency == "inconsistent"))
-        "bottom" else "none",
+      legend.position = if (any(dat$consistency == "inconsistent")) "bottom" else "none",
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "gray95")
     )
 
-  # ---- base plot -------------------------------------------------------------
   plt <- ggplot(dat, aes(x = .data[[cfg$x]], y = .data[[cfg$y]])) +
     theme_custom +
     geom_line(color = "#1f77b4", linewidth = .75, na.rm = TRUE) +
     geom_point(aes(shape = .data$consistency),
                color = "#1f77b4", size = 2.5, na.rm = TRUE) +
-    # named values: robust even when only one level is present
-    scale_shape_manual(values = c(consistent = 16, inconsistent = 1),
-                       drop = FALSE) +
+    scale_shape_manual(values = c(consistent = 16, inconsistent = 1), drop = FALSE) +
     labs(title = cfg$title, x = cfg$xlab, y = cfg$ylab, shape = NULL)
 
-  # highlight the selected model
   if (!is.na(sel) && sel >= 1L && sel <= nModels) {
     plt <- plt +
       geom_point(data = dat[sel, , drop = FALSE],
@@ -1516,29 +1282,21 @@ plotSubset <- function(model, type = 0) {
                  color = "#3322AA", size = 2.5, stroke = 1.1, na.rm = TRUE)
   }
 
-  # ---- type-specific decorations ----------------------------------------------
   if (type == 0) {
     plt <- plt +
-      geom_hline(yintercept = cutoff, linetype = "dashed",
-                 linewidth = .8, color = "#d62728")
+      geom_hline(yintercept = cutoff, linetype = "dashed", linewidth = .8, color = "#d62728")
   } else if (type == 1) {
-    # Mallows's Cp can legitimately be <= 0; log scale only when valid
     if (all(dat$cp > 0, na.rm = TRUE)) {
-      plt <- plt + scale_y_log10() +
-        labs(y = "log-transformed Mallows's Cp")
+      plt <- plt + scale_y_log10() + labs(y = "log-transformed Mallows's Cp")
     } else {
-      message("Mallows's Cp contains non-positive values; ",
-              "using a linear scale instead of log10.")
+      message("Mallows's Cp contains non-positive values; using a linear scale instead of log10.")
     }
   } else if (type == 6) {
     plt <- plt +
-      geom_hline(yintercept = 0.05, linetype = "dashed",
-                 linewidth = 1, color = "#d62728") +
-      # clip the view without silently removing observations (unlike ylim)
+      geom_hline(yintercept = 0.05, linetype = "dashed", linewidth = 1, color = "#d62728") +
       coord_cartesian(ylim = c(-0.005, 0.11))
   }
 
-  # indicate model averaging
   if (isTRUE(model$averaged)) {
     plt <- plt + labs(caption = paste0(
       "Final coefficients: BIC-weighted average over ",
@@ -1548,47 +1306,20 @@ plotSubset <- function(model, type = 0) {
   return(plt)
 }
 
+#' Plot first order derivative of regression model
 #'
-#' @title Plot first order derivative of regression model
-#'
-#' @description
-#' This function plots the scores obtained via the first order derivative of the regression model
-#' in dependence of the norm score.
+#' This function plots the scores obtained via the first order derivative of the regression model.
+#' Applicable only for Taylor polynomial models.
 #'
 #' @param model The model from the bestModel function, a cnorm object.
-#' @param minAge Minimum age to start checking. If NULL, it's automatically determined from the model.
-#' @param maxAge Maximum age for checking. If NULL, it's automatically determined from the model.
-#' @param minNorm Lower end of the norm score range. If NULL, it's automatically determined from the model.
-#' @param maxNorm Upper end of the norm score range. If NULL, it's automatically determined from the model.
-#' @param stepAge Stepping parameter for the age check, usually 1 or 0.1; lower values indicate higher precision.
+#' @param minAge Minimum age to start checking.
+#' @param maxAge Maximum age for checking.
+#' @param minNorm Lower end of the norm score range.
+#' @param maxNorm Upper end of the norm score range.
+#' @param stepAge Stepping parameter for age.
 #' @param stepNorm Stepping parameter for norm scores.
 #' @param order Degree of the derivative (default = 1).
 #'
-#' @details
-#' The results indicate the progression of the norm scores within each age group. The regression-based
-#' modeling approach relies on the assumption of a linear progression of the norm scores. Negative scores
-#' in the first order derivative indicate a violation of this assumption. Scores near zero are typical
-#' for bottom and ceiling effects in the raw data.
-#'
-#' The regression models usually converge within the range of the original values. In case of vertical
-#' and horizontal extrapolation, with increasing distance to the original data, the risk of assumption
-#' violation increases as well.
-#'
-#' @note
-#' This function is currently incompatible with reversed raw score scales ('descent' option).
-#'
-#' @return A ggplot object representing the derivative of the regression function.
-#'
-#' @seealso \code{\link{checkConsistency}}, \code{\link{bestModel}}, \code{\link{derive}}
-#'
-#' @examples
-#' \dontrun{
-#' # For traditional continuous norming model
-#' result <- cnorm(raw = elfe$raw, group = elfe$group)
-#' plotDerivative(result, minAge=2, maxAge=5, stepAge=.2, minNorm=25, maxNorm=75, stepNorm=1)
-#' }
-#'
-#' @import ggplot2
 #' @export
 #' @family plot
 plotDerivative <- function(model,
@@ -1602,41 +1333,23 @@ plotDerivative <- function(model,
   if (isTaylor(model)) {
     model <- model$model
   } else if (isParametric(model)) {
-    stop(
-      "This function is not applicable for parametric models (Beta Binomial or Sinh-Arcsinh). Please use the plotDensity function instead."
-    )
+    stop("This function is not applicable for parametric models (Beta-Binomial, CMP, or SHASH). ",
+         "Please use the plotDensity function instead.")
   }
 
   if (!model$useAge) {
     stop("Age or group variable explicitly set to FALSE in dataset. No plotting available.")
   }
 
-  if (is.null(minAge)) {
-    minAge <- model$minA1
-  }
+  if (is.null(minAge)) minAge <- model$minA1
+  if (is.null(maxAge)) maxAge <- model$maxA1
+  if (is.null(minNorm)) minNorm <- model$minL1
+  if (is.null(maxNorm)) maxNorm <- model$maxL1
 
-  if (is.null(maxAge)) {
-    maxAge <- model$maxA1
-  }
+  if (is.null(stepAge))  stepAge <- (maxAge - minAge) / 100
+  if (is.null(stepNorm)) stepNorm <- (maxNorm - minNorm) / 100
 
-  if (is.null(minNorm)) {
-    minNorm <- model$minL1
-  }
-
-  if (is.null(maxNorm)) {
-    maxNorm <- model$maxL1
-  }
-
-  if (is.null(stepAge)) {
-    stepAge <- (maxAge - minAge) / 100
-  }
-
-  if (is.null(stepNorm)) {
-    stepNorm <- (maxNorm - minNorm) / 100
-  }
-
-  if (order <= 0)
-    stop("Order of derivative must be a positive integer.")
+  if (order <= 0) stop("Order of derivative must be a positive integer.")
 
   rowS <- seq(minNorm, maxNorm, by = stepNorm)
   colS <- seq(minAge, maxAge, by = stepAge)
@@ -1649,45 +1362,24 @@ plotDerivative <- function(model,
   cat(
     paste0(
       rangeCheck(model, minAge, maxAge, minNorm, maxNorm),
-      " Coefficients from the ",
-      order,
-      " order derivative function:\n\n"
+      " Coefficients from the ", order, " order derivative function:\n\n"
     )
   )
   print(coeff)
 
-
   dev2 <- expand.grid(X = rowS, Y = colS)
-  dev2$Z <- mapply(function(norm, age)
-    predictRaw(norm, age, coeff), dev2$X, dev2$Y)
+  dev2$Z <- mapply(function(norm, age) predictRaw(norm, age, coeff), dev2$X, dev2$Y)
 
-  ordinal <- if (order <= 3)
-    c("st", "nd", "rd")[order]
-  else
-    "th"
+  ordinal <- if (order <= 3) c("st", "nd", "rd")[order] else "th"
   desc <- paste0(order, ordinal, " Order Derivative")
   custom_palette <- c(
-    "#FF0000",
-    "#FF4000",
-    "#FF8000",
-    "#FFBF00",
-    "#FFFF00",
-    "#80FF00",
-    "#00FF00",
-    "#00FF80",
-    "#00FFFF",
-    "#0080FF",
-    "#0000FF",
-    "#4B0082",
-    "#8B00FF"
+    "#FF0000", "#FF4000", "#FF8000", "#FFBF00", "#FFFF00",
+    "#80FF00", "#00FF00", "#00FF80", "#00FFFF", "#0080FF",
+    "#0000FF", "#4B0082", "#8B00FF"
   )
   theme_custom <- theme_minimal() +
     theme(
-      plot.title = element_text(
-        face = "bold",
-        size = 14,
-        hjust = 0.5
-      ),
+      plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
       axis.title = element_text(face = "bold", size = 12),
       axis.title.x = element_text(margin = margin(t = 10)),
       axis.title.y = element_text(margin = margin(r = 10)),
@@ -1726,9 +1418,7 @@ plotDerivative <- function(model,
 #' General convenience plotting function
 #'
 #' @param x a cnorm object
-#' @param y the type of plot as a string, can be one of
-#' 'raw' (1), 'norm' (2), 'curves' (3), 'percentiles' (4), 'series' (5), 'subset' (6),
-#' or 'derivative' (7), either as a string or the according index
+#' @param y the type of plot as a string or index
 #' @param ... additional parameters for the specific plotting function
 #'
 #' @export
@@ -1751,59 +1441,63 @@ plotCnorm <- function(x, y, ...) {
     plotPercentiles(x, ...)
   else if (y == "density"     || y == 5)
     plotDensity(x, ...)
-  else if (y == "series"      ||
-           y == 6)
+  else if (y == "series"      || y == 6)
     plotPercentileSeries(x, ...)
   else if (y == "subset"      || y == 7)
     plotSubset(x, ...)
   else if (y == "derivative"  || y == 8)
     plotDerivative(x, ...)
   else
-    stop("Unkown plot type")
+    stop("Unknown plot type")
 }
+
+
 
 #' Compare Two Norm Models Visually
 #'
 #' This function creates a visualization comparing two norm models by displaying
 #' their percentile curves. The first model is shown with solid lines, the second
 #' with dashed lines. If age and score vectors are provided, manifest percentiles
-#' are displayed as dots. The function works with regular cnorm models, beta-binomial
-#' models, and shash models, allowing comparison between different model types.
+#' are displayed as dots. The function works with regular cnorm models (Taylor polynomials),
+#' beta-binomial models, Conway-Maxwell-Poisson (CMP) models, and shash models,
+#' allowing comparison between different model types.
 #'
-#' For beta-binomial models, the exact quantiles of the discrete beta-binomial
-#' distribution are displayed by default as step functions (\code{discrete = TRUE}).
-#' Setting \code{discrete = FALSE} draws smooth lines based on the quantiles of
-#' the underlying beta (mixing) distribution instead. Note that this continuous
-#' approximation omits the binomial stage of the variance and therefore displays
-#' less spread than the fitted model actually implies, particularly in the outer
-#' percentiles. The parameter has no effect on Taylor polynomial or shash models.
+#' For discrete count and accuracy models (beta-binomial and CMP), the exact quantiles
+#' of the discrete distribution are displayed by default as step functions
+#' (\code{discrete = TRUE}). Setting \code{discrete = FALSE} draws smooth connected
+#' lines instead. Note that for beta-binomial models, setting \code{discrete = FALSE}
+#' draws smooth lines based on the quantiles of the underlying beta (mixing)
+#' distribution instead (omitting the binomial-stage variance). The parameter has no
+#' effect on continuous models (Taylor polynomials or shash).
 #'
-#' @param model1 First model object (distribution free, beta-binomial, or shash)
-#' @param model2 Second model object (distribution free, beta-binomial, or shash)
+#' @param model1 First model object (distribution-free, beta-binomial, CMP, or shash)
+#' @param model2 Second model object (distribution-free, beta-binomial, CMP, or shash)
 #' @param age Optional vector with manifest age or group values
 #' @param score Optional vector with manifest raw score values
 #' @param weights Optional vector with manifest weights
 #' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
 #' @param title Custom title for plot (optional)
 #' @param subtitle Custom subtitle for plot (optional)
-#' @param discrete Logical indicating whether beta-binomial models are displayed
-#'   with their exact discrete quantiles as step functions (TRUE, default) or
-#'   with a smooth continuous approximation via the underlying beta
-#'   distribution (FALSE). Ignored for other model types.
+#' @param discrete Logical indicating whether discrete models (beta-binomial and CMP)
+#'   are displayed with their exact discrete quantiles as step functions (TRUE, default)
+#'   or with smooth continuous curves (FALSE). Ignored for Taylor and shash models.
 #'
 #' @return A ggplot object showing the comparison of both models
 #'
 #' @examples
 #' \dontrun{
-#' # Compare different types of models
-#' model1 <- cnorm(group = elfe$group, raw = elfe$raw)
-#' model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
-#' model3 <- cnorm.shash(elfe$group, elfe$raw)
-#'
 #' # Compare traditional cnorm with shash
+#' model1 <- cnorm(group = elfe$group, raw = elfe$raw)
+#' model3 <- cnorm.shash(elfe$group, elfe$raw)
 #' compare(model1, model3, age = elfe$group, score = elfe$raw)
 #'
+#' # Compare traditional cnorm with CMP model on speeded count data
+#' model_cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+#' model_taylor <- cnorm(age = speeded$age, raw = speeded$raw)
+#' compare(model_taylor, model_cmp, age = speeded$age, score = speeded$raw)
+#'
 #' # Compare beta-binomial with shash
+#' model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
 #' compare(model2, model3, age = elfe$group, score = elfe$raw)
 #' }
 #'
@@ -1818,8 +1512,20 @@ compare <- function(model1,
                     title = NULL,
                     subtitle = NULL,
                     discrete = TRUE) {
-  # retrieve score from model if score is null and one of the
-  # models is a cnorm object
+
+  # Helper: verify if model is CMP
+  is_cmp <- function(m) inherits(m, "cnormCMP")
+
+  # Helper: robust parametric check (including CMP)
+  is_param <- function(m) {
+    if (exists("isParametric", mode = "function")) {
+      isParametric(m) || is_cmp(m)
+    } else {
+      inherits(m, c("cnormBetaBinomial", "cnormBetaBinomial2", "cnormShash", "cnormCMP"))
+    }
+  }
+
+  # Retrieve score from model if score is null and one of the models is a cnorm object
   if (is.null(score) && isTaylor(model1)) {
     score <- model1$data[[attributes(model1$data)$raw]]
     age <- model1$data[[attributes(model1$data)$age]]
@@ -1844,8 +1550,7 @@ compare <- function(model1,
                           ncol = length(percentiles))
 
     if (discrete) {
-      # Exact quantiles of the discrete beta-binomial distribution;
-      # one pmf evaluation per age, all percentiles read from it
+      # Exact quantiles of the discrete beta-binomial distribution
       for (j in seq_along(pred_ages)) {
         dist <- bb_distribution(preds$a[j], preds$b[j], n_max)
         if (!anyNA(dist$cum)) {
@@ -1855,8 +1560,7 @@ compare <- function(model1,
         }
       }
     } else {
-      # Continuous approximation via the underlying beta (mixing)
-      # distribution; omits the binomial-stage variance
+      # Continuous approximation via the underlying beta (mixing) distribution
       for (i in seq_along(percentiles)) {
         pred_matrix[, i] <- qbeta(percentiles[i],
                                   shape1 = preds$a,
@@ -1873,7 +1577,7 @@ compare <- function(model1,
   get_shash_predictions <- function(model, pred_ages) {
     preds <- predictCoefficients_shash(model, pred_ages)
 
-    pred_matrix <- matrix(NA,
+    pred_matrix <- matrix(NA_real_,
                           nrow = length(pred_ages),
                           ncol = length(percentiles))
     for (i in seq_along(percentiles)) {
@@ -1891,15 +1595,35 @@ compare <- function(model1,
     return(pred_data)
   }
 
-  # Function to get predictions for cnorm models
+  # Function to get predictions for CMP models
+  get_cmp_predictions <- function(model, pred_ages) {
+    preds <- predictCoefficients_cmp(model, pred_ages)
+
+    pred_matrix <- matrix(NA_real_,
+                          nrow = length(pred_ages),
+                          ncol = length(percentiles))
+    for (i in seq_along(percentiles)) {
+      pred_matrix[, i] <- qcmp(
+        percentiles[i],
+        mu = preds$mu,
+        nu = preds$nu
+      )
+    }
+
+    pred_data <- data.frame(age = pred_ages, pred_matrix)
+    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    return(pred_data)
+  }
+
+  # Function to get predictions for cnorm (Taylor) models
   get_cnorm_predictions <- function(model, pred_ages) {
     m <- model$model
     T <- qnorm(percentiles, m$scaleM, m$scaleSD)
 
-    pred_matrix <- matrix(NA,
+    pred_matrix <- matrix(NA_real_,
                           nrow = length(pred_ages),
                           ncol = length(percentiles))
-    for (i in 1:length(pred_ages)) {
+    for (i in seq_along(pred_ages)) {
       pred_matrix[i, ] <- predictRaw(T, pred_ages[i], m$coefficients)
     }
 
@@ -1910,7 +1634,7 @@ compare <- function(model1,
 
   # Determine age range
   get_age_range <- function(model) {
-    if (isParametric(model)) {
+    if (is_param(model)) {
       return(c(
         attr(model$result, "ageMin"),
         attr(model$result, "ageMax")
@@ -1929,14 +1653,16 @@ compare <- function(model1,
   pred_ages <- seq(min(range1[1], range2[1]), max(range1[2], range2[2]), length.out = 100)
 
   # Get predictions for both models; remember which models are displayed
-  # as step functions (discrete beta-binomial quantiles)
-  step1 <- isBeta(model1) && discrete
-  step2 <- isBeta(model2) && discrete
+  # as step functions (discrete quantiles)
+  step1 <- (isBeta(model1) || is_cmp(model1)) && discrete
+  step2 <- (isBeta(model2) || is_cmp(model2)) && discrete
 
   plot_data1 <- if (isBeta(model1)) {
     get_bb_predictions(model1, pred_ages)
   } else if (isSHASH(model1)) {
     get_shash_predictions(model1, pred_ages)
+  } else if (is_cmp(model1)) {
+    get_cmp_predictions(model1, pred_ages)
   } else {
     get_cnorm_predictions(model1, pred_ages)
   }
@@ -1945,6 +1671,8 @@ compare <- function(model1,
     get_bb_predictions(model2, pred_ages)
   } else if (isSHASH(model2)) {
     get_shash_predictions(model2, pred_ages)
+  } else if (is_cmp(model2)) {
+    get_cmp_predictions(model2, pred_ages)
   } else {
     get_cnorm_predictions(model2, pred_ages)
   }
@@ -1989,7 +1717,8 @@ compare <- function(model1,
   }
 
   # Set factor levels for correct ordering
-  plot_data_long$percentile <- factor(plot_data_long$percentile, levels = paste0("P", percentiles * 100))
+  plot_data_long$percentile <- factor(plot_data_long$percentile,
+                                      levels = paste0("P", percentiles * 100))
 
   # Set default title if none provided
   if (is.null(title)) {
@@ -2001,8 +1730,7 @@ compare <- function(model1,
   }
 
   # Layer helper: piecewise-constant discrete quantiles are rendered with
-  # geom_step (vertical risers, direction "mid"), continuous curves with
-  # geom_line
+  # geom_step (vertical risers, direction "mid"), continuous curves with geom_line
   model_layer <- function(dat, lty, use_step) {
     if (use_step) {
       geom_step(
@@ -2067,7 +1795,7 @@ compare <- function(model1,
 
     AIC1 <- -2 * loglik + 2 * ideal.model
     BIC1 <- model1$model$subsets$bic[ideal.model]
-  } else{
+  } else {
     n_obs <- attr(model1$result, "N")
     n_params <- length(model1$result$par)
     log_likelihood <- -model1$result$value
@@ -2085,7 +1813,7 @@ compare <- function(model1,
 
     AIC2 <- -2 * loglik + 2 * ideal.model
     BIC2 <- model2$model$subsets$bic[ideal.model]
-  } else{
+  } else {
     n_obs <- attr(model2$result, "N")
     n_params <- length(model2$result$par)
     log_likelihood <- -model2$result$value
@@ -2093,12 +1821,12 @@ compare <- function(model1,
     BIC2 <- n_params * log(n_obs) - 2 * log_likelihood
   }
 
-  if (!is.null(score) & !is.null(age)) {
+  if (!is.null(score) && !is.null(age)) {
     # Prepare data for manifest percentiles and fit statistics
     data <- data.frame(age = age, score = score)
     if (!is.null(weights)) {
       data$w <- weights
-    } else{
+    } else {
       data$w <- rep(1, length(age))
     }
 
@@ -2153,7 +1881,7 @@ compare <- function(model1,
     # Calculate fit statistics
     if (is.null(weights)) {
       data <- rankByGroup(data, raw = "score", group = "group")
-    } else{
+    } else {
       data <- rankByGroup(data,
                           raw = "score",
                           group = "group",
@@ -2161,7 +1889,7 @@ compare <- function(model1,
     }
     data$normValue <- 10 * (data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
 
-    # Get predictions for both models
+    # Get predictions for model 1
     if (isTaylor(model1)) {
       data$fitted1 <- predictNorm(
         data$score,
@@ -2171,13 +1899,14 @@ compare <- function(model1,
         maxNorm = model1$model$maxL1
       )
       data$fitted1 <- 10 * (data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
-    } else if (isParametric(model1)) {
+    } else if (is_param(model1)) {
       data$fitted1 <- predict(model1, data$age, data$score)
       scaleMean <- attr(model1$result, "scaleMean")
       scaleSD <- attr(model1$result, "scaleSD")
       data$fitted1 <- 10 * (data$fitted1 - scaleMean) / scaleSD
     }
 
+    # Get predictions for model 2
     if (isTaylor(model2)) {
       data$fitted2 <- predictNorm(
         data$score,
@@ -2187,7 +1916,7 @@ compare <- function(model1,
         maxNorm = model2$model$maxL1
       )
       data$fitted2 <- 10 * (data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
-    } else if (isParametric(model2)) {
+    } else if (is_param(model2)) {
       data$fitted2 <- predict(model2, data$age, data$score)
       scaleMean <- attr(model2$result, "scaleMean")
       scaleSD <- attr(model2$result, "scaleSD")
@@ -2207,7 +1936,6 @@ compare <- function(model1,
     MAD1 <- mean(abs(data$fitted1 - data$normValue), na.rm = TRUE)
     MAD2 <- mean(abs(data$fitted2 - data$normValue), na.rm = TRUE)
 
-
     # Create and print summary table
     fit_table <- data.frame(
       Metric = c("R2", "Bias", "RMSE", "MAD", "AIC", "BIC"),
@@ -2223,7 +1951,6 @@ compare <- function(model1,
       )
     )
 
-    # Round values
     fit_table[, 2:4] <- round(fit_table[, 2:4], 4)
 
     cat("\nModel Comparison Summary:\n")
@@ -2233,8 +1960,7 @@ compare <- function(model1,
     cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
     cat("      Scale metrics are T scores (scaleSD = 10)\n")
     cat("      AIC and BIC should only be used when comparing models of the same type.\n")
-  } else{
-    # Create and print summary table
+  } else {
     fit_table <- data.frame(
       Metric = c("AIC", "BIC"),
       Model1 = c(AIC1, BIC1),

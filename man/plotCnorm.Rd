@@ -9,9 +9,7 @@ plotCnorm(x, y, ...)
 \arguments{
 \item{x}{a cnorm object}
 
-\item{y}{the type of plot as a string, can be one of
-'raw' (1), 'norm' (2), 'curves' (3), 'percentiles' (4), 'series' (5), 'subset' (6),
-or 'derivative' (7), either as a string or the according index}
+\item{y}{the type of plot as a string or index}
 
 \item{...}{additional parameters for the specific plotting function}
 }

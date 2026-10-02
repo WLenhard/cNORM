@@ -219,7 +219,10 @@ bestModel <- function(data,
       report <- paste0("Final solution: ", n_terms_per_row[i],
                        " terms (highest consistent model)")
     } else {
-      i <- which(results$adjr2 > 0.99)[1]
+      if(!useAge)
+        i <- which(results$adjr2 > 0.995)[1]
+      else
+        i <- which(results$adjr2 > 0.99)[1]
       if (is.na(i)) {
         # fall back to the BIC-optimal model instead of the smallest one
         i <- which.min(results$bic)

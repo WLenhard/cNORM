@@ -174,49 +174,29 @@ predictRaw <-
 #'
 #' This function generates a norm table for a specific age based on the regression
 #' model by assigning raw scores to norm scores. Please specify the
-#' range of norm scores, you want to cover. A T value of 25 corresponds to a percentile
-#' of .6. As a consequence, specifying a range of T = 25 to T = 75 would cover 98.4 % of
-#' the population. Please be careful when extrapolating vertically (at the lower and
-#' upper end of the age specific distribution). Depending on the size of your standardization
-#' sample, extreme values with T < 20 or T > 80 might lead to inconsistent results.
-#' In case a confidence coefficient (CI, default .9) and the reliability is specified,
+#' range of norm scores you want to cover. For Taylor polynomial models, specifying a
+#' range of T = 25 to T = 75 covers 98.4% of the population.
+#' For parametric models (beta-binomial, CMP, shash), norm tables are computed directly
+#' from the distribution functions.
+#' In case a confidence coefficient (CI, default .9) and reliability is specified,
 #' confidence intervals are computed for the true score estimates, including a correction for
 #' regression to the mean (Eid & Schmidt, 2012, p. 272).
 #'
 #' @param A the age as single value or a vector of age values
-#' @param model The regression model from the cnorm function
-#' @param minNorm The lower bound of the norm score range
-#' @param maxNorm The upper bound of the norm score range
-#' @param minRaw clipping parameter for the lower bound of raw scores
-#' @param maxRaw clipping parameter for the upper bound of raw scores
-#' @param step Stepping parameter with lower values indicating higher precision
+#' @param model The regression model from cnorm, cnorm.betabinomial, cnorm.cmp, or cnorm.shash
+#' @param minNorm The lower bound of the norm score range (Taylor models)
+#' @param maxNorm The upper bound of the norm score range (Taylor models)
+#' @param minRaw clipping parameter for the lower bound of raw scores (or start score for CMP/shash)
+#' @param maxRaw clipping parameter for the upper bound of raw scores (or end score for CMP/shash)
+#' @param step Stepping parameter with lower values indicating higher precision (for CMP: integer step size)
 #' @param monotonuous corrects for decreasing norm scores in case of model inconsistencies (default)
 #' @param CI confidence coefficient, ranging from 0 to 1, default .9
-#' @param reliability coefficient, ranging between  0 to 1
+#' @param reliability coefficient, ranging between 0 to 1
 #' @param pretty Format table by collapsing intervals and rounding to meaningful precision
 #' @return either data.frame with norm scores, predicted raw scores and percentiles in case of simple A
 #' value or a list of norm tables if vector of A values was provided
 #' @seealso rawTable
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
-#' @examples
-#' \dontrun{
-#' # Generate cnorm object from example data
-#' cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-#'
-#' # create single norm table
-#' norms <- normTable(3.5, cnorm.elfe, minNorm = 25, maxNorm = 75, step = 0.5)
-#'
-#' # create list of norm tables
-#' norms <- normTable(c(2.5, 3.5, 4.5), cnorm.elfe,
-#'   minNorm = 25, maxNorm = 75,
-#'   step = 1, minRaw = 0, maxRaw = 26
-#' )
-#'
-#' # conventional norming, set age to arbitrary value
-#' model <- cnorm(raw = elfe$raw)
-#' normTable(0, model)
-#' }
-#'
 #' @family predict
 #' @export
 normTable <- function(A,
@@ -242,10 +222,25 @@ normTable <- function(A,
       CI = CI,
       reliability = reliability
     ))
+  } else if (isCMP(model)) {
+    res <- normTable.cmp(
+      model,
+      ages = A,
+      start = minRaw,
+      end = maxRaw,
+      step = if (is.null(step)) 1 else step,
+      CI = CI,
+      reliability = reliability
+    )
+    if (length(A) == 1L && is.list(res) && !is.data.frame(res)) {
+      return(res[[1L]])
+    } else {
+      return(res)
+    }
   } else if (isTaylor(model)) {
     model <- model$model
   } else if (!inherits(model, "cnormModel")) {
-    stop("Please provide a cnorm object.")
+    stop("Please provide a valid cnorm model object.")
   }
 
   if (model$useAge && !is.numeric(A)) {
@@ -412,6 +407,12 @@ rawTable <- function(A,
                      CI = .9,
                      reliability = NULL,
                      pretty = TRUE) {
+  if (isParametric(model)) {
+    stop("rawTable() is only applicable for Taylor polynomial models. ",
+         "For parametric models (Beta-Binomial, CMP, SHASH), use normTable() instead, ",
+         "which directly tabulates raw scores to norm scores.")
+  }
+
   if (isTaylor(model)) {
     model <- model$model
   } else if (!inherits(model, "cnormModel")) {

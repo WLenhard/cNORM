@@ -17,9 +17,9 @@ compare(
 )
 }
 \arguments{
-\item{model1}{First model object (distribution free, beta-binomial, or shash)}
+\item{model1}{First model object (distribution-free, beta-binomial, CMP, or shash)}
 
-\item{model2}{Second model object (distribution free, beta-binomial, or shash)}
+\item{model2}{Second model object (distribution-free, beta-binomial, CMP, or shash)}
 
 \item{percentiles}{Vector with percentile scores, ranging from 0 to 1 (exclusive)}
 
@@ -33,10 +33,9 @@ compare(
 
 \item{subtitle}{Custom subtitle for plot (optional)}
 
-\item{discrete}{Logical indicating whether beta-binomial models are displayed
-with their exact discrete quantiles as step functions (TRUE, default) or
-with a smooth continuous approximation via the underlying beta
-distribution (FALSE). Ignored for other model types.}
+\item{discrete}{Logical indicating whether discrete models (beta-binomial and CMP)
+are displayed with their exact discrete quantiles as step functions (TRUE, default)
+or with smooth continuous curves (FALSE). Ignored for Taylor and shash models.}
 }
 \value{
 A ggplot object showing the comparison of both models
@@ -45,29 +44,33 @@ A ggplot object showing the comparison of both models
 This function creates a visualization comparing two norm models by displaying
 their percentile curves. The first model is shown with solid lines, the second
 with dashed lines. If age and score vectors are provided, manifest percentiles
-are displayed as dots. The function works with regular cnorm models, beta-binomial
-models, and shash models, allowing comparison between different model types.
+are displayed as dots. The function works with regular cnorm models (Taylor polynomials),
+beta-binomial models, Conway-Maxwell-Poisson (CMP) models, and shash models,
+allowing comparison between different model types.
 }
 \details{
-For beta-binomial models, the exact quantiles of the discrete beta-binomial
-distribution are displayed by default as step functions (\code{discrete = TRUE}).
-Setting \code{discrete = FALSE} draws smooth lines based on the quantiles of
-the underlying beta (mixing) distribution instead. Note that this continuous
-approximation omits the binomial stage of the variance and therefore displays
-less spread than the fitted model actually implies, particularly in the outer
-percentiles. The parameter has no effect on Taylor polynomial or shash models.
+For discrete count and accuracy models (beta-binomial and CMP), the exact quantiles
+of the discrete distribution are displayed by default as step functions
+(\code{discrete = TRUE}). Setting \code{discrete = FALSE} draws smooth connected
+lines instead. Note that for beta-binomial models, setting \code{discrete = FALSE}
+draws smooth lines based on the quantiles of the underlying beta (mixing)
+distribution instead (omitting the binomial-stage variance). The parameter has no
+effect on continuous models (Taylor polynomials or shash).
 }
 \examples{
 \dontrun{
-# Compare different types of models
-model1 <- cnorm(group = elfe$group, raw = elfe$raw)
-model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
-model3 <- cnorm.shash(elfe$group, elfe$raw)
-
 # Compare traditional cnorm with shash
+model1 <- cnorm(group = elfe$group, raw = elfe$raw)
+model3 <- cnorm.shash(elfe$group, elfe$raw)
 compare(model1, model3, age = elfe$group, score = elfe$raw)
 
+# Compare traditional cnorm with CMP model on speeded count data
+model_cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+model_taylor <- cnorm(age = speeded$age, raw = speeded$raw)
+compare(model_taylor, model_cmp, age = speeded$age, score = speeded$raw)
+
 # Compare beta-binomial with shash
+model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
 compare(model2, model3, age = elfe$group, score = elfe$raw)
 }
 

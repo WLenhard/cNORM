@@ -15,7 +15,7 @@ plotNormCurves(
 )
 }
 \arguments{
-\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormShash object.}
+\item{model}{The model from the bestModel function, a cnorm object, or a cnormBetaBinomial / cnormBetaBinomial2 / cnormCMP / cnormShash object.}
 
 \item{normList}{Vector with norm scores to display. If NULL, default values are used.}
 
@@ -33,8 +33,9 @@ plotNormCurves(
 A ggplot object representing the norm curves.
 }
 \description{
-This function plots the norm curves based on the regression model. It supports both
-Taylor polynomial models, beta-binomial models, and shash models.
+This function plots the norm curves based on the regression model. It supports
+Taylor polynomial models, beta-binomial models, Conway-Maxwell-Poisson (CMP) models,
+and shash models.
 }
 \details{
 Please check the function for inconsistent curves: The different curves should not intersect.
@@ -55,6 +56,10 @@ plotNormCurves(m, minAge=2, maxAge=5)
 # For beta-binomial model
 bb_model <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 plotNormCurves(bb_model)
+
+# For CMP model
+cmp_model <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+plotNormCurves(cmp_model)
 }
 }
 \seealso{

@@ -6,6 +6,7 @@
 \alias{predictMoments.cnorm}
 \alias{predictMoments.cnormBetaBinomial}
 \alias{predictMoments.cnormBetaBinomial2}
+\alias{predictMoments.cnormCMP}
 \alias{predictMoments.cnormShash}
 \title{Model-Implied Distributional Moments at Specific Ages}
 \usage{
@@ -19,22 +20,31 @@ predictMoments(model, age, ...)
 
 \method{predictMoments}{cnormBetaBinomial2}(model, age, ...)
 
+\method{predictMoments}{cnormCMP}(model, age, censor = TRUE, minRaw = NULL, maxRaw = NULL, ...)
+
 \method{predictMoments}{cnormShash}(model, age, nNodes = 100, ...)
 }
 \arguments{
 \item{model}{A model object of class \code{cnorm},
-\code{cnormBetaBinomial}, \code{cnormBetaBinomial2} or
-\code{cnormShash}.}
+\code{cnormBetaBinomial}, \code{cnormBetaBinomial2}, \code{cnormCMP},
+or \code{cnormShash}.}
 
 \item{age}{A numeric vector of ages (values of the explanatory variable)
 at which to compute the moments.}
 
 \item{...}{Additional parameters passed to the methods, e.g.
-\code{nNodes}.}
+\code{nNodes} or \code{censor}.}
 
 \item{nNodes}{Number of Gauss-Hermite quadrature nodes (default 100).
 Only relevant for the Taylor and SHASH methods; ignored for
-beta-binomial models, which are computed exactly by summation.}
+discrete models (Beta-Binomial, CMP), which are computed exactly by summation.}
+
+\item{censor}{Logical; if \code{TRUE} (default), the distribution is censored
+at \code{[minRaw, maxRaw]} to reflect the empirical score limits. If \code{FALSE},
+uncensored theoretical population moments are calculated.}
+
+\item{minRaw, maxRaw}{Optional custom score bounds for censoring. If \code{NULL} (default),
+they are retrieved from the fitted model attributes.}
 }
 \value{
 A \code{data.frame} with one row per age and the columns
@@ -65,6 +75,12 @@ The computation strategy depends on the model family:
     \code{0:n}, using the age-specific predicted \eqn{\alpha} and
     \eqn{\beta} parameters. This respects the discreteness of the
     distribution; no continuity approximation is involved.}
+  \item{Conway-Maxwell-Poisson (\code{cnormCMP})}{Moments are computed
+    exactly by discrete summation over the probability mass function using
+    the age-specific predicted \eqn{\mu} and \eqn{\nu} parameters. By default,
+    the distribution is censored at \code{[minRaw, maxRaw]} to match the
+    empirical test score range, consistent with the other methods.
+    Uncensored theoretical moments can be computed with \code{censor = FALSE}.}
   \item{SHASH (\code{cnormShash})}{Moments are obtained by Gauss-Hermite
     quadrature of the quantile function \code{qshash} evaluated at the
     age-specific distribution parameters, censored at
@@ -75,7 +91,7 @@ Kurtosis is reported as \emph{excess} kurtosis (0 for the normal
 distribution).
 
 Note that the skewness and kurtosis of the \emph{censored} distribution
-are reported. For well-fitting models whose raw score range covers the
+are reported by default. For well-fitting models whose raw score range covers the
 probability mass of the conditional distribution, censoring effects are
 negligible; for distributions with substantial floor or ceiling effects,
 the censored moments are the substantively meaningful ones.
@@ -89,10 +105,17 @@ predictMoments(model, age = c(2.25, 2.75, 3.25, 3.75, 4.25))
 # Beta-binomial model
 bb <- cnorm.betabinomial(age = ppvt$age, score = ppvt$raw, n = 228)
 predictMoments(bb, age = seq(4, 16, by = 2))
+
+# Conway-Maxwell-Poisson model (speeded tests)
+cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+predictMoments(cmp, age = c(7, 8, 9, 10))
 }
 
 }
 \references{
+Conway, R. W., & Maxwell, W. L. (1962). A queuing model with state dependent
+service rates. Journal of Industrial Engineering, 12, 132-136.
+
 Isserlis, L. (1918). On a formula for the product-moment coefficient of
 any order of a normal frequency distribution in any number of variables.
 Biometrika, 12(1/2), 134-139.

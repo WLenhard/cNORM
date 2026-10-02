@@ -66,7 +66,8 @@ this number of terms is used}
 \item{R2}{Adjusted R square as a stopping criterion for the model building
 (default R2 = 0.99)}
 
-\item{plot}{Default TRUE; plots the regression model and prints report}
+\item{plot}{Default TRUE; plots the regression model and prints reportSetting
+it to FALSE as well deactivates potential user interactions.}
 
 \item{extensive}{If TRUE, screen models for consistency and - if possible, exclude inconsistent ones}
 
