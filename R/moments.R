@@ -291,23 +291,23 @@ predictMoments.cnormBetaBinomial <- function(model, age, ...) {
 predictMoments.cnormBetaBinomial2 <- predictMoments.cnormBetaBinomial
 
 
-# ---------------------------------------------------------------------------
-# Conway-Maxwell-Poisson models (exact, via pmf summation)
-# ---------------------------------------------------------------------------
-
 #' Exact moments of the Conway-Maxwell-Poisson distribution via pmf summation
 #'
 #' Computes moments by discrete summation over the support.
 #' If censor = TRUE, mass below minRaw and above maxRaw is collapsed onto
-#' the respective boundary point.
+#' the respective boundary point. If max_score is given, the distribution is the
+#' right-truncated CMP distribution on 0:max_score.
 #'
 #' @keywords internal
 #' @noRd
-.cmpMoments <- function(mu, nu, censor = TRUE, minRaw = 0, maxRaw = NULL) {
+.cmpMoments <- function(mu, nu, censor = TRUE, minRaw = 0, maxRaw = NULL,
+                        max_score = NULL) {
+  na_result <- list(mean = NA_real_, variance = NA_real_, sd = NA_real_,
+                    skewness = NA_real_, kurtosis = NA_real_)
   if (!is.finite(mu) || !is.finite(nu) || mu <= 0 || nu <= 0) {
-    return(list(mean = NA_real_, variance = NA_real_, sd = NA_real_,
-                skewness = NA_real_, kurtosis = NA_real_))
+    return(na_result)
   }
+  ms <- if (is.null(max_score)) Inf else max_score
 
   if (isTRUE(censor)) {
     minRaw <- max(0L, as.integer(round(minRaw)))
@@ -320,16 +320,20 @@ predictMoments.cnormBetaBinomial2 <- predictMoments.cnormBetaBinomial
 
     x <- minRaw:maxRaw
     # Floor: P(Y <= minRaw)
-    p_floor <- pcmp(minRaw, mu = mu, nu = nu, lower.tail = TRUE)
+    p_floor <- pcmp(minRaw, mu = mu, nu = nu, lower.tail = TRUE, max_score = ms)
     # Ceiling: P(Y >= maxRaw) = P(Y > maxRaw - 1)
-    p_tail  <- pcmp(maxRaw - 1L, mu = mu, nu = nu, lower.tail = FALSE)
+    p_tail  <- pcmp(maxRaw - 1L, mu = mu, nu = nu, lower.tail = FALSE, max_score = ms)
 
     if (maxRaw > minRaw + 1L) {
-      p_mid <- dcmp((minRaw + 1L):(maxRaw - 1L), mu = mu, nu = nu)
+      p_mid <- dcmp((minRaw + 1L):(maxRaw - 1L), mu = mu, nu = nu, max_score = ms)
       w <- c(p_floor, p_mid, p_tail)
     } else {
       w <- c(p_floor, p_tail)
     }
+  } else if (is.finite(ms)) {
+    # Uncensored, right-truncated: finite support 0:max_score, summed exactly
+    x <- 0:as.integer(ms)
+    w <- dcmp(x, mu = mu, nu = nu, max_score = ms)
   } else {
     # Uncensored: determine upper summation bound J capturing >= 1 - 1e-12 of mass
     J <- tryCatch({
@@ -348,8 +352,7 @@ predictMoments.cnormBetaBinomial2 <- predictMoments.cnormBetaBinomial
 
   w_sum <- sum(w)
   if (!is.finite(w_sum) || w_sum <= 0) {
-    return(list(mean = NA_real_, variance = NA_real_, sd = NA_real_,
-                skewness = NA_real_, kurtosis = NA_real_))
+    return(na_result)
   }
   w <- w / w_sum   # guard against numerical drift
 
@@ -361,16 +364,21 @@ predictMoments.cnormBetaBinomial2 <- predictMoments.cnormBetaBinomial
 #'   at \code{[minRaw, maxRaw]} to reflect the empirical score limits. If \code{FALSE},
 #'   uncensored theoretical population moments are calculated.
 #' @param minRaw,maxRaw Optional custom score bounds for censoring. If \code{NULL} (default),
-#'   they are retrieved from the fitted model attributes.
+#'   they are retrieved from the fitted model: the observed minimum, and the observed
+#'   maximum or - for a right-truncated model fitted with \code{max_score} - the ceiling
+#'   \code{max_score}, which is the upper bound of the support.
 #' @export
 predictMoments.cnormCMP <- function(model, age, censor = TRUE,
                                     minRaw = NULL, maxRaw = NULL, ...) {
   .checkAge(age)
 
+  # Ceiling of a right-truncated model (NULL for the ordinary, unbounded CMP model)
+  max_score <- attr(model$result, "max_score")
+
   if (is.null(minRaw))
     minRaw <- attr(model$result, "min")
   if (is.null(maxRaw))
-    maxRaw <- attr(model$result, "max")
+    maxRaw <- if (!is.null(max_score)) max_score else attr(model$result, "max")
 
   if (is.null(minRaw) || is.null(maxRaw)) {
     stop("Could not retrieve score bounds (min/max) from the model object.",
@@ -381,14 +389,16 @@ predictMoments.cnormCMP <- function(model, age, censor = TRUE,
 
   momentsList <- lapply(seq_along(age), function(i) {
     .cmpMoments(mu = pars$mu[i], nu = pars$nu[i],
-                censor = censor, minRaw = minRaw, maxRaw = maxRaw)
+                censor = censor, minRaw = minRaw, maxRaw = maxRaw,
+                max_score = max_score)
   })
 
-  method_label <- if (censor) {
-    "Conway-Maxwell-Poisson / censored discrete pmf summation"
-  } else {
-    "Conway-Maxwell-Poisson / exact discrete pmf summation"
-  }
+  method_label <- paste0(
+    "Conway-Maxwell-Poisson",
+    if (!is.null(max_score)) " (right-truncated)" else "",
+    if (censor) " / censored discrete pmf summation"
+    else " / exact discrete pmf summation"
+  )
 
   .momentsDataFrame(age, momentsList, method = method_label)
 }

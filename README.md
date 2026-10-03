@@ -15,7 +15,7 @@ The package currently features **both distribution-free and parametric continuou
 1. **Distribution-free modeling** using bivariate Taylor polynomials (A. Lenhard et al., 2016).
 2. **Beta-binomial modeling** (since v3.2): For bounded accuracy tests with a fixed number of dichotomous items without a time limit (e.g., 1PL IRT / Rasch-scaled scales).
 3. **Sinh-Arcsinh (SHASH) modeling** (since v3.5): For flexible continuous distributions accommodating skewness and varying tail heaviness, including scores spanning zero and negative numbers.
-4. **Conway-Maxwell-Poisson (CMP) modeling** (since v3.7): For open-ended count data and **speeded tests** (e.g., number of correctly processed items within a time limit). Unlike standard Poisson models, CMP allows modeling equi-dispersion ($\nu = 1$), over-dispersion ($\nu < 1$), and notably **under-dispersion** ($\nu > 1$, $\text{Var} < \text{Mean}$), which is typical for speeded cognitive performance tasks.
+4. **Conway-Maxwell-Poisson (CMP) modeling** (since v3.7): For open-ended count data and **speeded tests** (e.g., number of correctly processed items within a time limit) as well as truncated (bounded) scales. Unlike standard Poisson models, CMP allows modeling equi-dispersion ($\nu = 1$), over-dispersion ($\nu < 1$), and notably **under-dispersion** ($\nu > 1$, $\text{Var} < \text{Mean}$), which is typical for speeded cognitive performance tasks.
 
 cNORM was developed specifically for psychometric and educational tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, it applies wherever mental (e.g., processing speed, reaction time), physical (e.g., body weight, height), or behavioral scores depend on continuous (e.g., age, duration of schooling) or discrete explanatory variables (e.g., grade, sex). Conventional norming based on separate subsamples is supported as well.
 
@@ -105,11 +105,11 @@ library(cNORM)
 # It smoothly models location mu(age) and dispersion nu(age), naturally capturing
 # under-dispersion (nu > 1; Var < Mean) common in speeded tasks.
 
-# Basic fit:
-model.cmp <- cnorm.cmp(speed$age, speed$fluency)
+# Basic fit - please provide max_score if scale is truncated
+model.cmp <- cnorm.cmp(speed$age, speed$fluency, max_score=75)
 
 # Automatic model selection over polynomial degrees via BIC:
-model.cmp <- autoselect.cmp(speed$age, speed$fluency)
+model.cmp <- autoselect.cmp(speed$age, speed$fluency, max_score=75)
 
 # Fit statistics and parameter estimates:
 summary(model.cmp, age = speed$age, score = speed$fluency)

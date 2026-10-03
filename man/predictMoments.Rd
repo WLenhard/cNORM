@@ -44,7 +44,9 @@ at \code{[minRaw, maxRaw]} to reflect the empirical score limits. If \code{FALSE
 uncensored theoretical population moments are calculated.}
 
 \item{minRaw, maxRaw}{Optional custom score bounds for censoring. If \code{NULL} (default),
-they are retrieved from the fitted model attributes.}
+they are retrieved from the fitted model: the observed minimum, and the observed
+maximum or - for a right-truncated model fitted with \code{max_score} - the ceiling
+\code{max_score}, which is the upper bound of the support.}
 }
 \value{
 A \code{data.frame} with one row per age and the columns

@@ -4,28 +4,36 @@ points for further improvements.
 
 
 
-### Version in 3.7.0
-Date: 02.10.2026 - progress
+## Version in 3.7.0
+Date: 03.10.2026 - progress
 
-Checks on number of groups in Taylor modelling added. Now actively advises
-on 't' parameter reduction.
+New distributional family for modelling speeded tests and count data with the
+Conway-Maxwell Poisson Counts Model (CMPCM), which allows for adjusting
+dispersion.
 
-## New features
+### New features
 * Modelling speeded tests with the Conway-Maxwell Poisson Counts Model (CMPCM)
 * Vignette for CMP modelling
-* new dataset 'speed' with word reading fluency per age (synthetic data based
+* New dataset 'speed' with word reading fluency per age (synthetic data based
   on ELFE2)
+* Extended test coverage for CMP
+
+### Changes
+* Checks on number of groups in Taylor modelling added. Now actively advises
+  on 't' parameter reduction.
+* Added section on model selection strategies to vignettes
 
 
 
-### Version in 3.6.2
+
+## Version in 3.6.2
 Date: 20.07.2026 - release
 
 Fine-tuning of internal functions (relaxed monotonicity check) and a new S3 
 method for predicting distributional moments of fitted Taylor, beta binomial
 and shash models.
 
-## New features
+### New features
 
 * New function `predictMoments()`: Computes model-implied distributional 
   moments (mean, standard deviation, variance, skewness and excess kurtosis) 
@@ -51,7 +59,7 @@ and shash models.
     age-specific distribution parameters, censored at `minRaw`/`maxRaw`.
 
 
-## Changes
+### Changes
 
 * Monotonicity check in Taylor polynomials now accept minimal inconsistencies
   (violations of less than 1% of the raw score range; parameter added to cnorm 
@@ -64,7 +72,7 @@ and shash models.
 
 
 
-### Version in 3.6.1
+## Version in 3.6.1
 Date: 13.07.2026 - release
 
 This release mainly targets optimization and code hardening. The central new
@@ -73,7 +81,7 @@ which conducts a model averaging for the consistent models in order to reduce
 variance in model estimation. Beta binomial models are now drawn as stepping
 and this as well is applied for the compare function.
 
-## New features
+### New features
 
 * `bestModel()` gains an `averaging` argument: instead of selecting a single
   model, the final coefficients can now be computed as a BIC-weighted average
@@ -97,7 +105,7 @@ and this as well is applied for the compare function.
   only the age minimum and maximum, so intersecting percentile curves at
   interior ages are now detected.
 
-## Deprecations
+### Deprecations
 
 * `subsample_lm()` is deprecated and returns a plain (weighted) least squares
   fit. Averaging OLS coefficients over subsamples cannot improve on the
@@ -105,7 +113,7 @@ and this as well is applied for the compare function.
   `bestModel(..., averaging = TRUE)` instead. The `subsampling` argument of
   `bestModel()` is deprecated and ignored.
 
-## Bug fixes
+### Bug fixes
 
 * `cnorm.cv()` and the internal consistency screening used `.lm.fit()`, which
   neither returns fitted values nor unpivoted, named coefficients. This could
@@ -135,7 +143,7 @@ and this as well is applied for the compare function.
   (mode 2); more robust scale specification (`is.numeric` instead of `typeof`).
 
 
-## Performance Optimizations in beta binomial modelling
+### Performance Optimizations in beta binomial modelling
 
 * `lchoose(n, y)` is precomputed once per fit instead of in every optimizer
   iteration.
@@ -145,7 +153,7 @@ and this as well is applied for the compare function.
   beta-binomial pmf/cdf; percentile plots now use a single long-format layer.
 
 
-## Behavioural changes
+### Behavioural changes
 
 * Candidate models in Taylor modelling that do not depend on L at all (flat 
   percentile lines) are now flagged as *inconsistent* during screening; 
@@ -161,7 +169,7 @@ and this as well is applied for the compare function.
 
 
 
-### Version in 3.6.0
+## Version in 3.6.0
 Date: 17.06.2026 - release
 
 This release includes autoselect methods for shash and betabinomial models 
@@ -185,7 +193,7 @@ Changes:
 
 
 
-### Version in 3.5.4
+## Version in 3.5.4
 Date: 15.05.2026 - release
 
 This release aims at a better integration of parametric functions for the 
@@ -211,7 +219,7 @@ Changes:
 
 
 
-### Version in 3.5.3
+## Version in 3.5.3
 Date: 01.05.2026
 
 
@@ -247,7 +255,7 @@ Changes:
 
 
 
-### Version in 3.5.2
+## Version in 3.5.2
 Date: 26.02.2026
 
 
@@ -271,7 +279,7 @@ Changes:
 
 
 
-### Version in 3.5.1
+## Version in 3.5.1
 Date: 14.10.2025
 
 
@@ -289,7 +297,7 @@ Changes:
 *    shash distribution functions exported to NAMESPACE
 
 
-### Version in 3.5.0
+## Version in 3.5.0
 Date: 26.09.2025
 
 
@@ -307,7 +315,7 @@ Changes:
 *    Compare function now includes AIC and BIC information
 
 
-### Version in 3.4.0
+## Version in 3.4.0
 Date: 04.11.2024
 
 
@@ -320,7 +328,7 @@ Changes:
 
 
 
-### Version in 3.3.1
+## Version in 3.3.1
 Date: 16.10.2024
 
 
@@ -338,7 +346,7 @@ Changes:
 
 
 
-### Version in 3.3.0
+## Version in 3.3.0
 Date: 2024.08.26
 
 
@@ -361,7 +369,7 @@ Changes:
 
 
 
-### Version in 3.2.0
+## Version in 3.2.0
 Date: 2024.08.17
 
 
@@ -385,7 +393,7 @@ Changes:
 
 
 
-### Version in 3.1.0
+## Version in 3.1.0
 Date: 2024.07.19
 
 
@@ -396,7 +404,7 @@ Changes:
 *    Fixed bug in bestModels function when predictors are specified     
 
 
-### Version in 3.0.4
+## Version in 3.0.4
 Date: 2023.10.08
 
 
@@ -409,7 +417,7 @@ Changes:
 
 
 
-### Version in 3.0.3
+## Version in 3.0.3
 Date: 2023.05.22
 
 
@@ -427,7 +435,7 @@ Changes:
 
 
 
-### Version in 3.0.2
+## Version in 3.0.2
 Date: 2022.08.18
 
 
@@ -442,7 +450,7 @@ Changes:
 
 
 
-### Version in 3.0.1
+## Version in 3.0.1
 Date: 2022.04.11
 
 
@@ -458,7 +466,7 @@ Changes:
 
 
 
-### Version in 3.0.0
+## Version in 3.0.0
 Date: 2022.03.28
 
 
@@ -483,7 +491,7 @@ Changes:
 
 
 
-### Version in 2.1.1
+## Version in 2.1.1
 Date: 2021.10.13
 
 
@@ -497,7 +505,7 @@ Changes:
 
 
 
-### Version in 2.1.0
+## Version in 2.1.0
 Date: 2021.08.10
 
 
@@ -513,7 +521,7 @@ Changes:
 
 
 
-### Version in 2.0.4
+## Version in 2.0.4
 Date: 2021.07.24
 
 
@@ -526,7 +534,7 @@ Changes:
 
 
 
-### Version in 2.0.3 
+## Version in 2.0.3 
 Date: 2021.04.10
 
 
@@ -539,7 +547,7 @@ Changes:
 
 
 
-### Version in 2.0.2
+## Version in 2.0.2
 Date: 2021.01.30
 
 
@@ -552,7 +560,7 @@ Changes:
 
 
 
-### Version in 2.0.1
+## Version in 2.0.1
 Date: 2021.01.05
 
 
@@ -568,7 +576,7 @@ Changes:
 
 
 
-### Version in 2.0.0 (release)
+## Version in 2.0.0 (release)
 Date: 2020.12.04
 Version 2.0.0 features many fundamental improvements both relating to the procedure but as well to the
 package itself. It introduces weighted percentiles and thus helps in correcting violations of 
@@ -602,7 +610,7 @@ Changes:
 
 
 
-### Version in 1.2.4 (release)
+## Version in 1.2.4 (release)
 Date: 2020.10.14
 
 
@@ -617,7 +625,7 @@ Changes:
 
 
 
-### Version in 1.2.3 (release)
+## Version in 1.2.3 (release)
 Date: 2020.06.18
 
 Changes:
@@ -635,7 +643,7 @@ Changes:
 *    rawTable can now return matrices
 
 
-### Version in 1.2.2 (fifth release)
+## Version in 1.2.2 (fifth release)
 Date: 2019.09.18
 
 Changes:
@@ -652,7 +660,7 @@ Changes:
 
 
 
-### Version in 1.2.1
+## Version in 1.2.1
 Date: 2019.08.01
 
 Changes:
@@ -673,7 +681,7 @@ Changes:
 
 
 
-### Version in 1.2.0 (fourth release)
+## Version in 1.2.0 (fourth release)
 Date: 2019.07.26
 
 Changes:
@@ -691,7 +699,7 @@ Changes:
 
 
 
-### Version in 1.1.9
+## Version in 1.1.9
 Date: 2019.07.07
 
 Changes:
@@ -706,7 +714,7 @@ Changes:
 
 
 
-### Version in 1.1.8 (Third release to CRAN)
+## Version in 1.1.8 (Third release to CRAN)
 Date: 2019.03.15 (mainly testing and cleaning minor errors)
 
 Changes:
@@ -716,7 +724,7 @@ Changes:
 
 
 
-### Version in 1.1.7
+## Version in 1.1.7
 Date: 2019.02.28
 
 Changes:
@@ -732,7 +740,7 @@ Changes:
 
 
 
-### Version in 1.1.6
+## Version in 1.1.6
 Date: 2019.02.07, third release on CRAN
 
 Changes:
@@ -741,7 +749,7 @@ Changes:
 
 
 
-### Version in 1.1.5
+## Version in 1.1.5
 Date: 2019.02.06, third release on CRAN
 
 Changes:
@@ -753,7 +761,7 @@ Changes:
 
 
 
-### Version in 1.1.4
+## Version in 1.1.4
 Date: 2018.12.18
 
 Changes:
@@ -763,7 +771,7 @@ Changes:
 
 
 
-### Version in 1.1.3 - Second release on CRAN
+## Version in 1.1.3 - Second release on CRAN
 Date: 2018.12.09
 
 Changes:
@@ -773,7 +781,7 @@ Changes:
 
 
 
-### Version in 1.1.2
+## Version in 1.1.2
 Date: 2018.12.08
 
 Changes:
@@ -786,7 +794,7 @@ Changes:
 
 
 
-### Version in 1.1.1
+## Version in 1.1.1
 Date: 2018.12.01
 
 Changes:
@@ -803,7 +811,7 @@ Changes:
 
 
 
-### Version in 1.1.0
+## Version in 1.1.0
 Date: 2018.11.23
 
 Changes:
@@ -818,7 +826,7 @@ Changes:
 
 
 
-### Version in 1.0.3
+## Version in 1.0.3
 Date: 2018.11.16
 
 Changes:
@@ -833,7 +841,7 @@ Changes:
 
 
 
-### Version in 1.0.2
+## Version in 1.0.2
 Date: 2018.11.16
 
 Changes:
@@ -851,7 +859,7 @@ Changes:
 
 
 
-### Version in 1.0.1  - First release on CRAN
+## Version in 1.0.1  - First release on CRAN
 Date: 2018.11.03
 
 Changes:
@@ -863,7 +871,7 @@ Changes:
 
 
 
-### Version in 1.0.0
+## Version in 1.0.0
 Date: 2018.10.26
 
 Changes:
@@ -872,7 +880,7 @@ Changes:
 
 
 
-### Version in 0.9.20
+## Version in 0.9.20
 Date: 2018.10.24
 
 Changes:
@@ -882,7 +890,7 @@ Changes:
 
 
 
-### Version in 0.9.19
+## Version in 0.9.19
 Date: 2018.10.20
 
 Changes:
@@ -894,7 +902,7 @@ Changes:
 
 
 
-### Version in 0.9.18
+## Version in 0.9.18
 Date: 2018.10.08
 
 Changes:
@@ -902,7 +910,7 @@ Changes:
 *   First shiny prototype (many thanks to Sebastian Gary); please use cNORM.GUI() to start user interface
 
 
-### Version in 0.9.17
+## Version in 0.9.17
 Date: 2018.10.01
 
 Changes:
@@ -913,7 +921,7 @@ Changes:
 
 
 
-### Version in 0.9.16
+## Version in 0.9.16
 Date: 2018.09.21
 
 Changes:
@@ -924,7 +932,7 @@ Changes:
 
 
 
-### Version in 0.9.15
+## Version in 0.9.15
 Date: 2018.09.18
 
 Changes:
@@ -934,7 +942,7 @@ Changes:
 
 
 
-### Version in 0.9.13
+## Version in 0.9.13
 Date: 2018.09.16
 
 Changes:
@@ -944,7 +952,7 @@ Changes:
 
 
 
-### Version in 0.9.12
+## Version in 0.9.12
 Date: 2018.09.11
 
 Changes:
@@ -957,7 +965,7 @@ Changes:
 
 
 
-### Version in 0.9.9
+## Version in 0.9.9
 Date: 2018.09.06
 
 Changes:
@@ -966,7 +974,7 @@ Changes:
 
 
 
-### Version in 0.9.8
+## Version in 0.9.8
 Date: 2018.09.05
 
 Changes:
@@ -978,7 +986,7 @@ Changes:
 
 
 
-### Version in 0.9.7
+## Version in 0.9.7
 Date: 2018.08.31
 
 Changes:
@@ -992,7 +1000,7 @@ Changes:
 
 
 
-### Version in 0.9.6
+## Version in 0.9.6
 Date: 2018.08.28
 
 Changes:
@@ -1002,7 +1010,7 @@ Changes:
 
 
 
-### Version in 0.9.5
+## Version in 0.9.5
 Date: 2018.08.25
 
 Changes:
@@ -1012,7 +1020,7 @@ Changes:
 
 
 
-### Version in 0.9.4
+## Version in 0.9.4
 Date: 2018.08.23
 
 Changes:
@@ -1023,7 +1031,7 @@ Changes:
 
 
 
-### Version in 0.9.3
+## Version in 0.9.3
 Date: 2018.08.20
 
 Changes:
@@ -1034,7 +1042,7 @@ Changes:
 
 
 
-### Version in 0.9.2
+## Version in 0.9.2
 Date: 2018.08.18
 
 Changes:
@@ -1043,7 +1051,7 @@ Changes:
 
 
 
-### Version in 0.9.1
+## Version in 0.9.1
 Date: 2018.08.16
 
 Changes:
@@ -1054,7 +1062,7 @@ Changes:
 
 
 
-### Version in 0.9.0
+## Version in 0.9.0
 Date: 2018.08.14
 
 Changes:
@@ -1063,7 +1071,7 @@ Changes:
 
 
 
-### Version in 0.8.9
+## Version in 0.8.9
 
 Date: 2018.08.13
 
@@ -1074,7 +1082,7 @@ Changes:
 
 
 
-### Version in 0.8.8
+## Version in 0.8.8
 Date: 2018.08.12
 
 Changes:
@@ -1086,7 +1094,7 @@ Changes:
 
 
 
-### Version in 0.8.6
+## Version in 0.8.6
 Date: 2018.08.11
 
 Changes:
@@ -1097,7 +1105,7 @@ Changes:
 
 
 
-### Version in 0.8.5
+## Version in 0.8.5
 Date: 2018.08.06
 
 Changes:
@@ -1106,7 +1114,7 @@ Changes:
 
 
 
-### Version in 0.8.3
+## Version in 0.8.3
 Date: 2018.08.03
 
 Changes:
@@ -1115,7 +1123,7 @@ Changes:
 
 
 
-### Version in 0.8.2
+## Version in 0.8.2
 Date: 2018.08.02
 
 Changes:
@@ -1126,7 +1134,7 @@ Changes:
 
 
 
-### Version in 0.8.0
+## Version in 0.8.0
 Date: 2018.08.01
 
 Changes:
@@ -1135,7 +1143,7 @@ Changes:
 
 
 
-### Version in 0.7.11
+## Version in 0.7.11
 Date: 2018.07.31
 
 Changes:
@@ -1144,7 +1152,7 @@ Changes:
 
 
 
-### Version in 0.7.10
+## Version in 0.7.10
 Date: 2018.07.28
 
 Changes:
@@ -1154,7 +1162,7 @@ Changes:
 
 
 
-### Version in 0.7.9
+## Version in 0.7.9
 Date: 2018.07.28
 
 Changes:
@@ -1165,7 +1173,7 @@ Changes:
 
 
 
-### Version in 0.7.8
+## Version in 0.7.8
 Date: 2018.07.27
 
 Changes:
@@ -1174,7 +1182,7 @@ Changes:
 
 
 
-### Version in 0.7.7
+## Version in 0.7.7
 Date: 2018.07.27
 
 Changes:
@@ -1184,7 +1192,7 @@ Changes:
 
 
 
-### Version in 0.7.6
+## Version in 0.7.6
 
 Date: 2018.07.27
 
@@ -1195,7 +1203,7 @@ Changes:
 
 
 
-### Version in 0.7.5
+## Version in 0.7.5
 Date: 2018.07.26
 
 Changes:
@@ -1208,7 +1216,7 @@ Changes:
 
 
 
-### Version in 0.7.4
+## Version in 0.7.4
 
 Date: 2018.07.25
 
@@ -1218,7 +1226,7 @@ Changes:
 
 
 
-### Version in 0.7.3
+## Version in 0.7.3
 Date: 2018.07.25
 
 Changes:
@@ -1229,7 +1237,7 @@ Changes:
 
 
 
-### Version in 0.7.2
+## Version in 0.7.2
 Date: 2018.07.24
 
 Changes:

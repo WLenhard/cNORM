@@ -226,63 +226,26 @@ compare(model.shash, model.taylor, age = ppvt$group, score = ppvt$raw,
         title = "SinH-ArcSinH vs. Taylor")
 ```
 
-## Decision Framework for Model Selection
+# Choosing a Model Family
 
-`cNORM` provides four distinct modeling paradigms: one semi-parametric, distribution-free approach and three parametric families. Each model possesses distinct mathematical properties tailored to specific types of test data and measurement designs.
+`cNORM` offers one semi-parametric, distribution-free approach and three parametric families. Each is tailored to a particular kind of test data.
 
----
-
-### Quick Selection Matrix
-
-| Criterion | Distribution-Free (Taylor) | Beta-Binomial | Conway-Maxwell-Poisson (CMP) | Sinh-Arcsinh (SHASH) |
+| | Distribution-free (Taylor) | Beta-binomial | CMP | SHASH |
 | :--- | :--- | :--- | :--- | :--- |
-| **Score Scale** | Continuous or discrete | Discrete integer counts ($0 \le y \le n$) | Discrete integer counts ($y \ge 0$) | Continuous real numbers ($y \in \mathbb{R}$) |
-| **Test Paradigm** | General ability / achievement | Power / accuracy tests | Speeded tests / rate tasks | Continuous scales, physical / RT |
-| **Ceiling Bound** | Post-hoc clipping $[minRaw, maxRaw]$ | Natural upper bound ($n$ items) | Open-ended ($[0, \infty)$) | Natural infinite support ($(-\infty, \infty)$) |
-| **Distributional Shape** | Any (empirical rank projection) | Binomial with Beta-mixing | Over-, equi-, or **under-dispersed** | Skewed with heavy or light tails |
-| **Key Advantage** | Maximum shape flexibility | Respects fixed item bounds | Captures under-dispersion ($\text{Var} < \text{Mean}$) | Handles negative and uncentered scores |
-| **Primary Function** | `cnorm()` | `cnorm.betabinomial()` | `cnorm.cmp()` | `cnorm.shash()` |
+| **Score scale** | Continuous or discrete | Integer, $0 \le y \le n$ | Integer, $y \ge 0$ | Continuous, $y \in \mathbb{R}$ |
+| **Typical tests** | General ability and achievement | Power and accuracy tests | Speeded tests, rate tasks | Continuous measures, response times |
+| **Upper bound** | Post-hoc clipping to $[minRaw, maxRaw]$ | Natural bound ($n$ items) | Open-ended, or truncated via `max_score` | None |
+| **Distributional shape** | Any (empirical) | Binomial with beta mixing | Over-, equi- or under-dispersed | Skewed, light or heavy tails |
+| **Main strength** | Maximum flexibility | Respects fixed item numbers | Models the dispersion directly | Handles negative and uncentred scores |
+| **Function** | `cnorm()` | `cnorm.betabinomial()` | `cnorm.cmp()` | `cnorm.shash()` |
 
----
+**Distribution-free models** (`cnorm()`; Lenhard et al., 2018) are the choice when flexibility matters most: the data show irregular features that no standard family captures, you prefer not to assume a distribution, or the relationship between person location and age changes irregularly. Because bivariate polynomials can invert in extreme regions, always inspect `checkConsistency()` and `plotPercentiles()`. Parametric models cannot produce crossing percentile curves by construction.
 
-### Detailed Selection Guidelines
+**Beta-binomial models** (`cnorm.betabinomial()`) suit unspeeded power and accuracy tests in which the raw score is the number of correct responses among $n$ items. They respect the fixed ceiling and handle floor and ceiling effects naturally. Sum scores of Rasch-type tests are approximately beta-binomial, which makes the model a good working description rather than an exact one.
 
-#### 1. Use Distribution-Free Models (Taylor Polynomials) when:
-* **Maximum flexibility is paramount:** The data exhibit non-standard features (e.g., multimodality, local irregularities, or empirical anomalies) that cannot be captured by standard parametric families.
-* **No distributional assumptions can be justified:** You prefer empirical ranking over specifying a functional density.
-* **Complex interaction surfaces:** The relationship between person location and age changes irregularly across development.
-* **Caution:** Because bivariate polynomials can occasionally invert in extreme regions, always inspect consistency (`checkConsistency()`) and percentile curves (`plotPercentiles()`).
+**CMP models** (`cnorm.cmp()`) suit speeded tests whose raw score counts the units processed within a time limit, such as cancellation tasks, coding, symbol search or reading fluency. They model the dispersion as an age-dependent parameter instead of assuming it, covering under- and over-dispersion alike. If the test has a hard maximum score, set `max_score`. One limitation deserves mention: for large $\mu$, the skewness of a CMP distribution is approximately $1/\sqrt{\mu\nu}$, i.e., the shape is nearly determined by mean and variance. If skewness and kurtosis vary independently across age, SHASH or the distribution-free approach are more flexible.
 
-#### 2. Use Beta-Binomial Models (`cnorm.betabinomial`) when:
-* **The test is an unspeeded power/accuracy test:** Raw scores represent the sum of $n$ dichotomously scored items (1PL IRT / Rasch-scaled instruments).
-* **There is a strict, known ceiling:** Scores cannot exceed the maximum number of items $n$.
-* **Floor or ceiling effects are present:** The distribution naturally compresses near $0$ or $n$ without requiring artificial clipping.
-* **Item count is small to moderate:** The discrete nature of individual item increments is psychometrically meaningful.
-
-#### 3. Use Conway-Maxwell-Poisson Models (`cnorm.cmp`) when:
-* **The test is a speeded test:** The raw score is the number of correctly processed items within a fixed time limit (e.g., cancellation tasks, coding, symbol search, reading fluency).
-* **The scale is open-ended:** There is no hard item ceiling, or the ceiling is practically unattainable within the time limit.
-* **The data exhibit under-dispersion ($\text{Var} < \text{Mean}$):** Speeded tasks with easy items routinely produce performance pacing with variance substantially smaller than the mean—a feature that neither Poisson nor Negative Binomial models can accommodate.
-* **Counts can also be over-dispersed ($\text{Var} > \text{Mean}$):** The CMP dispersion parameter $\nu(a)$ smoothly models over- ($\nu < 1$), equi- ($\nu = 1$), and under-dispersion ($\nu > 1$) across age.
-
-#### 4. Use Sinh-Arcsinh Models (`cnorm.shash`) when:
-* **Raw scores are continuous:** Scores have decimal precision, or stem from latent scale transformations, response times, or physical measurements (e.g., height, weight, force).
-* **Zero or negative values occur:** Scores are difference scores, change scores, or unstandardized index points spanning zero and negative numbers.
-* **Asymmetry and tail heaviness vary smoothly across age:** The distribution shifts from Gaussian to skewed or heavy/light-tailed across developmental stages.
-* **Parametric parsimony is desired:** Four smooth polynomial trajectories ($\mu, \sigma, \epsilon, \delta$) describe the complete conditional distribution surface.
-
----
-
-### Empirical Model Evaluation
-
-When choosing between candidate models or tuning polynomial degrees, evaluate models across multiple complementary criteria:
-
-1. **Theoretical Appropriateness:** Does the model's support and dispersion mechanism match the test design (e.g., Beta-Binomial for accuracy tests, CMP for speeded tests)?
-2. **Information Criteria (AIC & BIC):** Lower values indicate better trade-offs between goodness-of-fit and parsimony. (Use `autoselect.cmp()`, `autoselect.betabinomial()`, or `autoselect.shash()` for automated grid selection).
-3. **Cross-Validation (`cnorm.cv`):** Evaluate out-of-sample prediction accuracy and check crossfit indices ($\approx 1.0$) to guard against overfitting.
-4. **Direct Model Comparison (`compare()`):** Overlay percentile curves from competing models (e.g., Taylor vs. CMP) and inspect differences in $R^2$, RMSE, and bias against manifest group percentiles.
-5. **Visual Plausibility:** Percentile curves must progress smoothly across age without crossings, implausible compressions, or edge-extrapolation artifacts.
-
+**SHASH models** (`cnorm.shash()`) suit continuous raw scores: decimals, response times, physical measurements, or difference scores that can be negative. Four smooth age trajectories (location, scale, skewness and tail weight) describe the whole conditional distribution, which is parsimonious and flexible at the same time, and lets asymmetry and tail weight change across development.
 
 # Conclusion
 

@@ -1,14 +1,11 @@
 # =============================================================================
 # Conway-Maxwell-Poisson (CMP) regression for continuous norming of count data
 # (e.g., speeded tests). Analogue to the shash and beta-binomial modules.
-#
-# Helpers assumed from the cNORM namespace (as used by the shash module):
-#   standardize(), filter_complete(), getGroups(), weighted.quantile(),
-#   rankByGroup(), rankBySlidingWindow()
 # =============================================================================
 
 #' Admissible range of log(nu): nu in [exp(-3), exp(3)] = [0.05, 20.1].
-#' Linear predictors of log(nu) are clamped to this range (cf. delta in shash).
+#' The linear predictor of log(nu) is clamped to this range (cf. delta in shash).
+#' The clamp acts on the predictor, not on individual coefficients.
 #' @noRd
 CMP_LOG_NU_RANGE <- c(-3, 3)
 
@@ -21,29 +18,57 @@ CMP_LOG_NU_RANGE <- c(-3, 3)
 #' polynomial functions of age (or any other continuous predictor). In contrast to the
 #' Poisson model, the CMP distribution does not force variance = mean: it can model
 #' over-dispersion (nu < 1), equi-dispersion (nu = 1, Poisson) and under-dispersion
-#' (nu > 1), the latter being typical for speeded tests with homogeneous performance.
+#' (nu > 1).
 #'
 #' @section Parameterization:
 #' The probability mass function is
 #' \deqn{P(Y = y) = \frac{1}{Z(\mu, \nu)} \left(\frac{\mu^y}{y!}\right)^\nu, \quad
 #'   Z(\mu, \nu) = \sum_{j=0}^{\infty} \left(\frac{\mu^j}{j!}\right)^\nu}
 #' i.e., the Poisson kernel raised to the power nu. This is the classical CMP
-#' distribution with rate \eqn{\lambda = \mu^\nu}. Modelling \eqn{\mu} instead of
+#' distribution with rate \eqn{\lambda = \mu^\nu}. \strong{Note:} the coefficients are
+#' therefore \emph{not} those of \pkg{COMPoissonReg}, which models \eqn{\lambda} (or
+#' the mean in its mean-parametrized variants) directly. Modelling \eqn{\mu} instead of
 #' \eqn{\lambda} (i) makes mu interpretable as an approximate mean,
 #' \eqn{E(Y) \approx \mu - (\nu - 1)/(2\nu)}, with \eqn{Var(Y) \approx \mu/\nu}
-#' (the exact moments are available via \code{predictCoefficients_cmp(..., moments = TRUE)}),
+#' (the exact moments are available via \code{\link{predictMoments}}),
 #' (ii) decouples the location and dispersion parameters, which stabilizes the optimization
 #' and the standard errors, and (iii) yields trivial starting values (a Poisson regression).
 #' The model is
 #' \deqn{\log \mu(a) = \sum_{k=0}^{K_\mu} \beta_k a^k, \qquad
 #'       \log \nu(a) = \sum_{k=0}^{K_\nu} \gamma_k a^k}
-#' with standardized age \eqn{a}.
+#' with standardized age \code{a = (age - mean(age)) / sd(age)}.
+#' The coefficients refer to the log scale; only the intercepts refer to the mean age.
+#'
+#' @section Right-truncated model:
+#' Many speeded tests have a finite number of items on the test sheet. If \code{max_score}
+#' is given, the CMP distribution is truncated to \eqn{\{0, 1, \dots, M\}} with
+#' \eqn{M} = \code{max_score} (the normalizing constant is summed up to \eqn{M} only), so that no
+#' probability mass is assigned to impossible scores and percentile ranks are properly
+#' normalized at the ceiling. In this case, mu and nu are the parameters of the
+#' \emph{truncated} distribution and the approximations of mean and variance above no
+#' longer hold near the ceiling; use \code{\link{predictMoments}} for exact moments.
+#'
+#' @section Shape flexibility:
+#' For large mu, the skewness of the CMP distribution is approximately
+#' \eqn{1/\sqrt{\mu\nu}}, i.e., the shape is nearly determined by mean and variance. If
+#' skewness or kurtosis vary independently across age, the SHASH model
+#' (\code{\link{cnorm.shash}}) or the distribution-free approach are more flexible.
+#'
+#' @section Name collision:
+#' \pkg{COMPoissonReg} also exports functions named \code{dcmp}, \code{pcmp}, \code{qcmp}
+#' and \code{rcmp}, but with the arguments \code{(lambda, nu)}. If both packages are
+#' attached, the one attached last masks the other and calls such as
+#' \code{dcmp(x, 8, 1)} are silently interpreted with a different parameterization. Use
+#' the explicit \code{cNORM::dcmp()} or \code{COMPoissonReg::dcmp()} in this case.
 #'
 #' @param age A numeric vector of predictor values (typically age, but can be any continuous predictor).
 #' @param score A numeric vector of raw scores. Must be the same length as age and must
 #'   consist of non-negative integers (counts).
-#' @param weights An optional numeric vector of weights for each observation.
-#'   If NULL (default), all observations are weighted equally.
+#' @param weights An optional numeric vector of non-negative weights for each observation.
+#'   If NULL (default), all observations are weighted equally. Weights enter the
+#'   likelihood as multipliers (e.g., post-stratification weights). AIC, BIC and the
+#'   Hessian-based standard errors are strictly valid only for frequency weights; the
+#'   sample size used in BIC is the number of rows.
 #' @param mu_degree Integer (>= 1) specifying the degree of the polynomial for log(mu(age)).
 #'   Default is 3. Note that the polynomial acts on the log scale, so lower degrees
 #'   than in the Taylor or shash approaches are often sufficient.
@@ -72,19 +97,36 @@ CMP_LOG_NU_RANGE <- c(-3, 3)
 #'   }
 #' @param max_terms Maximum number of terms used to evaluate the normalizing constant
 #'   Z(mu, nu). Default (NULL) is \code{max(2000, 20 * max(score))}. Increase only if
-#'   a warning indicates that the series did not converge.
+#'   a warning indicates that the series did not converge. The value is stored in the
+#'   model and also applied in \code{predict}, \code{normTable} and \code{plot}.
 #' @param tol Relative truncation tolerance for the normalizing constant (default 1e-12).
+#'   Also stored and re-used in all downstream functions.
 #' @param plot Logical indicating whether to automatically display a diagnostic plot of the
 #'   fitted model. Default is TRUE.
+#' @param max_score Optional positive integer: the maximum attainable raw score (e.g., the
+#'   number of items on the sheet). If given, the distribution is right-truncated at this
+#'   value (see section "Right-truncated model"). Default \code{NULL}: no ceiling.
+#' @param start Optional list with numeric vectors \code{mu} and (optionally) \code{nu}
+#'   containing starting values for the polynomial coefficients (on the scale of
+#'   \code{mu_est} / \code{nu_est}, i.e., of a previously fitted model). Shorter vectors
+#'   are padded with zeros, which allows warm starts from lower polynomial degrees.
+#'   If the optimization fails from these values, the default starting values are used.
 #'
 #' @return An object of class "cnormCMP" containing the fitted model results. This is a list with:
 #'   \item{mu_est}{Coefficients of the polynomial for log(mu(age)). The first coefficient is the intercept.}
 #'   \item{nu_est}{Coefficients of the polynomial for log(nu(age)); NULL if nu is fixed.}
 #'   \item{nu}{The fixed dispersion value (relevant if \code{nu_degree} is NULL).}
-#'   \item{se}{Standard errors of all estimated coefficients (if the Hessian could be inverted).}
+#'   \item{se}{Standard errors of all estimated coefficients (NA where they could not be computed).}
 #'   \item{mu_degree, nu_degree}{The polynomial degrees used.}
-#'   \item{result}{Complete output from \code{optim}, including convergence information,
-#'     and the data attributes needed for prediction.}
+#'   \item{max_score}{The ceiling used for right-truncation (NULL if none).}
+#'   \item{at_bound}{Logical; TRUE if the predictor of log(nu) reached the admissible range
+#'     at an observed age (standard errors and Wald tests are then not valid).}
+#'   \item{vcov}{Covariance matrix of the coefficients (mu coefficients first); NULL if unavailable.}
+#'   \item{result}{Output from \code{optim} and the data attributes needed for prediction.
+#'     \emph{Note:} the optimizer works in an orthogonalized (QR) parameterization of the
+#'     polynomials for numerical stability; \code{result$par} and \code{result$hessian}
+#'     refer to this parameterization. Use \code{mu_est}, \code{nu_est}, \code{se} and
+#'     \code{vcov} for coefficients on the usual polynomial scale.}
 #'
 #' @details
 #' Parameters are estimated by maximum likelihood with L-BFGS-B and analytic gradients.
@@ -96,25 +138,27 @@ CMP_LOG_NU_RANGE <- c(-3, 3)
 #' and observations sharing the same (mu, nu) (e.g., age groups) are evaluated only once.
 #'
 #' \subsection{Differences to the beta-binomial and shash models}{
-#' The CMP distribution has an unbounded support. It is appropriate for speeded tests and
-#' other open-ended counts. For tests with a fixed number of items and a hard ceiling
-#' (accuracy tests), the beta-binomial model respects this bound, whereas the CMP model
-#' assigns (small) probability mass to scores above the ceiling. Restrict the norm table
-#' to the possible score range in this case.
+#' The (untruncated) CMP distribution has an unbounded support. It is appropriate for
+#' speeded tests and other open-ended counts. For tests with a fixed number of items and
+#' a hard ceiling (accuracy tests), the beta-binomial model respects this bound, whereas
+#' the untruncated CMP model assigns (small) probability mass to scores above the ceiling.
+#' Use \code{max_score} for speeded tests with a finite number of items.
 #' }
 #'
 #' @note
 #' \itemize{
 #'   \item Raw scores must be non-negative integers.
-#'   \item The dispersion is restricted to nu in [0.05, 20]. If coefficients end up at their
-#'     bounds, a warning is issued and the Wald tests are not valid.
+#'   \item The dispersion is restricted to nu in [0.05, 20] by clamping the predictor of
+#'     log(nu).
 #'   \item Polynomial models can exhibit edge effects; predict outside the observed age range
 #'     with caution.
-#'   \item Because the distribution is discrete, percentile curves in the plot are step-like.
+#'   \item Because the distribution is discrete, norm tables are step-like in the raw score.
+#'   \item AIC/BIC are not comparable between the discrete CMP model and continuous
+#'     (shash) or distribution-free models.
 #' }
 #'
 #' @seealso \code{\link{cnorm.shash}}, \code{\link{autoselect.cmp}},
-#'   \code{\link{normTable.cmp}}, \code{\link{dcmp}}
+#'   \code{\link{normTable.cmp}}, \code{\link{dcmp}}, \code{\link{predictMoments}}
 #'
 #' @examples
 #' \dontrun{
@@ -127,7 +171,11 @@ CMP_LOG_NU_RANGE <- c(-3, 3)
 #' # Poisson regression (dispersion fixed to 1)
 #' model_pois <- cnorm.cmp(speeded$age, speeded$raw, nu_degree = NULL, nu = 1)
 #'
+#' # Right-truncated at the number of items on the sheet
+#' model_t <- cnorm.cmp(speeded$age, speeded$raw, max_score = 80)
+#'
 #' summary(model, age = speeded$age, score = speeded$raw)
+#' AIC(model); BIC(model)
 #' normTable.cmp(model, ages = c(8, 9), start = 0, end = 80)
 #' }
 #'
@@ -157,24 +205,35 @@ cnorm.cmp <- function(age,
                       scale = "T",
                       max_terms = NULL,
                       tol = 1e-12,
-                      plot = TRUE) {
-  # Input validation
+                      plot = TRUE,
+                      max_score = NULL,
+                      start = NULL) {
+  # ---- Input validation -------------------------------------------------
+  if (!is.numeric(age) || !is.numeric(score)) {
+    stop("'age' and 'score' must be numeric vectors.")
+  }
+
   if (length(age) != length(score)) {
     stop("Length of 'age' and 'score' must be the same.")
   }
 
-  if (!is.null(weights) && length(age) != length(weights)) {
-    stop("Length of 'weights' must match length of 'age' and 'score'.")
+  if (!is.null(weights)) {
+    if (!is.numeric(weights)) {
+      stop("'weights' must be a numeric vector.")
+    }
+    if (length(weights) != length(age)) {
+      stop("Length of 'weights' must match length of 'age' and 'score'.")
+    }
   }
 
-  if (!is.numeric(mu_degree) || length(mu_degree) != 1L || mu_degree < 1 ||
-      mu_degree != round(mu_degree)) {
+  if (!is.numeric(mu_degree) || length(mu_degree) != 1L || !is.finite(mu_degree) ||
+      mu_degree < 1 || mu_degree != round(mu_degree)) {
     stop("'mu_degree' must be a positive integer.")
   }
 
   if (!is.null(nu_degree) &&
-      (!is.numeric(nu_degree) || length(nu_degree) != 1L || nu_degree < 0 ||
-       nu_degree != round(nu_degree))) {
+      (!is.numeric(nu_degree) || length(nu_degree) != 1L || !is.finite(nu_degree) ||
+       nu_degree < 0 || nu_degree != round(nu_degree))) {
     stop("'nu_degree' must be NULL (fixed nu) or a non-negative integer (0 = constant nu).")
   }
 
@@ -182,8 +241,18 @@ cnorm.cmp <- function(age,
     stop("'nu' must be a single positive number.")
   }
 
+  if (!is.numeric(tol) || length(tol) != 1L || !is.finite(tol) || tol <= 0 || tol >= 1) {
+    stop("'tol' must be a single number in (0, 1).")
+  }
+
+  max_score <- cmp_check_max_score(max_score)
+
+  if (!is.null(start) && !is.list(start)) {
+    stop("'start' must be NULL or a list with elements 'mu' and (optionally) 'nu'.")
+  }
+
   # validate 'scale' early with explicit errors. Accepts integer vectors as well.
-  if (is.numeric(scale) && length(scale) == 2) {
+  if (is.numeric(scale) && length(scale) == 2 && all(is.finite(scale)) && scale[2] > 0) {
     scaleM <- scale[1]
     scaleSD <- scale[2]
   } else if (is.character(scale) && length(scale) == 1) {
@@ -195,7 +264,7 @@ cnorm.cmp <- function(age,
                           "'. Use 'T', 'IQ', 'z', or a numeric vector c(M, SD)."))
     scaleSD <- switch(scale, "T" = 10, "IQ" = 15, "z" = 1)
   } else {
-    stop("'scale' must be 'T', 'IQ', 'z', or a numeric vector c(M, SD).")
+    stop("'scale' must be 'T', 'IQ', 'z', or a numeric vector c(M, SD) with SD > 0.")
   }
 
   # Prepare vectors
@@ -205,8 +274,7 @@ cnorm.cmp <- function(age,
   }
 
   # Check if filtering needed
-  needs_filtering <- any(sapply(vectors_to_check, function(x)
-    any(!is.finite(x))))
+  needs_filtering <- any(vapply(vectors_to_check, function(x) any(!is.finite(x)), logical(1)))
 
   if (needs_filtering) {
     message("Vector(s) contained non-finite values (NA, NaN, Inf). These cases will be removed.")
@@ -227,33 +295,93 @@ cnorm.cmp <- function(age,
   }
   score <- round(score)
 
+  if (!is.null(weights)) {
+    if (any(weights < 0)) {
+      stop("'weights' must be non-negative.")
+    }
+    if (sum(weights) <= 0) {
+      stop("'weights' must have a positive sum.")
+    }
+  }
+
+  if(is.null(max_score)){
+    message("'max_score' not set. Assuming positively unbounded (open-ended) range of score values. Please set 'max_score' if there is an upper limit.")
+  }
+
+  if (!is.null(max_score) && any(score > max_score)) {
+    stop("'score' contains values above 'max_score' (maximum observed: ", max(score),
+         ", max_score: ", max_score, ").")
+  }
+
   # Guard against degenerate input (zero/undefined variance)
-  if (length(score) < 2L || !is.finite(sd(score)) || sd(score) <= 0) {
+  if (length(score) < 2L || !is.finite(stats::sd(score)) || stats::sd(score) <= 0) {
     stop("'score' has zero or undefined variance. The model cannot be fitted.")
+  }
+  age_sd <- stats::sd(age)
+  if (!is.finite(age_sd) || age_sd <= 0) {
+    stop("'age' has zero or undefined variance. The model cannot be fitted.")
+  }
+  k_max <- max(mu_degree, if (is.null(nu_degree)) 0 else nu_degree)
+  if (length(unique(age)) <= k_max) {
+    stop("Too few distinct age values (", length(unique(age)), ") for a polynomial of degree ",
+         k_max, ". Reduce 'mu_degree' / 'nu_degree'.")
   }
 
   if (is.null(max_terms)) {
     max_terms <- max(2000L, as.integer(ceiling(20 * max(score))))
   }
 
-  # Standardize age
-  age_std <- standardize(age)
+  # ---- Standardize age (inline: identical formula is used in prediction) ---
+  age_mean <- mean(age)
+  age_std <- (age - age_mean) / age_sd
 
-  # Create design matrices
+  # ---- Design matrices in an orthogonalized (QR) basis --------------------
+  # Raw polynomials of degree >= 3 are strongly collinear. The optimizer therefore
+  # works with Z = X T^{-1} (orthogonal columns); coefficients are mapped back below.
   X_mu <- cmp_design(age_std, mu_degree)
+  b_mu <- cmp_basis(X_mu)
+  Z_mu <- b_mu$Z
   if (!is.null(nu_degree)) {
     X_nu <- cmp_design(age_std, nu_degree)
+    b_nu <- cmp_basis(X_nu)
+    Z_nu <- b_nu$Z
     use_varying_nu <- TRUE
   } else {
-    X_nu <- NULL
+    b_nu <- NULL
+    Z_nu <- NULL
     use_varying_nu <- FALSE
   }
   fixed_nu <- if (use_varying_nu) NULL else nu
+  n_mu <- ncol(Z_mu)
 
-  # Initial values (Poisson regression for mu, moment-based start for nu)
-  initial_params <- cmp_start_values(X_mu, X_nu, score, weights)
-
+  # ---- Starting values -----------------------------------------------------
+  # Default: Poisson regression for mu, moment-based start for nu
+  initial_params <- cmp_start_values(Z_mu, Z_nu, score, weights)
   n_param <- length(initial_params)
+
+  starts <- list()
+  if (!is.null(start)) {
+    s <- initial_params
+    if (!is.null(start$mu)) {
+      s[seq_len(n_mu)] <- drop(b_mu$T %*% cmp_pad(start$mu, n_mu))
+    }
+    if (use_varying_nu && !is.null(start$nu)) {
+      s[n_mu + seq_len(ncol(Z_nu))] <- drop(b_nu$T %*% cmp_pad(start$nu, ncol(Z_nu)))
+    }
+    if (all(is.finite(s))) {
+      starts[[length(starts) + 1L]] <- s
+    }
+  }
+  starts[[length(starts) + 1L]] <- initial_params
+
+  # Conservative last-resort start: constant location, nu = 1
+  conservative <- initial_params
+  conservative[seq_len(n_mu)] <- c(log(max(stats::median(score), 0.5)), rep(0, n_mu - 1L))
+  if (use_varying_nu) {
+    conservative[n_mu + seq_len(ncol(Z_nu))] <- 0
+  }
+  starts[[length(starts) + 1L]] <- conservative
+
   control_defaults <- list(factr = 1e3,
                            maxit = n_param * 200,
                            lmm = min(n_param, 20))
@@ -262,52 +390,36 @@ cnorm.cmp <- function(age,
   else
     utils::modifyList(control_defaults, control)
 
-  # Parameter bounds (only the dispersion coefficients are box-constrained)
-  lower_bounds <- rep(-Inf, n_param)
-  upper_bounds <- rep(Inf, n_param)
-  if (use_varying_nu) {
-    nu_idx <- ncol(X_mu) + seq_len(ncol(X_nu))
-    lower_bounds[nu_idx] <- CMP_LOG_NU_RANGE[1]
-    upper_bounds[nu_idx] <- CMP_LOG_NU_RANGE[2]
-  }
-
   # Objective with analytic gradient; function value and gradient share one
-  # evaluation of the series (cached for identical parameter vectors)
-  obj <- cmp_make_objective(X_mu, X_nu, score, weights, fixed_nu, tol, max_terms)
+  # evaluation of the series (cached for identical parameter vectors).
+  # No box constraints: the admissible range of nu is enforced by clamping the
+  # predictor of log(nu) inside the likelihood.
+  obj <- cmp_make_objective(Z_mu, Z_nu, score, weights, fixed_nu, tol, max_terms, max_score)
 
-  run_optim <- function(start, ctrl) {
-    optim(
-      start,
-      obj$fn,
-      gr = obj$gr,
-      method = "L-BFGS-B",
-      lower = lower_bounds,
-      upper = upper_bounds,
-      hessian = TRUE,
-      control = ctrl
+  run_optim <- function(par0, ctrl) {
+    tryCatch(
+      optim(par0, obj$fn, gr = obj$gr, method = "L-BFGS-B", hessian = TRUE, control = ctrl),
+      error = function(e) NULL
     )
   }
+  invalid <- function(r) is.null(r) || !is.finite(r$value) || r$value >= 1e9
 
-  result <- tryCatch(run_optim(initial_params, control), error = function(e) NULL)
-
-  if (is.null(result) || !is.finite(result$value) || result$value >= 1e9) {
-    message("First optimization attempt failed. Trying with different parameters...")
-
-    # Try with more conservative initial values
-    initial_params2 <- initial_params
-    initial_params2[seq_len(ncol(X_mu))] <- c(log(max(stats::median(score), 0.5)),
-                                              rep(0, ncol(X_mu) - 1L))
-    if (use_varying_nu)
-      initial_params2[nu_idx] <- 0
-
-    control2 <- control
-    control2$factr <- if (is.null(control2$factr)) 1e4 else control2$factr * 10
-    control2$maxit <- if (is.null(control2$maxit)) 1000 else control2$maxit * 2
-
-    result <- run_optim(initial_params2, control2)
+  result <- NULL
+  for (i in seq_along(starts)) {
+    ctrl <- control
+    if (i > 1L && i == length(starts)) {
+      # last resort: relaxed precision, more iterations
+      ctrl$factr <- if (is.null(ctrl$factr)) 1e4 else ctrl$factr * 10
+      ctrl$maxit <- if (is.null(ctrl$maxit)) 1000 else ctrl$maxit * 2
+    }
+    result <- run_optim(starts[[i]], ctrl)
+    if (!invalid(result)) break
+    if (i < length(starts)) {
+      message("Optimization attempt ", i, " failed. Trying with different starting values...")
+    }
   }
 
-  if (!is.finite(result$value) || result$value >= 1e9) {
+  if (invalid(result)) {
     stop("Optimization failed: the CMP likelihood could not be evaluated. ",
          "Try reducing the polynomial degrees, fixing nu (nu_degree = NULL) or increasing 'max_terms'.")
   }
@@ -321,46 +433,66 @@ cnorm.cmp <- function(age,
     )
   }
 
-  # Warn when parameters sit at their box constraints; SEs and Wald tests are invalid there.
-  at_bound <- is.finite(lower_bounds) &
-    (result$par <= lower_bounds + 1e-6 | result$par >= upper_bounds - 1e-6)
-  if (any(at_bound)) {
-    warning(
-      "Parameter(s) at index ",
-      paste(which(at_bound), collapse = ", "),
-      " reached their bounds (nu is restricted to [",
-      round(exp(CMP_LOG_NU_RANGE[1]), 2), ", ", round(exp(CMP_LOG_NU_RANGE[2]), 1),
-      "]). Standard errors and Wald tests for these ",
-      "parameters are not valid. Consider reducing model complexity."
-    )
+  # ---- Back-transform coefficients to the polynomial scale ----------------
+  par_Z <- result$par
+  mu_Z <- par_Z[seq_len(n_mu)]
+  nu_Z <- if (use_varying_nu) par_Z[n_mu + seq_len(ncol(Z_nu))] else NULL
+  mu_est <- drop(backsolve(b_mu$T, mu_Z))
+  nu_est <- if (use_varying_nu) drop(backsolve(b_nu$T, nu_Z)) else NULL
+
+  # ---- Admissible range of nu: check the predictor at the observed ages ---
+  nu_at_bound <- FALSE
+  if (use_varying_nu) {
+    eta_nu_obs <- drop(Z_nu %*% nu_Z)
+    nu_at_bound <- any(eta_nu_obs <= CMP_LOG_NU_RANGE[1] + 1e-6 |
+                         eta_nu_obs >= CMP_LOG_NU_RANGE[2] - 1e-6)
+    if (nu_at_bound) {
+      warning(
+        "The predictor of log(nu) reached the admissible range [",
+        round(exp(CMP_LOG_NU_RANGE[1]), 2), ", ", round(exp(CMP_LOG_NU_RANGE[2]), 1),
+        "] at observed ages. The likelihood is flat there; standard errors and Wald tests ",
+        "are not valid. Consider reducing the degree of the dispersion polynomial."
+      )
+    }
   }
 
-  # Extract parameter estimates
-  n_mu <- ncol(X_mu)
-  mu_est <- result$par[seq_len(n_mu)]
-  nu_est <- if (use_varying_nu) result$par[n_mu + seq_len(ncol(X_nu))] else NULL
+  # ---- Standard errors on the polynomial scale -----------------------------
+  # Hessian is symmetrized; covariance in the QR basis is mapped back via
+  # Cov_raw = B Cov_Z B', B = blockdiag(T_mu^-1, T_nu^-1).
+  H <- result$hessian
+  H <- (H + t(H)) / 2
+  result$hessian <- H
 
-  # Guarded SE computation
-  se <- tryCatch({
-    h_inv <- solve(result$hessian)
-    d <- diag(h_inv)
+  se <- rep(NA_real_, n_param)
+  vcov_raw <- NULL
+  cov_Z <- tryCatch(solve(H), error = function(e) NULL)
+  if (is.null(cov_Z) || any(!is.finite(cov_Z))) {
+    warning("Could not compute standard errors: Hessian matrix issue")
+  } else {
+    B <- matrix(0, n_param, n_param)
+    B[seq_len(n_mu), seq_len(n_mu)] <- backsolve(b_mu$T, diag(n_mu))
+    if (use_varying_nu) {
+      idx_nu <- n_mu + seq_len(ncol(Z_nu))
+      B[idx_nu, idx_nu] <- backsolve(b_nu$T, diag(ncol(Z_nu)))
+    }
+    vcov_raw <- B %*% cov_Z %*% t(B)
+    vcov_raw <- (vcov_raw + t(vcov_raw)) / 2
+    d <- diag(vcov_raw)
     if (any(d < 0, na.rm = TRUE)) {
       warning("Hessian is not positive definite; standard errors are set to NA where invalid.")
       d[d < 0] <- NA
     }
-    sqrt(d)
-  }, error = function(e) {
-    warning("Could not compute standard errors: Hessian matrix issue")
-    rep(NA_real_, length(result$par))
-  })
+    se <- sqrt(d)
+  }
 
-  # Store attributes
-  attr(result, "age_mean") <- mean(age)
-  attr(result, "age_sd") <- sd(age)
+  # ---- Store attributes ------------------------------------------------------
+  grad_final <- tryCatch(obj$gr(result$par), error = function(e) NA_real_)
+  attr(result, "age_mean") <- age_mean
+  attr(result, "age_sd") <- age_sd
   attr(result, "ageMin") <- min(age)
   attr(result, "ageMax") <- max(age)
   attr(result, "score_mean") <- mean(score)
-  attr(result, "score_sd") <- sd(score)
+  attr(result, "score_sd") <- stats::sd(score)
   attr(result, "max") <- max(score)
   attr(result, "min") <- min(score)
   attr(result, "N") <- length(score)
@@ -369,6 +501,9 @@ cnorm.cmp <- function(age,
   attr(result, "nu") <- nu
   attr(result, "max_terms") <- max_terms
   attr(result, "tol") <- tol
+  attr(result, "max_score") <- max_score
+  attr(result, "weighted") <- !is.null(weights)
+  attr(result, "max_abs_gradient") <- if (all(is.na(grad_final))) NA_real_ else max(abs(grad_final), na.rm = TRUE)
 
   # Create model object
   model <- list(
@@ -378,6 +513,9 @@ cnorm.cmp <- function(age,
     se = se,
     mu_degree = mu_degree,
     nu_degree = nu_degree,
+    max_score = max_score,
+    at_bound = nu_at_bound,
+    vcov = vcov_raw,
     result = result
   )
 
@@ -401,6 +539,12 @@ cnorm.cmp <- function(age,
 #' The classical rate parameter is \eqn{\lambda = \mu^\nu}. For \code{nu = 1}, the
 #' distribution is the Poisson distribution with mean \code{mu}.
 #'
+#' @section Name collision:
+#' \pkg{COMPoissonReg} exports functions with the same names but the arguments
+#' \code{(lambda, nu)}. If both packages are attached, the one attached last masks the
+#' other, and the same call is silently interpreted with a different parameterization.
+#' Use \code{cNORM::dcmp()} etc. explicitly, or convert with \code{lambda = mu^nu}.
+#'
 #' @name cmp
 #' @aliases dcmp pcmp qcmp rcmp
 #'
@@ -408,16 +552,19 @@ cnorm.cmp <- function(age,
 #' @param p vector of probabilities.
 #' @param n number of observations. If \code{length(n) > 1}, the length is taken to be the number required.
 #' @param mu location parameter (> 0, default 1); approximately the mean,
-#'   \eqn{E(Y) \approx \mu - (\nu - 1)/(2\nu)}.
+#'   \eqn{E(Y) \approx \mu - (\nu - 1)/(2\nu)} (untruncated case).
 #' @param nu dispersion parameter (> 0, default 1). \code{nu < 1}: over-dispersion
 #'   (variance > mean); \code{nu > 1}: under-dispersion (variance < mean).
 #' @param log,log.p logical; if TRUE, probabilities are given as log(p).
 #' @param lower.tail logical; if TRUE (default), probabilities are P[X <= x], otherwise P[X > x].
+#' @param max_score optional ceiling \eqn{M}. If finite, the distribution is right-truncated to
+#'   \eqn{\{0, 1, \dots, M\}} (default \code{Inf}: no truncation).
 #'
 #' @details
 #' The normalizing constant is evaluated by a vectorized, adaptively truncated series
 #' with a rigorous geometric tail bound (relative error < 1e-12). The quantile function
-#' is computed by inversion of the cumulative sums, and random numbers are generated by
+#' is computed by inversion of the cumulative sums (the cumulative distribution is
+#' computed only once per distinct pair (mu, nu)), and random numbers are generated by
 #' inversion.
 #'
 #' @return \code{dcmp} gives the mass, \code{pcmp} the distribution function,
@@ -441,11 +588,15 @@ cnorm.cmp <- function(age,
 #' qcmp(c(0.025, 0.5, 0.975), mu = 20, nu = 3)
 #' pcmp(20, mu = 20, nu = 3)
 #'
+#' # Right-truncated at 25
+#' sum(dcmp(0:25, mu = 20, nu = 1, max_score = 25))
+#'
 #' @export
 #' @rdname cmp
-dcmp <- function(x, mu = 1, nu = 1, log = FALSE) {
+dcmp <- function(x, mu = 1, nu = 1, log = FALSE, max_score = Inf) {
   if (length(x) == 0L || length(mu) == 0L || length(nu) == 0L)
     return(numeric(0))
+  ms <- cmp_check_max_score(max_score)
   n <- max(length(x), length(mu), length(nu))
   x <- rep_len(x, n)
   mu <- rep_len(mu, n)
@@ -467,11 +618,12 @@ dcmp <- function(x, mu = 1, nu = 1, log = FALSE) {
     xc <- x[calc]
     eta <- base::log(mu[calc])
     nuc <- nu[calc]
-    mom <- cmp_engine(eta, nuc, max_terms = cmp_max_terms(mu[calc]))
+    mom <- cmp_engine(eta, nuc, max_terms = cmp_max_terms(mu[calc]), max_score = ms)
     ld <- nuc * (xc * eta - lgamma(xc + 1)) - mom$logZ
     nonint <- abs(xc - round(xc)) > 1e-7 * pmax(1, abs(xc))
     if (any(nonint)) warning("non-integer x in dcmp")
     ld[nonint | xc < 0] <- -Inf
+    if (!is.null(ms)) ld[xc > ms] <- -Inf
     if (any(!mom$ok)) {
       warning("CMP series did not converge for some parameter combinations; NaN produced.")
       ld[!mom$ok] <- NaN
@@ -483,9 +635,10 @@ dcmp <- function(x, mu = 1, nu = 1, log = FALSE) {
 
 #' @export
 #' @rdname cmp
-pcmp <- function(q, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE) {
+pcmp <- function(q, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE, max_score = Inf) {
   if (length(q) == 0L || length(mu) == 0L || length(nu) == 0L)
     return(numeric(0))
+  ms <- cmp_check_max_score(max_score)
   n <- max(length(q), length(mu), length(nu))
   q <- rep_len(q, n)
   mu <- rep_len(mu, n)
@@ -505,7 +658,7 @@ pcmp <- function(q, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE) {
 
   if (any(calc)) {
     mom <- cmp_engine(base::log(mu[calc]), nu[calc], q = floor(q[calc]),
-                      max_terms = cmp_max_terms(mu[calc]))
+                      max_terms = cmp_max_terms(mu[calc]), max_score = ms)
     pr <- if (lower.tail) mom$lower else mom$upper
     if (any(!mom$ok)) {
       warning("CMP series did not converge for some parameter combinations; NaN produced.")
@@ -519,9 +672,10 @@ pcmp <- function(q, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE) {
 
 #' @export
 #' @rdname cmp
-qcmp <- function(p, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE) {
+qcmp <- function(p, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE, max_score = Inf) {
   if (length(p) == 0L || length(mu) == 0L || length(nu) == 0L)
     return(numeric(0))
+  ms <- cmp_check_max_score(max_score)
   if (log.p) p <- exp(p)
   if (!lower.tail) p <- 1 - p
   n <- max(length(p), length(mu), length(nu))
@@ -536,35 +690,41 @@ qcmp <- function(p, mu = 1, nu = 1, lower.tail = TRUE, log.p = FALSE) {
 
   ok_in <- !bad & !nan
   out[ok_in & (mu == 0 | p == 0)] <- 0
-  out[ok_in & mu > 0 & p == 1] <- Inf
+  out[ok_in & mu > 0 & p == 1] <- if (is.null(ms)) Inf else ms
 
   calc <- ok_in & mu > 0 & p > 0 & p < 1
   if (any(calc)) {
-    mom <- cmp_engine(base::log(mu[calc]), nu[calc], p = p[calc],
-                      max_terms = cmp_max_terms(mu[calc]))
-    qq <- mom$quant
-    if (any(!mom$ok)) {
-      warning("CMP series did not converge for some parameter combinations; NaN produced.")
-      qq[!mom$ok] <- NaN
-    }
-    out[calc] <- qq
+    out[calc] <- cmp_quantile(p[calc], mu[calc], nu[calc], max_score = ms)
   }
   out
 }
 
 #' @export
 #' @rdname cmp
-rcmp <- function(n, mu = 1, nu = 1) {
+rcmp <- function(n, mu = 1, nu = 1, max_score = Inf) {
   if (length(n) > 1L) n <- length(n)
   if (n == 0L) return(numeric(0))
   u <- stats::runif(n)
-  qcmp(u, mu = rep_len(mu, n), nu = rep_len(nu, n))
+  qcmp(u, mu = rep_len(mu, n), nu = rep_len(nu, n), max_score = max_score)
 }
 
 
 # -----------------------------------------------------------------------------
 # Internal computing engine
 # -----------------------------------------------------------------------------
+
+#' Validate the optional ceiling; returns NULL (no ceiling) or an integer
+#' @keywords internal
+#' @noRd
+cmp_check_max_score <- function(max_score) {
+  if (is.null(max_score)) return(NULL)
+  if (!is.numeric(max_score) || length(max_score) != 1L || is.na(max_score) ||
+      max_score < 1 || (is.finite(max_score) && max_score != round(max_score))) {
+    stop("'max_score' must be NULL, Inf or a single positive integer.")
+  }
+  if (!is.finite(max_score)) return(NULL)
+  as.integer(max_score)
+}
 
 #' Polynomial design matrix with intercept (degree 0 = intercept only)
 #' @keywords internal
@@ -573,17 +733,52 @@ cmp_design <- function(x, degree) {
   if (degree < 1L) {
     matrix(1, nrow = length(x), ncol = 1L)
   } else {
-    cbind(1, poly(x, degree = degree, raw = TRUE))
+    cbind(1, outer(x, seq_len(degree), "^"))   # raw polynomial terms (NA-safe)
   }
 }
 
-#' Default truncation limit for the series, depending on the largest mu
+#' Orthogonalized basis of a design matrix
+#'
+#' Returns Z and T with X = Z T, where Z has orthogonal columns scaled to unit mean
+#' square (the first column is the constant 1) and T is upper triangular with a positive
+#' diagonal. Coefficients in the two parameterizations are related by
+#' beta_Z = T beta_raw, i.e., beta_raw = T^{-1} beta_Z.
 #' @keywords internal
 #' @noRd
-cmp_max_terms <- function(mu) {
+cmp_basis <- function(X) {
+  n <- nrow(X)
+  p <- ncol(X)
+  qrX <- qr(X, tol = 1e-10)
+  if (qrX$rank < p || any(qrX$pivot != seq_len(p))) {
+    stop("The polynomial design matrix is rank deficient. Reduce the polynomial degree.")
+  }
+  R <- qr.R(qrX)
+  Q <- qr.Q(qrX)
+  s <- sign(diag(R))
+  s[s == 0] <- 1
+  list(Z = sweep(Q, 2L, s, "*") * sqrt(n),
+       T = (s * R) / sqrt(n))
+}
+
+#' Pad (or cut) a coefficient vector to a given length
+#' @keywords internal
+#' @noRd
+cmp_pad <- function(v, len) {
+  v <- as.numeric(v)
+  if (length(v) < len) v <- c(v, rep(0, len - length(v)))
+  v[seq_len(len)]
+}
+
+#' Default truncation limit for the series, depending on the largest mu
+#' @param floor optional lower limit (e.g., the value stored in a fitted model)
+#' @keywords internal
+#' @noRd
+cmp_max_terms <- function(mu, floor = NULL) {
   mu <- mu[is.finite(mu)]
   top <- if (length(mu)) max(mu) else 0
-  as.integer(max(2000, min(1e5, ceiling(20 * top))))
+  mt <- max(2000, min(1e5, ceiling(20 * top)))
+  if (!is.null(floor) && is.finite(floor)) mt <- max(mt, floor)
+  as.integer(mt)
 }
 
 #' Group identical rows of one or more numeric key vectors
@@ -611,6 +806,23 @@ cmp_group <- function(keys) {
   list(rep = ord[newgrp], inv = inv)
 }
 
+#' Row-wise cumulative sums of a matrix
+#' @keywords internal
+#' @noRd
+cmp_row_cumsum <- function(E) {
+  if (nrow(E) == 1L) {
+    return(matrix(cumsum(E[1L, ]), nrow = 1L))
+  }
+  if (nrow(E) <= ncol(E)) {
+    return(t(apply(E, 1L, cumsum)))
+  }
+  # many rows, few columns: one vectorized step per column
+  for (j in seq_len(ncol(E))[-1L]) {
+    E[, j] <- E[, j] + E[, j - 1L]
+  }
+  E
+}
+
 #' Evaluate the CMP series for a block of parameter pairs with a common truncation J
 #'
 #' With eta = log(mu), the log-terms are log t_j = nu * (j * eta - log(j!)), j = 0..J.
@@ -618,6 +830,8 @@ cmp_group <- function(keys) {
 #' normalized by the exact maximum (stable log-sum-exp). Since
 #' t_{j+1} / t_j = (mu / (j + 1))^nu is decreasing in j, the neglected tail after J is
 #' bounded by t_J * r / (1 - r) with r = (mu / (J + 1))^nu (valid for r < 1).
+#' If \code{exact = TRUE} (right-truncated distribution with J = max_score), the sum is
+#' finite and exact, so no tail bound is needed.
 #'
 #' @param eta,nu Vectors (length m) of log(mu) and nu.
 #' @param J Highest summation index.
@@ -625,11 +839,15 @@ cmp_group <- function(keys) {
 #' @param p Optional vector (length m): returns the smallest x with P(Y <= x) >= p.
 #' @param second Logical; also return E(Y^2).
 #' @param tol Relative tolerance of the tail bound.
+#' @param exact Logical; the series is the complete (finite) support.
+#' @param full Logical; also return the complete pmf and cdf (m x (J + 1) matrices).
 #'
-#' @return A list with logZ, EY, ElgF (= E[log Y!]), ok and optionally EY2, lower, upper, quant.
+#' @return A list with logZ, EY, ElgF (= E[log Y!]), ok and optionally EY2, lower, upper,
+#'   quant, pmf, cdf.
 #' @keywords internal
 #' @noRd
-cmp_block <- function(eta, nu, J, q = NULL, p = NULL, second = FALSE, tol = 1e-12) {
+cmp_block <- function(eta, nu, J, q = NULL, p = NULL, second = FALSE, tol = 1e-12,
+                      exact = FALSE, full = FALSE) {
   m <- length(eta)
   js <- 0:J
   lg <- lgamma(js + 1)
@@ -649,20 +867,30 @@ cmp_block <- function(eta, nu, J, q = NULL, p = NULL, second = FALSE, tol = 1e-1
   )
   if (second) out$EY2 <- drop(E %*% (js^2)) / S
 
-  # Rigorous bound of the truncated tail (relative to the sum)
-  r <- exp(nu * (eta - log(J + 1)))
-  tail_rel <- E[, J + 1L] * r / pmax(1 - r, 1e-300) / S
-  tail_rel[!(r < 1)] <- Inf
-  out$ok <- is.finite(out$logZ) & (tail_rel < tol)
+  if (exact) {
+    out$ok <- is.finite(out$logZ)
+  } else {
+    # Rigorous bound of the truncated tail (relative to the sum)
+    r <- exp(nu * (eta - log(J + 1)))
+    tail_rel <- E[, J + 1L] * r / pmax(1 - r, 1e-300) / S
+    tail_rel[!(r < 1)] <- Inf
+    out$ok <- is.finite(out$logZ) & (tail_rel < tol)
+  }
 
   if (!is.null(q)) {
     mask <- matrix(js, nrow = m, ncol = J + 1L, byrow = TRUE) <= q
     out$lower <- rowSums(E * mask) / S
     out$upper <- rowSums(E * (!mask)) / S
   }
-  if (!is.null(p)) {
-    Cm <- t(apply(E, 1L, cumsum)) / S
-    out$quant <- rowSums(Cm < p * (1 - 64 * .Machine$double.eps))
+  if (!is.null(p) || full) {
+    Cm <- cmp_row_cumsum(E) / S
+    if (full) {
+      out$pmf <- E / S
+      out$cdf <- Cm
+    }
+    if (!is.null(p)) {
+      out$quant <- rowSums(Cm < p * (1 - 64 * .Machine$double.eps))
+    }
   }
   out
 }
@@ -673,6 +901,8 @@ cmp_block <- function(eta, nu, J, q = NULL, p = NULL, second = FALSE, tol = 1e-1
 #' estimated required truncation (powers of 2), and processed in memory-bounded blocks.
 #' Rows whose tail bound is not met are re-evaluated with doubled truncation up to
 #' \code{max_terms}; rows failing there are flagged via \code{ok = FALSE}.
+#' For a right-truncated distribution (\code{max_score} given), all rows are summed
+#' exactly up to \code{max_score}.
 #'
 #' @param eta Numeric vector, log(mu).
 #' @param nu Numeric vector (or scalar), dispersion.
@@ -680,15 +910,19 @@ cmp_block <- function(eta, nu, J, q = NULL, p = NULL, second = FALSE, tol = 1e-1
 #' @param tol Relative tolerance of the tail bound.
 #' @param max_terms Maximum number of series terms.
 #' @param block_size Maximum number of matrix cells per block.
+#' @param max_score Optional integer ceiling (right-truncation), or NULL.
 #'
 #' @return A list of vectors (length of \code{eta}): logZ, EY, ElgF, ok and optionally
 #'   EY2, lower, upper, quant.
 #' @keywords internal
 #' @noRd
 cmp_engine <- function(eta, nu, q = NULL, p = NULL, second = FALSE,
-                       tol = 1e-12, max_terms = 2000L, block_size = 1e6) {
+                       tol = 1e-12, max_terms = 2000L, block_size = 1e6,
+                       max_score = NULL) {
   n <- length(eta)
   if (length(nu) == 1L) nu <- rep(nu, n)
+  exact <- !is.null(max_score)
+  if (exact) max_terms <- as.integer(max_score)
 
   keys <- list(eta, nu)
   if (!is.null(q)) keys <- c(keys, list(q))
@@ -713,10 +947,14 @@ cmp_engine <- function(eta, nu, q = NULL, p = NULL, second = FALSE,
   if (!is.null(pp)) valid <- valid & !is.na(pp)
   pending <- valid
 
-  # Initial truncation: the terms peak at about mu with spread about sqrt(mu / nu)
-  mu_a <- exp(pmin(e, 700))
-  J_est <- ceiling(mu_a + 10 * sqrt(mu_a / v) + 30)
-  J_bin <- pmin(2^ceiling(log2(pmax(J_est, 64))), max_terms)
+  if (exact) {
+    J_bin <- rep(max_terms, m)
+  } else {
+    # Initial truncation: the terms peak at about mu with spread about sqrt(mu / nu)
+    mu_a <- exp(pmin(e, 700))
+    J_est <- ceiling(mu_a + 10 * sqrt(mu_a / v) + 30)
+    J_bin <- pmin(2^ceiling(log2(pmax(J_est, 64))), max_terms)
+  }
 
   while (any(pending)) {
     for (b in sort(unique(J_bin[pending]))) {
@@ -726,7 +964,7 @@ cmp_engine <- function(eta, nu, q = NULL, p = NULL, second = FALSE,
       for (s in seq(1L, length(rows), by = step)) {
         idx <- rows[s:min(s + step - 1L, length(rows))]
         blk <- cmp_block(e[idx], v[idx], b, q = qq[idx], p = pp[idx],
-                         second = second, tol = tol)
+                         second = second, tol = tol, exact = exact)
         for (f in fields) res[[f]][idx] <- blk[[f]]
         good <- blk$ok
         res$ok[idx[good]] <- TRUE
@@ -740,10 +978,166 @@ cmp_engine <- function(eta, nu, q = NULL, p = NULL, second = FALSE,
   lapply(res, function(x) x[g$inv])
 }
 
+#' Complete pmf and cdf of ONE CMP distribution (adaptive truncation)
+#'
+#' @return List with pmf and cdf (vectors over 0..J), ok and J.
+#' @keywords internal
+#' @noRd
+cmp_table <- function(eta, nu, tol = 1e-12, max_terms = 2000L, max_score = NULL) {
+  exact <- !is.null(max_score)
+  if (exact) {
+    J <- as.integer(max_score)
+    max_terms <- J
+  } else {
+    mu_a <- exp(min(eta, 700))
+    J <- min(2^ceiling(log2(max(ceiling(mu_a + 10 * sqrt(mu_a / nu) + 30), 64))), max_terms)
+  }
+  repeat {
+    blk <- cmp_block(eta, nu, J, tol = tol, exact = exact, full = TRUE)
+    if (isTRUE(blk$ok[1L]) || J >= max_terms) break
+    J <- min(2 * J, max_terms)
+  }
+  list(pmf = blk$pmf[1L, ], cdf = blk$cdf[1L, ], ok = isTRUE(blk$ok[1L]), J = J)
+}
+
+#' Quantile function for vectors of (p, mu, nu) with 0 < p < 1
+#'
+#' Pairs (mu, nu) that occur at least three times (e.g., many random deviates for one
+#' age) obtain their cumulative distribution once, and all quantiles are found by
+#' \code{findInterval}. Remaining rows are processed by the batched engine.
+#' @keywords internal
+#' @noRd
+cmp_quantile <- function(p, mu, nu, tol = 1e-12, max_terms = NULL, max_score = NULL) {
+  n <- length(p)
+  res <- rep(NA_real_, n)
+  if (n == 0L) return(res)
+
+  grp <- cmp_group(list(mu, nu))
+  members <- split(seq_len(n), grp$inv)
+  big <- which(lengths(members) >= 3L)
+  done <- rep(FALSE, n)
+  failed <- FALSE
+  p_adj <- p * (1 - 64 * .Machine$double.eps)
+
+  for (k in big) {
+    idx <- members[[k]]
+    r <- grp$rep[k]
+    tab <- cmp_table(base::log(mu[r]), nu[r], tol = tol,
+                     max_terms = cmp_max_terms(mu[r], max_terms), max_score = max_score)
+    done[idx] <- TRUE
+    if (tab$ok) {
+      res[idx] <- findInterval(p_adj[idx], tab$cdf, left.open = TRUE)
+    } else {
+      res[idx] <- NaN
+      failed <- TRUE
+    }
+  }
+
+  rest <- which(!done)
+  if (length(rest) > 0L) {
+    mom <- cmp_engine(base::log(mu[rest]), nu[rest], p = p[rest], tol = tol,
+                      max_terms = cmp_max_terms(mu[rest], max_terms), max_score = max_score)
+    qq <- mom$quant
+    if (any(!mom$ok)) {
+      qq[!mom$ok] <- NaN
+      failed <- TRUE
+    }
+    res[rest] <- qq
+  }
+
+  if (failed) {
+    warning("CMP series did not converge for some parameter combinations; NaN produced.")
+  }
+  res
+}
+
+#' Continuity-corrected ("mid-p") quantile function
+#'
+#' Linear interpolation of the cdf on [x - 0.5, x + 0.5], i.e., the inverse of the mid-p
+#' percentile rank G(x) = P(Y < x) + 0.5 P(Y = x) at integers. This is the quantile
+#' consistent with the mid-p norm scores and with interpolated manifest quantiles.
+#' @keywords internal
+#' @noRd
+cmp_quantile_mid <- function(p, mu, nu, tol = 1e-12, max_terms = NULL, max_score = NULL) {
+  x <- cmp_quantile(p, mu, nu, tol = tol, max_terms = max_terms, max_score = max_score)
+  cp <- cmp_cum_pmf(x, mu, nu, tol = tol, max_terms = max_terms, max_score = max_score)
+  pmf <- pmax(cp$pmf, .Machine$double.xmin)
+  q <- x - 0.5 + (p - cp$cdf_prev) / pmf
+  pmin(pmax(q, x - 0.5), x + 0.5)
+}
+
+#' Cumulative and point probabilities in one pass (for norm tables and prediction)
+#'
+#' @return List with pmf = P(Y = x), cdf_prev = P(Y <= x - 1), cdf = P(Y <= x), ok.
+#' @keywords internal
+#' @noRd
+cmp_cum_pmf <- function(x, mu, nu, tol = 1e-12, max_terms = NULL, max_score = NULL) {
+  eta <- base::log(mu)
+  mom <- cmp_engine(eta, nu, q = x - 1, tol = tol,
+                    max_terms = cmp_max_terms(mu, max_terms), max_score = max_score)
+  pmf <- exp(nu * (x * eta - lgamma(x + 1)) - mom$logZ)
+  if (!is.null(max_score)) pmf[x > max_score] <- 0
+  cdf_prev <- mom$lower
+  list(pmf = pmf, cdf_prev = cdf_prev, cdf = pmin(cdf_prev + pmf, 1), ok = mom$ok)
+}
+
+#' Exact mean, variance, sd, skewness and excess kurtosis of ONE CMP distribution
+#' @return numeric(5): mean, variance, sd, skewness, kurtosis (excess)
+#' @keywords internal
+#' @noRd
+cmp_central_moments <- function(mu, nu, tol = 1e-12, max_terms = NULL, max_score = NULL) {
+  na <- rep(NA_real_, 5L)
+  if (!is.finite(mu) || !is.finite(nu) || mu < 0 || nu <= 0) return(na)
+  if (mu == 0) return(c(0, 0, 0, NA_real_, NA_real_))
+  tab <- cmp_table(base::log(mu), nu, tol = tol,
+                   max_terms = cmp_max_terms(mu, max_terms), max_score = max_score)
+  if (!tab$ok) {
+    warning("CMP series did not converge; moments set to NA.")
+    return(na)
+  }
+  f <- tab$pmf / sum(tab$pmf)
+  x <- seq_along(f) - 1
+  m <- sum(f * x)
+  d <- x - m
+  v <- sum(f * d^2)
+  c(m, v, sqrt(v),
+    if (v > 0) sum(f * d^3) / v^1.5 else NA_real_,
+    if (v > 0) sum(f * d^4) / v^2 - 3 else NA_real_)
+}
+
+#' Options stored in a fitted model (tolerance, truncation limit, ceiling)
+#' @keywords internal
+#' @noRd
+cmp_opts <- function(model) {
+  r <- model$result
+  tol <- attr(r, "tol")
+  if (is.null(tol)) tol <- 1e-12
+  list(tol = tol,
+       max_terms = attr(r, "max_terms"),
+       max_score = attr(r, "max_score"))
+}
+
+#' Age groups for manifest percentiles and calibration checks
+#' @keywords internal
+#' @noRd
+cmp_age_groups <- function(age) {
+  if (length(age) / length(unique(age)) > 50 && min(table(age)) > 30) {
+    grp <- age
+  } else {
+    grp <- getGroups(age)
+  }
+  # Limit to max 30 groups for better visibility
+  if (length(unique(grp)) > 30) {
+    grp <- getGroups(age, n = 30)
+  }
+  grp
+}
+
 #' Initial values for the CMP regression
 #'
 #' mu: Poisson regression (weighted); nu: from the Pearson dispersion of that fit,
-#' using Var(Y) approx mu / nu.
+#' using Var(Y) approx mu / nu. The design matrices are the (orthogonalized) matrices
+#' used by the optimizer, so the returned values refer to that parameterization.
 #' @keywords internal
 #' @noRd
 cmp_start_values <- function(X_mu, X_nu, y, weights) {
@@ -783,9 +1177,10 @@ cmp_start_values <- function(X_mu, X_nu, y, weights) {
 #' \eqn{\ell = \nu (y \eta - \log y!) - \log Z(\mu, \nu)}:
 #' \deqn{\partial \ell / \partial \eta = \nu (y - E Y)}
 #' \deqn{\partial \ell / \partial \log\nu = \nu [\eta (y - E Y) - (\log y! - E \log Y!)]}
-#' where expectations are taken under the current CMP distribution. Contributions of
-#' observations whose log(nu) predictor is clamped are zeroed (exact subgradient of the
-#' clamped objective).
+#' where expectations are taken under the current CMP distribution (right-truncated at
+#' \code{max_score}, if given; the formulas are unchanged because the truncated
+#' distribution is again an exponential family). Contributions of observations whose
+#' log(nu) predictor is clamped are zeroed (exact subgradient of the clamped objective).
 #'
 #' @return A list with \code{nll} and \code{grad}. If the series cannot be evaluated
 #'   (non-finite parameters or truncation limit reached), a large penalty (1e10) and a
@@ -799,7 +1194,8 @@ cmp_evaluate <- function(params,
                          weights = NULL,
                          fixed_nu = NULL,
                          tol = 1e-12,
-                         max_terms = 2000L) {
+                         max_terms = 2000L,
+                         max_score = NULL) {
   n_mu <- ncol(X_mu)
   penalty <- list(nll = 1e10, grad = rep(0, length(params)))
 
@@ -818,7 +1214,7 @@ cmp_evaluate <- function(params,
 
   if (any(!is.finite(eta))) return(penalty)
 
-  mom <- cmp_engine(eta, nu, tol = tol, max_terms = max_terms)
+  mom <- cmp_engine(eta, nu, tol = tol, max_terms = max_terms, max_score = max_score)
   if (!all(mom$ok)) return(penalty)
 
   lgy <- lgamma(y + 1)
@@ -846,12 +1242,14 @@ cmp_evaluate <- function(params,
 #' @param weights Observation weights
 #' @param fixed_nu If X_nu is NULL, the dispersion is fixed to this value
 #' @param tol,max_terms Tolerance and truncation limit of the series
+#' @param max_score Optional ceiling (right-truncation), or NULL
 #'
 #' @return The negative log-likelihood of the model
 #' @keywords internal
 log_likelihood_cmp <- function(params, X_mu, X_nu = NULL, y, weights = NULL,
-                               fixed_nu = NULL, tol = 1e-12, max_terms = 2000L) {
-  cmp_evaluate(params, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms)$nll
+                               fixed_nu = NULL, tol = 1e-12, max_terms = 2000L,
+                               max_score = NULL) {
+  cmp_evaluate(params, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms, max_score)$nll
 }
 
 #' Analytic gradient of the negative log-likelihood for a CMP regression model
@@ -860,19 +1258,21 @@ log_likelihood_cmp <- function(params, X_mu, X_nu = NULL, y, weights = NULL,
 #' @return Numeric vector: gradient of the negative log-likelihood with respect to \code{params}.
 #' @keywords internal
 gradient_cmp <- function(params, X_mu, X_nu = NULL, y, weights = NULL,
-                         fixed_nu = NULL, tol = 1e-12, max_terms = 2000L) {
-  cmp_evaluate(params, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms)$grad
+                         fixed_nu = NULL, tol = 1e-12, max_terms = 2000L,
+                         max_score = NULL) {
+  cmp_evaluate(params, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms, max_score)$grad
 }
 
 #' Build objective and gradient closures that share one series evaluation
 #' @keywords internal
 #' @noRd
-cmp_make_objective <- function(X_mu, X_nu, y, weights, fixed_nu, tol, max_terms) {
+cmp_make_objective <- function(X_mu, X_nu, y, weights, fixed_nu, tol, max_terms,
+                               max_score = NULL) {
   last_par <- NULL
   last_val <- NULL
   evaluate <- function(par) {
     if (!is.null(last_par) && identical(par, last_par)) return(last_val)
-    val <- cmp_evaluate(par, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms)
+    val <- cmp_evaluate(par, X_mu, X_nu, y, weights, fixed_nu, tol, max_terms, max_score)
     last_par <<- par
     last_val <<- val
     val
@@ -888,26 +1288,13 @@ isCMP <- function(model) {
   inherits(model, "cnormCMP")
 }
 
-#' Cumulative and point probabilities in one pass (for norm tables and prediction)
-#'
-#' @return List with pmf = P(Y = x), cdf_prev = P(Y <= x - 1), cdf = P(Y <= x), ok.
-#' @keywords internal
-#' @noRd
-cmp_cum_pmf <- function(x, mu, nu) {
-  eta <- base::log(mu)
-  mom <- cmp_engine(eta, nu, q = x - 1, max_terms = cmp_max_terms(mu))
-  pmf <- exp(nu * (x * eta - lgamma(x + 1)) - mom$logZ)
-  cdf_prev <- mom$lower
-  list(pmf = pmf, cdf_prev = cdf_prev, cdf = pmin(cdf_prev + pmf, 1), ok = mom$ok)
-}
-
-
 #' Predict parameters for a CMP regression model
 #'
 #' @param model An object of class "cnormCMP"
 #' @param ages A numeric vector of age points for prediction
 #' @param moments Logical; if TRUE, the exact mean, variance and standard deviation of the
-#'   CMP distribution are added (requires one additional series evaluation per age).
+#'   CMP distribution are added (one series evaluation per age). For the full set of
+#'   moments including skewness and kurtosis, use \code{\link{predictMoments}}.
 #'
 #' @return A data frame with predicted mu, nu and lambda = mu^nu (and optionally mean, variance, sd)
 #'
@@ -917,7 +1304,7 @@ predictCoefficients_cmp <- function(model, ages, moments = FALSE) {
     stop("Wrong object. Please provide object from class 'cnormCMP'.")
   }
 
-  # Standardize new ages
+  # Standardize new ages (same formula as in cnorm.cmp)
   ages_std <- (ages - attr(model$result, "age_mean")) / attr(model$result, "age_sd")
 
   X_mu_new <- cmp_design(ages_std, model$mu_degree)
@@ -941,16 +1328,107 @@ predictCoefficients_cmp <- function(model, ages, moments = FALSE) {
   )
 
   if (moments) {
-    mom <- cmp_engine(log_mu, nu, second = TRUE, max_terms = cmp_max_terms(mu))
-    predicted$mean <- mom$EY
-    predicted$variance <- pmax(mom$EY2 - mom$EY^2, 0)
-    predicted$sd <- sqrt(predicted$variance)
+    o <- cmp_opts(model)
+    cm <- t(vapply(seq_along(ages), function(i) {
+      cmp_central_moments(mu[i], nu[i], o$tol, o$max_terms, o$max_score)
+    }, numeric(5)))
+    predicted$mean <- cm[, 1]
+    predicted$variance <- cm[, 2]
+    predicted$sd <- cm[, 3]
   }
 
   return(predicted)
 }
 
+#' Residuals of a CMP continuous norming model
+#'
+#' Computes residuals on the z-scale for a diagnostic check of the fitted model.
+#' With \code{type = "quantile"}, randomized quantile residuals (Dunn & Smyth, 1996) are
+#' returned: if the model is correct, they are exactly standard normal, also for discrete
+#' data. With \code{type = "z"}, the deterministic mid-p z-scores
+#' \eqn{\Phi^{-1}(P(Y < y) + 0.5 P(Y = y))} are returned (the z-scores underlying the
+#' norm scores); they are approximately standard normal for larger counts, but their
+#' variance is slightly below 1 for small counts.
+#'
+#' @param object A fitted model of class "cnormCMP".
+#' @param age Numeric vector of ages.
+#' @param score Numeric vector of raw scores (counts), same length as \code{age}.
+#' @param type \code{"quantile"} (randomized, default) or \code{"z"} (mid-p).
+#' @param seed Optional seed; if given, \code{set.seed(seed)} is called before the
+#'   randomization (note that this changes the state of the random number generator).
+#' @param ... Not used.
+#'
+#' @return A numeric vector of residuals.
+#'
+#' @references
+#' Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals. \emph{Journal of
+#' Computational and Graphical Statistics}, 5(3), 236-244.
+#'
+#' @examples
+#' \dontrun{
+#' model <- cnorm.cmp(speed$age, speed$fluency)
+#' r <- residuals(model, speed$age, speed$fluency, seed = 1)
+#' c(mean(r), sd(r))
+#' qqnorm(r)
+#' }
+#' @export
+residuals.cnormCMP <- function(object, age, score, type = c("quantile", "z"),
+                               seed = NULL, ...) {
+  if (!isCMP(object)) {
+    stop("Wrong object. Please provide object from class 'cnormCMP'.")
+  }
+  type <- match.arg(type)
+  if (!is.numeric(age) || !is.numeric(score)) {
+    stop("'age' and 'score' must be numeric vectors.")
+  }
+  if (length(age) != length(score)) {
+    stop("The lengths of 'age' and 'score' must be the same.")
+  }
+  score <- round(score)
+
+  pr <- predictCoefficients_cmp(object, age)
+  o <- cmp_opts(object)
+  cp <- cmp_cum_pmf(score, pr$mu, pr$nu, tol = o$tol, max_terms = o$max_terms,
+                    max_score = o$max_score)
+
+  if (type == "quantile") {
+    if (!is.null(seed)) set.seed(seed)
+    u <- cp$cdf_prev + stats::runif(length(score)) * cp$pmf
+  } else {
+    u <- cp$cdf_prev + 0.5 * cp$pmf
+  }
+  u[!cp$ok] <- NA
+  stats::qnorm(pmin(pmax(u, 1e-12), 1 - 1e-12))
+}
+
+#' Log-likelihood of a CMP model (enables \code{AIC()} and \code{BIC()})
+#'
+#' @param object A fitted model of class "cnormCMP".
+#' @param ... Not used.
+#' @return An object of class "logLik".
+#' @export
+logLik.cnormCMP <- function(object, ...) {
+  structure(-object$result$value,
+            df = length(object$result$par),
+            nobs = attr(object$result, "N"),
+            class = "logLik")
+}
+
+#' Number of observations used to fit a CMP model
+#'
+#' @param object A fitted model of class "cnormCMP".
+#' @param ... Not used.
+#' @return Integer.
+#' @export
+nobs.cnormCMP <- function(object, ...) {
+  attr(object$result, "N")
+}
+
 #' Plot CMP Model with Data and Percentile Lines
+#'
+#' The model-implied percentile curves are continuity-corrected quantiles, i.e., the
+#' inverse of the mid-p percentile rank used for the norm scores, so that they are
+#' directly comparable to the (interpolated) manifest percentiles.
 #'
 #' @param x A fitted model object of class "cnormCMP"
 #' @param ... Additional arguments including age, score, weights, percentiles, points
@@ -1017,16 +1495,20 @@ plot.cnormCMP <- function(x, ...) {
   } else {
     data$w <- rep(1, nrow(data))
   }
+  data <- data[is.finite(data$age) & is.finite(data$score) & is.finite(data$w), , drop = FALSE]
+  age <- data$age
 
   age_range <- range(age)
   pred_ages <- seq(age_range[1], age_range[2], length.out = n_points)
 
   # Get predictions
   preds <- predictCoefficients_cmp(model, pred_ages)
+  o <- cmp_opts(model)
 
-  # Calculate percentile lines using CMP quantiles (discrete: step-like curves)
+  # Percentile lines: continuity-corrected CMP quantiles (consistent with mid-p norm scores)
   percentile_lines <- lapply(percentiles, function(p) {
-    qcmp(p, mu = preds$mu, nu = preds$nu)
+    cmp_quantile_mid(rep(p, n_points), mu = preds$mu, nu = preds$nu,
+                     tol = o$tol, max_terms = o$max_terms, max_score = o$max_score)
   })
 
   percentile_data <- do.call(cbind, percentile_lines)
@@ -1051,17 +1533,7 @@ plot.cnormCMP <- function(x, ...) {
     )
 
   # Calculate manifest percentiles
-  if (length(age) / length(unique(age)) > 50 &&
-      min(table(data$age)) > 30) {
-    data$group <- age
-  } else {
-    data$group <- getGroups(age)
-  }
-
-  # Limit to max 30 groups for better visibility
-  if (length(unique(data$group)) > 30) {
-    data$group <- getGroups(age, n = 30)
-  }
+  data$group <- cmp_age_groups(age)
 
   # Get actual percentiles
   NAMES <- paste("PR", percentiles * 100, sep = "")
@@ -1152,10 +1624,14 @@ print.cnormCMP <- function(x, ...) {
     cat("- Dispersion (nu, log link): Polynomial degree",
         x$nu_degree,
         ifelse(x$nu_degree == 0, "(constant)", ""),
-        "\n\n")
+        "\n")
   } else {
-    cat("- Dispersion (nu): Fixed at", x$nu, "\n\n")
+    cat("- Dispersion (nu): Fixed at", x$nu, "\n")
   }
+  if (!is.null(x$max_score)) {
+    cat("- Right-truncated at max_score =", x$max_score, "\n")
+  }
+  cat("\n")
 
   cat("Sample size:", attr(x$result, "N"), "\n")
   cat("Age range:",
@@ -1175,7 +1651,102 @@ print.cnormCMP <- function(x, ...) {
       "\n")
   cat("- Log-likelihood:", -x$result$value, "\n")
   cat("- AIC:", 2 * length(x$result$par) + 2 * x$result$value, "\n")
+  if (isTRUE(x$at_bound)) {
+    cat("- WARNING: log(nu) reached its admissible range at observed ages.\n")
+  }
   invisible(x)
+}
+
+#' Build the worker that fits one chain of candidate models (internal)
+#'
+#' Defined at top level (not inside \code{autoselect.cmp}) so that, when it is shipped to
+#' parallel workers, only the data arguments are serialized with it. A chain is a fixed
+#' degree of nu with ascending degrees of mu; with \code{warm_start = TRUE} each fit
+#' starts from the solution of the previous (lower) degree.
+#'
+#' Warnings of each fit are captured (not discarded) and every record carries the flag
+#' \code{at_bound} (predictor of log(nu) at its admissible range).
+#' @keywords internal
+#' @noRd
+cmp_select_fitter <- function(age, score, weights, nu, control, scale,
+                              max_terms, tol, max_score, warm_start) {
+  force(age); force(score); force(weights); force(nu); force(control)
+  force(scale); force(max_terms); force(tol); force(max_score); force(warm_start)
+
+  fit_once <- function(mu_deg, nu_deg, start) {
+    out <- list(mu = mu_deg, nu = nu_deg, model = NULL,
+                BIC = Inf, AIC = NA_real_, logLik = NA_real_,
+                converged = FALSE, at_bound = NA, status = "error",
+                message = NA_character_, warnings = character(0))
+    warns <- character(0)
+    res <- tryCatch({
+      m <- withCallingHandlers(
+        suppressMessages(
+          cnorm.cmp(age = age, score = score, weights = weights,
+                    mu_degree = mu_deg,
+                    nu_degree = if (nu_deg < 0) NULL else nu_deg,
+                    nu = nu, control = control, scale = scale,
+                    max_terms = max_terms, tol = tol, plot = FALSE,
+                    max_score = max_score, start = start)
+        ),
+        warning = function(w) {
+          warns <<- c(warns, conditionMessage(w))
+          invokeRestart("muffleWarning")
+        }
+      )
+      list(model = m, err = NA_character_)
+    }, error = function(e) list(model = NULL, err = conditionMessage(e)))
+
+    out$warnings <- warns
+    if (is.null(res$model)) {
+      out$message <- res$err
+      return(out)
+    }
+    d <- diagnostics.cmp(res$model)
+    out$model <- res$model
+    out$BIC <- if (is.finite(d$BIC)) d$BIC else Inf
+    out$AIC <- d$AIC
+    out$logLik <- d$log_likelihood
+    out$converged <- isTRUE(d$converged)
+    out$at_bound <- isTRUE(res$model$at_bound)
+    out$status <- if (!is.finite(d$BIC)) "error"
+    else if (!isTRUE(d$converged)) "not_converged"
+    else "ok"
+    out
+  }
+
+  # 0 = clean (converged, nu inside its range), 1 = usable with caveats, 2 = failed
+  quality <- function(r) {
+    if (r$status == "error") 2L
+    else if (r$status == "ok" && !isTRUE(r$at_bound)) 0L
+    else 1L
+  }
+  better <- function(a, b) {
+    qa <- quality(a); qb <- quality(b)
+    if (qa != qb) qa < qb else a$BIC < b$BIC
+  }
+
+  function(task) {
+    out <- vector("list", length(task$mu_degs))
+    prev <- NULL
+    for (i in seq_along(task$mu_degs)) {
+      mu_deg <- task$mu_degs[i]
+      nu_deg <- task$nu_deg
+      start <- NULL
+      if (warm_start && !is.null(prev)) {
+        start <- list(mu = prev$mu_est, nu = prev$nu_est)
+      }
+      r <- fit_once(mu_deg, nu_deg, start)
+      # A warm start that did not end cleanly is compared with a cold start
+      if (!is.null(start) && quality(r) > 0L) {
+        r0 <- fit_once(mu_deg, nu_deg, NULL)
+        if (better(r0, r)) r <- r0
+      }
+      out[[i]] <- r
+      if (!is.null(r$model)) prev <- r$model
+    }
+    out
+  }
 }
 
 #' Automatic model selection for CMP continuous norming via BIC
@@ -1187,6 +1758,18 @@ print.cnormCMP <- function(x, ...) {
 #' value given in \code{nu} (\code{nu_degree = NULL} in \code{cnorm.cmp}; \code{nu = 1} is the
 #' Poisson model), \code{0} estimates a constant dispersion, and values >= 1 let the
 #' dispersion vary with age.
+#'
+#' \strong{Selection rule.} Candidates that converged and whose log(nu) predictor stays
+#' inside its admissible range at all observed ages ("clean" candidates) are preferred:
+#' the clean candidate with the lowest BIC is selected. Only if no clean candidate exists,
+#' the best of the remaining candidates (non-converged or at the nu boundary) is selected
+#' and a warning is issued. Warnings of the individual fits are collected in
+#' \code{$selection$evaluated} instead of being discarded.
+#'
+#' \strong{Warm starts.} With \code{warm_start = TRUE} (default), each fit starts from the
+#' solution of the next lower degree of mu (same degree of nu), which is faster and more
+#' reliable. Parallelization is then done across the degrees of nu (one chain per degree).
+#' With \code{warm_start = FALSE}, all candidates are fitted independently and in parallel.
 #'
 #' Parallel execution is attempted by default. If the workers cannot access
 #' the \pkg{cNORM} namespace, the function transparently falls back to sequential execution.
@@ -1202,14 +1785,19 @@ print.cnormCMP <- function(x, ...) {
 #' @param scale Norm scale (default \code{"T"}).
 #' @param max_terms,tol Passed to \code{\link{cnorm.cmp}}.
 #' @param parallel Logical; attempt parallel execution. Default \code{TRUE}.
-#' @param n_cores Number of cores. Defaults to all logical cores.
+#' @param n_cores Number of cores. Defaults to the number of logical cores minus one.
 #' @param plot Logical; plot the selected model. Default \code{TRUE}.
 #' @param verbose Logical; print progress. Default \code{TRUE}.
+#' @param max_score Optional ceiling for a right-truncated model, see \code{\link{cnorm.cmp}}.
+#' @param warm_start Logical; start each fit from the solution of the next lower degree
+#'   of mu. Default \code{TRUE}.
 #'
 #' @return The selected fitted \code{cnormCMP} model with an additional
 #'   element \code{$selection} containing:
 #'   \itemize{
-#'     \item \code{evaluated}: data frame of every combination tried, sorted by BIC.
+#'     \item \code{evaluated}: data frame of every combination tried, sorted by BIC, with
+#'       the columns \code{status}, \code{at_bound}, \code{n_warnings} and \code{message}.
+#'     \item \code{warnings}: named list with the warnings of each candidate.
 #'     \item \code{selected}: list with the chosen degrees and BIC.
 #'   }
 #'
@@ -1240,35 +1828,48 @@ autoselect.cmp <- function(age,
                            parallel  = TRUE,
                            n_cores   = NULL,
                            plot      = TRUE,
-                           verbose   = TRUE) {
+                           verbose   = TRUE,
+                           max_score = NULL,
+                           warm_start = TRUE) {
 
   # ---- Input validation -------------------------------------------------
+  if (!is.numeric(age) || !is.numeric(score))
+    stop("'age' and 'score' must be numeric vectors.")
   if (length(age) != length(score))
     stop("Length of 'age' and 'score' must be the same.")
-  if (!is.null(weights) && length(weights) != length(age))
-    stop("Length of 'weights' must match length of 'age' and 'score'.")
+  if (!is.null(weights) && (!is.numeric(weights) || length(weights) != length(age)))
+    stop("'weights' must be a numeric vector with the same length as 'age' and 'score'.")
+  if (!all(is.finite(c(min_mu, max_mu, min_nu, max_nu))) ||
+      any(c(min_mu, max_mu, min_nu, max_nu) != round(c(min_mu, max_mu, min_nu, max_nu))))
+    stop("The degree limits must be finite integers.")
   if (max_mu < min_mu) stop("'max_mu' must be >= 'min_mu'.")
   if (max_nu < min_nu) stop("'max_nu' must be >= 'min_nu'.")
   if (min_mu < 1)
     stop("Minimum degree for mu must be >= 1.")
   if (min_nu < -1)
     stop("'min_nu' must be >= -1 (-1 means fixed nu, 0 means constant estimated nu).")
-  if (nu <= 0) stop("'nu' must be > 0.")
+  if (!is.numeric(nu) || length(nu) != 1L || !is.finite(nu) || nu <= 0) stop("'nu' must be > 0.")
+  max_score <- cmp_check_max_score(max_score)
 
   say <- function(...) {
     if (verbose) { cat(..., sep = ""); utils::flush.console() }
   }
 
-  # ---- Build the grid ---------------------------------------------------
+  # ---- Build the grid and the tasks --------------------------------------
   grid <- expand.grid(mu = min_mu:max_mu,
                       nu = min_nu:max_nu,
                       KEEP.OUT.ATTRS = FALSE)
-  pairs <- lapply(seq_len(nrow(grid)),
-                  function(i) c(grid$mu[i], grid$nu[i]))
+  n_cand <- nrow(grid)
   say(sprintf(
     "Search grid: %d candidate models (mu %d:%d, nu %d:%d).\n",
-    length(pairs), min_mu, max_mu, min_nu, max_nu
+    n_cand, min_mu, max_mu, min_nu, max_nu
   ))
+
+  tasks <- if (isTRUE(warm_start)) {
+    lapply(min_nu:max_nu, function(d) list(nu_deg = d, mu_degs = min_mu:max_mu))
+  } else {
+    lapply(seq_len(n_cand), function(i) list(nu_deg = grid$nu[i], mu_degs = grid$mu[i]))
+  }
 
   # ---- Parallel setup with dev-mode fallback ---------------------------
   use_parallel <- FALSE
@@ -1276,10 +1877,11 @@ autoselect.cmp <- function(age,
   if (isTRUE(parallel)) {
     avail <- tryCatch(parallel::detectCores(logical = TRUE),
                       error = function(e) 1L)
-    if (is.null(n_cores)) n_cores <- avail
-    n_cores <- max(1L, min(n_cores, length(pairs), avail))
+    if (is.na(avail)) avail <- 1L
+    if (is.null(n_cores)) n_cores <- max(1L, avail - 1L)
+    n_cores <- max(1L, min(n_cores, length(tasks), avail))
 
-    if (n_cores > 1L && length(pairs) > 1L) {
+    if (n_cores > 1L && length(tasks) > 1L) {
       cl <- tryCatch(parallel::makeCluster(n_cores),
                      error = function(e) NULL)
       if (!is.null(cl)) {
@@ -1287,7 +1889,9 @@ autoselect.cmp <- function(age,
           res <- parallel::clusterCall(cl, function() {
             requireNamespace("cNORM", quietly = TRUE) &&
               exists("cnorm.cmp",       envir = asNamespace("cNORM")) &&
-              exists("diagnostics.cmp", envir = asNamespace("cNORM"))
+              exists("diagnostics.cmp", envir = asNamespace("cNORM")) &&
+              all(c("start", "max_score") %in%
+                    names(formals(get("cnorm.cmp", envir = asNamespace("cNORM")))))
           })
           all(vapply(res, isTRUE, logical(1)))
         }, error = function(e) FALSE)
@@ -1295,16 +1899,10 @@ autoselect.cmp <- function(age,
         if (worker_ok) {
           use_parallel <- TRUE
           on.exit(try(parallel::stopCluster(cl), silent = TRUE), add = TRUE)
-          parallel::clusterExport(
-            cl,
-            varlist = c("age", "score", "weights", "nu", "control",
-                        "scale", "max_terms", "tol"),
-            envir = environment()
-          )
-          say(sprintf("Parallel mode: using %d cores.\n", n_cores))
+          say(sprintf("Parallel mode: using %d cores (%d tasks).\n", n_cores, length(tasks)))
         } else {
           try(parallel::stopCluster(cl), silent = TRUE); cl <- NULL
-          say("Note: cNORM is not installed in the worker library path ",
+          say("Note: the installed cNORM version is not available to the workers ",
               "(typical during devtools::load_all). ",
               "Falling back to sequential execution.\n")
         }
@@ -1312,77 +1910,66 @@ autoselect.cmp <- function(age,
     }
   }
 
-  # ---- Worker --------------------------------------------------------
-  fit_worker <- function(p) {
-    # p = c(mu_deg, nu_deg); nu_deg == -1 -> fixed nu (nu_degree = NULL)
-    dd <- if (p[2] < 0) NULL else p[2]
-    tryCatch({
-      m <- suppressMessages(suppressWarnings(
-        cNORM::cnorm.cmp(
-          age = age, score = score, weights = weights,
-          mu_degree = p[1],
-          nu_degree = dd,
-          nu        = nu,
-          control   = control,
-          scale     = scale,
-          max_terms = max_terms,
-          tol       = tol,
-          plot      = FALSE
-        )
-      ))
-      d <- cNORM::diagnostics.cmp(m)
-      list(mu = p[1], nu = p[2],
-           model = m,
-           BIC = if (is.finite(d$BIC)) d$BIC else Inf,
-           AIC = d$AIC, logLik = d$log_likelihood,
-           converged = isTRUE(d$converged),
-           status  = if (!is.finite(d$BIC)) "error"
-           else if (!isTRUE(d$converged)) "not_converged"
-           else "ok",
-           message = NA_character_)
-    }, error = function(e) {
-      list(mu = p[1], nu = p[2],
-           model = NULL, BIC = Inf, AIC = NA_real_, logLik = NA_real_,
-           converged = FALSE, status = "error",
-           message = conditionMessage(e))
-    })
-  }
+  fitter <- cmp_select_fitter(age, score, weights, nu, control, scale,
+                              max_terms, tol, max_score, isTRUE(warm_start))
 
   fmt_nu <- function(d) if (d < 0) "fixed" else as.character(d)
 
   report <- function(r) {
-    tag <- switch(r$status,
-                  ok            = "",
-                  not_converged = "  (not strictly converged)",
-                  error         = paste0("  [error: ", r$message, "]"))
+    tag <- if (r$status == "error") {
+      paste0("  [error: ", r$message, "]")
+    } else {
+      paste0(if (r$status == "not_converged") "  (not strictly converged)" else "",
+             if (isTRUE(r$at_bound)) "  (nu at boundary)" else "",
+             if (length(r$warnings) > 0L) sprintf("  [%d warning%s]", length(r$warnings),
+                                                  if (length(r$warnings) == 1L) "" else "s") else "")
+    }
     say(sprintf("  mu=%d, nu=%s : BIC = %s%s\n",
                 r$mu, fmt_nu(r$nu),
                 formatC(r$BIC, digits = 3, format = "f"), tag))
   }
 
   # ---- Run the search --------------------------------------------------
-  say(sprintf("Evaluating %d model%s ...\n",
-              length(pairs), if (length(pairs) == 1) "" else "s"))
+  say(sprintf("Evaluating %d model%s ...\n", n_cand, if (n_cand == 1) "" else "s"))
 
   all_res <- list()
-  chunk_size <- if (use_parallel) n_cores else 1L
-  chunks <- split(pairs, ceiling(seq_along(pairs) / chunk_size))
-  for (chunk in chunks) {
-    results <- if (use_parallel && length(chunk) > 1L)
-      parallel::parLapply(cl, chunk, fit_worker)
-    else
-      lapply(chunk, fit_worker)
-    for (r in results) {
-      all_res[[length(all_res) + 1L]] <- r
-      report(r)
+  if (use_parallel) {
+    # load-balanced: tasks are handed to workers as they become free
+    chains <- parallel::parLapplyLB(cl, tasks, fitter)
+    for (ch in chains) {
+      for (r in ch) {
+        all_res[[length(all_res) + 1L]] <- r
+        report(r)
+      }
+    }
+  } else {
+    for (tk in tasks) {
+      for (r in fitter(tk)) {
+        all_res[[length(all_res) + 1L]] <- r
+        report(r)
+      }
     }
   }
 
-  bics <- vapply(all_res, `[[`, numeric(1), "BIC")
+  # ---- Select -----------------------------------------------------------
+  bics     <- vapply(all_res, function(r) r$BIC, numeric(1))
+  status   <- vapply(all_res, function(r) r$status, character(1))
+  at_bound <- vapply(all_res, function(r) isTRUE(r$at_bound), logical(1))
+
   if (all(!is.finite(bics)))
     stop("Selection failed: no model produced a finite BIC. ",
          "Inspect the error messages above for per-fit information.")
-  current <- all_res[[which.min(bics)]]
+
+  clean <- which(status == "ok" & !at_bound & is.finite(bics))
+  if (length(clean) > 0L) {
+    pool <- clean
+  } else {
+    pool <- which(status != "error" & is.finite(bics))
+    warning("No candidate model converged cleanly with log(nu) inside its admissible range. ",
+            "The best remaining candidate was selected; inspect $selection$evaluated ",
+            "and consider lower degrees.")
+  }
+  current <- all_res[[pool[which.min(bics[pool])]]]
 
   # ---- Compile results --------------------------------------------------
   evaluated <- do.call(rbind, lapply(
@@ -1391,10 +1978,17 @@ autoselect.cmp <- function(age,
                            BIC = r$BIC, AIC = r$AIC,
                            logLik = r$logLik,
                            converged = r$converged,
+                           at_bound = r$at_bound,
                            status = r$status,
+                           n_warnings = length(r$warnings),
                            message = r$message,
                            stringsAsFactors = FALSE)))
-  evaluated <- evaluated[order(evaluated$BIC), , drop = FALSE]
+  cand_warnings <- lapply(all_res, function(r) r$warnings)
+  names(cand_warnings) <- vapply(all_res, function(r)
+    sprintf("mu=%d,nu=%s", r$mu, fmt_nu(r$nu)), character(1))
+
+  ord <- order(evaluated$BIC)
+  evaluated <- evaluated[ord, , drop = FALSE]
   rownames(evaluated) <- NULL
 
   say(sprintf("\nSelected model: mu=%d, nu=%s (BIC = %.3f)\n",
@@ -1406,6 +2000,7 @@ autoselect.cmp <- function(age,
 
   final_model$selection <- list(
     evaluated = evaluated,
+    warnings  = cand_warnings,
     selected  = list(mu_degree = current$mu,
                      nu_degree = if (current$nu < 0) NULL else current$nu,
                      nu        = nu,
@@ -1425,12 +2020,17 @@ autoselect.cmp <- function(age,
 #' @param model Fitted CMP model object of class "cnormCMP"
 #' @param ages Numeric vector of age points for norm table generation
 #' @param start Minimum raw score value for the norm table (default: observed minimum)
-#' @param end Maximum raw score value for the norm table (default: observed maximum)
+#' @param end Maximum raw score value for the norm table (default: observed maximum).
+#'   For a right-truncated model, \code{end} is capped at \code{max_score}.
 #' @param step Step size between consecutive raw scores (integer, default: 1)
 #' @param CI Confidence coefficient (0-1, default: 0.9) for confidence intervals
 #' @param reliability Reliability coefficient (0-1) for true score confidence intervals
 #' @param mid_p Logical; if TRUE (default), uses mid-p adjusted percentiles for discrete scores
 #' @param minRaw,maxRaw Optional aliases for \code{start} and \code{end}
+#' @param range Range of the norm scores in standard deviations (default 3), identical to
+#'   the argument of \code{predict}: z-scores and norm scores are limited to +/- \code{range}
+#'   so that tables and individual predictions agree at the extremes. Use \code{Inf} to
+#'   switch off the limit. The column \code{Percentile} is never limited.
 #' @param ... Additional arguments
 #'
 #' @export
@@ -1444,11 +2044,20 @@ normTable.cmp <- function(model,
                           mid_p = TRUE,
                           minRaw = NULL,
                           maxRaw = NULL,
+                          range = 3,
                           ...) {
   # Input validation
   if (!isCMP(model)) {
     stop("Wrong object. Please provide an object of class 'cnormCMP'.")
   }
+  if (!is.numeric(ages) || length(ages) == 0L || any(!is.finite(ages))) {
+    stop("'ages' must be a non-empty vector of finite numbers.")
+  }
+  if (is.null(range)) range <- Inf
+  if (!is.numeric(range) || length(range) != 1L || is.na(range) || range <= 0) {
+    stop("'range' must be a single positive number (or Inf).")
+  }
+  o <- cmp_opts(model)
 
   # Support minRaw and maxRaw as aliases
   if (is.null(start) && !is.null(minRaw)) start <- minRaw
@@ -1464,6 +2073,9 @@ normTable.cmp <- function(model,
   # Ensure integer bounds for count data
   start <- max(0L, as.integer(ceiling(start)))
   end   <- as.integer(floor(end))
+  if (!is.null(o$max_score)) {
+    end <- min(end, o$max_score)
+  }
 
   if (start >= end) {
     stop("Start value must be less than end value.")
@@ -1510,7 +2122,8 @@ normTable.cmp <- function(model,
     cp <- cmp_cum_pmf(
       x,
       mu = rep(predictions$mu[k], length(x)),
-      nu = rep(predictions$nu[k], length(x))
+      nu = rep(predictions$nu[k], length(x)),
+      tol = o$tol, max_terms = o$max_terms, max_score = o$max_score
     )
 
     if (any(!cp$ok)) {
@@ -1523,9 +2136,12 @@ normTable.cmp <- function(model,
 
     # Mid-p percentile ranks: P(Y < x) + 0.5 * P(Y = x)
     perc <- if (mid_p) cp$cdf_prev + 0.5 * cp$pmf else cum
+    perc[!cp$ok] <- NA
 
-    # Clamp extreme probabilities to avoid non-finite z-scores
+    # Clamp extreme probabilities to avoid non-finite z-scores, then limit to +/- range
+    # (same rule as in predict)
     z <- qnorm(pmin(pmax(perc, 1e-12), 1 - 1e-12))
+    z <- pmin(pmax(z, -range), range)
 
     # Calculate norm scores
     norm <- rep(NA_real_, length(z))
@@ -1569,7 +2185,7 @@ normTable.cmp <- function(model,
 #'   \itemize{
 #'      \item age An optional numeric vector of age values corresponding to the raw scores.
 #'        If provided along with \code{score}, additional fit statistics (R-squared, RMSE, bias)
-#'        will be calculated.
+#'        and a calibration table (mean and SD of the z-residuals per age group) are calculated.
 #'      \item score An optional numeric vector of raw scores. Must be provided if \code{age} is given.
 #'      \item weights An optional numeric vector of weights for each observation.
 #'    }
@@ -1581,7 +2197,9 @@ normTable.cmp <- function(model,
 #' The summary includes basic model information, model fit statistics (log-likelihood, AIC, BIC),
 #' R-squared, RMSE and bias (if age and raw scores are provided), convergence information,
 #' and parameter estimates with standard errors, z-values and p-values. Coefficients refer to
-#' the log scale: log(mu) and log(nu).
+#' the log scale: log(mu) and log(nu); only the intercepts refer to the mean age. The
+#' calibration table should show means near 0 and SDs near 1 in every age group (the SD of
+#' mid-p z-scores is slightly below 1 for small counts; see \code{\link{residuals.cnormCMP}}).
 #'
 #' @examples
 #' \dontrun{
@@ -1632,6 +2250,9 @@ summary.cnormCMP <- function(object, ...) {
   } else {
     cat("  Dispersion (nu): Fixed at", diag$nu, "\n")
   }
+  if (!is.null(diag$max_score)) {
+    cat("  Right-truncated at max_score =", diag$max_score, "\n")
+  }
   cat("Number of observations:", diag$n_obs, "\n")
   cat("Number of parameters:", diag$n_params, "\n")
   cat("\n")
@@ -1650,8 +2271,19 @@ summary.cnormCMP <- function(object, ...) {
   cat("Convergence:\n")
   cat("  Converged:", diag$converged, "\n")
   cat("  Function evaluations:", diag$n_evaluations, "\n")
-  cat("  Max Hessian eigenvalue:", round(diag$max_gradient, 6), "\n")
+  cat("  Max |gradient|:", format(diag$max_abs_gradient, digits = 3), "\n")
+  cat("  Hessian condition number:", format(diag$hessian_cond, digits = 3), "\n")
   cat("  Message:", diag$message, "\n")
+  if (!is.null(diag$optim_message) && nzchar(diag$optim_message)) {
+    cat("  Optimizer message:", diag$optim_message, "\n")
+  }
+  if (isTRUE(diag$nu_at_bound)) {
+    cat("  WARNING: log(nu) reached its admissible range at observed ages;\n",
+        "          standard errors and Wald tests are not valid.\n")
+  }
+  if (!is.null(diag$note)) {
+    cat("  Note:", diag$note, "\n")
+  }
   cat("\n")
 
   cat("Parameter Estimates:\n")
@@ -1680,6 +2312,12 @@ summary.cnormCMP <- function(object, ...) {
     print(nu_table, digits = 4)
   }
 
+  if (!is.null(diag$calibration)) {
+    cat("\n")
+    cat("Calibration by age group (z-residuals; expected: mean 0, SD 1):\n")
+    print(diag$calibration, digits = 3, row.names = FALSE)
+  }
+
   invisible(diag)
 }
 
@@ -1693,7 +2331,14 @@ summary.cnormCMP <- function(object, ...) {
 #' @param score An optional numeric vector of raw scores for computing fit statistics
 #' @param weights An optional numeric vector of observation weights
 #'
-#' @return A list containing comprehensive diagnostic information
+#' @return A list containing comprehensive diagnostic information. Convergence is
+#'   reported in \code{converged}, \code{message} (interpretation of the \code{optim}
+#'   code), \code{optim_message} (message of the optimizer), \code{max_abs_gradient}
+#'   (largest absolute gradient component at the solution) and \code{hessian_cond}
+#'   (condition number of the Hessian in the orthogonalized parameterization).
+#'   Remarks that are not related to convergence are returned in \code{note}.
+#'   If \code{age} and \code{score} are given, \code{calibration} contains the mean and
+#'   SD of the mid-p z-residuals per age group.
 #'
 #' @keywords internal
 #' @export
@@ -1712,37 +2357,28 @@ diagnostics.cmp <- function(object,
   AIC <- 2 * n_params - 2 * log_likelihood
   BIC <- n_params * log(n_obs) - 2 * log_likelihood
 
-  # Parameter estimates and standard errors
+  # Parameter estimates and standard errors (element-wise: one NA does not blank the rest)
   mu_estimates <- object$mu_est
   nu_estimates <- object$nu_est
+  n_mu <- length(mu_estimates)
+  n_nu <- length(nu_estimates)
 
   se <- object$se
-  if (is.null(se) || any(is.na(se))) {
-    mu_se <- rep(NA, length(mu_estimates))
-    nu_se <- if (!is.null(nu_estimates))
-      rep(NA, length(nu_estimates))
-    else
-      NULL
-  } else {
-    n_mu <- length(mu_estimates)
-    mu_se <- se[1:n_mu]
-    if (!is.null(nu_estimates)) {
-      n_nu <- length(nu_estimates)
-      nu_se <- se[(n_mu + 1):(n_mu + n_nu)]
-    } else {
-      nu_se <- NULL
-    }
+  if (is.null(se) || length(se) != n_mu + n_nu) {
+    se <- rep(NA_real_, n_mu + n_nu)
   }
+  mu_se <- se[seq_len(n_mu)]
+  nu_se <- if (n_nu > 0L) se[n_mu + seq_len(n_nu)] else NULL
 
-  # Calculate z-values and p-values
-  mu_z_values <- ifelse(is.na(mu_se) |
-                          mu_se == 0, NA, mu_estimates / mu_se)
-  mu_p_values <- ifelse(is.na(mu_z_values), NA, 2 * (1 - pnorm(abs(mu_z_values))))
+  # z-values and p-values (two-sided; pnorm(-|z|) keeps precision for tiny p-values)
+  zfun <- function(est, s) ifelse(is.na(s) | s == 0, NA_real_, est / s)
+  pfun <- function(z) ifelse(is.na(z), NA_real_, 2 * stats::pnorm(-abs(z)))
 
-  if (!is.null(nu_estimates)) {
-    nu_z_values <- ifelse(is.na(nu_se) |
-                            nu_se == 0, NA, nu_estimates / nu_se)
-    nu_p_values <- ifelse(is.na(nu_z_values), NA, 2 * (1 - pnorm(abs(nu_z_values))))
+  mu_z_values <- zfun(mu_estimates, mu_se)
+  mu_p_values <- pfun(mu_z_values)
+  if (n_nu > 0L) {
+    nu_z_values <- zfun(nu_estimates, nu_se)
+    nu_p_values <- pfun(nu_z_values)
   } else {
     nu_z_values <- NULL
     nu_p_values <- NULL
@@ -1760,23 +2396,40 @@ diagnostics.cmp <- function(object,
     "52" = "Error from L-BFGS-B",
     paste("Convergence code:", object$result$convergence)
   )
+  optim_message <- object$result$message
+  if (is.null(optim_message)) optim_message <- NA_character_
 
-  # Largest Hessian eigenvalue (curvature diagnostic), if available
-  max_gradient <- NA
+  # Largest absolute gradient component at the solution
+  max_abs_gradient <- attr(object$result, "max_abs_gradient")
+  if (is.null(max_abs_gradient)) max_abs_gradient <- NA_real_
+
+  # Condition number of the Hessian (orthogonalized parameterization)
+  hessian_cond <- NA_real_
   if (!is.null(object$result$hessian)) {
-    max_gradient <- tryCatch({
-      eigenvals <- eigen(object$result$hessian, only.values = TRUE)$values
-      max(abs(eigenvals), na.rm = TRUE)
+    hessian_cond <- tryCatch({
+      ev <- eigen(object$result$hessian, symmetric = TRUE, only.values = TRUE)$values
+      if (min(ev) > 0) max(ev) / min(ev) else Inf
     }, error = function(e) {
-      NA
+      NA_real_
     })
   }
 
-  # Calculate R-squared if age and score data are provided
+  # Calculate R-squared and calibration if age and score data are provided
   R2 <- NA
   rmse <- NA
   bias <- NA
+  note <- NULL
+  calibration <- NULL
   if (!is.null(age) && !is.null(score)) {
+    if (length(age) != length(score)) {
+      stop("The lengths of 'age' and 'score' must be the same.")
+    }
+    keep <- is.finite(age) & is.finite(score)
+    if (!is.null(weights)) keep <- keep & is.finite(weights)
+    age <- age[keep]
+    score <- score[keep]
+    if (!is.null(weights)) weights <- weights[keep]
+
     if (length(age) / length(unique(age)) > 50 &&
         min(table(age)) > 30) {
       data <- data.frame(group = age, raw = score)
@@ -1811,10 +2464,21 @@ diagnostics.cmp <- function(object,
 
     norm_manifest <- data$normValue
     R2 <- cor(norm_scores, norm_manifest, use = "pairwise.complete.obs")^2
-    rmse <- sqrt(mean((norm_scores - norm_manifest)^2))
-    bias <- mean(norm_scores - norm_manifest)
+    rmse <- sqrt(mean((norm_scores - norm_manifest)^2, na.rm = TRUE))
+    bias <- mean(norm_scores - norm_manifest, na.rm = TRUE)
+
+    # Calibration: mid-p z-residuals should have mean 0 and SD close to 1 in every age group
+    res <- residuals.cnormCMP(object, age, score, type = "z")
+    grp <- cmp_age_groups(age)
+    calibration <- do.call(rbind, lapply(split(seq_along(res), grp), function(ix) {
+      data.frame(age = mean(age[ix]),
+                 n = length(ix),
+                 mean_z = mean(res[ix], na.rm = TRUE),
+                 sd_z = stats::sd(res[ix], na.rm = TRUE))
+    }))
+    rownames(calibration) <- NULL
   } else {
-    message <- "No age and raw scores provided. Cannot calculate R2, RMSE, and bias."
+    note <- "No age and raw scores provided. Cannot calculate R2, RMSE, bias and calibration."
   }
 
   # Return comprehensive diagnostic information
@@ -1823,6 +2487,7 @@ diagnostics.cmp <- function(object,
     mu_degree = object$mu_degree,
     nu_degree = object$nu_degree,
     nu = object$nu,
+    max_score = object$max_score,
     n_obs = n_obs,
     n_params = n_params,
 
@@ -1833,6 +2498,7 @@ diagnostics.cmp <- function(object,
     R2 = R2,
     rmse = rmse,
     bias = bias,
+    calibration = calibration,
 
     # Parameter estimates
     mu_estimates = mu_estimates,
@@ -1851,8 +2517,12 @@ diagnostics.cmp <- function(object,
     # Convergence info
     converged = converged,
     n_evaluations = n_evaluations,
-    max_gradient = max_gradient,
-    message = message
+    max_abs_gradient = max_abs_gradient,
+    hessian_cond = hessian_cond,
+    nu_at_bound = isTRUE(object$at_bound),
+    message = message,
+    optim_message = optim_message,
+    note = note
   )
 }
 
@@ -1867,23 +2537,32 @@ diagnostics.cmp <- function(object,
 #'      \item score A numeric vector of raw scores (integers).
 #'      \item range The range of the norm scores in standard deviations. Default is 3.
 #'        Thus, scores in the range of +/- 3 standard deviations are considered.
+#'        Applies to \code{type = "norm"} and \code{type = "z"}; use \code{Inf} to switch
+#'        the limit off.
 #'      \item mid_p Logical; use mid-p percentile ranks, P(Y < x) + 0.5 * P(Y = x)
 #'        (default TRUE), instead of P(Y <= x).
+#'      \item type What to return: \code{"norm"} (default; norm scores on the scale of the
+#'        model), \code{"z"} (z-scores) or \code{"percentile"} (percentile ranks in
+#'        0 to 100, never limited by \code{range}).
 #'    }
 #'
-#' @return A numeric vector of norm scores.
+#' @return A numeric vector of norm scores, z-scores or percentile ranks.
 #'
 #' @details
 #' The function predicts the CMP parameters (mu, nu) for each age using the provided
 #' model, calculates the (mid-)percentile rank of each raw score under the corresponding
 #' discrete distribution, and converts it to the norm scale specified in the model.
 #' Extreme percentiles are mapped to the boundary of the norm score range
-#' (mean +/- \code{range} standard deviations).
+#' (mean +/- \code{range} standard deviations). A warning is issued for scores above \code{max_score} of a right-truncated model,
+#' and if the series could not be evaluated for some cases (NA is returned for them).
 #'
 #' @examples
 #' \dontrun{
 #' model <- cnorm.cmp(children$age, children$score)
 #' norm_scores <- predict(model, c(7, 8, 9, 10), c(25, 30, 18, 45))
+#'
+#' # Mid-p percentile ranks instead of norm scores
+#' predict(model, c(7, 8, 9, 10), c(25, 30, 18, 45), type = "percentile")
 #' }
 #'
 #' @export
@@ -1910,20 +2589,6 @@ predict.cnormCMP <- function(object, ...) {
       score <- NULL
   }
 
-  if (any(score < 0, na.rm = TRUE)) {
-    stop("'score' contains negative values. Raw scores must be non-negative counts.")
-  }
-
-  if ("range" %in% names(args)) {
-    range <- args$range
-  } else {
-    if (length(args) > 2)
-      range <- args[[3]]
-    else
-      range <- 3
-  }
-  mid_p <- if ("mid_p" %in% names(args)) isTRUE(args$mid_p) else TRUE
-
   if (!isCMP(model)) {
     stop("Wrong object. Please provide object from class 'cnormCMP'.")
   }
@@ -1932,8 +2597,35 @@ predict.cnormCMP <- function(object, ...) {
     stop("Both 'age' and 'score' must be provided.")
   }
 
+  if (!is.numeric(age) || !is.numeric(score)) {
+    stop("'age' and 'score' must be numeric vectors.")
+  }
+
   if (length(age) != length(score)) {
     stop("The lengths of 'age' and 'score' must be the same.")
+  }
+
+  if (any(score < 0, na.rm = TRUE)) {
+    stop("'score' contains negative values. Raw scores must be non-negative counts.")
+  }
+
+  nms <- names(args)
+  if (is.null(nms)) nms <- rep("", length(args))
+  if ("range" %in% nms) {
+    range <- args$range
+  } else if (length(args) > 2 && !nzchar(nms[3])) {
+    range <- args[[3]]      # positional third argument (backward compatible)
+  } else {
+    range <- 3
+  }
+  if (is.null(range) || !is.numeric(range) || length(range) != 1L || is.na(range) || range <= 0) {
+    stop("'range' must be a single positive number (or Inf).")
+  }
+  mid_p <- if ("mid_p" %in% names(args)) isTRUE(args$mid_p) else TRUE
+  type <- if ("type" %in% names(args)) {
+    match.arg(args$type, c("norm", "z", "percentile"))
+  } else {
+    "norm"
   }
 
   if (any(abs(score - round(score)) > 1e-8, na.rm = TRUE)) {
@@ -1941,30 +2633,44 @@ predict.cnormCMP <- function(object, ...) {
   }
   score <- round(score)
 
+  o <- cmp_opts(model)
+  if (!is.null(o$max_score) && any(score > o$max_score, na.rm = TRUE)) {
+    warning("Some raw scores exceed 'max_score' (", o$max_score,
+            ") of the right-truncated model; they receive the highest percentile.")
+  }
+
   # Get predicted distribution parameters for each age
   predictions <- predictCoefficients_cmp(model, age)
 
   # (Mid-)percentile ranks under the discrete distribution
-  cp <- cmp_cum_pmf(score, mu = predictions$mu, nu = predictions$nu)
+  cp <- cmp_cum_pmf(score, mu = predictions$mu, nu = predictions$nu,
+                    tol = o$tol, max_terms = o$max_terms, max_score = o$max_score)
   percentiles <- if (mid_p) cp$cdf_prev + 0.5 * cp$pmf else cp$cdf
   percentiles[!cp$ok] <- NA
+
+  failed <- !cp$ok & is.finite(age) & is.finite(score)
+  if (any(failed)) {
+    warning("The CMP series did not converge for ", sum(failed),
+            " case(s); NA returned. Consider increasing 'max_terms' in cnorm.cmp().")
+  }
+
+  if (type == "percentile") {
+    return(percentiles * 100)
+  }
 
   percentiles_c <- pmin(pmax(percentiles, 1e-12), 1 - 1e-12)
   z_scores <- qnorm(percentiles_c)
 
   # Apply range constraints
   z_scores <- pmin(pmax(z_scores, -range), range)
+  if (type == "z") {
+    return(z_scores)
+  }
 
   # Get scale information
   mScale <- attr(model$result, "scaleMean")
   sdScale <- attr(model$result, "scaleSD")
 
-  if (!is.na(mScale) && !is.na(sdScale)) {
-    # Scale z-scores to specified norm scale
-    norm_scores <- mScale + sdScale * z_scores
-    return(norm_scores)
-  } else {
-    # Return percentile ranks if no scale specified
-    return(percentiles * 100)
-  }
+  # Scale z-scores to specified norm scale
+  mScale + sdScale * z_scores
 }

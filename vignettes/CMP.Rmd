@@ -22,125 +22,186 @@ library(cNORM)
 
 # Introduction
 
-In psychological and educational assessment, **speeded tests** constitute a distinct and widely used measurement paradigm. Typical examples include processing speed tasks (e.g., symbol search, coding, digit span in Wechsler batteries), cancellation and attention tests (e.g., test d2), reading fluency tasks, and rapid automatized naming (RAN). In these assessments, items are uniformly easy and the raw score is defined as the **number of correctly processed units within a fixed time limit**.
+In a speeded test, the raw score is the number of correctly processed units within a fixed time limit: symbols matched in a coding task, targets marked in a cancellation test such as the d2, words read correctly per minute in a fluency task. In many speeded tasks, items are deliberately kept relatively easy so that performance is substantially constrained by processing speed rather than by item difficulty.
 
-From a statistical standpoint, these scores represent **open-ended count data** ($y \in \{0, 1, 2, \dots\}$). Conventional count regression models, however, are poorly suited for norming speeded tests:
-- **The Poisson distribution** imposes the rigid restriction of *equi-dispersion*, forcing the variance to equal the mean.
-- **The Negative Binomial distribution** is strictly restricted to *over-dispersion*.
+Statistically, such scores are counts, $y \in \{0, 1, 2, \dots\}$, and there are two standard count distributions. These however display severe limitations regarding speeded tests:
 
-In speeded cognitive tests, participants typically work at a stable, homogeneous pacing under time constraints, resulting in performance variance that is substantially smaller than the mean — a phenomenon known as **under-dispersion**. 
+- The **Poisson distribution** forces the variance to equal the mean (*equi-dispersion*).
+- The **negative binomial distribution** allows only a variance larger than the mean (*over-dispersion*).
 
-To resolve this limitation, `cNORM` introduces the **Conway-Maxwell-Poisson (CMP) continuous norming model** (`cnorm.cmp()`). The CMP distribution generalizes the Poisson distribution by introducing a continuous dispersion parameter $\nu$, naturally accommodating over-, equi- and under-dispersion by modelling the dispersion parameter $\nu$.
+To model speeded tests, more flexibility is needed: In speeded tasks, underdispersion may arise when individual response rates are relatively regular, whereas heterogeneous response rates can generate overdispersion (see, e.g., Forthmann et al., 2024). Since the defining equidispersion property of the Poisson distribution is $$E(Y)=Var(Y)=\lambda $$, a quick check is to compare the variance with the mean: at a mean of 40 raw points, a standard deviation clearly below 6.3 indicates under-dispersion, one clearly above it over-dispersion. Which of the two occurs depends on the test and the age group; it is an empirical question.
 
-
-# Mathematical Foundation
-
-The classical Conway-Maxwell-Poisson distribution (Conway & Maxwell, 1962; Shmueli et al., 2005) is an exponential family distribution with probability mass function (PMF):
-
-$$P(Y = y \mid \mu, \nu) = \frac{1}{Z(\mu, \nu)} \left(\frac{\mu^y}{y!}\right)^\nu, \quad y \in \{0, 1, 2, \dots\}$$
-
-where $\mu > 0$ is the location parameter, $\nu > 0$ is the dispersion parameter, and $Z(\mu, \nu)$ is the normalizing constant:
-
-$$Z(\mu, \nu) = \sum_{j=0}^{\infty} \left(\frac{\mu^j}{j!}\right)^\nu$$
+The **Conway-Maxwell-Poisson (CMP) distribution** relaxes this constraint. It generalises the Poisson distribution by a dispersion parameter $\nu$ and thereby covers over-, equi- and under-dispersion in one distribution family. `cnorm.cmp()` builds a continuous norming model on this distribution: location and dispersion are both smooth functions of age, and norm scores follow from the percentile ranks of the fitted distribution. Additionally, many speeded tests are also bounded. They have a maximum number of items, e. g. the number of items in a test solved within a time constraint. For these scenarios, the distribution can be truncated at that maximum (`max_score`, see below). Thus, flexible count models for timed assessments are a tool for very prominent use cases in psychometrics.
 
 
-Both the location $\mu(a)$ and dispersion $\nu(a)$ vary smoothly across standardized age $a = \frac{\text{age} - \overline{\text{age}}}{\text{SD}(\text{age})}$ as polynomial functions under a log link:
+# The CMP Model
 
-$$\log \mu(a) = \sum_{k=0}^{K_\mu} \beta_k a^k, \qquad \log \nu(a) = \sum_{k=0}^{K_\nu} \gamma_k a^k$$
+The CMP distribution (Conway & Maxwell, 1962; Shmueli et al., 2005; for regression see Sellers & Shmueli, 2010) introduces the $\nu$ ('nu') parameter to allow dispersion to vary:
 
-Parameters are estimated simultaneously by maximum likelihood using L-BFGS-B.
+$$P(Y = y) = \frac{1}{Z(\mu, \nu)} \left(\frac{\mu^y}{y!}\right)^{\nu}, \qquad Z(\mu, \nu) = \sum_{j=0}^{\infty} \left(\frac{\mu^j}{j!}\right)^{\nu}, \qquad y = 0, 1, 2, \dots$$
 
+with $\mu > 0$ and $\nu > 0$. For $\nu = 1$, this is the Poisson distribution with mean $\mu$. Values $\nu > 1$ concentrate the distribution around its centre (under-dispersion), values $\nu < 1$ spread it out (over-dispersion). $\mu$ is approximately the mean, and the variance-to-mean ratio is approximately $1/\nu$. Exact moments for a fitted model are available through `predictMoments()`.
 
-# Modeling Example
-
-We demonstrate CMP modeling using a representative speed cognitive cancellation test (`speed`). In this test, children and adolescents work under a strict time limit; the raw score is the number of correctly identified targets.
-
-```r
-library(cNORM)
-
-# Inspect dataset
-head(speed)
+```{r pmf-figure, fig.height = 3.6, fig.width = 7, echo = FALSE}
+x <- 0:45
+op <- par(mar = c(4, 4, 1, 1))
+plot(x, dcmp(x, mu = 20, nu = 3), type = "l", lwd = 2, col = "#1b9e77",
+     ylim = c(0, 0.17), xlab = "Raw score", ylab = "P(Y = y)", bty = "l")
+lines(x, dcmp(x, mu = 20, nu = 1),   lwd = 2, col = "#7570b3")
+lines(x, dcmp(x, mu = 20, nu = 0.5), lwd = 2, col = "#d95f02")
+legend("topright", bty = "n", lwd = 2,
+       col = c("#1b9e77", "#7570b3", "#d95f02"),
+       legend = c(expression(nu == 3 ~ "(under-dispersed)"),
+                  expression(nu == 1 ~ "(Poisson)"),
+                  expression(nu == 0.5 ~ "(over-dispersed)")))
+par(op)
 ```
 
-## Basic Model Fitting
+The figure shows three CMP distributions with the same $\mu = 20$. Only $\nu$ changes, and with it the spread.
 
-Fitting a CMP continuous norming model is straightforward using `cnorm.cmp()`. By default, the function uses a cubic polynomial for location (`mu_degree = 3`) and a quadratic trend for dispersion (`nu_degree = 2`):
+When modelling over an explanatory variable like age, location and dispersion are modelled with polynomials. We use the logarithms of the parameters to stabilise estimation and to keep both parameters positive:
+
+$$\log \mu(a) = \sum_{k=0}^{K_\mu} \beta_k a^k, \qquad \log \nu(a) = \sum_{k=0}^{K_\nu} \gamma_k a^k, \qquad a = \frac{\text{age} - \overline{\text{age}}}{\text{SD}(\text{age})}.$$
+
+All coefficients are estimated simultaneously by maximum likelihood (L-BFGS-B with analytic gradients).
+
+
+# A First Look at the Data
+
+For demonstration, we use the `speed` dataset. This is a synthetic dataset in the cNORM package, which resembles the highly speeded word-picture matching task from the ELFE-II reading comprehension test (Lenhard, Lenhard & Schneider, 2017). It has a maximum item number of k = 75 and a very strict time cutoff of 3 minutes. Each item is composed of a picture and four words. The child has to underline the correct alternative as quickly as possible. Within the test, errors happen rarely and the performance is mostly determined by decoding speed. The raw score (`fluency`) is the number of correctly solved items with the maximum attainable score of 75.
+
+```{r data}
+head(speed)
+range(speed$fluency)
+```
+
+We first have a look at the *dispersion index* $\text{Var}/\text{Mean}$, separated by age. If the model assumptions of a Poisson distribution holds, this index should stay roughly at 1 at any age (= equi-dispersion). Values below 1 represent under-dispersion, values above 1 over-dispersion.
+
+```{r dispersion}
+by_year <- split(speed$fluency, floor(speed$age))
+round(t(sapply(by_year, function(x)
+  c(n = length(x), mean = mean(x), sd = sd(x), dispersion = var(x) / mean(x)))), 2)
+```
+
+
+# Fitting the Model
+
+`cnorm.cmp()` fits the model. By default, it uses a cubic polynomial for the location (`mu_degree = 3`) and a quadratic polynomial for the dispersion (`nu_degree = 2`). We start by treating the scale as open-ended:
 
 ```{r fig1, fig.height = 4, fig.width = 7}
-# Fit CMP model (automatically displays diagnostic percentile plot)
+model.open <- cnorm.cmp(age = speed$age, score = speed$fluency,
+  mu_degree = 3, nu_degree = 2, # default values
+)
+```
+
+The plot shows the fitted percentile curves together with the empirical percentiles (diamonds). The curves are continuity-corrected quantiles, i.e., the inverse of the mid-p percentile rank used for the norm scores below, which makes them directly comparable to the empirical values.
+
+The `mu_degree` and `nu_degree` can be adjusted to apply a stronger smoothing (lower values) or to increase the closeness of the fit (higher values). There are two special settings of the dispersion worth knowing: `nu_degree = 0` estimates a constant $\nu$ over age, and `nu_degree = NULL` fixes it at the value given in `nu`, so that `nu = 1` yields an ordinary Poisson regression. Keep the polynomial degrees as low as the data allow, since the dispersion is usually the less well-determined component. High values may result in overfitting. Internally, $\nu$ is restricted to the range $e^{-3}$ to $e^{3}$ resulting in a range of $[0.05, 20]$. If its predictor reaches this limit at an observed age, the function issues a warning and the standard errors are not valid. In that case, reduce `nu_degree`.
+
+
+# Tests with a Ceiling: `max_score`
+
+The `speed` test contains a finite number of targets, so scores above 75 are impossible. The open-ended CMP distribution is untruncated, however. It assigns a small probability to scores above the ceiling, and that probability is not available to the scores that can actually occur. As long as performance stays well below the maximum, the effect is negligible; in older age groups, where performance approaches the ceiling, it can bias the models. We can check this for the oldest age in the sample:
+
+```{r ceiling-mass}
+age_old <- max(speed$age)
+tab <- normTable.cmp(model.open, ages = age_old, start = 0, end = 150)[[1]]
+p_above <- 1 - tab$Pcum[tab$x == 75]
+```
+
+At age `r round(age_old, 1)`, the open-ended model assigns a probability of `r sprintf("%.1f%%", 100 * p_above)` to scores above 75. Where this probability is not negligible, percentile ranks near the top of the scale are not properly normalized. The CMP implementation in cNORM offers modelling truncated CMP distributions: If a maximum score $M$ is supplied via `max_score`, the distribution is truncated at $M$:
+
+$$P(Y = y) = \frac{(\mu^y / y!)^{\nu}}{\sum_{j=0}^{M} (\mu^j / j!)^{\nu}}, \qquad y = 0, 1, \dots, M.$$
+
+The norm score now stops at $M$. Probabilities add up to one on the attainable scores, percentile ranks are normalized at the ceiling, and norm tables end at $M$. Note that $\mu$ and $\nu$ now describe the *truncated* distribution: once the ceiling carries noticeable probability, $\mu$ is no longer approximately the mean, and mean and variance should be obtained from `predictMoments()`.
+
+```{r fig-ceiling, fig.height = 4, fig.width = 7}
 model.cmp <- cnorm.cmp(
   age = speed$age,
   score = speed$fluency,
   mu_degree = 3,
   nu_degree = 2,
+  max_score = 75,
   plot = TRUE
 )
 ```
 
-Notice that because count scores are discrete integers, the model-implied percentile curves are rendered as step functions, reflecting the probability mass of integer scores.
+When should `max_score` be used?
 
-## Model Diagnostics and Summary
+- **Use it** whenever the scale has a hard upper limit that persons can reach or approach, typically the number of items or targets on the test sheet. Supply the *theoretical* maximum, not the highest observed score. Scores above `max_score` raise an error.
+- **Omit it** if there is no ceiling, or if it is practically out of reach within the time limit. The two models are then practically indistinguishable, and the open-ended one is simpler.
+- **Be critical** if a large share of the sample obtains the maximum score. For large $\mu$, the shape of a CMP distribution is nearly determined by its mean and variance, so strong ceiling effects may call for a closer look at the diagnostics below, or for a more flexible approach.
 
-Comprehensive model fit statistics, information criteria, and coefficient significance tests are available via `summary()` and `diagnostics.cmp()`:
+
+# Checking the Model
+
+`summary()` combines fit statistics, convergence information and parameter estimates. If `age` and `score` are supplied, it also reports R², RMSE and bias of the predicted against the manifest norm scores and a calibration table by age group:
 
 ```{r}
-# Display model summary
 summary(model.cmp, age = speed$age, score = speed$fluency)
 ```
 
-The output confirms:
-- **Location parameters ($\log \mu$):** Reflect the developmental trajectory of performance pacing over age.
-- **Dispersion parameters ($\log \nu$):** Positive values indicate $\nu > 1$, confirming significant under-dispersion ($\text{Var} < \text{Mean}$) in this speeded test.
+Some guidance on reading the output:
+
+- **Coefficients** are on the log scale, and $\log \mu_0$ and $\log \nu_0$ are the intercepts at the *mean age*. A positive $\log \nu_0$ means $\nu > 1$ and thus under-dispersion at the mean age; the higher-order coefficients describe how location and dispersion change with age. To see the dispersion at specific ages, use `predictMoments()` below.
+- **Convergence** should be successful with a small maximum gradient. A warning that $\log \nu$ reached its admissible range signals an over-parameterized dispersion model.
+- **Calibration**: If the model fits, the z-residuals have a mean close to 0 and a standard deviation close to 1 in every age group. The standard deviation can fall slightly below 1 for small counts, because the mid-p transform of a discrete variable has slightly less than unit variance.
 
 
 # Automatic Model Selection via BIC
 
-To determine the optimal balance between developmental curvature and model parsimony, `cNORM` provides `autoselect.cmp()`. It evaluates an exhaustive grid of polynomial combinations across $\mu$ and $\nu$ and selects the candidate that minimizes the Bayesian Information Criterion (BIC):
+To balance developmental flexibility against parsimony, `autoselect.cmp()` evaluates a grid of polynomial degrees for $\mu$ and $\nu$ and selects the model with the lowest Bayesian Information Criterion (BIC). Candidates that converge and keep $\nu$ inside its admissible range at all observed ages are preferred, and the warnings of the individual fits are recorded rather than discarded. Each fit starts from the solution of the next lower degree of $\mu$, and the search runs in parallel across the degrees of $\nu$.
 
 ```{r, eval = FALSE}
-# Grid search over mu (degrees 1:4) and nu (degrees 0:2; -1 = fixed Poisson)
+# Grid: degrees 1 to 4 for mu, 0 to 2 for nu (0 = constant dispersion).
+# Use min_nu = -1 to include the Poisson model (nu fixed at 1) as a candidate.
 model.best <- autoselect.cmp(
   age = speed$age,
   score = speed$fluency,
   max_mu = 4,
   max_nu = 2,
   min_nu = 0,
-  parallel = TRUE
+  max_score = 75
 )
 
-# Inspect evaluated models sorted by BIC
+# Evaluated models, sorted by BIC
 head(model.best$selection$evaluated)
 ```
 
+BIC is a guide, not a verdict. Always inspect the percentile plot and the calibration of the selected model.
 
-# Norm Score Generation
 
-Norm scores can be predicted for individual cases or tabulated as comprehensive age-specific norm tables.
+# Norm Scores
 
-## Individual Predictions (Mid-p Adjusted)
+Norm scores can be predicted for individual cases or tabulated for specific ages.
 
-Because raw scores are discrete counts, assigning percentiles based on $P(Y \le x)$ creates a conservative bias for tied scores. `cNORM` applies the **mid-p percentile rank convention** by default:
+## Individual Predictions
 
-$$\text{PR}(x) = 100 \cdot \left[ P(Y < x) + \frac{1}{2} P(Y = x) \right]$$
+Raw scores are discrete, so many persons share the same score. Assigning them the percentile rank $P(Y \le x)$ would place all of them at the *upper end* of their tied block. `cNORM` therefore uses the **mid-p percentile rank** by default,
+
+$$\text{PR}(x) = 100 \cdot \left[ P(Y < x) + \tfrac{1}{2}\, P(Y = x) \right],$$
+
+and converts it into a norm score via the normal quantile function, $z = \Phi^{-1}(\text{PR}/100)$, followed by the linear transformation to the chosen scale (T-scores by default, with $M = 50$ and $SD = 10$). Norm scores are limited to $\pm 3$ standard deviations unless a different `range` is given.
 
 ```{r}
-# Predict norm scores (T-scale: Mean = 50, SD = 10) for specific age-score combinations
 cases <- data.frame(
   age = c(7.5, 8.5, 9.5, 10.5),
   raw = c(18, 24, 30, 35)
 )
 
-cases$T_Score <- predict(model.cmp, age = cases$age, score = cases$raw)
-cases$PR <- predict(model.cmp, age = cases$age, score = cases$raw, range = Inf) # Mid-p PR
+cases$T_Score <- round(predict(model.cmp, age = cases$age, score = cases$raw), 1)
+cases$PR <- round(predict(model.cmp, age = cases$age, score = cases$raw,
+                          type = "percentile"), 1)
 cases
 ```
 
-## Discrete Norm Tables
+The argument `type` selects the output: `"norm"` (default), `"z"` or `"percentile"`. Percentile ranks are never limited by `range`.
 
-Norm tables are generated via `normTable()` or `normTable.cmp()`. When a reliability coefficient is specified, confidence intervals based on Kelley's true score estimation (regression to the mean correction) are computed:
+## Norm Tables
+
+Norm tables are generated with `normTable()` (or `normTable.cmp()`). If a reliability coefficient is supplied, confidence intervals based on Kelley's true score estimate (regression to the mean) are added:
 
 ```{r}
-# Generate norm tables for ages 8.0 and 9.0
 tables <- normTable(
   c(8.0, 9.0),
   model.cmp,
@@ -148,103 +209,81 @@ tables <- normTable(
   CI = 0.90
 )
 
-# Display head of norm table for age 8.0
 head(tables[["8"]], 10)
 ```
 
-The resulting table provides:
-- **x**: Raw integer score
-- **Px**: Point probability $P(Y = x)$
-- **Pcum**: Cumulative probability $P(Y \le x)$
-- **Percentile**: Mid-p adjusted percentile rank
-- **z**: Standardized z-score
-- **norm**: Fitted norm score (e.g., T-score)
-- **lowerCI / upperCI**: True-score confidence interval limits
+The table contains:
+
+- **x**: raw score,
+- **Px**: point probability $P(Y = x)$,
+- **Pcum**: cumulative probability $P(Y \le x)$,
+- **Percentile**: mid-p percentile rank,
+- **z** and **norm**: z-score and norm score, limited to $\pm 3$ SD like in `predict()`,
+- **lowerCI** and **upperCI** (with **lowerCI_PR** and **upperCI_PR**): limits of the true-score confidence interval.
+
+For a model with `max_score`, the table ends at the maximum score.
 
 
-# Model-Implied Distributional Moments
+# Model-Implied Moments
 
-To analyze developmental trajectories of performance spread, skewness, and kurtosis, `predictMoments()` evaluates the exact moments via discrete PMF summation:
+`predictMoments()` evaluates mean, variance, skewness and (excess) kurtosis of the fitted score distribution at any age by exact summation of the probability mass function. For a model with `max_score`, the moments refer to the truncated distribution. We add the dispersion index to see how the spread relates to the Poisson benchmark:
 
 ```{r}
-# Compute model-implied population moments across ages
 moments <- predictMoments(model.cmp, age = seq(7, 11, by = 1), censor = FALSE)
-moments
+moments$dispersion <- moments$variance / moments$mean
+round(moments, 2)
 ```
 
-Notice that `variance` is strictly smaller than `mean` across all ages, directly capturing the under-dispersed pacing of the cognitive cancellation task.
+A dispersion index below 1 denotes under-dispersion, above 1 over-dispersion. Skewness and kurtosis show how the shape of the distribution changes across development. With `censor = TRUE` (the default), the distribution is instead censored at the empirical score range, which makes the moments comparable to those of the other model families.
 
 
-# Visual Model Comparison
+# Comparing Model Families
 
-You can visually contrast the fitted CMP model against alternative continuous norming models (such as distribution-free Taylor polynomials or fixed Poisson models) using `compare()`:
+`compare()` places a CMP model next to alternative models, for instance the distribution-free Taylor polynomial model, and shows their percentile curves and fit statistics:
 
 ```{r fig2, fig.height = 4, fig.width = 7}
-# Fit a traditional distribution-free Taylor model for comparison
 model.taylor <- cnorm(raw = speed$fluency, age = speed$age, plot = FALSE)
 
-# Compare models visually and print goodness-of-fit comparison table
 compare(
   model.taylor,
   model.cmp,
   age = speed$age,
   score = speed$fluency,
-  title = "Model Comparison: Taylor Polynomial vs. Conway-Maxwell-Poisson"
+  title = "Taylor Polynomial vs. Conway-Maxwell-Poisson"
 )
 ```
 
+Keep in mind that likelihood-based criteria (AIC, BIC) are comparable only between models of the same kind of distribution, such as the open-ended and the truncated CMP model above. They cannot be compared between discrete families (CMP, beta-binomial) and continuous ones (SHASH), nor with the distribution-free model, which has no likelihood. Across families, judge the models by the fit of the norm scores (R², RMSE, bias), by the visual inspection of the percentiles and by the calibration.
 
-# Decision Framework for Model Selection
 
-`cNORM` provides four distinct modeling paradigms: one semi-parametric, distribution-free approach and three parametric families. Each model possesses distinct mathematical properties tailored to specific types of test data and measurement designs.
+# Choosing a Model Family
 
----
+`cNORM` offers one semi-parametric, distribution-free approach and three parametric families. Each is tailored to a particular kind of test data.
 
-### Quick Selection Matrix
-
-| Criterion | Distribution-Free (Taylor) | Beta-Binomial | Conway-Maxwell-Poisson (CMP) | Sinh-Arcsinh (SHASH) |
+| | Distribution-free (Taylor) | Beta-binomial | CMP | SHASH |
 | :--- | :--- | :--- | :--- | :--- |
-| **Score Scale** | Continuous or discrete | Discrete integer counts ($0 \le y \le n$) | Discrete integer counts ($y \ge 0$) | Continuous real numbers ($y \in \mathbb{R}$) |
-| **Test Paradigm** | General ability / achievement | Power / accuracy tests | Speeded tests / rate tasks | Continuous scales, physical / RT |
-| **Ceiling Bound** | Post-hoc clipping $[minRaw, maxRaw]$ | Natural upper bound ($n$ items) | Open-ended ($[0, \infty)$) | Natural infinite support ($(-\infty, \infty)$) |
-| **Distributional Shape** | Any (empirical rank projection) | Binomial with Beta-mixing | Over-, equi-, or **under-dispersed** | Skewed with heavy or light tails |
-| **Key Advantage** | Maximum shape flexibility | Respects fixed item bounds | Captures under-dispersion ($\text{Var} < \text{Mean}$) | Handles negative and uncentered scores |
-| **Primary Function** | `cnorm()` | `cnorm.betabinomial()` | `cnorm.cmp()` | `cnorm.shash()` |
+| **Score scale** | Continuous or discrete | Integer, $0 \le y \le n$ | Integer, $y \ge 0$ | Continuous, $y \in \mathbb{R}$ |
+| **Typical tests** | General ability and achievement | Power and accuracy tests | Speeded tests, rate tasks | Continuous measures, response times |
+| **Upper bound** | Post-hoc clipping to $[minRaw, maxRaw]$ | Natural bound ($n$ items) | Open-ended, or truncated via `max_score` | None |
+| **Distributional shape** | Any (empirical) | Binomial with beta mixing | Over-, equi- or under-dispersed | Skewed, light or heavy tails |
+| **Main strength** | Maximum flexibility | Respects fixed item numbers | Models the dispersion directly | Handles negative and uncentred scores |
+| **Function** | `cnorm()` | `cnorm.betabinomial()` | `cnorm.cmp()` | `cnorm.shash()` |
 
----
+**Distribution-free models** (`cnorm()`; Lenhard et al., 2018) are the choice when flexibility matters most: the data show irregular features that no standard family captures, you prefer not to assume a distribution, or the relationship between person location and age changes irregularly. Because bivariate polynomials can invert in extreme regions, always inspect `checkConsistency()` and `plotPercentiles()`. Parametric models cannot produce crossing percentile curves by construction.
 
-### Detailed Selection Guidelines
+**Beta-binomial models** (`cnorm.betabinomial()`) suit unspeeded power and accuracy tests in which the raw score is the number of correct responses among $n$ items. They respect the fixed ceiling and handle floor and ceiling effects naturally. Sum scores of Rasch-type tests are approximately beta-binomial, which makes the model a good working description rather than an exact one.
 
-#### 1. Use Distribution-Free Models (Taylor Polynomials) when:
-* **Maximum flexibility is paramount:** The data exhibit non-standard features (e.g., multimodality, local irregularities, or empirical anomalies) that cannot be captured by standard parametric families.
-* **No distributional assumptions can be justified:** You prefer empirical ranking over specifying a functional density.
-* **Complex interaction surfaces:** The relationship between person location and age changes irregularly across development.
-* **Caution:** Because bivariate polynomials can occasionally invert in extreme regions, always inspect consistency (`checkConsistency()`) and percentile curves (`plotPercentiles()`).
+**CMP models** (`cnorm.cmp()`) suit speeded tests whose raw score counts the units processed within a time limit, such as cancellation tasks, coding, symbol search or reading fluency. They model the dispersion as an age-dependent parameter instead of assuming it, covering under- and over-dispersion alike. If the test has a hard maximum score, set `max_score`. One limitation deserves mention: for large $\mu$, the skewness of a CMP distribution is approximately $1/\sqrt{\mu\nu}$, i.e., the shape is nearly determined by mean and variance. If skewness and kurtosis vary independently across age, SHASH or the distribution-free approach are more flexible.
 
-#### 2. Use Beta-Binomial Models (`cnorm.betabinomial`) when:
-* **The test is an unspeeded power/accuracy test:** Raw scores represent the sum of $n$ dichotomously scored items (1PL IRT / Rasch-scaled instruments).
-* **There is a strict, known ceiling:** Scores cannot exceed the maximum number of items $n$.
-* **Floor or ceiling effects are present:** The distribution naturally compresses near $0$ or $n$ without requiring artificial clipping.
-* **Item count is small to moderate:** The discrete nature of individual item increments is psychometrically meaningful.
-
-#### 3. Use Conway-Maxwell-Poisson Models (`cnorm.cmp`) when:
-* **The test is a speeded test:** The raw score is the number of correctly processed items within a fixed time limit (e.g., cancellation tasks, coding, symbol search, reading fluency).
-* **The scale is open-ended:** There is no hard item ceiling, or the ceiling is practically unattainable within the time limit.
-* **The data exhibit under-dispersion ($\text{Var} < \text{Mean}$):** Speeded tasks with easy items routinely produce performance pacing with variance substantially smaller than the mean—a feature that neither Poisson nor Negative Binomial models can accommodate.
-* **Counts can also be over-dispersed ($\text{Var} > \text{Mean}$):** The CMP dispersion parameter $\nu(a)$ smoothly models over- ($\nu < 1$), equi- ($\nu = 1$), and under-dispersion ($\nu > 1$) across age.
-
-#### 4. Use Sinh-Arcsinh Models (`cnorm.shash`) when:
-* **Raw scores are continuous:** Scores have decimal precision, or stem from latent scale transformations, response times, or physical measurements (e.g., height, weight, force).
-* **Zero or negative values occur:** Scores are difference scores, change scores, or unstandardized index points spanning zero and negative numbers.
-* **Asymmetry and tail heaviness vary smoothly across age:** The distribution shifts from Gaussian to skewed or heavy/light-tailed across developmental stages.
-* **Parametric parsimony is desired:** Four smooth polynomial trajectories ($\mu, \sigma, \epsilon, \delta$) describe the complete conditional distribution surface.
+**SHASH models** (`cnorm.shash()`) suit continuous raw scores: decimals, response times, physical measurements, or difference scores that can be negative. Four smooth age trajectories (location, scale, skewness and tail weight) describe the whole conditional distribution, which is parsimonious and flexible at the same time, and lets asymmetry and tail weight change across development.
 
 
 # References
 
-* Conway, R. W., & Maxwell, W. L. (1962). A queuing model with state dependent service rates. *Journal of Industrial Engineering*, 12, 132–136.
-* Huang, A. (2017). Mean-parametrized Conway-Maxwell-Poisson regression models for dispersed counts. *Statistical Modelling*, 17(6), 359–380.
-* Forthmann, B., Lenhard, W., Lenhard, A., & Förster, N. (2024). Flexible Item Response Modeling for Timed Reading Comprehension Assessment. The Journal of Experimental Education, 1–17. https://doi.org/10.1080/00220973.2024.2367162
-* Lenhard, A., Lenhard, W., Suggate, S. & Segerer, R. (2016). A continuous solution to the norming problem. *Assessment*, 25(1), 112–125. https://doi.org/10.1177/1073191116656437
-* Sellers, K. F., & Shmueli, G. (2010). A flexible regression model for count data. *The Annals of Applied Statistics*, 4(2), 943–961.
-* Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S., & Boatwright, P. (2005). A useful distribution for fitting discrete data: revival of the Conway-Maxwell-Poisson distribution. *Journal of the Royal Statistical Society C*, 54(1), 127–142.
+* Conway, R. W., & Maxwell, W. L. (1962). A queuing model with state dependent service rates. *Journal of Industrial Engineering*, 12, 132-136.
+* Dunn, P. K., & Smyth, G. K. (1996). Randomized quantile residuals. *Journal of Computational and Graphical Statistics*, 5(3), 236-244.
+* Forthmann, B., Lenhard, W., Lenhard, A., & Förster, N. (2024). Flexible item response modeling for timed reading comprehension assessment. *The Journal of Experimental Education*, 1-17. https://doi.org/10.1080/00220973.2024.2367162
+* Huang, A. (2017). Mean-parametrized Conway-Maxwell-Poisson regression models for dispersed counts. *Statistical Modelling*, 17(6), 359-380.
+* Lenhard, A., Lenhard, W., Suggate, S., & Segerer, R. (2018). A continuous solution to the norming problem. *Assessment*, 25(1), 112-125. https://doi.org/10.1177/1073191116656437
+* Sellers, K. F., & Shmueli, G. (2010). A flexible regression model for count data. *The Annals of Applied Statistics*, 4(2), 943-961.
+* Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S., & Boatwright, P. (2005). A useful distribution for fitting discrete data: revival of the Conway-Maxwell-Poisson distribution. *Journal of the Royal Statistical Society C*, 54(1), 127-142.
