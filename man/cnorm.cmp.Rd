@@ -132,10 +132,9 @@ Use \code{max_score} for speeded tests with a finite number of items.
 \itemize{
   \item Raw scores must be non-negative integers.
   \item The dispersion is restricted to nu in [0.05, 20] by clamping the predictor of
-    log(nu). If the predictor reaches the clamp at an observed age, a warning is
-    issued and the Wald tests are not valid.
+    log(nu).
   \item Polynomial models can exhibit edge effects; predict outside the observed age range
-    with caution (a warning is issued).
+    with caution.
   \item Because the distribution is discrete, norm tables are step-like in the raw score.
   \item AIC/BIC are not comparable between the discrete CMP model and continuous
     (shash) or distribution-free models.

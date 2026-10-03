@@ -1,22 +1,20 @@
-## cNORM version 3.6.2
+## cNORM version 3.7.0
 
-Fine-tuning of internal functions (relaxed monotonicity check) and a new S3 
-method for predicting distributional moments of fitted Taylor, beta binomial
-and shash models. Model averaging was falsly already set to TRUE by default
-(now FALSE).
+New distributional family for modelling speeded tests and count data with the
+Conway-Maxwell Poisson Counts Model (CMPCM), which allows for adjusting
+dispersion.
 
-## Changes
+### New features
+* Modelling speeded tests with the Conway-Maxwell Poisson Counts Model (CMPCM)
+* Vignette for CMP modelling
+* New dataset 'speed' with word reading fluency per age (synthetic data based
+  on ELFE2)
+* Extended test coverage for CMP
 
-* New function `predictMoments()`: Computes model-implied distributional 
-  moments (mean, standard deviation, variance, skewness and excess kurtosis) 
-  of the raw score distribution at one or more ages.
-* Monotonicity check in Taylor polynomials now accept minimal inconsistencies
-  (violations of less than 1% of the raw score range; parameter added to cnorm 
-  and bestModel).
-* The averaging feature has been turned of by default. We have to conduct 
-  more research first.
-* Deprectated subsampling parameter and according function removed  
-* Added analytic grading in fitting shash models
+### Changes
+* Checks on number of groups in Taylor modelling added. Now actively advises
+  on 't' parameter reduction.
+* Added section on model selection strategies to vignettes
 
 
 ## Test environments

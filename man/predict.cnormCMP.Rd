@@ -35,8 +35,7 @@ The function predicts the CMP parameters (mu, nu) for each age using the provide
 model, calculates the (mid-)percentile rank of each raw score under the corresponding
 discrete distribution, and converts it to the norm scale specified in the model.
 Extreme percentiles are mapped to the boundary of the norm score range
-(mean +/- \code{range} standard deviations). A warning is issued for ages outside the
-range of the fitted model, for scores above \code{max_score} of a right-truncated model,
+(mean +/- \code{range} standard deviations). A warning is issued for scores above \code{max_score} of a right-truncated model,
 and if the series could not be evaluated for some cases (NA is returned for them).
 }
 \examples{

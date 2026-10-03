@@ -20,34 +20,48 @@ normTable.cmp(
 )
 }
 \arguments{
-\item{model}{Fitted CMP model object of class "cnormCMP"}
+\item{model}{Fitted CMP model object of class "cnormCMP". Can also be passed as the second
+argument if \code{ages} is given first (matching the \code{\link{normTable}} generic).}
 
-\item{ages}{Numeric vector of age points for norm table generation}
+\item{ages}{Numeric vector of age points for norm table generation.}
 
-\item{start}{Minimum raw score value for the norm table (default: observed minimum)}
+\item{start}{Minimum raw score value for the norm table. Default is \code{0} (the natural
+floor for count data).}
 
-\item{end}{Maximum raw score value for the norm table (default: observed maximum).
-For a right-truncated model, \code{end} is capped at \code{max_score}.}
+\item{end}{Maximum raw score value for the norm table. Default is \code{max_score} for a
+right-truncated model, or the maximum observed score if untruncated.}
 
-\item{step}{Step size between consecutive raw scores (integer, default: 1)}
+\item{step}{Step size between consecutive raw scores (integer >= 1, default: 1).}
 
-\item{CI}{Confidence coefficient (0-1, default: 0.9) for confidence intervals}
+\item{CI}{Confidence coefficient (0-1, default: 0.90) for confidence intervals.}
 
-\item{reliability}{Reliability coefficient (0-1) for true score confidence intervals}
+\item{reliability}{Reliability coefficient (0-1) for Kelley's true score confidence intervals.}
 
-\item{mid_p}{Logical; if TRUE (default), uses mid-p adjusted percentiles for discrete scores}
+\item{mid_p}{Logical; if TRUE (default), uses mid-p adjusted percentiles for discrete scores:
+\eqn{P(Y < x) + 0.5 P(Y = x)}.}
 
-\item{minRaw, maxRaw}{Optional aliases for \code{start} and \code{end}}
+\item{minRaw, maxRaw}{Optional aliases for \code{start} and \code{end}.}
 
 \item{range}{Range of the norm scores in standard deviations (default 3), identical to
-the argument of \code{predict}: z-scores and norm scores are limited to +/- \code{range}
-so that tables and individual predictions agree at the extremes. Use \code{Inf} to
-switch off the limit. The column \code{Percentile} is never limited.}
+\code{\link{predict.cnormCMP}}: z-scores and norm scores are limited to +/- \code{range}.
+Use \code{Inf} to switch off truncation. The column \code{Percentile} is never limited.}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments.}
+}
+\value{
+A list of data frames (one per age) containing:
+  \item{x}{Raw score count}
+  \item{Px}{Point probability \eqn{P(Y = x)}}
+  \item{Pcum}{Cumulative probability \eqn{P(Y \le x)}}
+  \item{Percentile}{Mid-p percentile rank (0 to 100)}
+  \item{z}{Standardized z-score (bounded by \code{+/- range})}
+  \item{norm}{Norm score on the model's scale (e.g. T-score)}
+  \item{lowerCI, upperCI}{True-score confidence interval limits (if reliability is given)}
+  \item{lowerCI_PR, upperCI_PR}{Percentile rank confidence limits (if reliability is given)}
 }
 \description{
-Generates norm tables for specific ages based on a fitted CMP regression model.
-Computes point probabilities, cumulative probabilities, percentile ranks, z-scores,
-and norm scores for integer raw scores.
+Generates norm tables for specific ages based on a fitted CMP continuous norming model.
+Computes point probabilities, cumulative probabilities, mid-p percentile ranks, z-scores,
+norm scores, and optional true-score confidence intervals (Kelley's formula) for count raw scores.
 }
+\concept{normTable}

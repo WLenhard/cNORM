@@ -5,7 +5,7 @@ points for further improvements.
 
 
 ## Version in 3.7.0
-Date: 03.10.2026 - progress
+Date: 03.10.2026 - release
 
 New distributional family for modelling speeded tests and count data with the
 Conway-Maxwell Poisson Counts Model (CMPCM), which allows for adjusting

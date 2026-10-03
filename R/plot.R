@@ -1462,44 +1462,31 @@ plotCnorm <- function(x, y, ...) {
 #' beta-binomial models, Conway-Maxwell-Poisson (CMP) models, and shash models,
 #' allowing comparison between different model types.
 #'
-#' For discrete count and accuracy models (beta-binomial and CMP), the exact quantiles
-#' of the discrete distribution are displayed by default as step functions
-#' (\code{discrete = TRUE}). Setting \code{discrete = FALSE} draws smooth connected
-#' lines instead. Note that for beta-binomial models, setting \code{discrete = FALSE}
-#' draws smooth lines based on the quantiles of the underlying beta (mixing)
-#' distribution instead (omitting the binomial-stage variance). The parameter has no
-#' effect on continuous models (Taylor polynomials or shash).
+#' For discrete count and accuracy models (beta-binomial and CMP), smooth continuous curves
+#' are displayed by default (\code{discrete = FALSE}). For CMP models, these are the
+#' continuity-corrected (mid-p) quantiles consistent with \code{\link{plot.cnormCMP}} and
+#' the derived norm scores. For beta-binomial models, smooth lines are based on the
+#' underlying beta (mixing) distribution. Setting \code{discrete = TRUE} displays the exact
+#' discrete quantiles as step functions. The parameter has no effect on continuous models
+#' (Taylor polynomials or shash).
+#'
+#' Observation weights (e.g. post-stratification or frequency weights) are fully respected
+#' in the computation of manifest percentiles, age group centers, and all fit indices
+#' (R-squared, Bias, RMSE, and MAD).
 #'
 #' @param model1 First model object (distribution-free, beta-binomial, CMP, or shash)
 #' @param model2 Second model object (distribution-free, beta-binomial, CMP, or shash)
+#' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
 #' @param age Optional vector with manifest age or group values
 #' @param score Optional vector with manifest raw score values
 #' @param weights Optional vector with manifest weights
-#' @param percentiles Vector with percentile scores, ranging from 0 to 1 (exclusive)
 #' @param title Custom title for plot (optional)
 #' @param subtitle Custom subtitle for plot (optional)
 #' @param discrete Logical indicating whether discrete models (beta-binomial and CMP)
-#'   are displayed with their exact discrete quantiles as step functions (TRUE, default)
-#'   or with smooth continuous curves (FALSE). Ignored for Taylor and shash models.
+#'   are displayed with their exact discrete quantiles as step functions (\code{TRUE})
+#'   or with smooth continuous curves (\code{FALSE}, default). Ignored for Taylor and shash models.
 #'
 #' @return A ggplot object showing the comparison of both models
-#'
-#' @examples
-#' \dontrun{
-#' # Compare traditional cnorm with shash
-#' model1 <- cnorm(group = elfe$group, raw = elfe$raw)
-#' model3 <- cnorm.shash(elfe$group, elfe$raw)
-#' compare(model1, model3, age = elfe$group, score = elfe$raw)
-#'
-#' # Compare traditional cnorm with CMP model on speeded count data
-#' model_cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
-#' model_taylor <- cnorm(age = speeded$age, raw = speeded$raw)
-#' compare(model_taylor, model_cmp, age = speeded$age, score = speeded$raw)
-#'
-#' # Compare beta-binomial with shash
-#' model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
-#' compare(model2, model3, age = elfe$group, score = elfe$raw)
-#' }
 #'
 #' @export
 #' @family plot
@@ -1511,7 +1498,7 @@ compare <- function(model1,
                     weights = NULL,
                     title = NULL,
                     subtitle = NULL,
-                    discrete = TRUE) {
+                    discrete = FALSE) {
 
   # Helper: verify if model is CMP
   is_cmp <- function(m) inherits(m, "cnormCMP")
@@ -1525,7 +1512,7 @@ compare <- function(model1,
     }
   }
 
-  # Retrieve score from model if score is null and one of the models is a cnorm object
+  # Retrieve score and age from model if missing and model is a cnorm (Taylor) object
   if (is.null(score) && isTaylor(model1)) {
     score <- model1$data[[attributes(model1$data)$raw]]
     age <- model1$data[[attributes(model1$data)$age]]
@@ -1550,7 +1537,6 @@ compare <- function(model1,
                           ncol = length(percentiles))
 
     if (discrete) {
-      # Exact quantiles of the discrete beta-binomial distribution
       for (j in seq_along(pred_ages)) {
         dist <- bb_distribution(preds$a[j], preds$b[j], n_max)
         if (!anyNA(dist$cum)) {
@@ -1560,11 +1546,10 @@ compare <- function(model1,
         }
       }
     } else {
-      # Continuous approximation via the underlying beta (mixing) distribution
       for (i in seq_along(percentiles)) {
-        pred_matrix[, i] <- qbeta(percentiles[i],
-                                  shape1 = preds$a,
-                                  shape2 = preds$b) * n_max
+        pred_matrix[, i] <- stats::qbeta(percentiles[i],
+                                         shape1 = preds$a,
+                                         shape2 = preds$b) * n_max
       }
     }
 
@@ -1598,16 +1583,38 @@ compare <- function(model1,
   # Function to get predictions for CMP models
   get_cmp_predictions <- function(model, pred_ages) {
     preds <- predictCoefficients_cmp(model, pred_ages)
+    o <- cmp_opts(model)
+    n_pts <- length(pred_ages)
 
     pred_matrix <- matrix(NA_real_,
-                          nrow = length(pred_ages),
+                          nrow = n_pts,
                           ncol = length(percentiles))
+
+    q_mid <- if (exists("cmp_quantile_mid", mode = "function")) {
+      cmp_quantile_mid
+    } else {
+      get("cmp_quantile_mid", envir = asNamespace("cNORM"))
+    }
+
     for (i in seq_along(percentiles)) {
-      pred_matrix[, i] <- qcmp(
-        percentiles[i],
-        mu = preds$mu,
-        nu = preds$nu
-      )
+      p_val <- percentiles[i]
+      if (discrete) {
+        pred_matrix[, i] <- qcmp(
+          p_val,
+          mu = preds$mu,
+          nu = preds$nu,
+          max_score = if (is.null(o$max_score)) Inf else o$max_score
+        )
+      } else {
+        pred_matrix[, i] <- q_mid(
+          rep(p_val, n_pts),
+          mu = preds$mu,
+          nu = preds$nu,
+          tol = o$tol,
+          max_terms = o$max_terms,
+          max_score = o$max_score
+        )
+      }
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
@@ -1618,7 +1625,7 @@ compare <- function(model1,
   # Function to get predictions for cnorm (Taylor) models
   get_cnorm_predictions <- function(model, pred_ages) {
     m <- model$model
-    T <- qnorm(percentiles, m$scaleM, m$scaleSD)
+    T <- stats::qnorm(percentiles, m$scaleM, m$scaleSD)
 
     pred_matrix <- matrix(NA_real_,
                           nrow = length(pred_ages),
@@ -1645,17 +1652,13 @@ compare <- function(model1,
     }
   }
 
-  # Get age ranges for both models
   range1 <- get_age_range(model1)
   range2 <- get_age_range(model2)
 
-  # Create common age sequence
   pred_ages <- seq(min(range1[1], range2[1]), max(range1[2], range2[2]), length.out = 100)
 
-  # Get predictions for both models; remember which models are displayed
-  # as step functions (discrete quantiles)
-  step1 <- (isBeta(model1) || is_cmp(model1)) && discrete
-  step2 <- (isBeta(model2) || is_cmp(model2)) && discrete
+  step1 <- (isBeta(model1) || is_cmp(model1)) && isTRUE(discrete)
+  step2 <- (isBeta(model2) || is_cmp(model2)) && isTRUE(discrete)
 
   plot_data1 <- if (isBeta(model1)) {
     get_bb_predictions(model1, pred_ages)
@@ -1677,7 +1680,7 @@ compare <- function(model1,
     get_cnorm_predictions(model2, pred_ages)
   }
 
-  # Prepare data for plotting (reshape to long format using base R)
+  # Prepare plotting data
   plot_data_long <- data.frame(
     age = numeric(),
     value = numeric(),
@@ -1685,7 +1688,6 @@ compare <- function(model1,
     model = character()
   )
 
-  # Reshape data for model 1
   for (i in 2:ncol(plot_data1)) {
     plot_data_long <- rbind(
       plot_data_long,
@@ -1698,7 +1700,6 @@ compare <- function(model1,
     )
   }
 
-  # Reshape data for model 2
   for (i in 2:ncol(plot_data2)) {
     plot_data_long <- rbind(
       plot_data_long,
@@ -1716,21 +1717,12 @@ compare <- function(model1,
     plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
   }
 
-  # Set factor levels for correct ordering
-  plot_data_long$percentile <- factor(plot_data_long$percentile,
-                                      levels = paste0("P", percentiles * 100))
+  perc_names <- paste0("P", percentiles * 100)
+  plot_data_long$percentile <- factor(plot_data_long$percentile, levels = perc_names)
 
-  # Set default title if none provided
-  if (is.null(title)) {
-    title <- "Visual Model Comparison"
-  }
+  if (is.null(title))    title <- "Visual Model Comparison"
+  if (is.null(subtitle)) subtitle <- "Model 1: solid lines, Model 2: dashed lines"
 
-  if (is.null(subtitle)) {
-    subtitle <- "Model 1: solid lines, Model 2: dashed lines"
-  }
-
-  # Layer helper: piecewise-constant discrete quantiles are rendered with
-  # geom_step (vertical risers, direction "mid"), continuous curves with geom_line
   model_layer <- function(dat, lty, use_step) {
     if (use_step) {
       geom_step(
@@ -1750,14 +1742,16 @@ compare <- function(model1,
     }
   }
 
-  # Create plot
+  color_values <- stats::setNames(rainbow(length(percentiles)), perc_names)
+
   p <- ggplot() +
-    model_layer(plot_data_long[plot_data_long$model == "Model 1", ],
-                "solid", step1) +
-    model_layer(plot_data_long[plot_data_long$model == "Model 2", ],
-                "dashed", step2) +
-    scale_color_manual(values = rainbow(length(percentiles)),
-                       labels = paste0(percentiles * 100, "%")) +
+    model_layer(plot_data_long[plot_data_long$model == "Model 1", ], "solid", step1) +
+    model_layer(plot_data_long[plot_data_long$model == "Model 2", ], "dashed", step2) +
+    scale_color_manual(
+      values = color_values,
+      breaks = perc_names,
+      labels = paste0(percentiles * 100, "%")
+    ) +
     labs(
       title = title,
       subtitle = subtitle,
@@ -1767,11 +1761,7 @@ compare <- function(model1,
     ) +
     theme_minimal() +
     theme(
-      plot.title = element_text(
-        hjust = 0.5,
-        size = 16,
-        face = "bold"
-      ),
+      plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
       plot.subtitle = element_text(hjust = 0.5, size = 12),
       axis.title = element_text(size = 12, face = "bold"),
       axis.title.x = element_text(margin = margin(t = 10)),
@@ -1785,67 +1775,59 @@ compare <- function(model1,
     )
 
   # Information criteria
-  if (isTaylor(model1)) {
-    ideal.model <- model1$model$ideal.model
-    rss <- model1$model$subsets$rss[ideal.model]
-    n <- nrow(model1$data)
-
-    sigma2 <- rss / (nrow(model1$data) - ideal.model - 1)  # residual variance
-    loglik <- -0.5 * n * (log(2 * pi) + log(sigma2) + 1)
-
-    AIC1 <- -2 * loglik + 2 * ideal.model
-    BIC1 <- model1$model$subsets$bic[ideal.model]
-  } else {
-    n_obs <- attr(model1$result, "N")
-    n_params <- length(model1$result$par)
-    log_likelihood <- -model1$result$value
-    AIC1 <- 2 * n_params - 2 * log_likelihood
-    BIC1 <- n_params * log(n_obs) - 2 * log_likelihood
+  calc_ic <- function(m) {
+    if (isTaylor(m)) {
+      ideal.model <- m$model$ideal.model
+      rss <- m$model$subsets$rss[ideal.model]
+      n <- nrow(m$data)
+      sigma2 <- rss / (n - ideal.model - 1)
+      loglik <- -0.5 * n * (log(2 * pi) + log(sigma2) + 1)
+      c(AIC = -2 * loglik + 2 * ideal.model,
+        BIC = m$model$subsets$bic[ideal.model])
+    } else {
+      n_obs <- attr(m$result, "N")
+      n_params <- length(m$result$par)
+      loglik <- -m$result$value
+      c(AIC = 2 * n_params - 2 * loglik,
+        BIC = n_params * log(n_obs) - 2 * loglik)
+    }
   }
 
-  if (isTaylor(model2)) {
-    ideal.model <- model2$model$ideal.model
-    rss <- model2$model$subsets$rss[ideal.model]
-    n <- nrow(model2$data)
-
-    sigma2 <- rss / (nrow(model2$data) - ideal.model - 1)  # residual variance
-    loglik <- -0.5 * n * (log(2 * pi) + log(sigma2) + 1)
-
-    AIC2 <- -2 * loglik + 2 * ideal.model
-    BIC2 <- model2$model$subsets$bic[ideal.model]
-  } else {
-    n_obs <- attr(model2$result, "N")
-    n_params <- length(model2$result$par)
-    log_likelihood <- -model2$result$value
-    AIC2 <- 2 * n_params - 2 * log_likelihood
-    BIC2 <- n_params * log(n_obs) - 2 * log_likelihood
-  }
+  ic1 <- calc_ic(model1)
+  ic2 <- calc_ic(model2)
+  AIC1 <- ic1["AIC"]; BIC1 <- ic1["BIC"]
+  AIC2 <- ic2["AIC"]; BIC2 <- ic2["BIC"]
 
   if (!is.null(score) && !is.null(age)) {
-    # Prepare data for manifest percentiles and fit statistics
-    data <- data.frame(age = age, score = score)
+    # Filter valid complete cases across age, score, and weights
+    keep <- is.finite(age) & is.finite(score)
     if (!is.null(weights)) {
-      data$w <- weights
-    } else {
-      data$w <- rep(1, length(age))
+      keep <- keep & is.finite(weights) & (weights > 0)
+    }
+    age <- age[keep]
+    score <- score[keep]
+    if (!is.null(weights)) {
+      weights <- weights[keep]
     }
 
-    # Calculate groups for manifest percentiles
-    if (length(age) / length(unique(age)) > 50 &&
-        min(table(data$age)) > 30) {
+    data <- data.frame(age = age, score = score)
+    data$w <- if (!is.null(weights)) weights else rep(1, length(age))
+
+    # Age groups for manifest percentiles
+    if (length(age) / length(unique(age)) > 50 && min(table(data$age)) > 30) {
       data$group <- age
     } else {
       data$group <- getGroups(age)
     }
 
-    # Calculate manifest percentiles
+    # Manifest percentiles using observation weights and weighted mean age
     percentile.actual <- as.data.frame(do.call("rbind", lapply(split(
       data, data$group
     ), function(df) {
-      c(age = mean(df$age),
+      c(age = stats::weighted.mean(df$age, w = df$w),
         weighted.quantile(df$score, probs = percentiles, weights = df$w))
     })))
-    colnames(percentile.actual) <- c("age", paste0("P", percentiles * 100))
+    colnames(percentile.actual) <- c("age", perc_names)
 
     # Reshape manifest data
     manifest_data_long <- data.frame(age = numeric(),
@@ -1863,10 +1845,9 @@ compare <- function(model1,
       )
     }
 
-    manifest_data_long$percentile <- factor(manifest_data_long$percentile,
-                                            levels = paste0("P", percentiles * 100))
+    manifest_data_long$percentile <- factor(manifest_data_long$percentile, levels = perc_names)
 
-    # Add manifest percentiles to plot
+    # Add manifest diamonds to plot
     p <- p + geom_point(
       data = manifest_data_long,
       aes(
@@ -1878,65 +1859,60 @@ compare <- function(model1,
       shape = 18
     )
 
-    # Calculate fit statistics
-    if (is.null(weights)) {
-      data <- rankByGroup(data, raw = "score", group = "group")
-    } else {
-      data <- rankByGroup(data,
-                          raw = "score",
-                          group = "group",
-                          weights = "w")
-    }
+    # Group ranking with weights
+    data <- rankByGroup(data, raw = "score", group = "group", weights = if (!is.null(weights)) "w" else NULL)
     data$normValue <- 10 * (data$normValue - attributes(data)$scaleMean) / attributes(data)$scaleSD
 
-    # Get predictions for model 1
-    if (isTaylor(model1)) {
-      data$fitted1 <- predictNorm(
-        data$score,
-        data$age,
-        model1,
-        minNorm = model1$model$minL1,
-        maxNorm = model1$model$maxL1
-      )
-      data$fitted1 <- 10 * (data$fitted1 - attributes(model1$data)$scaleMean) / attributes(model1$data)$scaleSD
-    } else if (is_param(model1)) {
-      data$fitted1 <- predict(model1, data$age, data$score)
-      scaleMean <- attr(model1$result, "scaleMean")
-      scaleSD <- attr(model1$result, "scaleSD")
-      data$fitted1 <- 10 * (data$fitted1 - scaleMean) / scaleSD
+    # Helper for fitted values
+    get_fitted <- function(m) {
+      if (isTaylor(m)) {
+        fit <- predictNorm(data$score, data$age, m,
+                           minNorm = m$model$minL1, maxNorm = m$model$maxL1)
+        10 * (fit - attributes(m$data)$scaleMean) / attributes(m$data)$scaleSD
+      } else {
+        fit <- predict(m, age = data$age, score = data$score)
+        scM <- attr(m$result, "scaleMean")
+        scSD <- attr(m$result, "scaleSD")
+        if (is.null(scM) || !is.finite(scM)) scM <- 50
+        if (is.null(scSD) || !is.finite(scSD)) scSD <- 10
+        10 * (fit - scM) / scSD
+      }
     }
 
-    # Get predictions for model 2
-    if (isTaylor(model2)) {
-      data$fitted2 <- predictNorm(
-        data$score,
-        data$age,
-        model2,
-        minNorm = model2$model$minL1,
-        maxNorm = model2$model$maxL1
-      )
-      data$fitted2 <- 10 * (data$fitted2 - attributes(model2$data)$scaleMean) / attributes(model2$data)$scaleSD
-    } else if (is_param(model2)) {
-      data$fitted2 <- predict(model2, data$age, data$score)
-      scaleMean <- attr(model2$result, "scaleMean")
-      scaleSD <- attr(model2$result, "scaleSD")
-      data$fitted2 <- 10 * (data$fitted2 - scaleMean) / scaleSD
+    data$fitted1 <- get_fitted(model1)
+    data$fitted2 <- get_fitted(model2)
+
+    # --- Weighted statistical helpers for fit metrics ---
+    w_mean <- function(x, w) {
+      sum(w * x, na.rm = TRUE) / sum(w[!is.na(x)])
     }
 
-    # Calculate fit statistics
-    R2a <- cor(data$fitted1, data$normValue, use = "pairwise.complete.obs")^2
-    R2b <- cor(data$fitted2, data$normValue, use = "pairwise.complete.obs")^2
+    w_cor2 <- function(x, y, w) {
+      ok <- is.finite(x) & is.finite(y) & is.finite(w) & (w > 0)
+      if (sum(ok) < 3L) return(NA_real_)
+      x <- x[ok]; y <- y[ok]; w <- w[ok]
+      w_sum <- sum(w)
+      mx <- sum(w * x) / w_sum
+      my <- sum(w * y) / w_sum
+      cov_xy <- sum(w * (x - mx) * (y - my)) / w_sum
+      var_x  <- sum(w * (x - mx)^2) / w_sum
+      var_y  <- sum(w * (y - my)^2) / w_sum
+      if (var_x > 0 && var_y > 0) (cov_xy / sqrt(var_x * var_y))^2 else NA_real_
+    }
 
-    bias1 <- mean(data$fitted1 - data$normValue, na.rm = TRUE)
-    bias2 <- mean(data$fitted2 - data$normValue, na.rm = TRUE)
+    # Fully weighted fit statistics
+    R2a <- w_cor2(data$fitted1, data$normValue, data$w)
+    R2b <- w_cor2(data$fitted2, data$normValue, data$w)
 
-    RMSE1 <- sqrt(mean((data$fitted1 - data$normValue)^2, na.rm = TRUE))
-    RMSE2 <- sqrt(mean((data$fitted2 - data$normValue)^2, na.rm = TRUE))
+    bias1 <- w_mean(data$fitted1 - data$normValue, data$w)
+    bias2 <- w_mean(data$fitted2 - data$normValue, data$w)
 
-    MAD1 <- mean(abs(data$fitted1 - data$normValue), na.rm = TRUE)
-    MAD2 <- mean(abs(data$fitted2 - data$normValue), na.rm = TRUE)
+    RMSE1 <- sqrt(w_mean((data$fitted1 - data$normValue)^2, data$w))
+    RMSE2 <- sqrt(w_mean((data$fitted2 - data$normValue)^2, data$w))
 
-    # Create and print summary table
+    MAD1 <- w_mean(abs(data$fitted1 - data$normValue), data$w)
+    MAD2 <- w_mean(abs(data$fitted2 - data$normValue), data$w)
+
     fit_table <- data.frame(
       Metric = c("R2", "Bias", "RMSE", "MAD", "AIC", "BIC"),
       Model1 = c(R2a, bias1, RMSE1, MAD1, AIC1, BIC1),
@@ -1957,7 +1933,7 @@ compare <- function(model1,
     cat("------------------------\n")
     print(format(fit_table, justify = "right"), row.names = FALSE)
     cat("\nNote: Difference = Model2 - Model1\n")
-    cat("      Fit indices are based on the manifest and fitted norm scores of both models.\n")
+    cat("      Fit indices are based on manifest and fitted norm scores (weighted if weights provided).\n")
     cat("      Scale metrics are T scores (scaleSD = 10)\n")
     cat("      AIC and BIC should only be used when comparing models of the same type.\n")
   } else {

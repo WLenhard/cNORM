@@ -13,7 +13,7 @@ compare(
   weights = NULL,
   title = NULL,
   subtitle = NULL,
-  discrete = TRUE
+  discrete = FALSE
 )
 }
 \arguments{
@@ -34,8 +34,8 @@ compare(
 \item{subtitle}{Custom subtitle for plot (optional)}
 
 \item{discrete}{Logical indicating whether discrete models (beta-binomial and CMP)
-are displayed with their exact discrete quantiles as step functions (TRUE, default)
-or with smooth continuous curves (FALSE). Ignored for Taylor and shash models.}
+are displayed with their exact discrete quantiles as step functions (\code{TRUE})
+or with smooth continuous curves (\code{FALSE}, default). Ignored for Taylor and shash models.}
 }
 \value{
 A ggplot object showing the comparison of both models
@@ -49,31 +49,17 @@ beta-binomial models, Conway-Maxwell-Poisson (CMP) models, and shash models,
 allowing comparison between different model types.
 }
 \details{
-For discrete count and accuracy models (beta-binomial and CMP), the exact quantiles
-of the discrete distribution are displayed by default as step functions
-(\code{discrete = TRUE}). Setting \code{discrete = FALSE} draws smooth connected
-lines instead. Note that for beta-binomial models, setting \code{discrete = FALSE}
-draws smooth lines based on the quantiles of the underlying beta (mixing)
-distribution instead (omitting the binomial-stage variance). The parameter has no
-effect on continuous models (Taylor polynomials or shash).
-}
-\examples{
-\dontrun{
-# Compare traditional cnorm with shash
-model1 <- cnorm(group = elfe$group, raw = elfe$raw)
-model3 <- cnorm.shash(elfe$group, elfe$raw)
-compare(model1, model3, age = elfe$group, score = elfe$raw)
+For discrete count and accuracy models (beta-binomial and CMP), smooth continuous curves
+are displayed by default (\code{discrete = FALSE}). For CMP models, these are the
+continuity-corrected (mid-p) quantiles consistent with \code{\link{plot.cnormCMP}} and
+the derived norm scores. For beta-binomial models, smooth lines are based on the
+underlying beta (mixing) distribution. Setting \code{discrete = TRUE} displays the exact
+discrete quantiles as step functions. The parameter has no effect on continuous models
+(Taylor polynomials or shash).
 
-# Compare traditional cnorm with CMP model on speeded count data
-model_cmp <- cnorm.cmp(age = speeded$age, score = speeded$raw)
-model_taylor <- cnorm(age = speeded$age, raw = speeded$raw)
-compare(model_taylor, model_cmp, age = speeded$age, score = speeded$raw)
-
-# Compare beta-binomial with shash
-model2 <- cnorm.betabinomial(elfe$group, elfe$raw)
-compare(model2, model3, age = elfe$group, score = elfe$raw)
-}
-
+Observation weights (e.g. post-stratification or frequency weights) are fully respected
+in the computation of manifest percentiles, age group centers, and all fit indices
+(R-squared, Bias, RMSE, and MAD).
 }
 \seealso{
 Other plot:
