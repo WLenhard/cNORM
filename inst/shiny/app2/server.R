@@ -3,7 +3,7 @@ library(cNORM)
 library(DT)
 library(ggplot2)
 
-# Hilfsoperator: NULL-coalescing
+# Auxiliary operator: NULL-coalescing
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 shinyServer(function(input, output, session) {
@@ -23,12 +23,23 @@ shinyServer(function(input, output, session) {
   observeEvent(input$Example, {
     req(input$Example)
 
-    if (input$Example == "elfe") {
+    if (input$Example == "speed") {
+      rv$data <- speed
+    } else if (input$Example == "elfe") {
       rv$data <- elfe
     } else if (input$Example == "ppvt") {
       rv$data <- ppvt
     } else if (input$Example == "CDC") {
       rv$data <- CDC
+    }
+
+    # Automatically set appropriate distribution type if example matches
+    if (input$Example == "speed") {
+      updateSelectInput(session, "distributionType", selected = "cmp")
+    } else if (input$Example == "elfe" || input$Example == "ppvt") {
+      updateSelectInput(session, "distributionType", selected = "betabinomial")
+    } else if (input$Example == "CDC") {
+      updateSelectInput(session, "distributionType", selected = "shash")
     }
 
     # Invalidate model when new data is loaded
@@ -87,24 +98,35 @@ shinyServer(function(input, output, session) {
   output$ageVariable <- renderUI({
     req(rv$data)
 
-    selectInput(
-      "age_var",
-      "Age Variable:",
-      choices = names(rv$data),
-      selected = names(rv$data)[1]
-    )
+    # Sensible default selection
+    col_names <- names(rv$data)
+    sel <- if ("age" %in% tolower(col_names)) {
+      col_names[which(tolower(col_names) == "age")[1]]
+    } else {
+      col_names[1]
+    }
+
+    selectInput("age_var", "Age Variable:", choices = col_names, selected = sel)
   })
 
   # Score variable selector
   output$scoreVariable <- renderUI({
     req(rv$data)
 
-    selectInput(
-      "score_var",
-      "Raw Score Variable:",
-      choices = names(rv$data),
-      selected = if (ncol(rv$data) > 1) names(rv$data)[2] else names(rv$data)[1]
-    )
+    col_names <- names(rv$data)
+    sel <- if ("fluency" %in% tolower(col_names)) {
+      col_names[which(tolower(col_names) == "fluency")[1]]
+    } else if ("raw" %in% tolower(col_names)) {
+      col_names[which(tolower(col_names) == "raw")[1]]
+    } else if ("score" %in% tolower(col_names)) {
+      col_names[which(tolower(col_names) == "score")[1]]
+    } else if (ncol(rv$data) > 1) {
+      col_names[2]
+    } else {
+      col_names[1]
+    }
+
+    selectInput("score_var", "Raw Score Variable:", choices = col_names, selected = sel)
   })
 
   # Weight variable selector
@@ -117,6 +139,15 @@ shinyServer(function(input, output, session) {
       choices = c("None" = "", names(rv$data)),
       selected = ""
     )
+  })
+
+  # Auto-populate max_score when speed dataset is used
+  observe({
+    req(rv$data, input$score_var)
+    if (identical(input$Example, "speed") && input$score_var == "fluency") {
+      updateCheckboxInput(session, "cmp_use_max_score", value = TRUE)
+      updateNumericInput(session, "cmp_max_score", value = 75)
+    }
   })
 
   # ============================================================================
@@ -136,7 +167,7 @@ shinyServer(function(input, output, session) {
 
         # Handle weights
         weights <- NULL
-        if (!is.null(input$weight_var) && input$weight_var != "") {
+        if (!is.null(input$weight_var) && nzchar(input$weight_var)) {
           weights <- rv$data[[input$weight_var]]
         }
 
@@ -145,9 +176,8 @@ shinyServer(function(input, output, session) {
         # Fit model based on distribution type
         if (input$distributionType == "shash") {
 
-          # Determine delta parameter
-          delta_deg <- if (input$fix_delta) NULL else input$delta_degree
-          delta_val <- if (input$fix_delta) input$delta_value else 1
+          delta_deg <- if (isTRUE(input$fix_delta)) NULL else input$delta_degree
+          delta_val <- if (isTRUE(input$fix_delta)) input$delta_value else 1
 
           incProgress(0.3, detail = "Fitting SHASH model...")
 
@@ -177,13 +207,38 @@ shinyServer(function(input, output, session) {
             scale = input$scale,
             plot = FALSE
           )
+
+        } else if (input$distributionType == "cmp") {
+
+          # Determine dispersion parameter setting
+          nu_deg <- if (isTRUE(input$cmp_fix_nu)) NULL else input$cmp_nu_degree
+          nu_val <- if (isTRUE(input$cmp_fix_nu)) input$cmp_nu_value else 1
+
+          # Ceiling / max_score
+          ms <- NULL
+          if (isTRUE(input$cmp_use_max_score) && !is.null(input$cmp_max_score) && !is.na(input$cmp_max_score)) {
+            ms <- as.integer(round(input$cmp_max_score))
+          }
+
+          incProgress(0.3, detail = "Fitting Conway-Maxwell-Poisson model...")
+
+          rv$model <- cnorm.cmp(
+            age = age,
+            score = score,
+            weights = weights,
+            mu_degree = input$cmp_mu_degree,
+            nu_degree = nu_deg,
+            nu = nu_val,
+            scale = input$scale,
+            max_score = ms,
+            plot = FALSE
+          )
         }
 
         # Reset existing norm tables when a new model is fit
         rv$normTables <- NULL
 
         incProgress(1, detail = "Model fitted!")
-
         showNotification("Model computed successfully!", type = "message")
 
       }, error = function(e) {
@@ -202,10 +257,19 @@ shinyServer(function(input, output, session) {
 
   # Model summary
   output$modelSummary <- renderPrint({
-    req(rv$model)
-    summary(rv$model,
-            age = rv$data[[input$age_var]],
-            score = rv$data[[input$score_var]])
+    req(rv$model, rv$data, input$age_var, input$score_var)
+
+    weights <- NULL
+    if (!is.null(input$weight_var) && nzchar(input$weight_var)) {
+      weights <- rv$data[[input$weight_var]]
+    }
+
+    summary(
+      rv$model,
+      age = rv$data[[input$age_var]],
+      score = rv$data[[input$score_var]],
+      weights = weights
+    )
   })
 
   # Percentile plot
@@ -213,15 +277,17 @@ shinyServer(function(input, output, session) {
     req(rv$model, rv$data, input$age_var, input$score_var)
 
     weights <- NULL
-    if (!is.null(input$weight_var) && input$weight_var != "") {
+    if (!is.null(input$weight_var) && nzchar(input$weight_var)) {
       weights <- rv$data[[input$weight_var]]
     }
 
-    plot(rv$model,
-         age = rv$data[[input$age_var]],
-         score = rv$data[[input$score_var]],
-         weights = weights,
-         points = TRUE)
+    plot(
+      rv$model,
+      age = rv$data[[input$age_var]],
+      score = rv$data[[input$score_var]],
+      weights = weights,
+      points = TRUE
+    )
   })
 
   # Download model
@@ -238,23 +304,25 @@ shinyServer(function(input, output, session) {
   # NORM TABLES TAB
   # ============================================================================
 
-  # Auto-populate score range when data/score variable changes
+  # Auto-populate score ranges when score variable changes
   observe({
     req(rv$data, input$score_var)
 
     score <- rv$data[[input$score_var]]
+    min_sc <- floor(min(score, na.rm = TRUE))
+    max_sc <- ceiling(max(score, na.rm = TRUE))
 
-    updateNumericInput(
-      session,
-      "norm_start",
-      value = floor(min(score, na.rm = TRUE))
-    )
+    # SHASH
+    updateNumericInput(session, "norm_start_shash", value = min_sc)
+    updateNumericInput(session, "norm_end_shash",   value = max_sc)
 
-    updateNumericInput(
-      session,
-      "norm_end",
-      value = ceiling(max(score, na.rm = TRUE))
-    )
+    # CMP
+    updateNumericInput(session, "norm_start_cmp", value = max(0L, as.integer(min_sc)))
+    updateNumericInput(session, "norm_end_cmp",   value = as.integer(max_sc))
+
+    # Beta-Binomial
+    updateNumericInput(session, "norm_start_bb", value = min_sc)
+    updateNumericInput(session, "norm_end_bb",   value = max_sc)
   })
 
   observeEvent(input$generateTables, {
@@ -269,7 +337,7 @@ shinyServer(function(input, output, session) {
         ages <- ages[!is.na(ages)]
 
         if (length(ages) == 0) {
-          showNotification("Please enter valid ages", type = "error")
+          showNotification("Please enter valid numeric ages.", type = "error")
           return(NULL)
         }
 
@@ -279,36 +347,29 @@ shinyServer(function(input, output, session) {
         ci_val  <- if (isTRUE(input$include_ci)) input$ci_level    else NULL
         rel_val <- if (isTRUE(input$include_ci)) input$reliability else NULL
 
-        # Generate tables
+        # Generate tables depending on model family
         if (input$distributionType == "shash") {
 
-          # Determine score range
-          start_score <- input$norm_start
-          end_score   <- input$norm_end
+          start_score <- input$norm_start_shash %||%
+            attr(rv$model$result, "min") %||%
+            floor(min(rv$data[[input$score_var]], na.rm = TRUE))
 
-          if (is.null(start_score) || is.na(start_score)) {
-            start_score <- attr(rv$model$result, "min") %||%
-              floor(min(rv$data[[input$score_var]], na.rm = TRUE))
-          }
-          if (is.null(end_score) || is.na(end_score)) {
-            end_score <- attr(rv$model$result, "max") %||%
-              ceiling(max(rv$data[[input$score_var]], na.rm = TRUE))
-          }
+          end_score <- input$norm_end_shash %||%
+            attr(rv$model$result, "max") %||%
+            ceiling(max(rv$data[[input$score_var]], na.rm = TRUE))
 
           rv$normTables <- normTable.shash(
             rv$model,
             ages = ages,
             start = start_score,
             end = end_score,
-            step = input$norm_step,
+            step = input$norm_step_shash %||% 1,
             CI = ci_val,
             reliability = rel_val
           )
 
         } else if (input$distributionType == "betabinomial") {
 
-          # Beta-Binomial: keine start/end/step Argumente!
-          # Tabelle wird automatisch ueber den gesamten Itembereich (0:n) erzeugt.
           rv$normTables <- normTable.betabinomial(
             rv$model,
             ages = ages,
@@ -316,33 +377,53 @@ shinyServer(function(input, output, session) {
             reliability = rel_val
           )
 
-          # Optional: Tabelle nachtraeglich auf gewuenschten Bereich filtern
-          start_score <- input$norm_start
-          end_score   <- input$norm_end
+          # Optional restriction of output
+          start_score <- input$norm_start_bb
+          end_score   <- input$norm_end_bb
 
           if ((!is.null(start_score) && !is.na(start_score)) ||
               (!is.null(end_score)   && !is.na(end_score))) {
 
             rv$normTables <- lapply(rv$normTables, function(df) {
-              # Spalte mit Rohwerten ermitteln
-              sc <- if ("raw"   %in% names(df)) "raw"
-              else if ("x"     %in% names(df)) "x"
+              sc <- if ("raw" %in% names(df)) "raw"
+              else if ("x" %in% names(df)) "x"
               else if ("score" %in% names(df)) "score"
               else names(df)[1]
 
               keep <- rep(TRUE, nrow(df))
-              if (!is.null(start_score) && !is.na(start_score))
-                keep <- keep & df[[sc]] >= start_score
-              if (!is.null(end_score) && !is.na(end_score))
-                keep <- keep & df[[sc]] <= end_score
+              if (!is.null(start_score) && !is.na(start_score)) keep <- keep & df[[sc]] >= start_score
+              if (!is.null(end_score)   && !is.na(end_score))   keep <- keep & df[[sc]] <= end_score
               df[keep, , drop = FALSE]
             })
           }
+
+        } else if (input$distributionType == "cmp") {
+
+          start_score <- input$norm_start_cmp
+          end_score   <- input$norm_end_cmp
+          step_val    <- max(1L, as.integer(round(input$norm_step_cmp %||% 1)))
+
+          if (is.null(start_score) || is.na(start_score)) {
+            start_score <- max(0L, as.integer(floor(attr(rv$model$result, "min") %||% 0)))
+          }
+          if (is.null(end_score) || is.na(end_score)) {
+            end_score <- as.integer(ceiling(attr(rv$model$result, "max") %||% max(rv$data[[input$score_var]], na.rm = TRUE)))
+          }
+
+          rv$normTables <- normTable.cmp(
+            rv$model,
+            ages = ages,
+            start = start_score,
+            end = end_score,
+            step = step_val,
+            CI = ci_val,
+            reliability = rel_val,
+            mid_p = TRUE
+          )
         }
 
         incProgress(1, detail = "Done!")
-
-        showNotification("Norm tables generated!", type = "message")
+        showNotification("Norm tables generated successfully!", type = "message")
 
       }, error = function(e) {
         showNotification(
@@ -378,7 +459,6 @@ shinyServer(function(input, output, session) {
 
         df <- rv$normTables[[age_name]]
 
-        # Numerische Spalten, die gerundet werden sollen
         candidate_cols <- c("Px", "Pcum", "Percentile", "z", "norm",
                             "lowerCI", "upperCI",
                             "lowerCI_PR", "upperCI_PR",
@@ -411,7 +491,6 @@ shinyServer(function(input, output, session) {
     content = function(file) {
       req(rv$normTables)
 
-      # Combine all tables with age column
       combined <- do.call(rbind, lapply(names(rv$normTables), function(age_name) {
         df <- rv$normTables[[age_name]]
         df$age <- suppressWarnings(as.numeric(age_name))

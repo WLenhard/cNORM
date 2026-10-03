@@ -180,7 +180,7 @@ vignette("cNORM-Demo", package = "cNORM")
 vignette("WeightedRegression", package = "cNORM")
 vignette("BetaBinomial", package = "cNORM")
 vignette("sinh", package = "cNORM")
-vignette("cmp", package = "cNORM")
+vignette("CMP", package = "cNORM")
 ```
 
 
