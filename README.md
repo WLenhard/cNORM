@@ -13,7 +13,7 @@
 
 The package currently features **both distribution-free and parametric continuous norming**:
 1. **Distribution-free modeling** using bivariate Taylor polynomials (A. Lenhard et al., 2016).
-2. **Beta-binomial modeling** (since v3.2): For bounded accuracy tests with a fixed number of dichotomous items without a time limit (e.g., 1PL IRT / Rasch-scaled scales).
+2. **Beta-binomial modeling** (since v3.2): For bounded accuracy tests with a fixed number of dichotomous items without a time limit (e.g., 1PL IRT / Rasch scales).
 3. **Sinh-Arcsinh (SHASH) modeling** (since v3.5): For flexible continuous distributions accommodating skewness and varying tail heaviness, including scores spanning zero and negative numbers.
 4. **Conway-Maxwell-Poisson (CMP) modeling** (since v3.7): For open-ended count data and **speeded tests** (e.g., number of correctly processed items within a time limit) as well as truncated (bounded) scales. Unlike standard Poisson models, CMP allows modeling equi-dispersion ($\nu = 1$), over-dispersion ($\nu < 1$), and, notably, **under-dispersion** ($\nu > 1$, $\text{Var} < \text{Mean}$), which is typical for speeded cognitive performance tasks.
 
@@ -35,9 +35,6 @@ cNORM.GUI2()  # parametric modeling
 
 # Automatic model fitting via 'cnorm'
 cnorm.elfe <- cnorm(raw = elfe$raw, group = elfe$group)
-
-# Swift modeling (pop-culture alias for cnorm):
-model <- taylorSwift(ppvt$raw, ppvt$group)
 
 # Model selection diagnostics
 plot(cnorm.elfe, "subset", type = 0) # Adjusted R2 by terms

@@ -125,6 +125,8 @@ S3method(summary, cnormShash)
 S3method(print,cnormCMP)
 S3method(summary,cnormCMP)
 S3method(plot,cnormCMP)
+S3method(logLik,cnormCMP)
+S3method(residuals,cnormCMP)
 
 # S3 methods to predict moments
 S3method(predictMoments, cnorm)

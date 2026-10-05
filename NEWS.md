@@ -3,6 +3,17 @@ This file documents the development of the package as well as open issues or
 points for further improvements.
 
 
+## Version in 3.7.1
+Date: 05.10.2026 - in progress
+
+### New features
+
+
+### Changes
+* Duplicated code removed
+* S3methods for cnormCMP added
+
+
 
 ## Version in 3.7.0
 Date: 03.10.2026 - release

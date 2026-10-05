@@ -163,18 +163,18 @@ CMP_LOG_NU_RANGE <- c(-3, 3)
 #' @examples
 #' \dontrun{
 #' # Basic usage
-#' model <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+#' model <- cnorm.cmp(age = speed$age, score = speed$fluency)
 #'
 #' # Constant but estimated dispersion
-#' model0 <- cnorm.cmp(speeded$age, speeded$raw, mu_degree = 3, nu_degree = 0)
+#' model0 <- cnorm.cmp(speed$age, speed$fluency, mu_degree = 3, nu_degree = 0)
 #'
 #' # Poisson regression (dispersion fixed to 1)
-#' model_pois <- cnorm.cmp(speeded$age, speeded$raw, nu_degree = NULL, nu = 1)
+#' model_pois <- cnorm.cmp(speed$age, speed$fluency, nu_degree = NULL, nu = 1)
 #'
 #' # Right-truncated at the number of items on the sheet
-#' model_t <- cnorm.cmp(speeded$age, speeded$raw, max_score = 80)
+#' model_t <- cnorm.cmp(speed$age, speed$fluency, max_score = 80)
 #'
-#' summary(model, age = speeded$age, score = speeded$raw)
+#' summary(model, age = speed$age, score = speed$fluency)
 #' AIC(model); BIC(model)
 #' normTable.cmp(model, ages = c(8, 9), start = 0, end = 80)
 #' }
@@ -528,7 +528,6 @@ cnorm.cmp <- function(age,
 
   return(model)
 }
-
 
 #' Conway-Maxwell-Poisson (CMP) Distribution
 #'
@@ -1081,30 +1080,6 @@ cmp_cum_pmf <- function(x, mu, nu, tol = 1e-12, max_terms = NULL, max_score = NU
   list(pmf = pmf, cdf_prev = cdf_prev, cdf = pmin(cdf_prev + pmf, 1), ok = mom$ok)
 }
 
-#' Exact mean, variance, sd, skewness and excess kurtosis of ONE CMP distribution
-#' @return numeric(5): mean, variance, sd, skewness, kurtosis (excess)
-#' @keywords internal
-#' @noRd
-cmp_central_moments <- function(mu, nu, tol = 1e-12, max_terms = NULL, max_score = NULL) {
-  na <- rep(NA_real_, 5L)
-  if (!is.finite(mu) || !is.finite(nu) || mu < 0 || nu <= 0) return(na)
-  if (mu == 0) return(c(0, 0, 0, NA_real_, NA_real_))
-  tab <- cmp_table(base::log(mu), nu, tol = tol,
-                   max_terms = cmp_max_terms(mu, max_terms), max_score = max_score)
-  if (!tab$ok) {
-    warning("CMP series did not converge; moments set to NA.")
-    return(na)
-  }
-  f <- tab$pmf / sum(tab$pmf)
-  x <- seq_along(f) - 1
-  m <- sum(f * x)
-  d <- x - m
-  v <- sum(f * d^2)
-  c(m, v, sqrt(v),
-    if (v > 0) sum(f * d^3) / v^1.5 else NA_real_,
-    if (v > 0) sum(f * d^4) / v^2 - 3 else NA_real_)
-}
-
 #' Options stored in a fitted model (tolerance, truncation limit, ceiling)
 #' @keywords internal
 #' @noRd
@@ -1292,14 +1267,11 @@ isCMP <- function(model) {
 #'
 #' @param model An object of class "cnormCMP"
 #' @param ages A numeric vector of age points for prediction
-#' @param moments Logical; if TRUE, the exact mean, variance and standard deviation of the
-#'   CMP distribution are added (one series evaluation per age). For the full set of
-#'   moments including skewness and kurtosis, use \code{\link{predictMoments}}.
 #'
 #' @return A data frame with predicted mu, nu and lambda = mu^nu (and optionally mean, variance, sd)
 #'
 #' @keywords internal
-predictCoefficients_cmp <- function(model, ages, moments = FALSE) {
+predictCoefficients_cmp <- function(model, ages) {
   if (!isCMP(model)) {
     stop("Wrong object. Please provide object from class 'cnormCMP'.")
   }
@@ -1326,16 +1298,6 @@ predictCoefficients_cmp <- function(model, ages, moments = FALSE) {
     nu = nu,
     lambda = mu^nu
   )
-
-  if (moments) {
-    o <- cmp_opts(model)
-    cm <- t(vapply(seq_along(ages), function(i) {
-      cmp_central_moments(mu[i], nu[i], o$tol, o$max_terms, o$max_score)
-    }, numeric(5)))
-    predicted$mean <- cm[, 1]
-    predicted$variance <- cm[, 2]
-    predicted$sd <- cm[, 3]
-  }
 
   return(predicted)
 }

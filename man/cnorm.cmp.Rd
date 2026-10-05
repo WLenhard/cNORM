@@ -192,18 +192,18 @@ the explicit \code{cNORM::dcmp()} or \code{COMPoissonReg::dcmp()} in this case.
 \examples{
 \dontrun{
 # Basic usage
-model <- cnorm.cmp(age = speeded$age, score = speeded$raw)
+model <- cnorm.cmp(age = speed$age, score = speed$fluency)
 
 # Constant but estimated dispersion
-model0 <- cnorm.cmp(speeded$age, speeded$raw, mu_degree = 3, nu_degree = 0)
+model0 <- cnorm.cmp(speed$age, speed$fluency, mu_degree = 3, nu_degree = 0)
 
 # Poisson regression (dispersion fixed to 1)
-model_pois <- cnorm.cmp(speeded$age, speeded$raw, nu_degree = NULL, nu = 1)
+model_pois <- cnorm.cmp(speed$age, speed$fluency, nu_degree = NULL, nu = 1)
 
 # Right-truncated at the number of items on the sheet
-model_t <- cnorm.cmp(speeded$age, speeded$raw, max_score = 80)
+model_t <- cnorm.cmp(speed$age, speed$fluency, max_score = 80)
 
-summary(model, age = speeded$age, score = speeded$raw)
+summary(model, age = speed$age, score = speed$fluency)
 AIC(model); BIC(model)
 normTable.cmp(model, ages = c(8, 9), start = 0, end = 80)
 }

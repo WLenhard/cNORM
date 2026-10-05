@@ -4,16 +4,12 @@
 \alias{predictCoefficients_cmp}
 \title{Predict parameters for a CMP regression model}
 \usage{
-predictCoefficients_cmp(model, ages, moments = FALSE)
+predictCoefficients_cmp(model, ages)
 }
 \arguments{
 \item{model}{An object of class "cnormCMP"}
 
 \item{ages}{A numeric vector of age points for prediction}
-
-\item{moments}{Logical; if TRUE, the exact mean, variance and standard deviation of the
-CMP distribution are added (one series evaluation per age). For the full set of
-moments including skewness and kurtosis, use \code{\link{predictMoments}}.}
 }
 \value{
 A data frame with predicted mu, nu and lambda = mu^nu (and optionally mean, variance, sd)
