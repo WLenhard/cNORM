@@ -50,7 +50,7 @@ specificNormValue <- predictNorm(raw = 21, A = 2.75, cnorm.elfe)
 Other predict:
 \code{\link[=derivationTable]{derivationTable()}},
 \code{\link[=getNormCurve]{getNormCurve()}},
-\code{\link[=normTable]{normTable()}},
+\code{\link[=normTable.default]{normTable.default()}},
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
 \code{\link[=predict.cnormCMP]{predict.cnormCMP()}},

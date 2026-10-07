@@ -22,4 +22,3 @@ A list containing comprehensive diagnostic information
 This function computes detailed diagnostic statistics for a fitted shash model,
 including fit statistics, parameter estimates, and convergence information.
 }
-\keyword{internal}

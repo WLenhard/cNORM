@@ -34,7 +34,6 @@ specified percentile lines. See \code{\link{plot.cnormBetaBinomial}}.
 \seealso{
 Other plot:
 \code{\link[=compare]{compare()}},
-\code{\link[=plot.cnorm]{plot.cnorm()}},
 \code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
 \code{\link[=plotDensity]{plotDensity()}},
 \code{\link[=plotDerivative]{plotDerivative()}},

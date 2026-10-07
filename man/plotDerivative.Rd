@@ -39,7 +39,6 @@ Applicable only for Taylor polynomial models.
 \seealso{
 Other plot:
 \code{\link[=compare]{compare()}},
-\code{\link[=plot.cnorm]{plot.cnorm()}},
 \code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
 \code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
 \code{\link[=plotDensity]{plotDensity()}},

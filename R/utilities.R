@@ -605,3 +605,4 @@ filter_complete <- function(...) {
   keep <- Reduce(`&`, lapply(v, is.finite))
   lapply(v, `[`, keep)
 }
+

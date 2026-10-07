@@ -29,4 +29,3 @@ A list containing comprehensive diagnostic information. Convergence is
 This function computes detailed diagnostic statistics for a fitted CMP model,
 including fit statistics, parameter estimates, and convergence information.
 }
-\keyword{internal}

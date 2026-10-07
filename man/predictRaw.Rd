@@ -38,7 +38,7 @@ predictRaw(35, 3.5, model)
 Other predict:
 \code{\link[=derivationTable]{derivationTable()}},
 \code{\link[=getNormCurve]{getNormCurve()}},
-\code{\link[=normTable]{normTable()}},
+\code{\link[=normTable.default]{normTable.default()}},
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
 \code{\link[=predict.cnormCMP]{predict.cnormCMP()}},

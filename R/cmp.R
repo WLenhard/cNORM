@@ -2343,7 +2343,6 @@ summary.cnormCMP <- function(object, ...) {
 #'   If \code{age} and \code{score} are given, \code{calibration} contains the mean and
 #'   SD of the mid-p z-residuals per age group.
 #'
-#' @keywords internal
 #' @export
 diagnostics.cmp <- function(object,
                             age = NULL,

@@ -36,6 +36,7 @@ export(
   autoselect.cmp,
   cnorm.cmp,
   dcmp,
+  diagnostics,
   diagnostics.cmp,
   normTable.cmp,
   qcmp,
@@ -105,21 +106,26 @@ export(
 S3method(plot, cnorm)
 S3method(print, cnorm)
 S3method(summary, cnorm)
+S3method(predictMoments, cnorm)
+S3method(predictMoments, default)
 
 # S3 methods for cnormBetaBinomial class
 S3method(plot, cnormBetaBinomial)
 S3method(predict, cnormBetaBinomial)
 S3method(summary, cnormBetaBinomial)
+S3method(predictMoments, cnormBetaBinomial)
 
 # S3 methods for cnormBetaBinomial2 class
 S3method(plot, cnormBetaBinomial2)
 S3method(predict, cnormBetaBinomial2)
 S3method(summary, cnormBetaBinomial2)
+S3method(predictMoments, cnormBetaBinomial2)
 
 # S3 methods for cnormShash class
 S3method(plot, cnormShash)
 S3method(predict, cnormShash)
 S3method(summary, cnormShash)
+S3method(predictMoments, cnormShash)
 
 # S3 methods for cmp class
 S3method(print,cnormCMP)
@@ -127,12 +133,6 @@ S3method(summary,cnormCMP)
 S3method(plot,cnormCMP)
 S3method(logLik,cnormCMP)
 S3method(residuals,cnormCMP)
-
-# S3 methods to predict moments
-S3method(predictMoments, cnorm)
-S3method(predictMoments, cnormBetaBinomial)
-S3method(predictMoments, cnormBetaBinomial2)
-S3method(predictMoments, cnormShash)
 S3method(predictMoments, cnormCMP)
 S3method(predict,cnormCMP)
-S3method(predictMoments, default)
+

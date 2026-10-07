@@ -1736,7 +1736,7 @@ summary.cnormShash <- function(object, ...) {
 #'
 #' @return A list containing comprehensive diagnostic information
 #'
-#' @keywords internal
+#' @export
 diagnostics.shash <- function(object,
                               age = NULL,
                               score = NULL,

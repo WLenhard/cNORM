@@ -63,7 +63,6 @@ in the computation of manifest percentiles, age group centers, and all fit indic
 }
 \seealso{
 Other plot:
-\code{\link[=plot.cnorm]{plot.cnorm()}},
 \code{\link[=plot.cnormBetaBinomial]{plot.cnormBetaBinomial()}},
 \code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
 \code{\link[=plotDensity]{plotDensity()}},

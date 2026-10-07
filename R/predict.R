@@ -202,7 +202,7 @@ predictRaw <-
 #' @references Eid, M. & Schmidt, K. (2012). Testtheorie und Testkonstruktion. Hogrefe.
 #' @family predict
 #' @export
-normTable <- function(A,
+normTable.default <- function(A,
                       model,
                       minNorm = NULL,
                       maxNorm = NULL,

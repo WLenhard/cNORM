@@ -1415,43 +1415,6 @@ plotDerivative <- function(model,
   return(p)
 }
 
-#' General convenience plotting function
-#'
-#' @param x a cnorm object
-#' @param y the type of plot as a string or index
-#' @param ... additional parameters for the specific plotting function
-#'
-#' @export
-plotCnorm <- function(x, y, ...) {
-  if (!isTaylor(x)) {
-    message("Please provide a cnorm object as x.")
-    return(invisible(NULL))
-  }
-  if (!is.character(y) && !is.numeric(y)) {
-    message("y must be a plot-type string or integer index.")
-    return(invisible(NULL))
-  }
-  if (y == "raw"         || y == 1)
-    plotRaw(x, ...)
-  else if (y == "norm"        || y == 2)
-    plotNorm(x, ...)
-  else if (y == "curves"      || y == 3)
-    plotNormCurves(x, ...)
-  else if (y == "percentiles" || y == 4)
-    plotPercentiles(x, ...)
-  else if (y == "density"     || y == 5)
-    plotDensity(x, ...)
-  else if (y == "series"      || y == 6)
-    plotPercentileSeries(x, ...)
-  else if (y == "subset"      || y == 7)
-    plotSubset(x, ...)
-  else if (y == "derivative"  || y == 8)
-    plotDerivative(x, ...)
-  else
-    stop("Unknown plot type")
-}
-
-
 
 #' Compare Two Norm Models Visually
 #'

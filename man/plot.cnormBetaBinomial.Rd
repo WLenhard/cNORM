@@ -47,7 +47,6 @@ removed prior to plotting, mirroring the behavior of the fitting functions.
 \seealso{
 Other plot:
 \code{\link[=compare]{compare()}},
-\code{\link[=plot.cnorm]{plot.cnorm()}},
 \code{\link[=plot.cnormBetaBinomial2]{plot.cnormBetaBinomial2()}},
 \code{\link[=plotDensity]{plotDensity()}},
 \code{\link[=plotDerivative]{plotDerivative()}},

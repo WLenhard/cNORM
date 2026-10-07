@@ -52,7 +52,7 @@ predict(model, c(7, 8, 9, 10), c(25, 30, 18, 45), type = "percentile")
 Other predict:
 \code{\link[=derivationTable]{derivationTable()}},
 \code{\link[=getNormCurve]{getNormCurve()}},
-\code{\link[=normTable]{normTable()}},
+\code{\link[=normTable.default]{normTable.default()}},
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},

@@ -50,7 +50,7 @@ norm_scores <- predict(model, ages, raw)
 Other predict:
 \code{\link[=derivationTable]{derivationTable()}},
 \code{\link[=getNormCurve]{getNormCurve()}},
-\code{\link[=normTable]{normTable()}},
+\code{\link[=normTable.default]{normTable.default()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
 \code{\link[=predict.cnormCMP]{predict.cnormCMP()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},

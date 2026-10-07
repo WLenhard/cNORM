@@ -11,7 +11,8 @@ Date: 05.10.2026 - in progress
 
 ### Changes
 * Duplicated code removed
-* S3methods for cnormCMP added
+* S3methods for cnormCMP added and generally enhanced S3method compatibility
+  of the package
 
 
 

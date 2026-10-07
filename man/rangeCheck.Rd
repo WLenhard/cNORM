@@ -50,11 +50,11 @@ Other model:
 \code{\link[=checkConsistency]{checkConsistency()}},
 \code{\link[=cnorm.cv]{cnorm.cv()}},
 \code{\link[=derive]{derive()}},
+\code{\link[=diagnostics]{diagnostics()}},
 \code{\link[=modelSummary]{modelSummary()}},
-\code{\link[=print.cnorm]{print.cnorm()}},
+\code{\link[=normTable]{normTable()}},
 \code{\link[=printSubset]{printSubset()}},
 \code{\link[=regressionFunction]{regressionFunction()}},
-\code{\link[=summary.cnorm]{summary.cnorm()}},
 \code{\link[=weightedAverageModel]{weightedAverageModel()}}
 }
 \concept{model}
