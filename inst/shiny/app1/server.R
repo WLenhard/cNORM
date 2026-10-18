@@ -18,7 +18,7 @@ parseNums <- function(s) {
 }
 
 shinyServer(function(input, output, session) {
-
+  session$allowReconnect(TRUE)
   session$onSessionEnded(function() stopApp())
 
   # ---- Data loading ----------------------------------------------------------
@@ -59,11 +59,6 @@ shinyServer(function(input, output, session) {
     nm  <- variableNames()
     sel <- if ("raw" %in% nm) "raw" else if ("Raw" %in% nm) "Raw" else NULL
     selectInput("InputRawValues", "Raw-score variable", choices = nm, selected = sel)
-  })
-
-  # ---- Intro / data preview --------------------------------------------------
-  output$introduction <- renderUI({
-    if (is.null(currentFile())) includeHTML("www/introduction.html") else NULL
   })
 
   output$table <- DT::renderDT({

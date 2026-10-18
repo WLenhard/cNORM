@@ -9,9 +9,32 @@ library(readxl)
 
 shinyUI(fluidPage(
   title = "cNORM - Shiny",
-
+  tags$head(
+    tags$script(HTML("
+      var keepAliveInterval;
+      $(document).on('shiny:connected', function(event) {
+        keepAliveInterval = setInterval(function() {
+          Shiny.setInputValue('keep_alive', Math.random());
+        }, 25000); // Send ping every 25 seconds
+      });
+      $(document).on('shiny:disconnected', function(event) {
+        clearInterval(keepAliveInterval);
+      });
+    "))
+  ),
   tabsetPanel(
-
+    # ------------------------------------------------------------------
+    # Tab 0: Introduction
+    # ------------------------------------------------------------------
+    tabPanel(
+      "Introduction",
+      fluidRow(
+        column(
+          width = 10, offset = 1,
+          includeHTML("www/introduction.html")
+        )
+      )
+    ),
     # ---------------------------------------------------------------- DATA ----
     tabPanel("Data",
              sidebarLayout(
@@ -27,7 +50,8 @@ shinyUI(fluidPage(
                           "Uploaded files take precedence over the example.")
                ),
                mainPanel(
-                 uiOutput("introduction"),
+                 h3("Data preview"),
+                 p("Review your data below, then continue with the 'Modeling' tab."),
                  DT::DTOutput("table")
                )
              )

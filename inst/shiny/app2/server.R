@@ -7,7 +7,7 @@ library(ggplot2)
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
 shinyServer(function(input, output, session) {
-
+  session$allowReconnect(TRUE)
   # Reactive values to store data and model
   rv <- reactiveValues(
     data = NULL,

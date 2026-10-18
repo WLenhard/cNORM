@@ -1,78 +1,145 @@
 <!DOCTYPE html>
 <body>
+<style>
+  .cnorm-intro { max-width: 960px; line-height: 1.55; }
+  .cnorm-intro h1 { margin-bottom: .2em; }
+  .cnorm-intro h3 { margin-top: 1.6em; border-bottom: 1px solid #ccc; padding-bottom: .2em; }
+  .cnorm-intro .lead { font-size: 1.05em; }
+  .cnorm-intro img.hero { float: right; max-width: 380px; width: 40%; margin: 0 0 1em 1.5em; }
+  .cnorm-intro table { border-collapse: collapse; margin: .6em 0 1em; width: 100%; }
+  .cnorm-intro th, .cnorm-intro td { border: 1px solid #ccc; padding: .35em .6em; text-align: left; vertical-align: top; }
+  .cnorm-intro th { background: rgba(128,128,128,.12); }
+  .cnorm-intro .note { border-left: 4px solid #2c7fb8; background: rgba(44,127,184,.08); padding: .5em .9em; margin: 1em 0; }
+  .cnorm-intro pre { padding: .7em .9em; overflow-x: auto; }
+  .cnorm-intro .refs li { margin-bottom: .4em; }
+  @media (max-width: 700px) { .cnorm-intro img.hero { float: none; display: block; width: 100%; max-width: 100%; margin: 0 0 1em 0; } }
+</style>
+
+<div class="cnorm-intro">
+
 <h1>cNORM &mdash; Continuous Norming</h1>
-<img src="plotPercentiles.png" align="right" style="max-width:380px;" />
+<img class="hero" src="plotPercentiles.png" alt="Percentile curves across age groups as produced by cNORM" />
 
-<p>This tool generates continuous test norms for psychometric and
-biometric data using regression-based Taylor polynomials. It is
-distribution-free and allows you to compute robust norm scores even with
-moderate sample sizes per age (or grade) group. It is based on the
-<a href="https://www.psychometrica.de/cNorm_en.html">cNORM</a> package
-of the R plattform. For advanced functionality like weighting and fine-grained
-setting (descending scores, types of bindings, predicting norm scorses for
-complete new datasets based on existing models ...), please use
-the cnorm function on the R console.</p>
+<p class="lead">This application generates continuous norms for psychometric and
+biometric test scores. Instead of computing norms separately for each age or
+grade group, cNORM models the raw score as a function of both the norm
+score and the explanatory variable (e.&nbsp;g. age). This stabilizes the
+estimates, interpolates between groups, reduces the sample size required per
+group and yields smooth, internally consistent norm tables.</p>
 
-<p>This GUI guides you through three short steps:</p>
+<p>The app implements the <b>distribution-free approach</b> based on
+regression with Taylor polynomials (Lenhard et al., 2018, 2019; Lenhard &amp; Lenhard, 2021),
+as provided by the <a href="https://CRAN.R-project.org/package=cNORM" target="_blank">cNORM</a>
+package for R (version&nbsp;3.7). The package additionally offers
+<b>parametric modelling</b> with the beta-binomial, the sinh-arcsinh (SHASH)
+and the Conway-Maxwell-Poisson distribution.</p>
 
+<h3>Quick start</h3>
 <ol>
-  <li><b>Data</b> &ndash; load an example or upload your own file.</li>
-  <li><b>Modeling</b> &ndash; pick the grouping variable (e. g. age groups,
-  grade ...), raw-score
-      variable, norm scale and polynomial degrees, then click
-      <i>Run model</i>. You can inspect the percentile plot,
-      the consistency check and the model-fit curve to choose the right
-      number of terms.</li>
-  <li><b>Prediction</b> &ndash; predict single norm/raw scores or generate
-      and download full norm tables. Diagnostic plots are available in
-      the <i>Visualization</i> tab and a stratified
-      <i>Cross-validation</i> can be run separately.</li>
+  <li><b>Data</b> &ndash; load a built-in example or upload your own file
+      (one row per person; see <i>Data requirements</i> below). Cases with
+      missing values are removed automatically.</li>
+  <li><b>Modeling</b> &ndash; select the grouping variable and the raw-score
+      variable, choose the norm scale (e.&nbsp;g. T, IQ, z, percentile) and the
+      polynomial degrees <i>k</i> and <i>t</i>, then click <i>Run model</i>.
+      Inspect the percentile plot, the consistency check and the model-fit curve
+      to decide on the number of terms.</li>
+  <li><b>Prediction</b> &ndash; convert single raw scores to norm scores (and vice versa)
+      or generate and download complete norm tables. Diagnostic plots are available in
+      the <i>Visualization</i> tab; a stratified <i>Cross-validation</i> can be run
+      separately.</li>
 </ol>
 
-<h3>Required variables</h3>
+<h3>Data requirements</h3>
 <ul>
-  <li><b>Grouping variable</b> &ndash; e.g. age group, grade, year. Must be
-      numeric and meaningful (group mean is fine). Sidenote: If you have a
-      continuous variable like age, please use the <a href="https://cnorm.shinyapps.io/cNORM-Parametric/">
-      parametric modelling</a> or the additional parameters available on the
-      R console.</li>
-  <li><b>Raw-score variable</b> &ndash; the test score to be normed.</li>
+  <li><b>Grouping variable</b> &ndash; numeric and meaningful on a metric scale, e.&nbsp;g.
+      age group, grade or year (the group mean or midpoint is appropriate).
+      The groups define the subsamples in which ranks and norm scores are computed
+      before the model is fitted.</li>
+  <li><b>Raw-score variable</b> &ndash; the numeric test score to be normed.
+      Ascending and descending scales are supported (see the console options below).</li>
+  <li>If age is recorded <b>continuously</b>, use the
+      <a href="/cNORM-Parametric/" target="_blank">parametric modelling app</a>,
+      or the sliding-window ranking (<code>age</code> and <code>width</code>
+      arguments) on the R console.</li>
 </ul>
 
 <h3>Built-in example data sets</h3>
 <ul>
-  <li><b>elfe</b> &ndash; reading-comprehension scores in primary school
-      (sentence-completion task, 0&ndash;28).</li>
+  <li><b>elfe</b> &ndash; reading comprehension in primary school
+      (sentence-completion task, raw score 0&ndash;28), grouped by grade.</li>
   <li><b>ppvt</b> &ndash; Peabody Picture Vocabulary Test IV norming sample,
-      ages 2.5&ndash;17.5, raw 0&ndash;228.</li>
+      ages 2.5&ndash;17.5, raw score 0&ndash;228.</li>
   <li><b>CDC</b> &ndash; epidemiological growth data (BMI, weight, height),
       ages 2&ndash;18, from the CDC.</li>
 </ul>
 
-<h3>Model parameters at a glance</h3>
-<ul>
-  <li><b>k</b> &ndash; polynomial degree of the location (norm score) term.
-      Higher values give a closer fit but risk overfitting (default 5).</li>
-  <li><b>t</b> &ndash; polynomial degree of the explanatory term (typically
-      age). Age trajectories are usually smooth, so 2&ndash;3 is enough.</li>
-  <li><b>Number of terms</b> &ndash; leave blank to auto-select model.
-  Otherwise specify a fixed value (look for the
-      &ldquo;elbow&rdquo; in the model-fit curve).</li>
-</ul>
+<h3>Model parameters</h3>
+<table>
+  <tr><th style="width:22%">Parameter</th><th>Meaning and recommendation</th></tr>
+  <tr><td><b>Norm scale</b></td>
+      <td>Scale of the norm scores (e.&nbsp;g. T: M&nbsp;=&nbsp;50, SD&nbsp;=&nbsp;10; IQ: M&nbsp;=&nbsp;100, SD&nbsp;=&nbsp;15; z; percentile). Norm scores are derived from
+      within-group ranks via a normal-distribution transformation.</td></tr>
+  <tr><td><b>k</b></td>
+      <td>Maximum polynomial degree of the location, i.&nbsp;e. the norm score
+      (default&nbsp;5). Higher values allow more flexible score distributions
+      (skew, floor and ceiling effects) at the cost of potential overfitting.</td></tr>
+  <tr><td><b>t</b></td>
+      <td>Maximum polynomial degree of the explanatory variable (typically age;
+      package default&nbsp;3). Developmental trajectories are usually smooth, so
+      2&ndash;3 is generally sufficient.</td></tr>
+  <tr><td><b>Number of terms</b></td>
+      <td>Number of polynomial terms retained from the best-subset regression.
+      Leave blank for automatic selection, or enter a fixed value, ideally at the
+      &ldquo;elbow&rdquo; of the model-fit curve. Prefer the most parsimonious
+      model that still yields consistent percentile curves.</td></tr>
+</table>
+
+<h3>Evaluating the model</h3>
+<p>A high R<sup>2</sup> alone does not establish a good norming model. Please
+check the following before using the norms:</p>
+<ol>
+  <li><b>Percentile plot</b> &ndash; the model-implied curves should follow the
+      empirical percentiles (points) closely and run smoothly across the full age range.</li>
+  <li><b>Consistency check</b> &ndash; percentile curves must not intersect, and raw scores must
+      increase monotonically with the norm score at every age. Violations, especially
+      at the extremes or at the edges of the age range, indicate overfitting or a
+      too complex model; reduce the number of terms, <i>k</i> or <i>t</i>.</li>
+  <li><b>Model-fit curve</b> &ndash; compare R<sup>2</sup> across models of different size
+      and choose the smallest model beyond which the gain is negligible.</li>
+  <li><b>Cross-validation</b> &ndash; assess the stability of the model on
+      held-out data and compare the candidate models.</li>
+  <li><b>Range of validity</b> &ndash; norm scores are interpolated within the observed age
+      range and should not be extrapolated beyond it. Extreme norm scores
+      (beyond approximately &plusmn;2.5&nbsp;SD) depend strongly on the
+      model and on the sample size and should be interpreted with caution.</li>
+</ol>
+<p>In case of overfit (e. g. wavy percentile lines) reduce the degree of age (t) and/or location (k).</p>
+
+<h3>Advanced options on the R console</h3>
+<p>The GUI covers the most important functionality. The following require the R console:
+weighting and post-stratification (e.&nbsp;g. raking via iterative proportional
+fitting) to correct for unrepresentative samples, descending scores, the choice of ranking
+method and handling of ties, sliding-window ranking for continuous age, extended cross-validation,
+model-implied moments (<code>predictMoments()</code>) and predicting norm scores for new data
+based on an existing model.</p>
 
 <h3>Privacy</h3>
 <p>When launched locally via <code>cNORM.GUI()</code>, all data stays on
-your computer. The hosted version runs on shinyapps.io
-(<a href="https://docs.rstudio.com/shinyapps.io/security-and-compliance.html"
-target="_blank">security &amp; compliance</a>); cNORM itself does not store
-any uploaded data.</p>
+your computer. The online application is hosted on ISO&nbsp;27001-certified
+IONOS servers located in the European Union (Frankfurt, Germany), in compliance with
+the General Data Protection Regulation (GDPR). cNORM does not store uploaded
+data; nothing you upload is retained.</p>
 
-<h3>References</h3>
-<ul>
-  <li><a href="https://cran.r-project.org/package=cNORM" target="_blank">R package cNORM (CRAN)</a></li>
-  <li><a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">Tutorial &amp; manual</a></li>
+<h3>Citation and references</h3>
+<p>Please cite the package (see <code>citation("cNORM")</code>) and the methodological
+papers relevant to your analysis.</p>
+<ul class="refs">
+  <li><a href="https://CRAN.R-project.org/package=cNORM" target="_blank">cNORM on CRAN</a> &middot;
+      <a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">Tutorial &amp; manual</a> &middot;
+      <a href="https://github.com/WLenhard/cNORM" target="_blank">GitHub (issues &amp; source)</a></li>
   <li>Lenhard, A., Lenhard, W., Suggate, S. &amp; Segerer, R. (2018).
-      A continuous solution to the norming problem. <i>Assessment, 25</i>,
+      A continuous solution to the norming problem. <i>Assessment, 25</i>(1),
       112&ndash;125. doi:10.1177/1073191116656437</li>
   <li>Lenhard, A., Lenhard, W. &amp; Gary, S. (2019). Continuous norming of
       psychometric tests: A simulation study of parametric and
@@ -81,6 +148,10 @@ any uploaded data.</p>
       quality via regression-based continuous norming.
       <i>Educational and Psychological Measurement, 81</i>(2), 229&ndash;261.
       doi:10.1177/0013164420928457</li>
+  <li>Gary, S., Lenhard, W. &amp; Lenhard, A. (2021). Modelling norm scores with the
+      cNORM package in R. <i>Psych, 3</i>(3), 501&ndash;521. doi:10.3390/psych3030033</li>
 </ul>
+
+</div>
 </body>
 </html>

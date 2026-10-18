@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<body>
+<style>
+  .cnorm-intro { max-width: 960px; line-height: 1.55; }
+  .cnorm-intro h1 { margin-bottom: .2em; }
+  .cnorm-intro h3 { margin-top: 1.6em; border-bottom: 1px solid #ccc; padding-bottom: .2em; }
+  .cnorm-intro h4 { margin-top: 1.2em; }
+  .cnorm-intro .lead { font-size: 1.05em; }
+  .cnorm-intro table { border-collapse: collapse; margin: .6em 0 1em; width: 100%; }
+  .cnorm-intro th, .cnorm-intro td { border: 1px solid #ccc; padding: .35em .6em; text-align: left; vertical-align: top; }
+  .cnorm-intro th { background: rgba(128,128,128,.12); }
+  .cnorm-intro .note { border-left: 4px solid #2c7fb8; background: rgba(44,127,184,.08); padding: .5em .9em; margin: 1em 0; }
+  .cnorm-intro pre { padding: .7em .9em; overflow-x: auto; }
+  .cnorm-intro .refs li { margin-bottom: .4em; }
+  .cnorm-intro .tablewrap { overflow-x: auto; }
+</style>
+
+<div class="cnorm-intro">
+
+<h1>cNORM &mdash; Parametric Continuous Norming</h1>
+<img class="hero" align="right" width = 350px src="beta.plot.png" alt="Percentile curves across age groups, modeled with the beta binomial model" />
+<p class="lead">This application models norm scores such as percentiles, T scores,
+IQ scores or z scores for psychometric, biometric and other data, using
+<b>parametric continuous norming</b>. Rather than norming each age group separately,
+the full distribution of the raw score is modelled as a smooth function of age.
+This interpolates between age groups, stabilizes the estimates at the tails
+and reduces the sample size required for stable norms.</p>
+
+<div class="note">
+  <b>Distribution-free alternative:</b> if you prefer a model that makes no
+  assumption about the distribution family (regression with Taylor polynomials on
+  grouped data), use the
+  <a href="/cNORM/"><b>distribution-free modelling app</b></a>.
+</div>
+
+<h3>Quick start</h3>
+<ol>
+  <li><b>Data Input</b> &ndash; select a built-in example or upload your own file.
+      Review the data in the preview table.</li>
+  <li><b>Modeling</b> &ndash; select the age, raw-score and (optionally) weight variable,
+      choose the distribution family, set the polynomial degrees and the norm scale,
+      and click <i>Compute Model</i>. Check the percentile plot and the model summary.
+      The fitted model can be downloaded as an <code>.rds</code> file.</li>
+  <li><b>Norm Tables</b> &ndash; enter the ages for which you need tables, define the
+      raw-score range, optionally add confidence intervals and click
+      <i>Generate Tables</i>. The tables can be downloaded as a CSV file.</li>
+</ol>
+
+<h3>How parametric continuous norming works</h3>
+<p>At every age, the raw score is assumed to follow a probability distribution from a
+selected family (see below). The parameters of this distribution (e.&nbsp;g. location,
+scale, skewness) are not constant but are modelled as <b>polynomial functions of age</b>;
+the polynomial degree controls how flexibly each parameter may change with age.
+The coefficients are estimated by (optionally weighted) maximum likelihood from the
+whole sample at once, so that all observations inform the estimate at every age.</p>
+<p>To obtain a norm score, the observed raw score is converted into its
+cumulative probability (percentile) under the distribution fitted for the
+person's age, and this percentile is transformed to the chosen norm scale. The
+procedure is continuous in age, so ages need not coincide with the age groups of the
+standardization sample.</p>
+
+<h3>Data requirements</h3>
+<ul>
+  <li><b>Age variable</b> &ndash; numeric explanatory variable, ideally recorded
+      continuously (e.&nbsp;g. decimal years). A variable named <code>age</code> is
+      preselected automatically.</li>
+  <li><b>Raw-score variable</b> &ndash; numeric test score. Variables named
+      <code>fluency</code>, <code>raw</code> or <code>score</code> are preselected
+      automatically; otherwise please check the selection. The permissible scale
+      depends on the family (see below).</li>
+  <li><b>Weight variable (optional)</b> &ndash; case weights, e.&nbsp;g. post-stratification
+      weights that correct for deviations of the sample from the population
+      (see <code>computeWeights()</code> in the R package).</li>
+  <li><b>File formats</b> &ndash; <code>.csv</code> (comma-separated, with header row),
+      <code>.xlsx</code>/<code>.xls</code> (first sheet), <code>.sav</code> (SPSS) and
+      <code>.rda</code> (the first object in the file is used). An uploaded file overrides the
+      selected example, and loading new data resets the current model and tables.</li>
+</ul>
+
+<h3>Choosing the distribution family</h3>
+<div class="tablewrap">
+<table>
+  <tr><th style="width:19%">Family</th><th style="width:30%">Typical data</th><th>Parameters (polynomial in age)</th></tr>
+  <tr><td><b>Sinh-Arcsinh (SHASH)</b></td>
+      <td>Continuous, unbounded scores; response times, difference scores, biometric data
+      (e.&nbsp;g. BMI, height, weight).</td>
+      <td>&mu; (location), &sigma; (scale), &epsilon; (skewness), &delta; (tail weight).
+      Default degrees 3, 2, 2, 1. &delta; may alternatively be fixed to a constant
+      (&delta;&nbsp;=&nbsp;1 with &epsilon;&nbsp;=&nbsp;0 corresponds to the normal distribution).</td></tr>
+  <tr><td><b>Beta-Binomial</b></td>
+      <td>Accuracy and power tests with a fixed number of items <i>n</i> (scores 0 to <i>n</i>),
+      e.&nbsp;g. vocabulary or comprehension tests. Particularly appropriate for
+      Rasch (1PL) scaled tests.</td>
+      <td>&alpha; and &beta; (shape parameters). Default degrees 3 and 3.
+      The norm table covers the entire range from 0 to <i>n</i>.</td></tr>
+  <tr><td><b>Conway-Maxwell-Poisson (CMP)</b><br><i>new in cNORM 3.7</i></td>
+      <td>Speeded tests, rates and counts (non-negative integers), such as the number of
+      items processed within a time limit; scores may have a ceiling.</td>
+      <td>&mu; (location) and &nu; (dispersion). Default degrees 3 and 2.
+      &nu;&nbsp;=&nbsp;1 is the Poisson distribution, &nu;&nbsp;&lt;&nbsp;1 indicates
+      over-dispersion and &nu;&nbsp;&gt;&nbsp;1 under-dispersion, as is typical
+      for speeded tests with bounded scores.</td></tr>
+</table>
+</div>
+
+<h4>Family-specific options</h4>
+<ul>
+  <li><b>SHASH</b> &ndash; &delta; can be fixed instead of being modelled as a polynomial,
+      which is a useful simplification when the tails do not change noticeably with age.</li>
+  <li><b>Beta-Binomial</b> &ndash; the number of items <i>n</i> is the maximum attainable score.
+      If this maximum is not observed in your data, please fit the model on the R console
+      and set the number of items explicitly (see <code>?cnorm.betabinomial</code>).</li>
+  <li><b>CMP</b> &ndash; the dispersion &nu; can be modelled as a polynomial
+      (degree&nbsp;0 yields one constant, estimated value) or fixed to a value
+      (e.&nbsp;g. 1 for a Poisson model). If the test has a ceiling, activate
+      <i>right-truncation</i> and enter the maximum attainable score, so that no probability
+      mass is assigned to scores above it. Raw scores must be non-negative integers.</li>
+</ul>
+
+<h3>Selecting polynomial degrees</h3>
+<p>The degree of a parameter determines how it may vary with age: degree&nbsp;0 is constant,
+1 is linear, 2 is quadratic and so on. Higher degrees capture more complex developmental
+trajectories but increase the risk of overfitting. Recommended strategy:</p>
+<ol>
+  <li>Start with the default degrees for the selected family.</li>
+  <li>Inspect the <b>percentile plot</b>, which shows observed percentiles (points)
+      against the model predictions (lines). Systematic deviations between points and
+      lines suggest that degrees are too low; wavy lines indicate overfitting, so reduce the degrees.</li>
+  <li>Compare competing specifications using the <b>Summary</b> tab (parameter estimates and fit
+      information). Prefer the most parsimonious model that reproduces the empirical percentiles well.</li>
+  <li>Do not interpret the norms outside the age range covered by your sample, and be cautious with
+      extreme percentiles in age ranges with few observations.</li>
+</ol>
+
+<h3>Norm scales</h3>
+<p>Norm scores can be expressed as <b>T scores</b> (M&nbsp;=&nbsp;50, SD&nbsp;=&nbsp;10),
+<b>IQ scores</b> (M&nbsp;=&nbsp;100, SD&nbsp;=&nbsp;15) or <b>z scores</b>
+(M&nbsp;=&nbsp;0, SD&nbsp;=&nbsp;1). Percentile ranks are included in the norm tables.</p>
+
+<h3>Generating norm tables</h3>
+<ul>
+  <li><b>Ages</b> &ndash; enter one or more ages separated by commas or spaces (e.&nbsp;g. <code>7, 8, 9, 10</code>);
+      one table per age is created.</li>
+  <li><b>Raw-score range</b> &ndash; start, end and step size are preset from your data.
+      For CMP, scores are integers and percentiles are evaluated with a mid-p adjustment.
+      For the Beta-Binomial family, the complete range 0 to <i>n</i> is generated and
+      start/end can only be used to restrict the display.</li>
+  <li><b>Confidence intervals</b> &ndash; optionally specify a confidence level and the reliability
+      coefficient of the test; the intervals reflect measurement error of the test and
+      are added to the norm scores.</li>
+</ul>
+
+<h3>Built-in example data sets</h3>
+<p>Selecting an example automatically sets the matching distribution family.</p>
+<div class="tablewrap">
+<table>
+  <tr><th>Data set</th><th>Description</th><th>Family</th></tr>
+  <tr><td><b>speed</b></td><td>Reading fluency, speeded word&ndash;picture matching task; ages 7&ndash;11, scores 0&ndash;75
+      (score variable <code>fluency</code>; the ceiling of 75 is set automatically).</td><td>CMP</td></tr>
+  <tr><td><b>elfe</b></td><td>Reading comprehension test; ages 6&ndash;10, scores 0&ndash;28.</td><td>Beta-Binomial</td></tr>
+  <tr><td><b>ppvt</b></td><td>Peabody Picture Vocabulary Test IV; ages 2.5&ndash;17.5, scores 0&ndash;228.</td><td>Beta-Binomial</td></tr>
+  <tr><td><b>CDC</b></td><td>Growth data of the CDC (BMI, weight, height); ages 2&ndash;18.</td><td>SHASH</td></tr>
+</table>
+</div>
+
+<h3>Working on the R console</h3>
+<p>The app covers the core workflow. Additional options, such as automatic selection of
+polynomial degrees (<code>autoselect.shash()</code>, <code>autoselect.betabinomial()</code>)
+and further diagnostics, are available in the R package. A downloaded model (<code>.rds</code>)
+can be reloaded with <code>readRDS()</code> and used for further predictions.</p>
+<pre>library(cNORM)
+
+model &lt;- cnorm.cmp(age = speed$age, score = speed$fluency,
+                   mu_degree = 3, nu_degree = 2, max_score = 75)
+summary(model, age = speed$age, score = speed$fluency)
+tables &lt;- normTable.cmp(model, ages = c(8, 9, 10), start = 0, end = 75)
+
+vignette("BetaBinomial", package = "cNORM")</pre>
+<p>Further information: <a href="https://www.psychometrica.de/cNorm_betabinomial_en.html" target="_blank">Psychometrica</a>
+and the package vignettes on <a href="https://CRAN.R-project.org/package=cNORM" target="_blank">CRAN</a>.
+The package can also be launched locally with <code>cNORM.GUI()</code>.</p>
+
+<h3>Privacy</h3>
+<p>When launched locally, all data stays on your computer. The online application is hosted on
+ISO&nbsp;27001-certified IONOS servers located in the European Union (Frankfurt, Germany),
+in compliance with the General Data Protection Regulation (GDPR). cNORM does not store uploaded
+data; nothing you upload is retained.</p>
+
+<h3>Citation and references</h3>
+<p>Please cite the package (see <code>citation("cNORM")</code>) and the methodological papers
+relevant to your analysis.</p>
+<ul class="refs">
+  <li><a href="https://CRAN.R-project.org/package=cNORM" target="_blank">cNORM on CRAN</a> &middot;
+      <a href="https://www.psychometrica.de/cNorm_en.html" target="_blank">Tutorial &amp; manual</a> &middot;
+      <a href="https://github.com/WLenhard/cNORM" target="_blank">GitHub (issues &amp; source)</a></li>
+  <li>Lenhard, A., Lenhard, W., Suggate, S. &amp; Segerer, R. (2018). A continuous solution to the norming
+      problem. <i>Assessment, 25</i>(1), 112&ndash;125. doi:10.1177/1073191116656437</li>
+  <li>Lenhard, A., Lenhard, W. &amp; Gary, S. (2019). Continuous norming of psychometric tests: A simulation
+      study of parametric and semi-parametric approaches. <i>PLoS ONE, 14</i>(9), e0222279.</li>
+  <li>Lenhard, W. &amp; Lenhard, A. (2021). Improvement of norm score quality via regression-based
+      continuous norming. <i>Educational and Psychological Measurement, 81</i>(2), 229&ndash;261.
+      doi:10.1177/0013164420928457</li>
+  <li>Gary, S., Lenhard, W. &amp; Lenhard, A. (2021). Modelling norm scores with the cNORM package in R.
+      <i>Psych, 3</i>(3), 501&ndash;521. doi:10.3390/psych3030033</li>
+  <li>Jones, M. C. &amp; Pewsey, A. (2009). Sinh-arcsinh distributions. <i>Biometrika, 96</i>(4), 761&ndash;780.</li>
+  <li>Shmueli, G., Minka, T. P., Kadane, J. B., Borle, S. &amp; Boatwright, P. (2005). A useful distribution for
+      fitting discrete data: Revival of the Conway&ndash;Maxwell&ndash;Poisson distribution.
+      <i>Journal of the Royal Statistical Society C, 54</i>(1), 127&ndash;142.</li>
+</ul>
+
+</div>
+</body>
+</html>

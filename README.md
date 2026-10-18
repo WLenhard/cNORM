@@ -89,8 +89,7 @@ summary(model.betabinomial)
 predict(model.betabinomial, c(2.0, 2.2, 2.4, 2.6), c(10, 15, 13, 22))
 
 # generate norm tables
-tables <- normTable.betabinomial(model.betabinomial, c(2, 3, 4),
-                                 reliability=0.9)
+tables <- normTable(c(2, 3, 4), model.betabinomial, reliability=0.9)
 ```
 
 ### 3. Parametric modeling for speeded tests and counts: Conway-Maxwell-Poisson (CMP)
@@ -147,7 +146,7 @@ summary(model.shash, ppvt$age, ppvt$raw)
 
 # Prediction of norm scores for new data and generating norm tables
 predict(model.shash, c(8.9, 10.1), c(153, 121))
-tables <- normTable.shash(model.shash, c(10, 15),
+tables <- normTable(c(10, 15), model.shash
                                  reliability=0.9)
 ```
 

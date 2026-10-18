@@ -9,9 +9,34 @@ shinyUI(fluidPage(
 
   # Set tab title
   title = "cNORM - Parametric Modeling",
-
+  tags$head(
+    tags$script(HTML("
+      var keepAliveInterval;
+      $(document).on('shiny:connected', function(event) {
+        keepAliveInterval = setInterval(function() {
+          Shiny.setInputValue('keep_alive', Math.random());
+        }, 25000); // Send ping every 25 seconds
+      });
+      $(document).on('shiny:disconnected', function(event) {
+        clearInterval(keepAliveInterval);
+      });
+    "))
+  ),
   # Tabsetpanel for main workflow
   tabsetPanel(
+
+    # ------------------------------------------------------------------
+    # Tab 0: Introduction
+    # ------------------------------------------------------------------
+    tabPanel(
+      "Introduction",
+      fluidRow(
+        column(
+          width = 10, offset = 1,
+          includeHTML("www/introduction.html")
+        )
+      )
+    ),
 
     # ------------------------------------------------------------------
     # Tab 1: Data Input
