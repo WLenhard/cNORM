@@ -3,7 +3,6 @@ library(shiny)
 library(shinycssloaders)
 library(cNORM)
 library(DT)
-library(markdown)
 library(foreign)
 library(readxl)
 
@@ -11,15 +10,68 @@ data(elfe, package = "cNORM")
 data(ppvt, package = "cNORM")
 data(CDC,  package = "cNORM")
 
-# Helper: split user-entered numbers separated by space/comma
+# Value of the "(none)" choice in the grouping-variable selector (see ui.R).
+NO_GROUP <- "__none__"
+
+# ---- Helpers -----------------------------------------------------------------
+
+# Split user-entered numbers separated by comma, semicolon or whitespace.
 parseNums <- function(s) {
   if (is.null(s) || !nzchar(trimws(s))) return(NULL)
-  as.numeric(unlist(strsplit(s, "[,\\s]+", perl = TRUE)))
+  v <- suppressWarnings(as.numeric(strsplit(trimws(s), "[,;[:space:]]+")[[1]]))
+  v <- v[is.finite(v)]
+  if (length(v) == 0) NULL else v
+}
+
+# Percentiles entered as 0-100, returned as proportions (or NULL if none valid).
+parsePercentiles <- function(s) {
+  v <- parseNums(s)
+  if (is.null(v)) return(NULL)
+  v <- sort(unique(v[v > 0 & v < 100]))
+  if (length(v) == 0) NULL else v / 100
+}
+
+# Read an uploaded file into a data frame.
+readUserFile <- function(path, name) {
+  ext <- tolower(tools::file_ext(name))
+  df <- switch(ext,
+               "csv" = {
+                 d <- utils::read.csv2(path)                    # semicolon, decimal comma
+                 if (ncol(d) == 1) d <- utils::read.csv(path)   # fall back to comma-separated
+                 d
+               },
+               "sav" = suppressWarnings(
+                 foreign::read.spss(path, to.data.frame = TRUE, use.value.labels = FALSE)
+               ),
+               "xlsx" = readxl::read_xlsx(path),
+               "xls"  = readxl::read_xls(path),
+               "rda"  = ,
+               "rdata" = {
+                 e <- new.env()
+                 load(path, envir = e)
+                 dfs <- Filter(is.data.frame, mget(ls(e), envir = e))
+                 if (length(dfs) == 0) stop("The R data file contains no data frame.")
+                 dfs[[1]]
+               },
+               stop("Unsupported file type: .", ext)
+  )
+  as.data.frame(df)
+}
+
+# Raw-score curve of a model WITHOUT age/group terms (raw = f(norm score)).
+modelRawCurve <- function(m, n = 200) {
+  L <- seq(m$minL1, m$maxL1, length.out = n)
+  r <- vapply(L, function(x)
+    cNORM::predictRaw(x, 1, coefficients = m$coefficients,
+                      minRaw = -Inf, maxRaw = Inf), numeric(1))
+  data.frame(norm = L, raw = r)
 }
 
 shinyServer(function(input, output, session) {
   session$allowReconnect(TRUE)
-  session$onSessionEnded(function() stopApp())
+  # Only terminate the R process when running locally (cNORM.GUI());
+  # on a server this would stop the app for all users.
+  if (interactive()) session$onSessionEnded(function() stopApp())
 
   # ---- Data loading ----------------------------------------------------------
   currentFile <- reactive({
@@ -32,15 +84,14 @@ shinyServer(function(input, output, session) {
                     "CDC"  = as.data.frame(CDC),
                     NULL))
     }
-    path <- input$file$datapath
-    ext  <- tolower(tools::file_ext(path))
-    switch(ext,
-           "csv"  = as.data.frame(read.csv2(path)),
-           "sav"  = as.data.frame(foreign::read.spss(path, to.data.frame = TRUE)),
-           "xlsx" = as.data.frame(readxl::read_xlsx(path)),
-           "xls"  = as.data.frame(readxl::read_xls(path)),
-           "rda"  = { e <- new.env(); load(path, e); get(ls(e)[1], envir = e) },
-           NULL)
+    tryCatch(
+      readUserFile(input$file$datapath, input$file$name),
+      error = function(e) {
+        showNotification(paste("File could not be read:", conditionMessage(e)),
+                         type = "error", duration = 10)
+        NULL
+      }
+    )
   })
 
   variableNames <- reactive({
@@ -51,8 +102,10 @@ shinyServer(function(input, output, session) {
   # ---- Variable selectors ----------------------------------------------------
   output$GroupingVariable <- renderUI({
     nm  <- variableNames()
-    sel <- if ("group" %in% nm) "group" else if ("Group" %in% nm) "Group" else NULL
-    selectInput("InputGroupingVariable", "Grouping variable", choices = nm, selected = sel)
+    sel <- if ("group" %in% nm) "group" else if ("Group" %in% nm) "Group" else NO_GROUP
+    selectInput("InputGroupingVariable", "Grouping variable (e. g. age group, grade)",
+                choices  = c("(none: no modelling over age/group)" = NO_GROUP, nm),
+                selected = sel)
   })
 
   output$RawValues <- renderUI({
@@ -88,29 +141,68 @@ shinyServer(function(input, output, session) {
 
   # Build the model when the user clicks "Run model".
   observeEvent(input$RunModel, {
-    req(currentFile(), input$InputGroupingVariable, input$InputRawValues)
+    req(currentFile(), input$InputRawValues, input$InputGroupingVariable)
 
-    df    <- currentFile()
-    grp   <- input$InputGroupingVariable
-    raw   <- input$InputRawValues
-    scale <- input$Scale
-    k     <- as.numeric(input$NumberOfPowers)
-    t     <- as.numeric(input$NumberOfPowersAge)
-    nT    <- input$InputNumberOfTerms
+    fail <- function(msg) showNotification(msg, type = "error", duration = 10)
 
-    ranked   <- cNORM::rankByGroup(df, group = grp, raw = raw, scale = scale)
-    prepared <- cNORM::computePowers(ranked, k = k, t = t, norm = "normValue")
+    df       <- currentFile()
+    raw      <- input$InputRawValues
+    grp      <- input$InputGroupingVariable
+    useGroup <- !identical(grp, NO_GROUP)
+    scale    <- input$Scale
+    k        <- as.numeric(input$NumberOfPowers)
+    tAge     <- if (useGroup) as.numeric(input$NumberOfPowersAge) else 0
+    nT       <- input$InputNumberOfTerms
+    nTerms   <- if (is.null(nT) || is.na(nT) || nT < 1) 0L else as.integer(nT)
 
-    model <- if (is.null(nT) || is.na(nT) || nT < 1) {
-      cNORM::bestModel(prepared, raw = raw, k = k, t = t,
-                       terms = 0, plot = FALSE)
-    } else {
-      cNORM::bestModel(prepared, raw = raw, k = k, t = t,
-                       terms = as.integer(nT), plot = FALSE)
+    # --- input checks ---
+    if (!is.numeric(df[[raw]]))
+      return(fail(paste0("The raw-score variable '", raw, "' is not numeric.")))
+    if (useGroup) {
+      if (identical(grp, raw))
+        return(fail("Grouping variable and raw-score variable must be different."))
+      if (!is.numeric(df[[grp]]))
+        return(fail(paste0("The grouping variable '", grp, "' is not numeric.")))
     }
 
-    cnormResult(list(data = prepared, model = model,
-                     group = grp, raw = raw, scale = scale))
+    # --- remove cases with missing values in the selected variables ---
+    vars    <- if (useGroup) c(raw, grp) else raw
+    keep    <- stats::complete.cases(df[, vars, drop = FALSE])
+    nRemove <- sum(!keep)
+    df      <- df[keep, , drop = FALSE]
+
+    if (nrow(df) < 20)
+      return(fail("Too few complete cases to fit a model (at least 20 needed)."))
+    if (useGroup && length(unique(df[[grp]])) < 2)
+      return(fail("The grouping variable has only one value. Select '(none)' instead."))
+
+    res <- withProgress(message = "Fitting model ...", value = 0.5, {
+      tryCatch({
+        if (useGroup) {
+          ranked   <- cNORM::rankByGroup(df, group = grp, raw = raw, scale = scale)
+          prepared <- cNORM::computePowers(ranked, k = k, t = tAge, norm = "normValue")
+          model    <- cNORM::bestModel(prepared, raw = raw, k = k, t = tAge,
+                                       terms = nTerms, plot = FALSE)
+        } else {
+          # No grouping variable: ranks are computed in the total sample and
+          # the model contains no age/group terms. 'group' and 't' are not provided.
+          ranked   <- cNORM::rankByGroup(df, group = FALSE, raw = raw, scale = scale)
+          prepared <- cNORM::computePowers(ranked, k = k, norm = "normValue")
+          model    <- cNORM::bestModel(prepared, raw = raw, k = k,
+                                       terms = nTerms, plot = FALSE)
+        }
+        list(data = prepared, model = model,
+             group = if (useGroup) grp else NULL,
+             raw = raw, scale = scale,
+             hasGroup = useGroup, k = k, t = tAge,   # t = 0 without group
+             n = nrow(df), nRemoved = nRemove)
+      }, error = function(e) {
+        fail(paste("Model could not be fitted:", conditionMessage(e)))
+        NULL
+      })
+    })
+
+    if (!is.null(res)) cnormResult(res)
   })
 
   preparedData   <- reactive({ req(cnormResult()); cnormResult()$data })
@@ -118,19 +210,49 @@ shinyServer(function(input, output, session) {
   chosenGrouping <- reactive({ req(cnormResult()); cnormResult()$group })
   chosenRaw      <- reactive({ req(cnormResult()); cnormResult()$raw })
   chosenScale    <- reactive({ req(cnormResult()); cnormResult()$scale })
+  hasGroup       <- reactive({ req(cnormResult()); isTRUE(cnormResult()$hasGroup) })
   cnormObj       <- reactive({
     req(cnormResult())
     cNORM::buildCnormObject(preparedData(), bestModel())
   })
 
+  # Observed range of the grouping variable (only meaningful with a group).
   ageRange <- reactive({
-    req(currentFile(), chosenGrouping())
-    range(currentFile()[[chosenGrouping()]], na.rm = TRUE)
+    req(cnormResult(), hasGroup())
+    range(preparedData()[[chosenGrouping()]], na.rm = TRUE)
+  })
+
+  # Raw-score curve over the norm scores (only for models without group).
+  rawCurve <- reactive({
+    req(bestModel())
+    modelRawCurve(bestModel())
+  })
+
+  # Keep the term sliders within the number of terms that is possible.
+  observeEvent(cnormResult(), {
+    res <- cnormResult()
+    req(res)
+    nmax <- max(1, (res$k + 1) * (res$t + 1) - 1)
+    updateSliderInput(session, "terms",
+                      max = nmax, value = min(isolate(input$terms), nmax))
+    updateSliderInput(session, "MaxTermsCV",
+                      max = nmax, value = min(isolate(input$MaxTermsCV), nmax))
   })
 
   # ---- Model report ----------------------------------------------------------
   output$ModelReport <- renderPrint({
     req(bestModel())
+    res <- cnormResult()
+    cat(sprintf("Cases used: %d (%d removed due to missing values)\n",
+                res$n, res$nRemoved))
+    if (res$hasGroup) {
+      cat(sprintf("Grouping variable: %s (k = %d, t = %d)\n",
+                  res$group, as.integer(res$k), as.integer(res$t)))
+    } else {
+      cat(sprintf("No grouping variable: modelled without age (k = %d)\n",
+                  as.integer(res$k)))
+    }
+    cat("\n")
     cat(bestModel()$report, sep = "\n")
   })
 
@@ -146,22 +268,52 @@ shinyServer(function(input, output, session) {
 
   output$ConsistencyCheck <- renderText({
     req(bestModel())
-    if (cNORM::checkConsistency(bestModel()))
-      "⚠ Model may be inconsistent. Check the percentile plot for intersecting curves and try a different number of terms."
+    inconsistent <- if (hasGroup()) {
+      cNORM::checkConsistency(bestModel())
+    } else {
+      # no age dimension: raw score must increase monotonically with the norm score
+      any(diff(rawCurve()$raw) < 0)
+    }
+    if (isTRUE(inconsistent))
+      "⚠ Model may be inconsistent. Check the plot for intersecting curves / decreasing raw scores and try a different number of terms."
     else
       "✓ No consistency violations within the data range."
   })
 
   output$RangeCheck <- renderText({
     req(bestModel())
-    cNORM::rangeCheck(bestModel())
+    m <- bestModel()
+    if (hasGroup()) {
+      cNORM::rangeCheck(m)
+    } else {
+      sprintf("Valid range: norm scores %.2f to %.2f, raw scores %s to %s. Do not extrapolate beyond this range.",
+              m$minL1, m$maxL1, format(m$minRaw), format(m$maxRaw))
+    }
   })
 
   # ---- Modeling diagnostics --------------------------------------------------
+  # Raw score vs. norm score: observed data and model curve (no-group case).
+  plotNoGroupFit <- function() {
+    d  <- preparedData()
+    cv <- rawCurve()
+    plot(d$normValue, d[[chosenRaw()]], pch = 16, col = grDevices::rgb(0, 0, 0, .25),
+         xlab = "Norm score", ylab = "Raw score",
+         main = "Raw score by norm score (no grouping variable)")
+    lines(cv$norm, cv$raw, col = "#d95f02", lwd = 3)
+    legend("topleft", legend = c("Observed", "Model"),
+           pch = c(16, NA), lty = c(NA, 1), lwd = c(NA, 3),
+           col = c(grDevices::rgb(0, 0, 0, .5), "#d95f02"), bty = "n")
+  }
+
   output$modelPlot <- renderPlot({
-    rng <- ageRange()
-    cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
-                           minAge = rng[1], maxAge = rng[2])
+    req(cnormResult())
+    if (!hasGroup()) {
+      plotNoGroupFit()
+    } else {
+      rng <- ageRange()
+      cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                             minAge = rng[1], maxAge = rng[2])
+    }
   })
 
   chosenTypeOfPlotSubset <- reactive({
@@ -182,23 +334,32 @@ shinyServer(function(input, output, session) {
 
   # ---- Visualization ---------------------------------------------------------
   output$PlotPercentiles <- renderPlot({
-    rng <- ageRange()
-    pct <- parseNums(input$PercentilesForPercentiles) / 100
-    if (is.null(pct))
-      cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
-                             minAge = rng[1], maxAge = rng[2])
-    else
-      cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
-                             minAge = rng[1], maxAge = rng[2], percentiles = pct)
+    req(cnormResult())
+    if (!hasGroup()) {
+      plotNoGroupFit()
+    } else {
+      rng <- ageRange()
+      pct <- parsePercentiles(input$PercentilesForPercentiles)
+      if (is.null(pct))
+        cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                               minAge = rng[1], maxAge = rng[2])
+      else
+        cNORM::plotPercentiles(cnormObj(), raw = chosenRaw(), group = chosenGrouping(),
+                               minAge = rng[1], maxAge = rng[2], percentiles = pct)
+    }
   })
 
   output$Series <- renderPlot({
+    req(cnormObj())
+    validate(need(hasGroup(), "This plot requires a grouping variable."))
     cNORM::plotPercentileSeries(cnormObj(), start = input$terms, end = input$terms)
   })
 
   output$NormCurves <- renderPlot({
+    req(bestModel())
+    validate(need(hasGroup(), "This plot requires a grouping variable."))
     rng <- ageRange()
-    pct <- parseNums(input$PercentilesForNormCurves) / 100
+    pct <- parsePercentiles(input$PercentilesForNormCurves)
     if (is.null(pct)) pct <- c(.02276, .1587, .5, .8413, .97724)
     norms <- switch(chosenScale(),
                     "T"  = qnorm(pct, 50, 10),
@@ -209,111 +370,163 @@ shinyServer(function(input, output, session) {
   })
 
   output$PlotDensity <- renderPlot({
-    grps <- parseNums(input$densities)
-    if (is.null(grps)) cNORM::plotDensity(bestModel())
-    else cNORM::plotDensity(bestModel(), group = grps)
+    req(bestModel())
+    if (!hasGroup()) {
+      x <- preparedData()[[chosenRaw()]]
+      hist(x, breaks = "Sturges", col = "grey80", border = "white",
+           xlab = "Raw score", main = "Distribution of raw scores")
+    } else {
+      grps <- parseNums(input$densities)
+      if (is.null(grps)) cNORM::plotDensity(bestModel())
+      else cNORM::plotDensity(bestModel(), group = grps)
+    }
   })
 
   output$PlotDerivatives <- renderPlot({
-    rng <- ageRange()
-    cNORM::plotDerivative(bestModel(), minAge = rng[1], maxAge = rng[2])
+    req(bestModel())
+    if (!hasGroup()) {
+      cv <- rawCurve()
+      d  <- diff(cv$raw) / diff(cv$norm)
+      x  <- cv$norm[-1] - diff(cv$norm) / 2
+      plot(x, d, type = "l", lwd = 3, col = "#2c7fb8",
+           xlab = "Norm score", ylab = "d raw / d norm",
+           main = "First derivative of the raw score over the norm score")
+      abline(h = 0, lty = 2, col = "red")
+    } else {
+      rng <- ageRange()
+      cNORM::plotDerivative(bestModel(), minAge = rng[1], maxAge = rng[2])
+    }
   })
 
   output$PlotNormScores <- renderPlot({
-    input$normScoreButton
+    req(cnormObj())
     type <- if (isTRUE(input$differences)) 1 else 0
-    cNORM::plotNorm(cnormObj(), group = isTRUE(input$grouping), type = type)
-  }) |> bindEvent(input$normScoreButton)
+    cNORM::plotNorm(cnormObj(), group = hasGroup() && isTRUE(input$grouping), type = type)
+  }) |> bindEvent(input$normScoreButton, ignoreNULL = FALSE)
 
   output$PlotRawScores <- renderPlot({
-    input$rawScoreButton
+    req(cnormObj())
     type <- if (isTRUE(input$differences1)) 1 else 0
-    if (isTRUE(input$grouping1))
+    if (hasGroup() && isTRUE(input$grouping1))
       cNORM::plotRaw(cnormObj(), group = TRUE, type = type)
     else
       cNORM::plotRaw(cnormObj(), type = type)
-  }) |> bindEvent(input$rawScoreButton)
+  }) |> bindEvent(input$rawScoreButton, ignoreNULL = FALSE)
 
   # ---- Cross validation ------------------------------------------------------
+  # Note: cnorm.cv() draws its plot while it is computing. The plot output is
+  # defined (and displayed) before the table, so it triggers the computation
+  # first and the plot ends up in the right place.
   cvResult <- eventReactive(input$CrossValidation, {
-    cNORM::cnorm.cv(preparedData(),
-                    repetitions = input$RepetitionsCV,
-                    norms = input$NormsCV,
-                    min = 1, max = input$MaxTermsCV,
-                    group = chosenGrouping(),
-                    raw   = chosenRaw(),
-                    age   = chosenGrouping())
+    req(cnormResult())
+    res <- cnormResult()
+    args <- list(repetitions = input$RepetitionsCV,
+                 norms       = input$NormsCV,
+                 min         = 1,
+                 max         = input$MaxTermsCV,
+                 raw         = res$raw,
+                 k           = res$k)    # pass the user's settings, if supported
+    if (res$hasGroup) {
+      args$group <- res$group
+      args$age   <- res$group
+      args$t     <- res$t
+    }
+    fm <- names(formals(cNORM::cnorm.cv))
+    if (!"..." %in% fm) args <- args[names(args) %in% fm]
+
+    withProgress(message = "Running cross-validation ...", value = 0.5, {
+      tryCatch(
+        do.call(cNORM::cnorm.cv, c(list(preparedData()), args)),
+        error = function(e) {
+          showNotification(paste("Cross-validation failed:", conditionMessage(e)),
+                           type = "error", duration = 10)
+          NULL
+        }
+      )
+    })
   })
-  output$PlotCV  <- renderPlot({ cvResult() })
-  output$TableCV <- DT::renderDT({ cvResult() })
+  output$PlotCV  <- renderPlot({ req(cvResult()); invisible(cvResult()) })
+  output$TableCV <- DT::renderDT({ req(cvResult()); cvResult() })
 
   # ---- Predictions -----------------------------------------------------------
+  # Without a grouping variable, no age is required: the dummy group value 1 is used.
   output$InputNormValue <- renderUI({
     req(bestModel())
+    m <- bestModel()
     tagList(
-      numericInput("NormValueInputAge", "Age",  value = NULL,
-                   min = bestModel()$minA1,  max = bestModel()$maxA1),
+      if (hasGroup())
+        numericInput("NormValueInputAge", "Age / group", value = NULL,
+                     min = m$minA1, max = m$maxA1),
       numericInput("NormValueInputRaw", "Raw score", value = NULL,
-                   min = bestModel()$minRaw, max = bestModel()$maxRaw),
+                   min = m$minRaw, max = m$maxRaw),
       actionButton("CalcNormValue", "Compute norm score")
     )
   })
 
   output$NormValue <- renderText({
-    input$CalcNormValue
-    isolate({
-      req(input$NormValueInputAge, input$NormValueInputRaw)
-      m <- bestModel()
-      v <- cNORM::predictNorm(input$NormValueInputRaw, input$NormValueInputAge,
-                              model = m, minNorm = m$minL1, maxNorm = m$maxL1)
-      paste("Predicted norm score:", round(v, 2))
-    })
+    m   <- bestModel()
+    age <- if (hasGroup()) input$NormValueInputAge else 1
+    req(age, input$NormValueInputRaw)
+    v <- cNORM::predictNorm(input$NormValueInputRaw, age,
+                            model = m, minNorm = m$minL1, maxNorm = m$maxL1)
+    out <- paste("Predicted norm score:", round(v, 2))
+    if (hasGroup() && (age < m$minA1 || age > m$maxA1))
+      out <- paste0(out, "\nNote: age/group is outside the observed range (",
+                    m$minA1, " to ", m$maxA1, "); this is an extrapolation.")
+    out
   }) |> bindEvent(input$CalcNormValue)
 
   output$InputRawValue <- renderUI({
     req(bestModel())
+    m <- bestModel()
     tagList(
-      numericInput("RawValueInputAge", "Age", value = NULL,
-                   min = bestModel()$minA1, max = bestModel()$maxA1),
+      if (hasGroup())
+        numericInput("RawValueInputAge", "Age / group", value = NULL,
+                     min = m$minA1, max = m$maxA1),
       numericInput("RawValueInputNorm", "Norm score", value = NULL,
-                   min = bestModel()$minL1, max = bestModel()$maxL1),
+                   min = m$minL1, max = m$maxL1),
       actionButton("CalcRawValue", "Compute raw score")
     )
   })
 
   output$RawValue <- renderText({
-    input$CalcRawValue
-    isolate({
-      req(input$RawValueInputAge, input$RawValueInputNorm)
-      m <- bestModel()
-      v <- cNORM::predictRaw(input$RawValueInputNorm, input$RawValueInputAge,
-                             coefficients = m$coefficients,
-                             minRaw = m$minRaw, maxRaw = m$maxRaw)
-      paste("Predicted raw score:", round(v, 2))
-    })
+    m   <- bestModel()
+    age <- if (hasGroup()) input$RawValueInputAge else 1
+    req(age, input$RawValueInputNorm)
+    v <- cNORM::predictRaw(input$RawValueInputNorm, age,
+                           coefficients = m$coefficients,
+                           minRaw = m$minRaw, maxRaw = m$maxRaw)
+    out <- paste("Predicted raw score:", round(v, 2))
+    if (hasGroup() && (age < m$minA1 || age > m$maxA1))
+      out <- paste0(out, "\nNote: age/group is outside the observed range (",
+                    m$minA1, " to ", m$maxA1, "); this is an extrapolation.")
+    out
   }) |> bindEvent(input$CalcRawValue)
 
   output$InputNormTable <- renderUI({
     req(bestModel())
     m <- bestModel()
     tagList(
-      numericInput("NormTableInput",         "Age",            value = NULL,
-                   min = 0, max = m$maxA1),
-      numericInput("NormTableInputStart",    "Norm start",     value = m$scaleM - 2.5 * m$scaleSD),
-      numericInput("NormTableInputEnd",      "Norm end",       value = m$scaleM + 2.5 * m$scaleSD),
-      numericInput("NormTableInputStepping", "Step width",     value = NULL),
-      numericInput("NormTableCI",            "Confidence",     value = 0.9),
-      numericInput("NormTableRel",           "Reliability",    value = NULL),
+      if (hasGroup())
+        numericInput("NormTableInput", "Age / group", value = NULL,
+                     min = m$minA1, max = m$maxA1),
+      numericInput("NormTableInputStart",    "Norm start",  value = m$scaleM - 2.5 * m$scaleSD),
+      numericInput("NormTableInputEnd",      "Norm end",    value = m$scaleM + 2.5 * m$scaleSD),
+      numericInput("NormTableInputStepping", "Step width",
+                   value = if (identical(chosenScale(), "z")) 0.1 else 1),
+      numericInput("NormTableCI",            "Confidence",  value = 0.9),
+      numericInput("NormTableRel",           "Reliability", value = NULL),
       actionButton("CalcNormTables", "Generate norm table"),
       downloadButton("DownloadNormTable", "Download")
     )
   })
 
   normTable <- eventReactive(input$CalcNormTables, {
-    req(input$NormTableInput, input$NormTableInputStart,
-        input$NormTableInputEnd, input$NormTableInputStepping)
-    m <- bestModel()
-    tab <- cNORM::normTable(input$NormTableInput, m,
+    m   <- bestModel()
+    age <- if (hasGroup()) input$NormTableInput else 1
+    req(age, input$NormTableInputStart, input$NormTableInputEnd,
+        input$NormTableInputStepping)
+    tab <- cNORM::normTable(age, m,
                             minNorm = input$NormTableInputStart,
                             maxNorm = input$NormTableInputEnd,
                             minRaw  = m$minRaw, maxRaw = m$maxRaw,
@@ -321,26 +534,27 @@ shinyServer(function(input, output, session) {
                             CI          = if (is.na(input$NormTableCI))  NULL else input$NormTableCI,
                             reliability = if (is.na(input$NormTableRel)) NULL else input$NormTableRel,
                             pretty = TRUE)
-    tab$raw        <- round(tab$raw, 2)
-    tab$percentile <- round(tab$percentile, 2)
+    if ("raw"        %in% names(tab)) tab$raw        <- round(tab$raw, 2)
+    if ("percentile" %in% names(tab)) tab$percentile <- round(tab$percentile, 2)
     tab
   })
 
   output$NormTable         <- DT::renderDT({ normTable() })
   output$DownloadNormTable <- downloadHandler(
     filename = function() "NormTable.csv",
-    content  = function(file) write.csv(normTable(), file, row.names = FALSE)
+    content  = function(file) utils::write.csv(normTable(), file, row.names = FALSE)
   )
 
   output$InputRawTable <- renderUI({
     req(bestModel())
     m <- bestModel()
     tagList(
-      numericInput("RawTableInput",         "Age",         value = NULL,
-                   min = 0, max = m$maxA1),
+      if (hasGroup())
+        numericInput("RawTableInput", "Age / group", value = NULL,
+                     min = m$minA1, max = m$maxA1),
       numericInput("RawTableInputStart",    "Raw start",   value = m$minRaw),
       numericInput("RawTableInputEnd",      "Raw end",     value = m$maxRaw),
-      numericInput("RawTableInputStepping", "Step width",  value = NULL),
+      numericInput("RawTableInputStepping", "Step width",  value = 1),
       numericInput("RawTableCI",            "Confidence",  value = 0.9),
       numericInput("RawTableRel",           "Reliability", value = NULL),
       actionButton("CalcRawTables", "Generate raw table"),
@@ -349,10 +563,11 @@ shinyServer(function(input, output, session) {
   })
 
   rawTable <- eventReactive(input$CalcRawTables, {
-    req(input$RawTableInput, input$RawTableInputStart,
-        input$RawTableInputEnd, input$RawTableInputStepping)
-    m <- bestModel()
-    tab <- cNORM::rawTable(input$RawTableInput, m,
+    m   <- bestModel()
+    age <- if (hasGroup()) input$RawTableInput else 1
+    req(age, input$RawTableInputStart, input$RawTableInputEnd,
+        input$RawTableInputStepping)
+    tab <- cNORM::rawTable(age, m,
                            minNorm = m$minL1, maxNorm = m$maxL1,
                            minRaw  = input$RawTableInputStart,
                            maxRaw  = input$RawTableInputEnd,
@@ -360,15 +575,15 @@ shinyServer(function(input, output, session) {
                            CI          = if (is.na(input$RawTableCI))  NULL else input$RawTableCI,
                            reliability = if (is.na(input$RawTableRel)) NULL else input$RawTableRel,
                            pretty = TRUE)
-    tab$norm       <- round(tab$norm, 3)
-    tab$percentile <- round(tab$percentile, 2)
+    if ("norm"       %in% names(tab)) tab$norm       <- round(tab$norm, 3)
+    if ("percentile" %in% names(tab)) tab$percentile <- round(tab$percentile, 2)
     tab
   })
 
   output$RawTable         <- DT::renderDT({ rawTable() })
   output$DownloadRawTable <- downloadHandler(
     filename = function() "RawTable.csv",
-    content  = function(file) write.csv(rawTable(), file, row.names = FALSE)
+    content  = function(file) utils::write.csv(rawTable(), file, row.names = FALSE)
   )
 
   # ---- Model export ----------------------------------------------------------

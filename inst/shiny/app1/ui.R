@@ -1,11 +1,13 @@
-
 library(shiny)
 library(shinycssloaders)
 library(cNORM)
 library(DT)
-library(markdown)
 library(foreign)
 library(readxl)
+
+# Value of the "(none)" choice in the grouping-variable selector.
+# Must match NO_GROUP in server.R.
+NO_GROUP <- "__none__"
 
 shinyUI(fluidPage(
   title = "cNORM - Shiny",
@@ -35,6 +37,7 @@ shinyUI(fluidPage(
         )
       )
     ),
+
     # ---------------------------------------------------------------- DATA ----
     tabPanel("Data",
              sidebarLayout(
@@ -45,8 +48,8 @@ shinyUI(fluidPage(
                              choices = c("(none)" = "", "elfe", "ppvt", "CDC"),
                              selected = ""),
                  fileInput("file", "Or upload your own file:",
-                           accept = c(".csv", ".xlsx", ".xls", ".rda", ".sav")),
-                 helpText("Accepted: CSV (semicolon), Excel, SPSS, R data.",
+                           accept = c(".csv", ".xlsx", ".xls", ".rda", ".RData", ".rdata", ".sav")),
+                 helpText("Accepted: CSV (semicolon or comma), Excel, SPSS, R data.",
                           "Uploaded files take precedence over the example.")
                ),
                mainPanel(
@@ -63,6 +66,9 @@ shinyUI(fluidPage(
                sidebarPanel(
                  h3("Model settings"),
                  uiOutput("GroupingVariable"),
+                 helpText("Choose '(none)' if the raw scores do not depend on age or grade. ",
+                          "The whole sample is then treated as one group and the raw score is ",
+                          "modelled as a function of the norm score only."),
                  uiOutput("RawValues"),
                  selectInput("Scale", "Norm scale:",
                              choices = c("T (M=50, SD=10)"   = "T",
@@ -71,8 +77,13 @@ shinyUI(fluidPage(
                              selected = "T"),
                  selectInput("NumberOfPowers",    "Power degree of location (k):",
                              choices = 1:6, selected = 5),
-                 selectInput("NumberOfPowersAge", "Power degree of explanatory variable (t), e. g. age:",
-                             choices = 1:6, selected = 3),
+                 # t is only relevant if a grouping variable is selected
+                 conditionalPanel(
+                   condition = paste0("input.InputGroupingVariable != '", NO_GROUP, "'"),
+                   selectInput("NumberOfPowersAge",
+                               "Power degree of explanatory variable (t), e. g. age:",
+                               choices = 1:6, selected = 3)
+                 ),
                  numericInput("InputNumberOfTerms",
                               "Number of terms (leave blank for auto selection):",
                               value = NA, min = 1, step = 1),
@@ -86,21 +97,38 @@ shinyUI(fluidPage(
                  )
                ),
                mainPanel(
-                 h4("Model summary"),
-                 withSpinner(uiOutput("ModelReportUI"), type = 5),
-                 verbatimTextOutput("ConsistencyCheck"),
-                 verbatimTextOutput("RangeCheck"),
-                 h4("Percentile plot"),
-                 withSpinner(plotOutput("modelPlot", height = "500px"), type = 5),
-                 h4("Model fit by number of terms"),
-                 selectInput("chosenTypePlotSubset", NULL,
-                             choices = c("R2 by Number of Predictors",
-                                         "Mallow's (log) Cp by R2",
-                                         "Bayesian Information Criterion (BIC) by R2",
-                                         "RMSE by Number of Predictors"),
-                             selected = "RMSE by Number of Predictors"),
-                 withSpinner(plotOutput("PlotWL", height = "500px"), type = 5),
-                 DT::DTOutput("PrintSubset")
+                 tabsetPanel(
+                   id = "ModelingResults",
+                   type = "tabs",
+
+                   tabPanel("Percentile Plot",
+                            br(),
+                            withSpinner(plotOutput("modelPlot", height = "600px"), type = 5)
+                   ),
+
+                   tabPanel("Model Summary",
+                            br(),
+                            withSpinner(uiOutput("ModelReportUI"), type = 5),
+                            verbatimTextOutput("ConsistencyCheck"),
+                            verbatimTextOutput("RangeCheck")
+                   ),
+
+                   tabPanel("Model Fit",
+                            br(),
+                            selectInput("chosenTypePlotSubset", "Fit criterion:",
+                                        choices = c("R2 by Number of Predictors",
+                                                    "Mallow's (log) Cp by R2",
+                                                    "Bayesian Information Criterion (BIC) by R2",
+                                                    "RMSE by Number of Predictors"),
+                                        selected = "RMSE by Number of Predictors"),
+                            withSpinner(plotOutput("PlotWL", height = "500px"), type = 5)
+                   ),
+
+                   tabPanel("Model Fit Table",
+                            br(),
+                            DT::DTOutput("PrintSubset")
+                   )
+                 )
                )
              )
     ),
@@ -113,7 +141,9 @@ shinyUI(fluidPage(
                    h3("Percentile curves"),
                    helpText("Dots: observed percentiles. Lines: model. ",
                             "Intersecting curves suggest an inconsistent model — try adjusting ",
-                            "the number of terms in the Modeling tab."),
+                            "the number of terms in the Modeling tab. ",
+                            "Without a grouping variable, the raw score is plotted against ",
+                            "the norm score instead."),
                    textInput("PercentilesForPercentiles",
                              "Custom percentiles (comma/space separated):", value = "2.5, 10, 25, 50, 75, 90, 97.5")
                  ),
@@ -124,7 +154,8 @@ shinyUI(fluidPage(
                  sidebarPanel(
                    h3("Percentile series"),
                    helpText("Choose the number of terms with the slider to compare models. ",
-                            "Avoid intersecting or wavy curves."),
+                            "Avoid intersecting or wavy curves. ",
+                            "Requires a grouping variable."),
                    sliderInput("terms", "Number of terms:",
                                min = 1, max = 24, value = 5)
                  ),
@@ -137,7 +168,8 @@ shinyUI(fluidPage(
                    textInput("PercentilesForNormCurves",
                              "Percentiles (comma/space separated):", value = "2.5, 10, 25, 50, 75, 90, 97.5"),
                    helpText("z = -2, -1, 0, 1, 2 corresponds to ",
-                            "2.276, 15.87, 50.00, 84.13, 97.724")
+                            "2.276, 15.87, 50.00, 84.13, 97.724. ",
+                            "Requires a grouping variable.")
                  ),
                  mainPanel(plotOutput("NormCurves", height = "700px"))
                )),
@@ -146,7 +178,8 @@ shinyUI(fluidPage(
                  sidebarPanel(
                    h3("Density"),
                    helpText("Probability density of raw scores by group. Helps detect ",
-                            "non-normality or model violations."),
+                            "non-normality or model violations. Without a grouping variable, ",
+                            "a histogram of the raw scores is shown."),
                    textInput("densities", "Groups (comma/space separated):", "")
                  ),
                  mainPanel(withSpinner(plotOutput("PlotDensity", height = "700px"), type = 5))
@@ -156,7 +189,8 @@ shinyUI(fluidPage(
                  sidebarPanel(
                    h3("First derivative"),
                    helpText("Negative regions indicate violations of the bijective ",
-                            "mapping between raw and norm scores.")
+                            "mapping between raw and norm scores. Without a grouping ",
+                            "variable, the slope of the raw score over the norm score is shown.")
                  ),
                  mainPanel(withSpinner(plotOutput("PlotDerivatives", height = "600px"), type = 5))
                )),

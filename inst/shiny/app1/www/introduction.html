@@ -1,5 +1,3 @@
-<!DOCTYPE html>
-<body>
 <style>
   .cnorm-intro { max-width: 960px; line-height: 1.55; }
   .cnorm-intro h1 { margin-bottom: .2em; }
@@ -23,12 +21,9 @@
 <p class="lead">This application generates continuous norms for psychometric and
 biometric test scores. Instead of computing norms separately for each age or
 grade group, cNORM models the raw score as a function of both the norm
-score and the explanatory variable (e.&nbsp;g. age). This stabilizes the
-estimates, interpolates between groups, reduces the sample size required per
-group and yields smooth, internally consistent norm tables.</p>
-
-<p>The app implements the <b>distribution-free approach</b> based on
-regression with Taylor polynomials (Lenhard et al., 2018, 2019; Lenhard &amp; Lenhard, 2021),
+score and the explanatory variable (e.&nbsp;g. age). The app implements the
+<b>distribution-free approach</b> based on regression with Taylor polynomials
+(Lenhard et al., 2018, 2019; Lenhard &amp; Lenhard, 2021),
 as provided by the <a href="https://CRAN.R-project.org/package=cNORM" target="_blank">cNORM</a>
 package for R (version&nbsp;3.7). The package additionally offers
 <b>parametric modelling</b> with the beta-binomial, the sinh-arcsinh (SHASH)
@@ -36,14 +31,12 @@ and the Conway-Maxwell-Poisson distribution.</p>
 
 <h3>Quick start</h3>
 <ol>
-  <li><b>Data</b> &ndash; load a built-in example or upload your own file
-      (one row per person; see <i>Data requirements</i> below). Cases with
-      missing values are removed automatically.</li>
-  <li><b>Modeling</b> &ndash; select the grouping variable and the raw-score
-      variable, choose the norm scale (e.&nbsp;g. T, IQ, z, percentile) and the
-      polynomial degrees <i>k</i> and <i>t</i>, then click <i>Run model</i>.
-      Inspect the percentile plot, the consistency check and the model-fit curve
-      to decide on the number of terms.</li>
+  <li><b>Data</b> &ndash; load a built-in example or upload your own file</li>
+  <li><b>Modeling</b> &ndash; select the raw-score variable and, if the scores
+      depend on age or grade, the grouping variable. Choose the norm scale
+      (T, IQ or z) and adjust the polynomial degrees, then click
+      <i>Run model</i>. Inspect the percentile plot, the consistency check and
+      the model-fit curve to decide on the number of terms.</li>
   <li><b>Prediction</b> &ndash; convert single raw scores to norm scores (and vice versa)
       or generate and download complete norm tables. Diagnostic plots are available in
       the <i>Visualization</i> tab; a stratified <i>Cross-validation</i> can be run
@@ -52,12 +45,15 @@ and the Conway-Maxwell-Poisson distribution.</p>
 
 <h3>Data requirements</h3>
 <ul>
-  <li><b>Grouping variable</b> &ndash; numeric and meaningful on a metric scale, e.&nbsp;g.
-      age group, grade or year (the group mean or midpoint is appropriate).
+  <li><b>Raw-score variable</b> &ndash; the test score to be normed.
+      Ascending scales are supported in this app (descending scales require
+      the R console, see below).</li>
+  <li><b>Grouping variable (optional)</b> &ndash; age group, grade or year (the group mean or midpoint is appropriate).
       The groups define the subsamples in which ranks and norm scores are computed
-      before the model is fitted.</li>
-  <li><b>Raw-score variable</b> &ndash; the numeric test score to be normed.
-      Ascending and descending scales are supported (see the console options below).</li>
+      before the model is fitted. If the test is not expected to depend on age or
+      grade, select <i>(none)</i>.</li>
+  <li>Cases with missing values in the selected variables are removed automatically;
+      the number of removed cases is reported in the model summary.</li>
   <li>If age is recorded <b>continuously</b>, use the
       <a href="/cNORM-Parametric/" target="_blank">parametric modelling app</a>,
       or the sliding-window ranking (<code>age</code> and <code>width</code>
@@ -74,12 +70,22 @@ and the Conway-Maxwell-Poisson distribution.</p>
       ages 2&ndash;18, from the CDC.</li>
 </ul>
 
+<h3>Modelling without a grouping variable</h3>
+<p>When the grouping variable is set to <i>(none)</i>, the whole sample is treated as a
+single group. Norm scores are derived from the ranks in the total sample and the raw score is
+modelled as a polynomial of the norm score only (<i>t</i>&nbsp;=&nbsp;0; the degree <i>t</i> is
+ignored). The resulting norm table is valid for one population only. Please note that some of the
+other functions are unavailbale in this case.</p>
+
 <h3>Model parameters</h3>
 <table>
   <tr><th style="width:22%">Parameter</th><th>Meaning and recommendation</th></tr>
+  <tr><td><b>Grouping variable</b></td>
+      <td>Numeric variable that defines the subsamples (e.&nbsp;g. age group or grade) for
+      ranking and for the explanatory variable of the regression. Select <i>(none)</i> to
+      model without age or group dependency.</td></tr>
   <tr><td><b>Norm scale</b></td>
-      <td>Scale of the norm scores (e.&nbsp;g. T: M&nbsp;=&nbsp;50, SD&nbsp;=&nbsp;10; IQ: M&nbsp;=&nbsp;100, SD&nbsp;=&nbsp;15; z; percentile). Norm scores are derived from
-      within-group ranks via a normal-distribution transformation.</td></tr>
+      <td>Scale of the norm scores (T: M&nbsp;=&nbsp;50, SD&nbsp;=&nbsp;10; IQ: M&nbsp;=&nbsp;100, SD&nbsp;=&nbsp;15; z: M&nbsp;=&nbsp;0, SD&nbsp;=&nbsp;1).</td></tr>
   <tr><td><b>k</b></td>
       <td>Maximum polynomial degree of the location, i.&nbsp;e. the norm score
       (default&nbsp;5). Higher values allow more flexible score distributions
@@ -89,10 +95,9 @@ and the Conway-Maxwell-Poisson distribution.</p>
       package default&nbsp;3). Developmental trajectories are usually smooth, so
       2&ndash;3 is generally sufficient.</td></tr>
   <tr><td><b>Number of terms</b></td>
-      <td>Number of polynomial terms retained from the best-subset regression.
+      <td>Number of polynomial terms retained from the regression.
       Leave blank for automatic selection, or enter a fixed value, ideally at the
-      &ldquo;elbow&rdquo; of the model-fit curve. Prefer the most parsimonious
-      model that still yields consistent percentile curves.</td></tr>
+      &ldquo;elbow&rdquo; of the model-fit curve.</td></tr>
 </table>
 
 <h3>Evaluating the model</h3>
@@ -104,8 +109,8 @@ check the following before using the norms:</p>
   <li><b>Consistency check</b> &ndash; percentile curves must not intersect, and raw scores must
       increase monotonically with the norm score at every age. Violations, especially
       at the extremes or at the edges of the age range, indicate overfitting or a
-      too complex model; reduce the number of terms, <i>k</i> or <i>t</i>.</li>
-  <li><b>Model-fit curve</b> &ndash; compare R<sup>2</sup> across models of different size
+      too complex model.</li>
+  <li><b>Model-fit curve</b> &ndash; compare the fit across models of different size
       and choose the smallest model beyond which the gain is negligible.</li>
   <li><b>Cross-validation</b> &ndash; assess the stability of the model on
       held-out data and compare the candidate models.</li>
@@ -114,7 +119,7 @@ check the following before using the norms:</p>
       (beyond approximately &plusmn;2.5&nbsp;SD) depend strongly on the
       model and on the sample size and should be interpreted with caution.</li>
 </ol>
-<p>In case of overfit (e. g. wavy percentile lines) reduce the degree of age (t) and/or location (k).</p>
+<p>In case of overfit (e.&nbsp;g. wavy percentile lines) reduce the degree of age (t) and/or location (k).</p>
 
 <h3>Advanced options on the R console</h3>
 <p>The GUI covers the most important functionality. The following require the R console:
@@ -153,5 +158,3 @@ papers relevant to your analysis.</p>
 </ul>
 
 </div>
-</body>
-</html>
