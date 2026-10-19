@@ -19,7 +19,7 @@ The package currently features **both distribution-free and parametric continuou
 
 cNORM was developed specifically for psychometric and educational tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, it applies wherever mental (e.g., processing speed, reaction time), physical (e.g., body weight, height), or behavioral scores depend on continuous (e.g., age, duration of schooling) or discrete explanatory variables (e.g., grade, sex). Conventional norming based on separate subsamples is supported as well.
 
-The package estimates conditional percentiles as a function of the explanatory variable. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the [online demonstration](https://cnorm.shinyapps.io/cNORM/) and explore the package vignettes.
+The package estimates conditional percentiles as a function of the explanatory variable. For an in-depth tutorial, visit the [project homepage](https://www.psychometrica.de/cNorm_en.html), try the online demonstration ([distribution-free modelling](http://212.227.205.82:3838/cNORM/), [parametric modelling](http://212.227.205.82:3838/cNORM-Parametric/)) and explore the package vignettes.
 
 
 ## In a nutshell

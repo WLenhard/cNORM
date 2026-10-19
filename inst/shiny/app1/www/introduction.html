@@ -25,9 +25,15 @@ score and the explanatory variable (e.&nbsp;g. age). The app implements the
 <b>distribution-free approach</b> based on regression with Taylor polynomials
 (Lenhard et al., 2018, 2019; Lenhard &amp; Lenhard, 2021),
 as provided by the <a href="https://CRAN.R-project.org/package=cNORM" target="_blank">cNORM</a>
-package for R (version&nbsp;3.7). The package additionally offers
-<b>parametric modelling</b> with the beta-binomial, the sinh-arcsinh (SHASH)
-and the Conway-Maxwell-Poisson distribution.</p>
+package for R (version&nbsp;3.7).</p>
+
+<div class="note">
+  <b>Parametric alternative:</b> If you have a clear assumption on the distribution
+  family of the data, you can as well model with the beta-binomial (preferable for
+  IRT based scales), Conway-Maxwell-Poisson (purely speeded tests) or Sinh-ArcSinh
+  (shash; can adapt to complex shapes) approach. For this, use the
+  <a href="/cNORM-Parametric/" target="_blank"><b>parametric modelling app</b></a>.
+</div>
 
 <h3>Quick start</h3>
 <ol>
