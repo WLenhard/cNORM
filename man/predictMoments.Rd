@@ -8,6 +8,7 @@
 \alias{predictMoments.cnormBetaBinomial2}
 \alias{predictMoments.cnormCMP}
 \alias{predictMoments.cnormShash}
+\alias{predictMoments.cnormNormal}
 \title{Model-Implied Distributional Moments at Specific Ages}
 \usage{
 predictMoments(model, age, ...)
@@ -23,6 +24,8 @@ predictMoments(model, age, ...)
 \method{predictMoments}{cnormCMP}(model, age, censor = TRUE, minRaw = NULL, maxRaw = NULL, ...)
 
 \method{predictMoments}{cnormShash}(model, age, nNodes = 100, ...)
+
+\method{predictMoments}{cnormNormal}(model, age, nNodes = 100, ...)
 }
 \arguments{
 \item{model}{A model object of class \code{cnorm},

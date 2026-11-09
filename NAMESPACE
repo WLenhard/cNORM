@@ -34,11 +34,15 @@ importFrom(ggplot2,
 # Exported functions
 export(
   autoselect.cmp,
+  autoselect.normal,
   cnorm.cmp,
+  cnorm.normal,
   dcmp,
   diagnostics,
   diagnostics.cmp,
   normTable.cmp,
+  diagnostics.normal,
+  normTable.normal,
   qcmp,
   rcmp,
   pcmp,
@@ -126,6 +130,12 @@ S3method(plot, cnormShash)
 S3method(predict, cnormShash)
 S3method(summary, cnormShash)
 S3method(predictMoments, cnormShash)
+
+# S3 methods for cnormNormal class
+S3method(plot, cnormNormal)
+S3method(predict, cnormNormal)
+S3method(summary, cnormNormal)
+S3method(predictMoments, cnormNormal)
 
 # S3 methods for cmp class
 S3method(print,cnormCMP)

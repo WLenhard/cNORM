@@ -5,12 +5,14 @@
 #' @export
 #' @family model
 diagnostics <- function(model, ...) {
-  if (inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+  if (isBeta(model)) {
     diagnostics.betabinomial(model, ...)
-  } else if (inherits(model, "cnormShash")) {
+  } else if (isSHASH(model)) {
     diagnostics.shash(model, ...)
-  } else if (inherits(model, "cnormCMP")) {
+  } else if (isCMP(model)) {
     diagnostics.cmp(model, ...)
+  } else if (isNormal(model)) {
+    diagnostics.normal(model, ...)
   } else {
     stop("No diagnostics available for objects of class '", class(model)[1], "'.")
   }
@@ -26,12 +28,14 @@ diagnostics <- function(model, ...) {
 #' @export
 #' @family model
 normTable <- function(A, model, ...) {
-  if (inherits(model, c("cnormBetaBinomial", "cnormBetaBinomial2"))) {
+  if (isBeta(model)) {
     normTable.betabinomial(model, ages = A, ...)
-  } else if (inherits(model, "cnormShash")) {
+  } else if (isSHASH(model)) {
     normTable.shash(model, ages = A, ...)
-  } else if (inherits(model, "cnormCMP")) {
+  } else if (isCMP(model)) {
     normTable.cmp(model, ages = A, ...)
+  } else if (isNormal(model)) {
+    normTable.normal(model, ages = A, ...)
   } else {
     normTable.default(A, model, ...)   # cnorm, cnormModel, lm
   }
@@ -111,4 +115,5 @@ normTable.cnormShash <- function(A, model, ...) normTable.shash(A, model, ...)
 
 #' @export
 normTable.cnormCMP   <- function(A, model, ...) normTable.cmp(A, model, ...)
+
 

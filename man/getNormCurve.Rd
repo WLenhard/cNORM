@@ -54,6 +54,7 @@ Other predict:
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormBetaBinomial2]{predict.cnormBetaBinomial2()}},
 \code{\link[=predict.cnormCMP]{predict.cnormCMP()}},
+\code{\link[=predict.cnormNormal]{predict.cnormNormal()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},
 \code{\link[=predictNorm]{predictNorm()}},
 \code{\link[=predictRaw]{predictRaw()}},

@@ -592,11 +592,20 @@ isCMP <- function(model) {
   return(inherits(model, "cnormCMP"))
 }
 
+#' Check if an object is of class 'cnormNormal'
+#' @keywords internal
+isNormal <- function(model) {
+  inherits(model, "cnormNormal")
+}
+
 # Check if model is parametric (SHASH, BetaBinomial, or CMP)
 #' @keywords internal
 isParametric <- function(model) {
-  return(isSHASH(model) || isBeta(model) || isCMP(model))
+  return(isSHASH(model) || isBeta(model) || isCMP(model) || isNormal(model))
 }
+
+
+
 
 # filter incomplete cases
 #' @keywords internal

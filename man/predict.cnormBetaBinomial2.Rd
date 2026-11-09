@@ -33,6 +33,7 @@ Other predict:
 \code{\link[=normTable.default]{normTable.default()}},
 \code{\link[=predict.cnormBetaBinomial]{predict.cnormBetaBinomial()}},
 \code{\link[=predict.cnormCMP]{predict.cnormCMP()}},
+\code{\link[=predict.cnormNormal]{predict.cnormNormal()}},
 \code{\link[=predict.cnormShash]{predict.cnormShash()}},
 \code{\link[=predictNorm]{predictNorm()}},
 \code{\link[=predictRaw]{predictRaw()}},

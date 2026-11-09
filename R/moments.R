@@ -448,3 +448,29 @@ predictMoments.cnormShash <- function(model, age, nNodes = 100, ...) {
   .momentsDataFrame(age, momentsList,
                     method = "SHASH / Gauss-Hermite quadrature")
 }
+
+#' @rdname predictMoments
+#' @export
+predictMoments.cnormNormal <- function(model, age, nNodes = 100, ...) {
+  .checkAge(age)
+
+  minRaw <- attr(model$result, "min")
+  maxRaw <- attr(model$result, "max")
+  if (is.null(minRaw) || is.null(maxRaw))
+    stop("Could not retrieve minRaw/maxRaw from the model object.",
+         call. = FALSE)
+
+  gh   <- .gaussHermite(nNodes)
+  pars <- predictCoefficients_normal(model, age)
+
+  momentsList <- lapply(seq_along(age), function(i) {
+    # gh$z are standard normal nodes, so X = mu + sigma * z directly
+    # without needing a pnorm() -> qnorm() round-trip
+    x <- pars$mu[i] + pars$sigma[i] * gh$z
+    x <- pmin(pmax(x, minRaw), maxRaw)
+    .weightedMoments(x, gh$w)
+  })
+
+  .momentsDataFrame(age, momentsList,
+                    method = "Normal / Gauss-Hermite quadrature")
+}

@@ -3,17 +3,17 @@ This file documents the development of the package as well as open issues or
 points for further improvements.
 
 
-## Version in 3.7.1
+## Version in 3.8.0
 Date: 05.10.2026 - in progress
 
 ### New features
+* New parametric family: the normal distribution  
 
 
 ### Changes
 * Duplicated code removed
 * S3methods for cnormCMP added and generally enhanced S3method compatibility
   of the package
-
 
 
 ## Version in 3.7.0

@@ -876,16 +876,17 @@ plotDensity <- function(model,
   is_beta_binomial <- isBeta(model)
   is_shash <- isSHASH(model)
   is_cmp <- isCMP(model)
+  is_normal <- isNormal(model)
 
   if (is.null(minNorm)) {
-    minNorm <- if (is_beta_binomial || is_shash || is_cmp)
+    minNorm <- if (is_beta_binomial || is_shash || is_cmp || is_normal)
       -3
     else
       model$minL1
   }
 
   if (is.null(maxNorm)) {
-    maxNorm <- if (is_beta_binomial || is_shash || is_cmp)
+    maxNorm <- if (is_beta_binomial || is_shash || is_cmp || is_normal)
       3
     else
       model$maxL1
@@ -900,14 +901,14 @@ plotDensity <- function(model,
       model$minRaw
   }
   if (is.null(maxRaw)) {
-    maxRaw <- if (is_beta_binomial || is_shash || is_cmp)
+    maxRaw <- if (is_beta_binomial || is_shash || is_cmp || is_normal)
       attr(model$result, "max")
     else
       model$maxRaw
   }
 
   if (is.null(group)) {
-    if (is_beta_binomial || is_shash || is_cmp) {
+    if (is_beta_binomial || is_shash || is_cmp || is_normal) {
       age_min <- attr(model$result, "ageMin")
       age_max <- attr(model$result, "ageMax")
       group <- round(seq(
@@ -1463,28 +1464,49 @@ compare <- function(model1,
                     subtitle = NULL,
                     discrete = FALSE) {
 
-  # Helper: verify if model is CMP
-  is_cmp <- function(m) inherits(m, "cnormCMP")
-
-  # Helper: robust parametric check (including CMP)
-  is_param <- function(m) {
-    if (exists("isParametric", mode = "function")) {
-      isParametric(m) || is_cmp(m)
-    } else {
-      inherits(m, c("cnormBetaBinomial", "cnormBetaBinomial2", "cnormShash", "cnormCMP"))
+  # Retrieve score and age from model if missing and model is a cnorm (Taylor) object
+  if ((is.null(score) || is.null(age)) && isTaylor(model1)) {
+    raw_col <- attr(model1$data, "raw")
+    age_col <- attr(model1$data, "age")
+    if (is.null(age_col)) age_col <- attr(model1$data, "group")
+    if (!is.null(raw_col) && !is.null(age_col)) {
+      score <- model1$data[[raw_col]]
+      age   <- model1$data[[age_col]]
     }
   }
 
-  # Retrieve score and age from model if missing and model is a cnorm (Taylor) object
-  if (is.null(score) && isTaylor(model1)) {
-    score <- model1$data[[attributes(model1$data)$raw]]
-    age <- model1$data[[attributes(model1$data)$age]]
+  if ((is.null(score) || is.null(age)) && isTaylor(model2)) {
+    raw_col <- attr(model2$data, "raw")
+    age_col <- attr(model2$data, "age")
+    if (is.null(age_col)) age_col <- attr(model2$data, "group")
+    if (!is.null(raw_col) && !is.null(age_col)) {
+      score <- model2$data[[raw_col]]
+      age   <- model2$data[[age_col]]
+    }
   }
 
-  if (is.null(score) && isTaylor(model2)) {
-    score <- model2$data[[attributes(model2$data)$raw]]
-    age <- model2$data[[attributes(model2$data)$age]]
+  # Filter valid complete cases early (prevents NA in score from corrupting min/max clamping)
+  if (!is.null(score) && !is.null(age)) {
+    if (length(age) != length(score)) {
+      stop("Length of 'age' and 'score' must be the same.")
+    }
+    if (!is.null(weights) && length(weights) != length(age)) {
+      stop("Length of 'weights' must match length of 'age' and 'score'.")
+    }
+    keep <- is.finite(age) & is.finite(score)
+    if (!is.null(weights)) {
+      keep <- keep & is.finite(weights) & (weights > 0)
+    }
+    age   <- age[keep]
+    score <- score[keep]
+    if (!is.null(weights)) {
+      weights <- weights[keep]
+    }
+  } else if (!is.null(score)) {
+    score <- score[is.finite(score)]
   }
+
+  perc_names <- paste0("P", percentiles * 100)
 
   # Function to get predictions for beta-binomial models
   get_bb_predictions <- function(model, pred_ages) {
@@ -1517,7 +1539,7 @@ compare <- function(model1,
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
-    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    names(pred_data)[-1] <- perc_names
     return(pred_data)
   }
 
@@ -1539,7 +1561,27 @@ compare <- function(model1,
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
-    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    names(pred_data)[-1] <- perc_names
+    return(pred_data)
+  }
+
+  # Function to get predictions for normal models
+  get_normal_predictions <- function(model, pred_ages) {
+    preds <- predictCoefficients_normal(model, pred_ages)
+
+    pred_matrix <- matrix(NA_real_,
+                          nrow = length(pred_ages),
+                          ncol = length(percentiles))
+    for (i in seq_along(percentiles)) {
+      pred_matrix[, i] <- stats::qnorm(
+        percentiles[i],
+        mean = preds$mu,
+        sd = preds$sigma
+      )
+    }
+
+    pred_data <- data.frame(age = pred_ages, pred_matrix)
+    names(pred_data)[-1] <- perc_names
     return(pred_data)
   }
 
@@ -1581,7 +1623,7 @@ compare <- function(model1,
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
-    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    names(pred_data)[-1] <- perc_names
     return(pred_data)
   }
 
@@ -1598,20 +1640,39 @@ compare <- function(model1,
     }
 
     pred_data <- data.frame(age = pred_ages, pred_matrix)
-    names(pred_data)[-1] <- paste0("P", percentiles * 100)
+    names(pred_data)[-1] <- perc_names
     return(pred_data)
+  }
+
+  # Unified prediction dispatcher
+  get_model_predictions <- function(model, pred_ages) {
+    if (isBeta(model)) {
+      get_bb_predictions(model, pred_ages)
+    } else if (isSHASH(model)) {
+      get_shash_predictions(model, pred_ages)
+    } else if (isNormal(model)) {
+      get_normal_predictions(model, pred_ages)
+    } else if (isCMP(model)) {
+      get_cmp_predictions(model, pred_ages)
+    } else if (isTaylor(model)) {
+      get_cnorm_predictions(model, pred_ages)
+    } else {
+      stop("Unsupported model class: ", paste(class(model), collapse = ", "))
+    }
   }
 
   # Determine age range
   get_age_range <- function(model) {
-    if (is_param(model)) {
+    if (isParametric(model)) {
       return(c(
         attr(model$result, "ageMin"),
         attr(model$result, "ageMax")
       ))
-    } else {
+    } else if (isTaylor(model)) {
       m <- model$model
       return(c(m$minA1, m$maxA1))
+    } else {
+      stop("Unsupported model class: ", paste(class(model), collapse = ", "))
     }
   }
 
@@ -1620,67 +1681,38 @@ compare <- function(model1,
 
   pred_ages <- seq(min(range1[1], range2[1]), max(range1[2], range2[2]), length.out = 100)
 
-  step1 <- (isBeta(model1) || is_cmp(model1)) && isTRUE(discrete)
-  step2 <- (isBeta(model2) || is_cmp(model2)) && isTRUE(discrete)
+  step1 <- (isBeta(model1) || isCMP(model1)) && isTRUE(discrete)
+  step2 <- (isBeta(model2) || isCMP(model2)) && isTRUE(discrete)
 
-  plot_data1 <- if (isBeta(model1)) {
-    get_bb_predictions(model1, pred_ages)
-  } else if (isSHASH(model1)) {
-    get_shash_predictions(model1, pred_ages)
-  } else if (is_cmp(model1)) {
-    get_cmp_predictions(model1, pred_ages)
-  } else {
-    get_cnorm_predictions(model1, pred_ages)
-  }
-
-  plot_data2 <- if (isBeta(model2)) {
-    get_bb_predictions(model2, pred_ages)
-  } else if (isSHASH(model2)) {
-    get_shash_predictions(model2, pred_ages)
-  } else if (is_cmp(model2)) {
-    get_cmp_predictions(model2, pred_ages)
-  } else {
-    get_cnorm_predictions(model2, pred_ages)
-  }
+  plot_data1 <- get_model_predictions(model1, pred_ages)
+  plot_data2 <- get_model_predictions(model2, pred_ages)
 
   # Prepare plotting data
-  plot_data_long <- data.frame(
-    age = numeric(),
-    value = numeric(),
-    percentile = character(),
-    model = character()
-  )
-
-  for (i in 2:ncol(plot_data1)) {
-    plot_data_long <- rbind(
-      plot_data_long,
+  plot_data_long <- rbind(
+    do.call(rbind, lapply(2:ncol(plot_data1), function(i) {
       data.frame(
         age = plot_data1$age,
         value = plot_data1[[i]],
         percentile = names(plot_data1)[i],
         model = "Model 1"
       )
-    )
-  }
-
-  for (i in 2:ncol(plot_data2)) {
-    plot_data_long <- rbind(
-      plot_data_long,
+    })),
+    do.call(rbind, lapply(2:ncol(plot_data2), function(i) {
       data.frame(
         age = plot_data2$age,
         value = plot_data2[[i]],
         percentile = names(plot_data2)[i],
         model = "Model 2"
       )
-    )
+    }))
+  )
+
+  if (!is.null(score) && length(score) > 0) {
+    min_sc <- min(score, na.rm = TRUE)
+    max_sc <- max(score, na.rm = TRUE)
+    plot_data_long$value <- pmin(pmax(plot_data_long$value, min_sc), max_sc)
   }
 
-  if (!is.null(score)) {
-    plot_data_long$value[plot_data_long$value < min(score)] <- min(score)
-    plot_data_long$value[plot_data_long$value > max(score)] <- max(score)
-  }
-
-  perc_names <- paste0("P", percentiles * 100)
   plot_data_long$percentile <- factor(plot_data_long$percentile, levels = perc_names)
 
   if (is.null(title))    title <- "Visual Model Comparison"
@@ -1761,18 +1793,7 @@ compare <- function(model1,
   AIC1 <- ic1["AIC"]; BIC1 <- ic1["BIC"]
   AIC2 <- ic2["AIC"]; BIC2 <- ic2["BIC"]
 
-  if (!is.null(score) && !is.null(age)) {
-    # Filter valid complete cases across age, score, and weights
-    keep <- is.finite(age) & is.finite(score)
-    if (!is.null(weights)) {
-      keep <- keep & is.finite(weights) & (weights > 0)
-    }
-    age <- age[keep]
-    score <- score[keep]
-    if (!is.null(weights)) {
-      weights <- weights[keep]
-    }
-
+  if (!is.null(score) && !is.null(age) && length(age) > 0) {
     data <- data.frame(age = age, score = score)
     data$w <- if (!is.null(weights)) weights else rep(1, length(age))
 
@@ -1781,6 +1802,11 @@ compare <- function(model1,
       data$group <- age
     } else {
       data$group <- getGroups(age)
+    }
+
+    # Limit to max 30 groups for better visibility (consistent with plot methods)
+    if (length(unique(data$group)) > 30) {
+      data$group <- getGroups(age, n = 30)
     }
 
     # Manifest percentiles using observation weights and weighted mean age
@@ -1793,20 +1819,13 @@ compare <- function(model1,
     colnames(percentile.actual) <- c("age", perc_names)
 
     # Reshape manifest data
-    manifest_data_long <- data.frame(age = numeric(),
-                                     value = numeric(),
-                                     percentile = character())
-
-    for (i in 2:ncol(percentile.actual)) {
-      manifest_data_long <- rbind(
-        manifest_data_long,
-        data.frame(
-          age = percentile.actual$age,
-          value = percentile.actual[[i]],
-          percentile = names(percentile.actual)[i]
-        )
+    manifest_data_long <- do.call(rbind, lapply(2:ncol(percentile.actual), function(i) {
+      data.frame(
+        age = percentile.actual$age,
+        value = percentile.actual[[i]],
+        percentile = names(percentile.actual)[i]
       )
-    }
+    }))
 
     manifest_data_long$percentile <- factor(manifest_data_long$percentile, levels = perc_names)
 
@@ -1847,7 +1866,9 @@ compare <- function(model1,
 
     # --- Weighted statistical helpers for fit metrics ---
     w_mean <- function(x, w) {
-      sum(w * x, na.rm = TRUE) / sum(w[!is.na(x)])
+      ok <- is.finite(x) & is.finite(w) & (w > 0)
+      if (!any(ok)) return(NA_real_)
+      sum(w[ok] * x[ok]) / sum(w[ok])
     }
 
     w_cor2 <- function(x, y, w) {
@@ -1906,6 +1927,8 @@ compare <- function(model1,
       Model2 = c(AIC2, BIC2),
       Difference = c(AIC2 - AIC1, BIC2 - BIC1)
     )
+
+    fit_table[, 2:4] <- round(fit_table[, 2:4], 4)
 
     cat("\nModel Comparison Summary:\n")
     cat("------------------------\n")
