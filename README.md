@@ -14,7 +14,7 @@
 The package currently features **both distribution-free and parametric continuous norming**:
 1. **Distribution-free modeling** using bivariate Taylor polynomials (A. Lenhard et al., 2016).
 2. **Beta-binomial modeling** (since v3.2): For bounded accuracy tests with a fixed number of dichotomous items without a time limit (e.g., 1PL IRT / Rasch scales).
-3. **Sinh-Arcsinh (SHASH) modeling** (since v3.5): For flexible continuous distributions accommodating skewness and varying tail heaviness, including scores spanning zero and negative numbers.
+3. **Sinh-Arcsinh (SHASH) modeling** (since v3.5) and as a simple alternative **Normal modeling** (since v3.8): For flexible continuous distributions accommodating skewness and varying tail heaviness, including scores spanning zero and negative numbers. As a simple alternative to ShaSh, modelling a normal distribution is as well possible (should only be applied, when normality is ensured over the total range of age or grade, no ceiling or bottom effects are present).
 4. **Conway-Maxwell-Poisson (CMP) modeling** (since v3.7): For open-ended count data and **speeded tests** (e.g., number of correctly processed items within a time limit) as well as truncated (bounded) scales. Unlike standard Poisson models, CMP allows modeling equi-dispersion ($\nu = 1$), over-dispersion ($\nu < 1$), and, notably, **under-dispersion** ($\nu > 1$, $\text{Var} < \text{Mean}$), which is typical for speeded cognitive performance tasks.
 
 cNORM was developed specifically for psychometric and educational tests (e.g. vocabulary development: A. Lenhard, Lenhard, Segerer & Suggate, 2015; written language acquisition: W. Lenhard, Lenhard & Schneider, 2017). However, it applies wherever mental (e.g., processing speed, reaction time), physical (e.g., body weight, height), or behavioral scores depend on continuous (e.g., age, duration of schooling) or discrete explanatory variables (e.g., grade, sex). Conventional norming based on separate subsamples is supported as well.
@@ -148,6 +148,11 @@ summary(model.shash, ppvt$age, ppvt$raw)
 predict(model.shash, c(8.9, 10.1), c(153, 121))
 tables <- normTable(c(10, 15), model.shash
                                  reliability=0.9)
+                                 
+# Note: For a simple normal distribution, use cnorm.normal() instead of
+# cnorm.shash() or set delta to 0 and epsilon to 1. The cnormNormal
+# family functions parallel that of ShaSh and poduce sparser models with fewer
+# parameters, but their fit is less close to the data.
 ```
 
 ### 5. Visual Model Comparison
