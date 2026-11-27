@@ -7,7 +7,8 @@ points for further improvements.
 Date: 05.10.2026 - in progress
 
 ### New features
-* New parametric family: the normal distribution  
+* New parametric family: the normal distribution
+* 
 
 
 ### Changes
